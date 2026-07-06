@@ -1,0 +1,81 @@
+# Frame Africa — Continuous Integration
+# Runs on PRs and pushes to dev/main. Enforces the checks required by
+# documents/09-Git-Workflow.md and documents/08-Test-Deployment.md.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, type-check, test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Unit & integration tests
+        run: pnpm test -- --coverage
+
+      - name: Build
+        run: pnpm build
+
+  security:
+    name: Security scans
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependency audit
+        run: pnpm audit --audit-level=high || true
+
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+
+      # - name: SAST (CodeQL) — enable via GitHub "Code scanning"
+      #   uses: github/codeql-action/analyze@v3
+
+  # e2e:
+  #   name: E2E (staging smoke)
+  #   needs: [quality]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - run: pnpm exec playwright test
+
+# NOTE:
+# - Branch protection should require the "quality" and "security" checks to pass.
+# - Deployment to staging (dev) and production (main) is handled by a separate
+#   deploy workflow, gated on these checks + manual approval (see 08-Test-Deployment.md).

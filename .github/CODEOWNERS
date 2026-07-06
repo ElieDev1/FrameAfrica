@@ -1,0 +1,25 @@
+# CODEOWNERS — automatic review requests on matching paths.
+# Order matters; the last matching pattern takes precedence.
+# Replace the placeholder handles with real GitHub usernames/teams.
+
+# Default owners for everything
+*                       @frameafrica/maintainers
+
+# Documentation
+/documents/             @frameafrica/docs @frameafrica/leads
+*.md                    @frameafrica/docs
+
+# CI / workflows / infra
+/.github/               @frameafrica/devops
+/.github/workflows/     @frameafrica/devops
+
+# Frontend (Next.js)
+/projects/web/          @frameafrica/frontend
+
+# Backend (Node.js / NestJS)
+/projects/api/          @frameafrica/backend
+
+# Security-sensitive areas require security review
+/documents/05-Security-Design.md   @frameafrica/security
+/projects/api/src/auth/            @frameafrica/security
+/projects/api/src/billing/         @frameafrica/security @frameafrica/backend
