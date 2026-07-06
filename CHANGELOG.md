@@ -22,17 +22,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Coding standards, product roadmap, and Architecture Decision Records (ADRs).
 - CI workflow and `.env.example`.
 - Interactive UI/UX design prototype (`documents/design-prototype/`) covering Homepage, Article, Category, Search, CMS Editor, Admin, and Components screens.
+- **Phase 0 scaffold:** pnpm + Turborepo monorepo with the Next.js web app (`projects/web`) and NestJS API (`projects/api`).
+- Prisma base schema and enums (`user`, `role`, `category`, `article`) per `03-Database-Design.md`.
+- API baseline: global `/v1` prefix, strict `ValidationPipe`, `PrismaModule`, and a `/health` endpoint.
+- Web baseline: brand fonts (Archivo, Source Serif 4, IBM Plex Mono), dark/light design tokens, and the landing page.
+- Local dev `docker-compose.yml` (PostgreSQL + Redis) and `.gitattributes` to enforce LF line endings.
 
 ### Changed
 - `06-UIUX-Content-Layout.md`: locked in concrete font families (Archivo, Source Serif 4, IBM Plex Mono) matching the design prototype; added a link to the prototype.
+- Scoped Prettier to code (`projects/**` + config); hand-authored docs (`*.md`, `documents/`) are excluded from formatting.
+- Aligned Jest to v29 across `web` and `api` so a single test-runner version is used monorepo-wide.
+
+### Fixed
+- CI is now green end-to-end (format, lint, type-check, test, build): the API generates the Prisma client on `postinstall`, resolving type-unsafe `PrismaClient` lint errors, and the Jest version mismatch that crashed the API test suite is gone.
 
 ### Deprecated
 - _Nothing yet._
 
 ### Removed
-- _Nothing yet._
-
-### Fixed
 - _Nothing yet._
 
 ### Security

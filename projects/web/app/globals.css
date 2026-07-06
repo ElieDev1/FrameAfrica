@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --color-bg: #0a0a0a;
@@ -16,7 +16,7 @@
   --color-accent-green: #2e7d32;
 }
 
-:root[data-theme="light"] {
+:root[data-theme='light'] {
   --color-bg: #faf8f4;
   --color-surface: #ffffff;
   --color-surface-2: #f1eee8;
