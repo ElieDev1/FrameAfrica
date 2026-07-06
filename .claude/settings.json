@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx --yes create-next-app@latest web --typescript --eslint --tailwind --app --no-src-dir --import-alias \"@/*\" --use-pnpm --turbopack=false)",
+      "Bash(npx --yes @nestjs/cli@latest new api --package-manager pnpm --skip-git)",
+      "Bash(powershell -NoProfile -Command \"Get-Process node,npm,pnpm -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,CPU,StartTime\")",
+      "Bash(npm ping *)",
+      "Bash(npm config *)",
+      "Bash(nest new *)",
+      "Bash(docker --version)",
+      "Bash(mkdir -p \"c:\\\\Users\\\\nseng\\\\OneDrive\\\\Documents\\\\Projects\\\\FrameAfrica\\\\.husky\")",
+      "Bash(pnpm install *)"
+    ],
+    "additionalDirectories": ["c:\\Users\\nseng\\OneDrive\\Documents\\Projects\\FrameAfrica"]
+  }
+}

@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  --color-bg: #0a0a0a;
+  --color-surface: #161616;
+  --color-surface-2: #1e1e1e;
+  --color-elev: #232323;
+  --color-border: rgba(255, 255, 255, 0.09);
+  --color-border-2: rgba(255, 255, 255, 0.14);
+  --color-text: #ffffff;
+  --color-muted: #b0b0b0;
+  --color-faint: #7a7a7a;
+  --color-primary: #f39200;
+  --color-accent-red: #e2231a;
+  --color-accent-yellow: #ffc20e;
+  --color-accent-green: #2e7d32;
+}
+
+:root[data-theme="light"] {
+  --color-bg: #faf8f4;
+  --color-surface: #ffffff;
+  --color-surface-2: #f1eee8;
+  --color-elev: #ffffff;
+  --color-border: rgba(15, 15, 15, 0.11);
+  --color-border-2: rgba(15, 15, 15, 0.18);
+  --color-text: #0c0c0c;
+  --color-muted: #5a554e;
+  --color-faint: #8a857c;
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-surface-2: var(--color-surface-2);
+  --color-elev: var(--color-elev);
+  --color-border: var(--color-border);
+  --color-border-2: var(--color-border-2);
+  --color-text: var(--color-text);
+  --color-muted: var(--color-muted);
+  --color-faint: var(--color-faint);
+  --color-primary: var(--color-primary);
+  --color-accent-red: var(--color-accent-red);
+  --color-accent-yellow: var(--color-accent-yellow);
+  --color-accent-green: var(--color-accent-green);
+  --font-heading: var(--font-archivo);
+  --font-body: var(--font-source-serif);
+  --font-mono: var(--font-ibm-plex-mono);
+  --radius-brand: 12px;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-heading), system-ui, sans-serif;
+}
