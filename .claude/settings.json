@@ -19,7 +19,16 @@
       "Bash(pnpm typecheck *)",
       "Bash(pnpm test *)",
       "Bash(cd \"c:\\\\Users\\\\nseng\\\\OneDrive\\\\Documents\\\\Projects\\\\FrameAfrica\" && rm -rf node_modules projects/web/node_modules projects/api/node_modules && pnpm install --frozen-lockfile 2>&1 | tail -50)",
-      "Bash(pnpm build *)"
+      "Bash(pnpm build *)",
+      "Read(//c/Program Files/Docker/Docker/**)",
+      "Bash(docker compose *)",
+      "Bash(pnpm --filter api exec prisma migrate deploy)",
+      "Bash(docker exec *)",
+      "Bash(xxd \"c:\\\\Users\\\\nseng\\\\OneDrive\\\\Documents\\\\Projects\\\\FrameAfrica\\\\projects\\\\api\\\\.env\")",
+      "Bash(node -e ' *)",
+      "Bash(pnpm --filter api run db:seed)",
+      "Bash(pnpm --filter api exec prisma db seed)",
+      "Bash(curl -s -o /dev/null -w \"api still up: %{http_code}\\\\n\" http://localhost:4000/v1/health)"
     ],
     "additionalDirectories": ["c:\\Users\\nseng\\OneDrive\\Documents\\Projects\\FrameAfrica"]
   }
