@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `06-UIUX-Content-Layout.md`: locked in concrete font families (Archivo, Source Serif 4, IBM Plex Mono) matching the design prototype; added a link to the prototype.
 - Scoped Prettier to code (`projects/**` + config); hand-authored docs (`*.md`, `documents/`) are excluded from formatting.
 - Aligned Jest to v29 across `web` and `api` so a single test-runner version is used monorepo-wide.
+- `09-Git-Workflow.md`: added a **Commit Granularity** policy (§4.1) — commit after each logical change, not once per phase.
 
 ### Fixed
 - CI is now green end-to-end (format, lint, type-check, test, build): the API generates the Prisma client on `postinstall`, resolving type-unsafe `PrismaClient` lint errors, and the Jest version mismatch that crashed the API test suite is gone.

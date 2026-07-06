@@ -105,6 +105,58 @@ security(comments): sanitize rich-text to prevent stored XSS
 - Commit early and often; a feature branch will have many commits (they get squashed on merge).
 - Never commit secrets, `.env` files, or large binaries.
 
+## 4.1 Commit Granularity — after each change, not after the whole phase
+
+**Rule of thumb: one commit = one thing you could describe in a single sentence
+without saying "and".** Commit each piece as you finish it — do **not** save up a
+whole feature, milestone, or roadmap phase into one giant commit.
+
+**Why this matters**
+- **Reviewable** — a reviewer can read a 30-line commit; nobody can meaningfully
+  review a 12,000-line "phase done" dump.
+- **Bisectable** — `git bisect` and `git revert` only help when each commit is a
+  small, self-contained step.
+- **Recoverable** — if work is interrupted (a crash, a lost session, running out of
+  time), the finished pieces are already safely committed instead of lost.
+- **Free** — feature-branch commits are **squashed on merge into `dev`** (§5), so many
+  small commits still collapse into one clean commit on `dev`. Granularity costs you
+  nothing and buys you all of the above.
+
+**What counts as "one thing" (commit each of these separately)**
+- Add a database table/model → `feat(db): add article_revision table`
+- Add a module skeleton → `feat(content): scaffold content module`
+- Wire one endpoint → `feat(content): add GET /articles/:slug`
+- Add tests for that endpoint → `test(content): cover article-by-slug lookup`
+- Fix one bug → `fix(auth): rotate refresh token on reuse`
+- A tooling/config tweak → `chore(ci): cache pnpm store`
+
+**Do**
+```
+feat(content): add article Prisma model
+feat(content): add ContentModule + controller
+feat(content): implement create-draft endpoint
+test(content): cover create-draft validation
+```
+
+**Don't**
+```
+phase1: to be reviewed          # ❌ one commit for an entire phase
+wip                             # ❌ meaningless subject, batches everything
+update files                    # ❌ no scope, no logical unit
+```
+
+> **Anti-pattern from this repo:** the Phase 0 scaffold landed as a single
+> `phase1: to be reviewed` commit. It was unreviewable, and a broken CI pipeline
+> (ungenerated Prisma client, mismatched Jest versions) hid inside it. Had each
+> piece been committed and pushed as it was added, the failure would have surfaced
+> immediately and the history would tell the story of how the app was built.
+
+**Practical rhythm**
+1. Make one small, complete change (it builds / lints / — ideally — has its test).
+2. `git add` **only** the files for that change (`git add -p` when a file mixes concerns).
+3. Commit it with a Conventional Commit message (§4).
+4. Repeat. Push regularly so work is backed up and CI runs early.
+
 ## 5. Pull Request Process
 
 **Opening a PR**
