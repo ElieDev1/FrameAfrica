@@ -9,7 +9,17 @@
       "Bash(nest new *)",
       "Bash(docker --version)",
       "Bash(mkdir -p \"c:\\\\Users\\\\nseng\\\\OneDrive\\\\Documents\\\\Projects\\\\FrameAfrica\\\\.husky\")",
-      "Bash(pnpm install *)"
+      "Bash(pnpm install *)",
+      "Bash(gh run *)",
+      "Bash(pnpm format:check)",
+      "Bash(rm projects/api/.prettierrc)",
+      "Bash(pnpm exec *)",
+      "Bash(pnpm lint *)",
+      "Bash(pnpm --filter api exec prisma generate)",
+      "Bash(pnpm typecheck *)",
+      "Bash(pnpm test *)",
+      "Bash(cd \"c:\\\\Users\\\\nseng\\\\OneDrive\\\\Documents\\\\Projects\\\\FrameAfrica\" && rm -rf node_modules projects/web/node_modules projects/api/node_modules && pnpm install --frozen-lockfile 2>&1 | tail -50)",
+      "Bash(pnpm build *)"
     ],
     "additionalDirectories": ["c:\\Users\\nseng\\OneDrive\\Documents\\Projects\\FrameAfrica"]
   }
