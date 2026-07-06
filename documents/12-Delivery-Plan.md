@@ -98,6 +98,11 @@ until merged and note their PR.
 
 ### Slice 8 — Monetization  `FR-SUB-*`, `FR-AD-*`
 - [ ] Metered paywall (N free/period) → `402` preview when over meter (`FR-SUB-1`; `04` §7)
+  - *Partial, landed early as a Slice 1 fix (#8):* `GET /v1/articles/:slug` already
+    returns the `402` + one-paragraph-preview shape for `isPremium` articles (every
+    caller is currently treated as unsubscribed — there's no auth yet). Still
+    missing: per-reader metering (N free articles/period), and this only covers
+    the always-premium case, not "over the free meter."
 - [ ] Plans, subscriptions, invoices (`FR-SUB-2`)
 - [ ] MoMo & Airtel payments with signed, idempotent webhooks (`FR-SUB-3`; `05` §8)
 - [ ] Basic ads + public notices / tenders / obituaries (`FR-AD-1`, `-3`)
