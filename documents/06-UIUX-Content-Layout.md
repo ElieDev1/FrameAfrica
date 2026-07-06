@@ -30,8 +30,9 @@ Frame Africa is a **news product**, so the design serves reading above all: clea
 | `--color-text` | `#FFFFFF` | Primary text on dark |
 | `--color-muted` | `#B0B0B0` | Metadata, captions |
 | `--radius` | `12px` | Cards/buttons |
-| `--font-heading` | Bold grotesque/sans | Headlines |
-| `--font-body` | Readable serif or humanist sans | Article body |
+| `--font-heading` | Archivo (weights 400–900) | Headlines, kickers, UI labels |
+| `--font-body` | Source Serif 4 | Article body, deks |
+| `--font-mono` | IBM Plex Mono | Metadata, timestamps, badges, bylines |
 
 **Light mode** mirrors these with a white canvas; theme is user-toggleable and respects system preference.
 
@@ -195,6 +196,14 @@ Mobile-first CSS; content reflows, never horizontally scrolls; tap targets ≥ 4
 - Prominent, honest labeling of ads and sponsored content.
 - Accessible corrections page and per-article correction notices.
 - Easy, discoverable secure-tips and contact options.
+
+## 12. Interactive Design Prototype
+
+A clickable, self-contained HTML prototype covering Homepage, Article, Category, Search,
+CMS Editor, Admin, and a component-library screen (with desktop/mobile and dark/light
+toggles) lives in [`documents/design-prototype/`](design-prototype/Frame%20Africa.dc.html).
+It is the visual reference this document's layouts describe — open the `.dc.html` file
+directly in a browser to explore.
 
 ---
 

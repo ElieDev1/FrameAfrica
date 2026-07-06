@@ -21,9 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Community health files: `SECURITY.md`, `CODE_OF_CONDUCT.md`, `LICENSE`, `CODEOWNERS`, issue templates.
 - Coding standards, product roadmap, and Architecture Decision Records (ADRs).
 - CI workflow and `.env.example`.
+- Interactive UI/UX design prototype (`documents/design-prototype/`) covering Homepage, Article, Category, Search, CMS Editor, Admin, and Components screens.
 
 ### Changed
-- _Nothing yet._
+- `06-UIUX-Content-Layout.md`: locked in concrete font families (Archivo, Source Serif 4, IBM Plex Mono) matching the design prototype; added a link to the prototype.
 
 ### Deprecated
 - _Nothing yet._
