@@ -14,7 +14,9 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
+  // Default to 4000 so the API and the Next.js dev server (3000) don't collide;
+  // matches API_URL in .env.example.
+  await app.listen(process.env.PORT ?? 4000);
 }
 
 void bootstrap();

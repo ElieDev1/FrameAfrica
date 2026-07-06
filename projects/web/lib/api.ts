@@ -1,0 +1,130 @@
+/**
+ * Typed client for the Frame Africa read API. Used from Server Components, so it
+ * talks to the API directly (server-to-server) via API_URL. Only the `data`
+ * payload is returned to callers; the `{ data, meta }` envelope stays here.
+ */
+
+const API_URL =
+  process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/v1';
+
+export type ArticleLanguage = 'en' | 'rw' | 'fr' | 'sw';
+
+export interface AuthorSummary {
+  id: string;
+  displayName: string;
+  avatarUrl: string | null;
+}
+
+export interface CategoryRef {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface ArticleSummary {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  excerpt: string | null;
+  language: ArticleLanguage;
+  isPremium: boolean;
+  isBreaking: boolean;
+  readTimeMin: number | null;
+  publishedAt: string | null;
+  category: CategoryRef;
+  author: AuthorSummary;
+}
+
+export interface ArticleDetail extends ArticleSummary {
+  body: string;
+  seo: unknown;
+  viewCount: number;
+  likeCount: number;
+  shareCount: number;
+  updatedAt: string;
+}
+
+export interface CategoryNode {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  children: CategoryNode[];
+}
+
+export interface Pagination {
+  nextCursor: string | null;
+  hasMore: boolean;
+}
+
+interface ApiEnvelope<T> {
+  data: T;
+  meta: { requestId: string; pagination?: Pagination };
+}
+
+export class ApiError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+const REVALIDATE_SECONDS = 60;
+
+async function apiGet<T>(path: string): Promise<ApiEnvelope<T>> {
+  const res = await fetch(`${API_URL}${path}`, {
+    headers: { accept: 'application/json' },
+    next: { revalidate: REVALIDATE_SECONDS },
+  });
+
+  if (!res.ok) {
+    throw new ApiError(res.status, `GET ${path} failed with ${res.status}`);
+  }
+
+  return res.json() as Promise<ApiEnvelope<T>>;
+}
+
+export interface ListArticlesParams {
+  category?: string;
+  language?: ArticleLanguage;
+  q?: string;
+  limit?: number;
+  cursor?: string;
+}
+
+export async function fetchArticles(
+  params: ListArticlesParams = {},
+): Promise<{ articles: ArticleSummary[]; pagination?: Pagination }> {
+  const search = new URLSearchParams();
+  if (params.category) search.set('category', params.category);
+  if (params.language) search.set('language', params.language);
+  if (params.q) search.set('q', params.q);
+  if (params.limit) search.set('limit', String(params.limit));
+  if (params.cursor) search.set('cursor', params.cursor);
+
+  const query = search.toString();
+  const envelope = await apiGet<ArticleSummary[]>(`/articles${query ? `?${query}` : ''}`);
+  return { articles: envelope.data, pagination: envelope.meta.pagination };
+}
+
+/** Returns the article, or `null` if the API responds 404. */
+export async function fetchArticle(slug: string): Promise<ArticleDetail | null> {
+  try {
+    const envelope = await apiGet<ArticleDetail>(`/articles/${encodeURIComponent(slug)}`);
+    return envelope.data;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export async function fetchCategories(): Promise<CategoryNode[]> {
+  const envelope = await apiGet<CategoryNode[]>('/categories');
+  return envelope.data;
+}

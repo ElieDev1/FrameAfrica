@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API baseline: global `/v1` prefix, strict `ValidationPipe`, `PrismaModule`, and a `/health` endpoint.
 - Web baseline: brand fonts (Archivo, Source Serif 4, IBM Plex Mono), dark/light design tokens, and the landing page.
 - Local dev `docker-compose.yml` (PostgreSQL + Redis) and `.gitattributes` to enforce LF line endings.
+- **Phase 1 — public reading (MVP):** content module with public read endpoints `GET /v1/articles`, `GET /v1/articles/:slug`, and `GET /v1/categories`, returning the standard `{ data, meta }` envelope with cursor pagination and category/language/text filters.
+- Published-only queries that expose no author PII (password hash, 2FA secret, email, phone), backed by unit tests.
+- Next.js homepage (featured hero + Latest river) and article page (`/article/[slug]`) wired to the API as Server Components, with `ArticleCard`, a shared header/footer, SEO metadata, and graceful states for unreachable-API / 404.
+- Typed web API client, an idempotent dev seed (`pnpm db:seed`), and the initial Prisma migration.
 
 ### Changed
 - `06-UIUX-Content-Layout.md`: locked in concrete font families (Archivo, Source Serif 4, IBM Plex Mono) matching the design prototype; added a link to the prototype.

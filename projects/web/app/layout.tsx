@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Archivo, Source_Serif_4, IBM_Plex_Mono } from 'next/font/google';
+import { SiteHeader } from '@/components/SiteHeader';
 import './globals.css';
 
 const archivo = Archivo({
@@ -36,7 +37,15 @@ export default function RootLayout({
       lang="en"
       className={`${archivo.variable} ${sourceSerif.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <SiteHeader />
+        <main className="flex-1">{children}</main>
+        <footer className="border-t border-border bg-surface">
+          <div className="mx-auto max-w-6xl px-6 py-6 font-mono text-xs text-faint">
+            © {new Date().getFullYear()} Frame Africa · News. Views. Africa.
+          </div>
+        </footer>
+      </body>
     </html>
   );
 }
