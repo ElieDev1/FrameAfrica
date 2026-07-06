@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Next.js homepage (featured hero + Latest river) and article page (`/article/[slug]`) wired to the API as Server Components, with `ArticleCard`, a shared header/footer, SEO metadata, and graceful states for unreachable-API / 404.
 - Typed web API client, an idempotent dev seed (`pnpm db:seed`), and the initial Prisma migration.
 - `12-Delivery-Plan.md`: a living, checkboxed progress tracker that decomposes the roadmap into feature slices (traced to SRS requirement IDs).
+- **Auth core (MVP):** `POST /v1/auth/register|login|refresh|logout` and `GET /v1/me`, issuing a short-lived access JWT plus a rotating refresh token; new readers get the `reader` role. RBAC building blocks (`JwtAuthGuard`, `RolesGuard`, `@Roles`, `@CurrentUser`) and a `refresh_token` table/migration.
 
 ### Changed
 - `06-UIUX-Content-Layout.md`: locked in concrete font families (Archivo, Source Serif 4, IBM Plex Mono) matching the design prototype; added a link to the prototype.
@@ -52,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 - Established security design baseline (`documents/05-Security-Design.md`) and vulnerability-reporting policy (`SECURITY.md`).
 - `GET /v1/articles/:slug` no longer leaks the full body of premium (`isPremium`) articles to unsubscribed callers: it now returns a one-paragraph preview with `isLocked: true` and HTTP `402`, per `04-API-Design.md` §7.
+- Passwords hashed with **Argon2id**; refresh tokens stored **hashed** and delivered in an **httpOnly, SameSite=strict** cookie with **rotation + reuse detection** (replaying a rotated token revokes the whole token family), per `05-Security-Design.md` §3.
 
 ---
 
