@@ -78,6 +78,19 @@ export default async function ArticlePage({ params }: PageProps) {
         ))}
       </div>
 
+      {article.isLocked && (
+        <div className="mt-8 flex flex-col items-center gap-3 rounded-xl border border-border-2 bg-surface px-6 py-10 text-center">
+          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-primary">
+            Premium story
+          </span>
+          <p className="font-heading text-xl font-bold text-text">Subscribe to keep reading</p>
+          <p className="max-w-sm font-body text-sm text-muted">
+            This story is available to Frame Africa subscribers. Plans and payment (MoMo, Airtel
+            Money, card) are coming soon.
+          </p>
+        </div>
+      )}
+
       <div className="mt-10 border-t border-border pt-6">
         <Link href="/" className="font-mono text-xs text-primary hover:underline">
           ← Back to home

@@ -1,12 +1,7 @@
 // Frame Africa — development seed data.
 // Idempotent: re-running upserts the same rows. Run with `pnpm db:seed`.
 
-import {
-  ArticleLanguage,
-  ArticleStatus,
-  PrismaClient,
-  RoleName,
-} from '@prisma/client';
+import { ArticleLanguage, ArticleStatus, PrismaClient, RoleName } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -84,8 +79,7 @@ async function main(): Promise<void> {
     {
       slug: 'rwanda-coffee-exports-hit-record-high',
       title: 'Rwanda coffee exports hit record high on specialty demand',
-      subtitle:
-        'Premium lots from the Western Province drove a double-digit rise in earnings.',
+      subtitle: 'Premium lots from the Western Province drove a double-digit rise in earnings.',
       excerpt:
         'Specialty buyers in Europe and Asia paid a growing premium for fully washed Rwandan lots this season.',
       category: 'business',
@@ -96,8 +90,7 @@ async function main(): Promise<void> {
     {
       slug: 'kigali-innovation-city-adds-startups',
       title: 'Kigali Innovation City welcomes a new cohort of startups',
-      subtitle:
-        'The campus continues to position the capital as a regional tech hub.',
+      subtitle: 'The campus continues to position the capital as a regional tech hub.',
       excerpt:
         'A dozen early-stage ventures move in this quarter, spanning fintech, health, and agritech.',
       category: 'technology',
@@ -118,8 +111,7 @@ async function main(): Promise<void> {
       slug: 'amavubi-name-squad-for-qualifier',
       title: 'Amavubi name squad for crucial qualifier',
       subtitle: 'The national side face a decisive fixture at Amahoro Stadium.',
-      excerpt:
-        'The coach recalls two overseas-based players ahead of the weekend clash.',
+      excerpt: 'The coach recalls two overseas-based players ahead of the weekend clash.',
       category: 'sports',
       readTimeMin: 3,
       daysAgo: 2,
@@ -128,8 +120,7 @@ async function main(): Promise<void> {
       slug: 'central-bank-holds-key-rate',
       title: 'Central bank holds key rate as inflation cools',
       subtitle: 'Policymakers cite easing food prices and a stable franc.',
-      excerpt:
-        'The monetary committee kept its benchmark unchanged for a second straight meeting.',
+      excerpt: 'The monetary committee kept its benchmark unchanged for a second straight meeting.',
       category: 'economy',
       isPremium: true,
       readTimeMin: 5,
@@ -138,10 +129,8 @@ async function main(): Promise<void> {
     {
       slug: 'kigali-green-transport-plan',
       title: 'Kigali unveils expanded green transport plan',
-      subtitle:
-        'Electric buses and cycle lanes anchor the city’s next mobility phase.',
-      excerpt:
-        'The plan targets cleaner air and shorter commutes across the capital.',
+      subtitle: 'Electric buses and cycle lanes anchor the city’s next mobility phase.',
+      excerpt: 'The plan targets cleaner air and shorter commutes across the capital.',
       category: 'rwanda',
       readTimeMin: 4,
       daysAgo: 4,
@@ -182,9 +171,7 @@ async function main(): Promise<void> {
     prisma.category.count(),
     prisma.article.count({ where: { status: ArticleStatus.published } }),
   ]);
-  console.log(
-    `Seed complete: ${categories} categories, ${published} published articles.`,
-  );
+  console.log(`Seed complete: ${categories} categories, ${published} published articles.`);
 }
 
 main()

@@ -2,11 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ArticleStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListArticlesQueryDto } from './dto/list-articles-query.dto';
-import type {
-  ArticleDetail,
-  ArticleSummary,
-  CategoryNode,
-} from './content.types';
+import type { ArticleDetail, ArticleSummary, CategoryNode } from './content.types';
 
 const DEFAULT_LIMIT = 20;
 
@@ -110,15 +106,26 @@ function toArticleSummary(article: ArticleWithRelations): ArticleSummary {
 }
 
 function toArticleDetail(article: ArticleWithRelations): ArticleDetail {
+  // No auth/subscription context exists in this public-read slice yet, so every
+  // caller is treated as unsubscribed — premium bodies stay behind a preview
+  // until billing (documents/04-API-Design.md §7) lands.
+  const isLocked = article.isPremium;
+
   return {
     ...toArticleSummary(article),
-    body: article.body,
+    body: isLocked ? previewParagraph(article.body) : article.body,
     seo: article.seo,
     viewCount: Number(article.viewCount),
     likeCount: article.likeCount,
     shareCount: article.shareCount,
     updatedAt: article.updatedAt.toISOString(),
+    isLocked,
   };
+}
+
+/** The free teaser shown before the paywall prompt: the article's first paragraph. */
+function previewParagraph(body: string): string {
+  return body.split('\n\n')[0] ?? '';
 }
 
 type CategoryRow = {

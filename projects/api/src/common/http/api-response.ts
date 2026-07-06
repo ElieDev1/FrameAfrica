@@ -20,10 +20,7 @@ export interface ApiResponse<T> {
 }
 
 /** Wrap a payload in the standard `{ data, meta }` envelope. */
-export function apiResponse<T>(
-  data: T,
-  pagination?: Pagination,
-): ApiResponse<T> {
+export function apiResponse<T>(data: T, pagination?: Pagination): ApiResponse<T> {
   return {
     data,
     meta: {

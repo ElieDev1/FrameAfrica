@@ -1,4 +1,5 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Query, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { apiResponse } from '../common/http/api-response';
 import { ContentService } from './content.service';
 import { ListArticlesQueryDto } from './dto/list-articles-query.dto';
@@ -10,14 +11,21 @@ export class ContentController {
 
   @Get('articles')
   async listArticles(@Query() query: ListArticlesQueryDto) {
-    const { items, nextCursor, hasMore } =
-      await this.content.listArticles(query);
+    const { items, nextCursor, hasMore } = await this.content.listArticles(query);
     return apiResponse(items, { nextCursor, hasMore });
   }
 
+  /**
+   * Premium articles the caller can't read yet return 402 with a preview
+   * payload (documents/04-API-Design.md §7) instead of the full body.
+   */
   @Get('articles/:slug')
-  async getArticle(@Param('slug') slug: string) {
-    return apiResponse(await this.content.getArticleBySlug(slug));
+  async getArticle(@Param('slug') slug: string, @Res({ passthrough: true }) res: Response) {
+    const article = await this.content.getArticleBySlug(slug);
+    if (article.isLocked) {
+      res.status(HttpStatus.PAYMENT_REQUIRED);
+    }
+    return apiResponse(article);
   }
 
   @Get('categories')

@@ -34,12 +34,15 @@ export interface ArticleSummary {
 }
 
 export interface ArticleDetail extends ArticleSummary {
+  /** Full body when readable for free; a one-paragraph teaser when `isLocked`. */
   body: string;
   seo: unknown;
   viewCount: number;
   likeCount: number;
   shareCount: number;
   updatedAt: string;
+  /** True when this is premium content and the caller has no active subscription. */
+  isLocked: boolean;
 }
 
 export interface CategoryNode {

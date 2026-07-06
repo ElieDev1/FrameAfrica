@@ -28,6 +28,7 @@ function sampleArticle(): ArticleDetail {
     likeCount: 0,
     shareCount: 0,
     updatedAt: '2026-01-02T00:00:00.000Z',
+    isLocked: false,
   };
 }
 
@@ -49,5 +50,19 @@ describe('ArticlePage', () => {
     mockFetchArticle.mockResolvedValue(null);
 
     await expect(ArticlePage({ params: Promise.resolve({ slug: 'missing' }) })).rejects.toThrow();
+  });
+
+  it('shows the subscribe prompt and hides the rest of the story when locked', async () => {
+    mockFetchArticle.mockResolvedValue({
+      ...sampleArticle(),
+      isPremium: true,
+      isLocked: true,
+      body: 'Teaser paragraph only.',
+    });
+
+    render(await ArticlePage({ params: Promise.resolve({ slug: 'rwanda-coffee' }) }));
+
+    expect(screen.getByText('Teaser paragraph only.')).toBeInTheDocument();
+    expect(screen.getByText('Subscribe to keep reading')).toBeInTheDocument();
   });
 });

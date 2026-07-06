@@ -37,12 +37,15 @@ export interface ArticleSummary {
 }
 
 export interface ArticleDetail extends ArticleSummary {
+  /** Full body when readable for free; a one-paragraph teaser when `isLocked`. */
   body: string;
   seo: unknown;
   viewCount: number;
   likeCount: number;
   shareCount: number;
   updatedAt: string;
+  /** True when this is premium content and the caller has no active subscription. */
+  isLocked: boolean;
 }
 
 export interface CategoryNode {
@@ -75,13 +78,13 @@ export class ApiError extends Error {
 
 const REVALIDATE_SECONDS = 60;
 
-async function apiGet<T>(path: string): Promise<ApiEnvelope<T>> {
+async function apiGet<T>(path: string, acceptStatuses: number[] = []): Promise<ApiEnvelope<T>> {
   const res = await fetch(`${API_URL}${path}`, {
     headers: { accept: 'application/json' },
     next: { revalidate: REVALIDATE_SECONDS },
   });
 
-  if (!res.ok) {
+  if (!res.ok && !acceptStatuses.includes(res.status)) {
     throw new ApiError(res.status, `GET ${path} failed with ${res.status}`);
   }
 
@@ -111,10 +114,13 @@ export async function fetchArticles(
   return { articles: envelope.data, pagination: envelope.meta.pagination };
 }
 
-/** Returns the article, or `null` if the API responds 404. */
+/**
+ * Returns the article, or `null` if the API responds 404. A 402 response still
+ * carries a valid (locked/preview) payload — see `ArticleDetail.isLocked`.
+ */
 export async function fetchArticle(slug: string): Promise<ArticleDetail | null> {
   try {
-    const envelope = await apiGet<ArticleDetail>(`/articles/${encodeURIComponent(slug)}`);
+    const envelope = await apiGet<ArticleDetail>(`/articles/${encodeURIComponent(slug)}`, [402]);
     return envelope.data;
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {

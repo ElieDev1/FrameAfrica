@@ -78,9 +78,7 @@ describe('ContentService', () => {
       expect(res.hasMore).toBe(true);
       expect(res.items).toHaveLength(1);
       expect(res.nextCursor).toBe('a1');
-      expect(prisma.article.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ take: 2 }),
-      );
+      expect(prisma.article.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 2 }));
     });
 
     it('restricts the query to published, non-deleted articles', async () => {
@@ -99,21 +97,31 @@ describe('ContentService', () => {
   });
 
   describe('getArticleBySlug', () => {
-    it('returns detail and coerces the BigInt view count to a number', async () => {
+    it('returns the full body and unlocked for a free article', async () => {
       prisma.article.findFirst.mockResolvedValue(articleRow());
 
       const res = await service.getArticleBySlug('s1');
 
+      expect(res.isLocked).toBe(false);
       expect(res.body).toBe('Full body text.');
       expect(res.viewCount).toBe(10);
+    });
+
+    it('locks premium articles behind a one-paragraph preview', async () => {
+      prisma.article.findFirst.mockResolvedValue(
+        articleRow({ isPremium: true, body: 'Teaser paragraph.\n\nRest of the story.' }),
+      );
+
+      const res = await service.getArticleBySlug('s1');
+
+      expect(res.isLocked).toBe(true);
+      expect(res.body).toBe('Teaser paragraph.');
     });
 
     it('throws NotFound when no published article matches', async () => {
       prisma.article.findFirst.mockResolvedValue(null);
 
-      await expect(service.getArticleBySlug('nope')).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(service.getArticleBySlug('nope')).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 

@@ -51,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 - Established security design baseline (`documents/05-Security-Design.md`) and vulnerability-reporting policy (`SECURITY.md`).
+- `GET /v1/articles/:slug` no longer leaks the full body of premium (`isPremium`) articles to unsubscribed callers: it now returns a one-paragraph preview with `isLocked: true` and HTTP `402`, per `04-API-Design.md` §7.
 
 ---
 

@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import type { Response } from 'express';
 import { ContentController } from './content.controller';
 import { ContentService } from './content.service';
 
@@ -7,6 +8,10 @@ type ServiceMock = {
   getArticleBySlug: jest.Mock;
   getCategoryTree: jest.Mock;
 };
+
+function mockResponse(): Pick<Response, 'status'> {
+  return { status: jest.fn() };
+}
 
 describe('ContentController', () => {
   let controller: ContentController;
@@ -42,12 +47,24 @@ describe('ContentController', () => {
   });
 
   it('wraps a single article and passes the slug through', async () => {
-    service.getArticleBySlug.mockResolvedValue({ slug: 's1' });
+    service.getArticleBySlug.mockResolvedValue({ slug: 's1', isLocked: false });
+    const httpRes = mockResponse();
 
-    const res = await controller.getArticle('s1');
+    const res = await controller.getArticle('s1', httpRes as Response);
 
     expect(res.data).toMatchObject({ slug: 's1' });
     expect(service.getArticleBySlug).toHaveBeenCalledWith('s1');
+    expect(httpRes.status).not.toHaveBeenCalled();
+  });
+
+  it('returns 402 for a locked (premium, unsubscribed) article', async () => {
+    service.getArticleBySlug.mockResolvedValue({ slug: 's1', isLocked: true });
+    const httpRes = mockResponse();
+
+    const res = await controller.getArticle('s1', httpRes as Response);
+
+    expect(res.data).toMatchObject({ slug: 's1' });
+    expect(httpRes.status).toHaveBeenCalledWith(402);
   });
 
   it('wraps the category tree', async () => {
