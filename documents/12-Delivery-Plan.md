@@ -79,9 +79,9 @@ until merged and note their PR.
 - [ ] Bookmarks, reading history, followed categories (`FR-READ-5`, `-6`)
 - [ ] Data export + account erasure (`FR-AUTH-8`; `05` §9)
 
-### Slice 5 — CMS & editorial workflow  `FR-PROD-*`, `FR-EDIT-*`
-- [ ] Draft create/edit (author-scoped) + a tracked revision on every save (`FR-PROD-1`, `-6`)
-- [ ] Workflow state machine: draft → review → publish, role-gated (`FR-EDIT-1`, `02` §6)
+### Slice 5 — CMS & editorial workflow  `FR-PROD-*`, `FR-EDIT-*` 🚧
+- [x] Journalist draft lifecycle: create/edit (author-scoped) + a tracked revision on every save + submit for review (`FR-PROD-1`, `-5`, `-6`), role-gated
+- [ ] Editor workflow state machine: review → publish/reject, role-gated (`FR-EDIT-1`, `02` §6)
 - [ ] Publish now / schedule / embargo (`FR-EDIT-2`, `-3`)
 - [ ] Corrections & retractions with a public, dated log (`FR-EDIT-5`)
 - [ ] Feature as breaking news (`FR-EDIT-4`)

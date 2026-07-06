@@ -73,6 +73,7 @@ model User {
   roles         UserRole[]
   articles      Article[]
   refreshTokens RefreshToken[]
+  revisions     ArticleRevision[] @relation("UserRevisions")
 
   @@map("user")
 }
@@ -158,11 +159,29 @@ model Article {
   updatedAt    DateTime      @updatedAt @map("updated_at")
   deletedAt    DateTime?     @map("deleted_at")
 
-  author   User     @relation(fields: [authorId], references: [id])
-  category Category @relation(fields: [categoryId], references: [id])
+  author    User              @relation(fields: [authorId], references: [id])
+  category  Category          @relation(fields: [categoryId], references: [id])
+  revisions ArticleRevision[]
 
   @@index([status, publishedAt])
   @@index([categoryId, publishedAt])
   @@index([authorId])
   @@map("article")
+}
+
+/// Immutable snapshot captured on every draft save (documents/03 §3.5).
+model ArticleRevision {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  articleId  String   @map("article_id") @db.Uuid
+  editorId   String   @map("editor_id") @db.Uuid
+  title      String
+  body       String
+  changeNote String?  @map("change_note")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  editor  User    @relation("UserRevisions", fields: [editorId], references: [id])
+
+  @@index([articleId, createdAt])
+  @@map("article_revision")
 }

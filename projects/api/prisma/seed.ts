@@ -2,8 +2,12 @@
 // Idempotent: re-running upserts the same rows. Run with `pnpm db:seed`.
 
 import { ArticleLanguage, ArticleStatus, PrismaClient, RoleName } from '@prisma/client';
+import * as argon2 from 'argon2';
 
 const prisma = new PrismaClient();
+
+// Dev-only credentials for the seeded journalist (never used outside local dev).
+const JOURNALIST_PASSWORD = 'DevPass123!';
 
 const body = (lede: string): string =>
   [
@@ -20,13 +24,17 @@ async function main(): Promise<void> {
     create: { name: RoleName.journalist },
   });
 
+  const passwordHash = await argon2.hash(JOURNALIST_PASSWORD, {
+    type: argon2.argon2id,
+  });
   const author = await prisma.user.upsert({
     where: { email: 'jane.uwase@frameafrica.rw' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'jane.uwase@frameafrica.rw',
       displayName: 'Jane Uwase',
       emailVerifiedAt: new Date(),
+      passwordHash,
     },
   });
 
