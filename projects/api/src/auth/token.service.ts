@@ -38,7 +38,9 @@ export class TokenService {
     private readonly config: ConfigService,
     private readonly prisma: PrismaService,
   ) {
-    this.accessSecret = this.config.get<string>('JWT_ACCESS_SECRET', 'dev-access-secret');
+    // No fallback: a missing secret must fail startup, not sign tokens with a
+    // value anyone can read in this file.
+    this.accessSecret = this.config.getOrThrow<string>('JWT_ACCESS_SECRET');
     this.accessTtlSeconds = Number(
       this.config.get<string>('JWT_ACCESS_TTL', String(DEFAULT_ACCESS_TTL)),
     );

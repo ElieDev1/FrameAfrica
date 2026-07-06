@@ -1,4 +1,5 @@
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import type { PrismaService } from '../prisma/prisma.service';
 import { AuthService } from './auth.service';
 import type { PasswordService } from './password.service';
@@ -76,6 +77,22 @@ describe('AuthService', () => {
       });
       expect(res.user).not.toHaveProperty('passwordHash');
     });
+
+    it('turns a race-losing duplicate email into a 409 (not a raw DB error)', async () => {
+      const { service, prisma, passwords } = build();
+      prisma.user.findUnique.mockResolvedValue(null); // pre-check sees no row yet
+      passwords.hash.mockResolvedValue('argon-hash');
+      prisma.user.create.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+          code: 'P2002',
+          clientVersion: 'test',
+        }),
+      );
+
+      await expect(
+        service.register({ email: 'a@b.rw', password: 'pw123456', displayName: 'A' }),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
   });
 
   describe('login', () => {
@@ -85,6 +102,21 @@ describe('AuthService', () => {
       await expect(service.login({ email: 'no@one.rw', password: 'pw' })).rejects.toBeInstanceOf(
         UnauthorizedException,
       );
+    });
+
+    it('still hashes-verifies against a dummy hash for an unknown email (timing-safe)', async () => {
+      const { service, prisma, passwords } = build();
+      prisma.user.findFirst.mockResolvedValue(null);
+      passwords.verify.mockResolvedValue(false);
+
+      await expect(service.login({ email: 'no@one.rw', password: 'pw' })).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+
+      expect(passwords.verify).toHaveBeenCalledTimes(1);
+      const [hashArg] = passwords.verify.mock.calls[0] as [string, string];
+      expect(hashArg).toMatch(/^\$argon2id\$/);
+      expect(hashArg).not.toBe('hashed'); // not a real user's hash — the dummy
     });
 
     it('rejects a wrong password', async () => {

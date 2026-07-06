@@ -13,6 +13,7 @@ type RefreshTokenMock = {
 
 const configStub = {
   get: (_key: string, def?: unknown) => def,
+  getOrThrow: () => 'test-access-secret',
 } as unknown as ConfigService;
 
 function build(): { service: TokenService; refreshToken: RefreshTokenMock } {
@@ -28,6 +29,19 @@ function build(): { service: TokenService; refreshToken: RefreshTokenMock } {
 }
 
 describe('TokenService', () => {
+  it('fails to construct when JWT_ACCESS_SECRET is not configured', () => {
+    const throwingConfig = {
+      get: (_key: string, def?: unknown) => def,
+      getOrThrow: () => {
+        throw new Error("JWT_ACCESS_SECRET doesn't exist");
+      },
+    } as unknown as ConfigService;
+
+    expect(() => new TokenService(new JwtService({}), throwingConfig, {} as PrismaService)).toThrow(
+      /JWT_ACCESS_SECRET/,
+    );
+  });
+
   describe('access tokens', () => {
     it('signs a token that verifies back to the same claims', async () => {
       const { service } = build();

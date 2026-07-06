@@ -11,6 +11,15 @@ const withRoles = {
 
 type UserWithRoles = Prisma.UserGetPayload<{ include: typeof withRoles }>;
 
+/**
+ * A precomputed Argon2id hash (same cost params as PasswordService) with no
+ * corresponding real password. Verifying against it when the email is unknown
+ * or has no password keeps login's response time constant either way, so
+ * timing can't be used to enumerate registered emails.
+ */
+const DUMMY_PASSWORD_HASH =
+  '$argon2id$v=19$m=19456,t=2,p=1$CjwQMz9TxglcQ96CXNValw$uH5k7HEziD/YzWgnwZmkCfTA64NpOqE+Bvz5QuRmG3U';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -28,26 +37,37 @@ export class AuthService {
     }
 
     const passwordHash = await this.passwords.hash(input.password);
-    const user = await this.prisma.user.create({
-      data: {
-        email: input.email,
-        displayName: input.displayName,
-        passwordHash,
-        roles: {
-          create: [
-            {
-              role: {
-                connectOrCreate: {
-                  where: { name: RoleName.reader },
-                  create: { name: RoleName.reader },
+    let user: UserWithRoles;
+    try {
+      user = await this.prisma.user.create({
+        data: {
+          email: input.email,
+          displayName: input.displayName,
+          passwordHash,
+          roles: {
+            create: [
+              {
+                role: {
+                  connectOrCreate: {
+                    where: { name: RoleName.reader },
+                    create: { name: RoleName.reader },
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
-      },
-      include: withRoles,
-    });
+        include: withRoles,
+      });
+    } catch (error) {
+      // The findUnique check above doesn't close the race between two
+      // concurrent registrations for the same email — the unique constraint
+      // is the real guard, so translate its violation to the same 409.
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('Email is already registered');
+      }
+      throw error;
+    }
 
     return this.issueSession(user);
   }
@@ -58,11 +78,14 @@ export class AuthService {
       include: withRoles,
     });
 
-    const passwordOk = user?.passwordHash
-      ? await this.passwords.verify(user.passwordHash, input.password)
-      : false;
+    // Always verify — against the real hash if we have one, otherwise a fixed
+    // dummy hash — so response time doesn't reveal whether the email exists.
+    const passwordOk = await this.passwords.verify(
+      user?.passwordHash ?? DUMMY_PASSWORD_HASH,
+      input.password,
+    );
 
-    if (!user || !passwordOk) {
+    if (!user || !user.passwordHash || !passwordOk) {
       throw new UnauthorizedException('Invalid email or password');
     }
     if (user.status !== UserStatus.active) {

@@ -13,7 +13,8 @@ import { TokenService } from './token.service';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_ACCESS_SECRET', 'dev-access-secret'),
+        // No fallback: a missing secret must fail startup (see TokenService).
+        secret: config.getOrThrow<string>('JWT_ACCESS_SECRET'),
         signOptions: {
           expiresIn: Number(config.get<string>('JWT_ACCESS_TTL', '900')),
         },

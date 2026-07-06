@@ -1,5 +1,6 @@
 import { Body, Controller, HttpCode, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { apiResponse } from '../common/http/api-response';
 import { AuthService } from './auth.service';
@@ -10,6 +11,11 @@ import { RegisterDto } from './dto/register.dto';
 const REFRESH_COOKIE = 'refresh_token';
 // Scope the cookie to the auth routes so it isn't sent on every API call.
 const REFRESH_COOKIE_PATH = '/v1/auth';
+
+// documents/04-API-Design.md §10: "Auth attempts: 5 fails → temp lockout + backoff".
+// This counts all requests (not just failures) per IP — a coarser but simpler
+// mitigation than tracking failure counts; revisit if that distinction matters.
+const AUTH_THROTTLE = { default: { limit: 5, ttl: 60_000 } };
 
 @Controller('auth')
 export class AuthController {
@@ -22,17 +28,20 @@ export class AuthController {
     this.cookieSecure = config.get<string>('COOKIE_SECURE', 'true') !== 'false';
   }
 
+  @Throttle(AUTH_THROTTLE)
   @Post('register')
   async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
     return this.session(await this.auth.register(dto), res);
   }
 
+  @Throttle(AUTH_THROTTLE)
   @Post('login')
   @HttpCode(200)
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     return this.session(await this.auth.login(dto), res);
   }
 
+  @Throttle(AUTH_THROTTLE)
   @Post('refresh')
   @HttpCode(200)
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
