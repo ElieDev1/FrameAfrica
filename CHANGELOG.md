@@ -31,12 +31,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Published-only queries that expose no author PII (password hash, 2FA secret, email, phone), backed by unit tests.
 - Next.js homepage (featured hero + Latest river) and article page (`/article/[slug]`) wired to the API as Server Components, with `ArticleCard`, a shared header/footer, SEO metadata, and graceful states for unreachable-API / 404.
 - Typed web API client, an idempotent dev seed (`pnpm db:seed`), and the initial Prisma migration.
+- `12-Delivery-Plan.md`: a living, checkboxed progress tracker that decomposes the roadmap into feature slices (traced to SRS requirement IDs).
 
 ### Changed
 - `06-UIUX-Content-Layout.md`: locked in concrete font families (Archivo, Source Serif 4, IBM Plex Mono) matching the design prototype; added a link to the prototype.
 - Scoped Prettier to code (`projects/**` + config); hand-authored docs (`*.md`, `documents/`) are excluded from formatting.
 - Aligned Jest to v29 across `web` and `api` so a single test-runner version is used monorepo-wide.
 - `09-Git-Workflow.md`: added a **Commit Granularity** policy (§4.1) — commit after each logical change, not once per phase.
+- Refreshed stale status markers in `11-Roadmap.md` and `CLAUDE.md` (Phase 0 done, MVP in progress) and linked the delivery plan from the docs index.
 
 ### Fixed
 - CI is now green end-to-end (format, lint, type-check, test, build): the API generates the Prisma client on `postinstall`, resolving type-unsafe `PrismaClient` lint errors, and the Jest version mismatch that crashed the API test suite is gone.

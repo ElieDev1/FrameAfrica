@@ -13,13 +13,17 @@ source — fast, credible, multilingual, and mobile-first.
 
 ## Release Milestones
 
-### v0.1 — Foundation (current)
+> Milestones below are directional. **Live, checkbox-level progress is tracked in
+> `12-Delivery-Plan.md`** — update that document as PRs merge into `dev`.
+
+### v0.1 — Foundation ✅ (complete)
 - Repository, documentation set, and Git/GitHub workflow.
 - Architecture, database, API, security, and UI/UX designs approved.
 - CI/CD skeleton and environments defined.
 
-### v1.0 — MVP (Public launch)
+### v1.0 — MVP (Public launch) 🚧 (current)
 **Goal:** publish and read news reliably in English + Kinyarwanda.
+_First slice shipped: public reading (read API + homepage + article page)._
 - CMS with editorial workflow (draft → review → publish), revisions, corrections.
 - Article, category (nested), tags, media (images/video), search.
 - Responsive public site (homepage, article, category, search) with dark mode.

@@ -19,16 +19,17 @@ All design docs live in `documents/`:
 9. `documents/08-Test-Deployment.md` — testing & CI/CD
 10. `documents/09-Git-Workflow.md` — branching & PR rules (follow strictly)
 11. `documents/10-Coding-Standards.md` — conventions & Definition of Done
-12. `documents/11-Roadmap.md` — what to build next (start at Phase 0 → 1)
-13. `documents/adr/` — architecture decisions
+12. `documents/11-Roadmap.md` — milestones (why/when)
+13. `documents/12-Delivery-Plan.md` — **live progress tracker (what's done / next), checkboxed**
+14. `documents/adr/` — architecture decisions
 
 ## Tech stack
 Next.js (React, TS) · NestJS (Node, TS) · PostgreSQL · OpenSearch · Redis · S3 · Cloudflare ·
 OAuth2+JWT · MoMo/Airtel/card payments · Docker/K8s · GitHub Actions.
 
 ## Where code goes
-- `projects/web/` — Next.js app (currently empty — to scaffold)
-- `projects/api/` — NestJS app (currently empty — to scaffold)
+- `projects/web/` — Next.js app (scaffolded; homepage + article page live)
+- `projects/api/` — NestJS app (scaffolded; content read API live)
 - `documents/` — docs (source of truth; update when behavior changes)
 
 ## Rules Claude Code must follow
@@ -43,9 +44,10 @@ OAuth2+JWT · MoMo/Airtel/card payments · Docker/K8s · GitHub Actions.
 - **Don't** commit `.env`, `node_modules`, or build output (see `.gitignore`).
 
 ## Current status
-Documentation complete. Code not yet scaffolded — the next step is Phase 0 in
-`documents/11-Roadmap.md`: initialize the Next.js and NestJS skeletons in `projects/`,
-set up the base database schema, and get CI green.
+**Phase 0 complete** (monorepo, Next.js + NestJS skeletons, base schema, CI green).
+**Phase 1 (MVP) in progress** — the public reading slice is live (content read API +
+homepage + article page). See `documents/12-Delivery-Plan.md` for the checkboxed
+plan and what's next (recommended: auth & reader accounts).
 
 ## How to start a work session
 1. Read the docs above (skim 00, then the ones relevant to the task).

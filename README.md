@@ -33,8 +33,9 @@ FrameAfrica/
 │   ├── 09-Git-Workflow.md            Git & GitHub branching / PR workflow
 │   ├── 10-Coding-Standards.md        Coding conventions & Definition of Done
 │   ├── 11-Roadmap.md                 Product roadmap & milestones
+│   ├── 12-Delivery-Plan.md           Live progress tracker (checkboxed slices)
 │   └── adr/                          Architecture Decision Records
-├── projects/                     ← reserved for the Next.js + Node.js codebase
+├── projects/                     ← Next.js (web) + NestJS (api) codebase
 └── assets/                       ← brand assets (logo, icons)
 ```
 
@@ -52,7 +53,8 @@ FrameAfrica/
 10. **09 — Git Workflow** — branching, PRs, and release process.
 11. **10 — Coding Standards** — conventions and Definition of Done.
 12. **11 — Roadmap** — milestones from MVP to scale.
-13. **adr/** — the record of key architecture decisions.
+13. **12 — Delivery Plan** — live, checkboxed progress tracker (what's done / next).
+14. **adr/** — the record of key architecture decisions.
 
 ## Tech stack (summary)
 
