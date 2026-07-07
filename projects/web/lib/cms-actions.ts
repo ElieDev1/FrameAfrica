@@ -45,6 +45,9 @@ function draftPayload(formData: FormData) {
     body: String(formData.get('body') ?? ''),
     language: String(formData.get('language') || 'en'),
     isPremium: formData.get('isPremium') === 'on',
+    featuredImageUrl: String(formData.get('featuredImageUrl') ?? '').trim() || undefined,
+    featuredImageAlt: String(formData.get('featuredImageAlt') ?? '').trim() || undefined,
+    featuredImageCredit: String(formData.get('featuredImageCredit') ?? '').trim() || undefined,
   };
 }
 

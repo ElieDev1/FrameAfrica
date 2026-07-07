@@ -39,4 +39,19 @@ export class CreateDraftDto {
   @IsOptional()
   @IsBoolean()
   isPremium?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  featuredImageUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  featuredImageAlt?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  featuredImageCredit?: string;
 }

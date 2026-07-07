@@ -56,6 +56,28 @@ describe('CmsDraftService', () => {
       expect(arg.data).toHaveProperty('revisions');
     });
 
+    it('stores the featured image with its alt + credit', async () => {
+      const { service, prisma } = build();
+      prisma.category.findUnique.mockResolvedValue({ id: 'c1' });
+      prisma.article.findUnique.mockResolvedValue(null);
+      prisma.article.create.mockResolvedValue(row());
+
+      await service.createDraft('u1', {
+        title: 'My Draft',
+        categoryId: 'c1',
+        body: 'x',
+        featuredImageUrl: '/seed/x.jpg',
+        featuredImageAlt: 'An alt',
+        featuredImageCredit: 'Frame Africa',
+      });
+
+      const calls = prisma.article.create.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { data: Record<string, unknown> };
+      expect(arg.data.featuredImageUrl).toBe('/seed/x.jpg');
+      expect(arg.data.featuredImageAlt).toBe('An alt');
+      expect(arg.data.featuredImageCredit).toBe('Frame Africa');
+    });
+
     it('rejects an unknown category', async () => {
       const { service, prisma } = build();
       prisma.category.findUnique.mockResolvedValue(null);
@@ -89,6 +111,19 @@ describe('CmsDraftService', () => {
       const arg = calls[0]?.[0] as { data: Record<string, unknown> };
       expect(arg.data.slug).toBe('new-title');
       expect(arg.data).toHaveProperty('revisions');
+    });
+
+    it('updates the featured image and clears an emptied value to null', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue(row());
+      prisma.article.update.mockResolvedValue(row());
+
+      await service.updateDraft('u1', 'a1', { featuredImageUrl: '', featuredImageAlt: 'New alt' });
+
+      const calls = prisma.article.update.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { data: Record<string, unknown> };
+      expect(arg.data.featuredImageUrl).toBeNull();
+      expect(arg.data.featuredImageAlt).toBe('New alt');
     });
 
     it('refuses to edit a non-editable (e.g. published) article', async () => {

@@ -27,6 +27,9 @@ export interface DraftDetail extends DraftListItem {
   subtitle: string | null;
   excerpt: string | null;
   body: string;
+  featuredImageUrl: string | null;
+  featuredImageAlt: string | null;
+  featuredImageCredit: string | null;
   createdAt: string;
 }
 

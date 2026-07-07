@@ -23,6 +23,9 @@ export interface DraftInitial {
   body: string;
   language: string;
   isPremium: boolean;
+  featuredImageUrl: string;
+  featuredImageAlt: string;
+  featuredImageCredit: string;
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -128,6 +131,44 @@ export function DraftForm({
           Premium (subscribers only)
         </label>
       </div>
+
+      <fieldset className="flex flex-col gap-4 rounded-xl border border-border p-4">
+        <legend className="px-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+          Featured image
+        </legend>
+        <Field label="Image URL">
+          <input
+            name="featuredImageUrl"
+            type="url"
+            defaultValue={initial?.featuredImageUrl}
+            maxLength={500}
+            placeholder="https://…  (upload coming soon)"
+            className={inputClass}
+          />
+        </Field>
+        <div className="flex flex-wrap gap-4">
+          <div className="min-w-[16rem] flex-1">
+            <Field label="Alt text (for accessibility)">
+              <input
+                name="featuredImageAlt"
+                defaultValue={initial?.featuredImageAlt}
+                maxLength={300}
+                className={inputClass}
+              />
+            </Field>
+          </div>
+          <div className="min-w-[10rem] flex-1">
+            <Field label="Credit">
+              <input
+                name="featuredImageCredit"
+                defaultValue={initial?.featuredImageCredit}
+                maxLength={200}
+                className={inputClass}
+              />
+            </Field>
+          </div>
+        </div>
+      </fieldset>
 
       <Field label="Body">
         <textarea

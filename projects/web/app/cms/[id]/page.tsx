@@ -43,6 +43,9 @@ export default async function EditDraftPage({ params }: PageProps) {
                 body: draft.body,
                 language: draft.language,
                 isPremium: draft.isPremium,
+                featuredImageUrl: draft.featuredImageUrl ?? '',
+                featuredImageAlt: draft.featuredImageAlt ?? '',
+                featuredImageCredit: draft.featuredImageCredit ?? '',
               }}
             />
           </div>

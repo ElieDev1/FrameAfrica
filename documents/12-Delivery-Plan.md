@@ -94,8 +94,8 @@ until merged and note their PR.
 
 ### Slice 6 — Media  `FR-PROD-2` 🚧
 - [ ] Signed S3 upload + responsive image variants (WebP/AVIF) (`02` §5)
-- [x] Featured image on articles — `featured_image_url` on `article`, served by the read API and rendered with `next/image` across cards + article hero (falls back to the branded placeholder when absent). _Galleries still to come._
-- [x] Credit / alt-text metadata — `featured_image_alt` + `featured_image_credit`, rendered as image `alt` and a photo credit (`06` §6). _Licensing field with the DAM._
+- [x] Featured image on articles — `featured_image_url` on `article`, served by the read API and rendered with `next/image` across cards + article hero (falls back to the branded placeholder when absent). Staff attach one via the **CMS editor** (URL + alt + credit fields). _Galleries + upload still to come._
+- [x] Credit / alt-text metadata — `featured_image_alt` + `featured_image_credit`, authored in the CMS and rendered as image `alt` and a photo credit (`06` §6). _Licensing field with the DAM._
 
 ### Slice 7 — Comments & moderation  `FR-COMM-*`
 - [ ] Threaded comments, likes, reports (`FR-COMM-1`, `-2`)

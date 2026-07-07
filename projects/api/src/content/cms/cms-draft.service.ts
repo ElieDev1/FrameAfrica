@@ -46,6 +46,9 @@ export class CmsDraftService {
         body,
         language: dto.language ?? 'en',
         isPremium: dto.isPremium ?? false,
+        featuredImageUrl: dto.featuredImageUrl || null,
+        featuredImageAlt: dto.featuredImageAlt || null,
+        featuredImageCredit: dto.featuredImageCredit || null,
         status: ArticleStatus.draft,
         readTimeMin: readTime(body),
         author: { connect: { id: authorId } },
@@ -101,6 +104,10 @@ export class CmsDraftService {
     if (dto.excerpt !== undefined) data.excerpt = dto.excerpt;
     if (dto.language !== undefined) data.language = dto.language;
     if (dto.isPremium !== undefined) data.isPremium = dto.isPremium;
+    if (dto.featuredImageUrl !== undefined) data.featuredImageUrl = dto.featuredImageUrl || null;
+    if (dto.featuredImageAlt !== undefined) data.featuredImageAlt = dto.featuredImageAlt || null;
+    if (dto.featuredImageCredit !== undefined)
+      data.featuredImageCredit = dto.featuredImageCredit || null;
     if (dto.body !== undefined) {
       data.body = dto.body;
       data.readTimeMin = readTime(dto.body);
@@ -202,6 +209,9 @@ function toDraftDetail(article: DraftRow): DraftDetail {
     subtitle: article.subtitle,
     excerpt: article.excerpt,
     body: article.body,
+    featuredImageUrl: article.featuredImageUrl,
+    featuredImageAlt: article.featuredImageAlt,
+    featuredImageCredit: article.featuredImageCredit,
     createdAt: article.createdAt.toISOString(),
   };
 }

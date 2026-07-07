@@ -42,6 +42,21 @@ export class UpdateDraftDto {
   @IsBoolean()
   isPremium?: boolean;
 
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  featuredImageUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  featuredImageAlt?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  featuredImageCredit?: string;
+
   /** Optional note stored on the revision this update creates. */
   @IsOptional()
   @IsString()
