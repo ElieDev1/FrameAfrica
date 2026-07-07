@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Aligned Jest to v29 across `web` and `api` so a single test-runner version is used monorepo-wide.
 - `09-Git-Workflow.md`: added a **Commit Granularity** policy (§4.1) — commit after each logical change, not once per phase.
 - Refreshed stale status markers in `11-Roadmap.md` and `CLAUDE.md` (Phase 0 done, MVP in progress) and linked the delivery plan from the docs index.
+- BFF sessions now **refresh on expiry**: a Next proxy rotates the access token (using the stored refresh cookie) when it expires, so logins survive past the ~15-minute access TTL instead of silently signing out.
 
 ### Fixed
 - CI is now green end-to-end (format, lint, type-check, test, build): the API generates the Prisma client on `postinstall`, resolving type-unsafe `PrismaClient` lint errors, and the Jest version mismatch that crashed the API test suite is gone.
