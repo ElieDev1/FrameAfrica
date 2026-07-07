@@ -15,6 +15,10 @@ const DEFAULT_LIMIT = 20;
 const articleInclude = {
   category: { select: { id: true, name: true, slug: true } },
   author: { select: { id: true, displayName: true, avatarUrl: true } },
+  topics: {
+    include: { topic: { select: { id: true, name: true, slug: true } } },
+    orderBy: { topic: { name: 'asc' } },
+  },
 } satisfies Prisma.ArticleInclude;
 
 type ArticleWithRelations = Prisma.ArticleGetPayload<{
@@ -33,10 +37,16 @@ export class ContentService {
   }> {
     const limit = query.limit ?? DEFAULT_LIMIT;
 
+    // A section aggregates its sub-sections: filtering by a section slug matches
+    // articles in that category *and* all of its descendants. Unknown slug → no
+    // matches (empty id list).
+    const categoryIds = query.category ? await this.categorySubtreeIds(query.category) : null;
+
     const where: Prisma.ArticleWhereInput = {
       status: ArticleStatus.published,
       deletedAt: null,
-      ...(query.category ? { category: { slug: query.category } } : {}),
+      ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
+      ...(query.topic ? { topics: { some: { topic: { slug: query.topic } } } } : {}),
       ...(query.language ? { language: query.language } : {}),
       ...(query.q
         ? {
@@ -93,18 +103,81 @@ export class ContentService {
     return buildCategoryTree(categories);
   }
 
-  /** A single active category by slug (section masthead), or 404. */
+  /** A single active category by slug (section masthead) with its parent + active
+   * sub-sections (for breadcrumb + sub-section chips), or 404. */
   async getCategoryBySlug(slug: string): Promise<CategoryDetail> {
     const category = await this.prisma.category.findFirst({
       where: { slug, isActive: true },
-      select: { id: true, name: true, slug: true, description: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        parent: { select: { name: true, slug: true } },
+        children: {
+          where: { isActive: true },
+          orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+          select: { id: true, name: true, slug: true },
+        },
+      },
     });
 
     if (!category) {
       throw new NotFoundException(`Category "${slug}" was not found`);
     }
 
-    return category;
+    return {
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      description: category.description,
+      parent: category.parent,
+      children: category.children,
+    };
+  }
+
+  /** A single active topic by slug (topic page masthead), or 404. */
+  async getTopicBySlug(slug: string): Promise<TopicDetail> {
+    const topic = await this.prisma.topic.findFirst({
+      where: { slug, isActive: true },
+      select: { id: true, name: true, slug: true, description: true },
+    });
+    if (!topic) {
+      throw new NotFoundException(`Topic "${slug}" was not found`);
+    }
+    return topic;
+  }
+
+  /**
+   * The category matching `slug` plus every descendant, as an id list. Returns
+   * `[]` for an unknown/inactive slug so callers match no articles. Loads the
+   * (small) active-category set once and walks it in memory.
+   */
+  private async categorySubtreeIds(slug: string): Promise<string[]> {
+    const all = await this.prisma.category.findMany({
+      where: { isActive: true },
+      select: { id: true, slug: true, parentId: true },
+    });
+    const root = all.find((c) => c.slug === slug);
+    if (!root) return [];
+
+    const childrenByParent = new Map<string, string[]>();
+    for (const c of all) {
+      if (c.parentId) {
+        const siblings = childrenByParent.get(c.parentId) ?? [];
+        siblings.push(c.id);
+        childrenByParent.set(c.parentId, siblings);
+      }
+    }
+
+    const ids: string[] = [];
+    const stack = [root.id];
+    while (stack.length > 0) {
+      const current = stack.pop()!;
+      ids.push(current);
+      stack.push(...(childrenByParent.get(current) ?? []));
+    }
+    return ids;
   }
 
   /** Up to 4 other published articles in the same category (empty if none / unknown slug). */
@@ -154,6 +227,7 @@ function toArticleSummary(article: ArticleWithRelations): ArticleSummary {
       : null,
     category: article.category,
     author: article.author,
+    topics: article.topics.map((t) => t.topic),
   };
 }
 

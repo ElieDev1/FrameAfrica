@@ -5,7 +5,9 @@ import { notFound } from 'next/navigation';
 import { ArticleCard } from '@/components/ArticleCard';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { CommentsSection } from '@/components/CommentsSection';
+import { ReadingProgress } from '@/components/ReadingProgress';
 import { ShareBar } from '@/components/ShareBar';
+import { StickyShare } from '@/components/StickyShare';
 import { fetchArticle, fetchComments, fetchRelated, type ArticleDetail } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import { getSession } from '@/lib/session';
@@ -48,6 +50,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+/**
+ * True when a story was edited a meaningful time after publishing (>5 min), so
+ * we only surface an "Updated" stamp for genuine post-publish revisions, not the
+ * save that published it.
+ */
+function isMeaningfullyUpdated(publishedAt: string | null, updatedAt: string): boolean {
+  if (!publishedAt) return false;
+  return new Date(updatedAt).getTime() - new Date(publishedAt).getTime() > 5 * 60 * 1000;
+}
+
 /** schema.org NewsArticle structured data (documents/01 §4.8, SEO). */
 function newsArticleJsonLd(article: ArticleDetail): string {
   const data = {
@@ -83,6 +95,8 @@ export default async function ArticlePage({ params }: PageProps) {
 
   return (
     <article className="mx-auto max-w-2xl px-6 py-10">
+      <ReadingProgress />
+      <StickyShare title={article.title} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: newsArticleJsonLd(article) }}
@@ -128,6 +142,7 @@ export default async function ArticlePage({ params }: PageProps) {
         <span className="text-text">{article.author.displayName}</span>
         {article.publishedAt && <span>· {formatDate(article.publishedAt)}</span>}
         {article.readTimeMin && <span>· {article.readTimeMin} min read</span>}
+        {updated && <span className="text-primary">· Updated {formatDate(article.updatedAt)}</span>}
       </div>
 
       <div className="mt-5">
@@ -166,6 +181,23 @@ export default async function ArticlePage({ params }: PageProps) {
       <div className="mt-8">
         <BlockRenderer blocks={article.blocks} />
       </div>
+
+      {article.topics.length > 0 && (
+        <nav aria-label="Topics" className="mt-10 flex flex-wrap items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-faint">
+            Topics
+          </span>
+          {article.topics.map((topic) => (
+            <Link
+              key={topic.id}
+              href={`/topic/${topic.slug}`}
+              className="rounded-full border border-border px-3 py-1 font-mono text-[11px] text-muted transition hover:border-primary hover:text-primary"
+            >
+              {topic.name}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       {article.isLocked && (
         <div className="mt-8 flex flex-col items-center gap-3 rounded-xl border border-border-2 bg-surface px-6 py-10 text-center">

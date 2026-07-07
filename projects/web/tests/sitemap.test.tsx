@@ -29,6 +29,7 @@ describe('sitemap', () => {
           featuredImage: null,
           category: { id: 'c1', name: 'Business', slug: 'business' },
           author: { id: 'u1', displayName: 'Jane', avatarUrl: null },
+          topics: [],
         },
       ],
     });

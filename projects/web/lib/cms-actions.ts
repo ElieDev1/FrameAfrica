@@ -36,13 +36,25 @@ async function errorMessage(res: Response, fallback: string): Promise<string> {
   }
 }
 
+/** Parse the block-editor's serialised JSON into an array (empty on any error). */
+function parseBlocks(formData: FormData): unknown[] {
+  try {
+    const value: unknown = JSON.parse(String(formData.get('blocks') ?? '[]'));
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
+
 function draftPayload(formData: FormData) {
   return {
     title: String(formData.get('title') ?? '').trim(),
     categoryId: String(formData.get('categoryId') ?? ''),
     subtitle: String(formData.get('subtitle') ?? '').trim() || undefined,
     excerpt: String(formData.get('excerpt') ?? '').trim() || undefined,
-    body: String(formData.get('body') ?? ''),
+    // The structured document authored in the block editor; the API derives the
+    // plain body from it and sanitises every block on write.
+    blocks: parseBlocks(formData),
     language: String(formData.get('language') || 'en'),
     isPremium: formData.get('isPremium') === 'on',
     featuredImageUrl: String(formData.get('featuredImageUrl') ?? '').trim() || undefined,

@@ -15,6 +15,8 @@ const category: CategoryDetail = {
   name: 'Business',
   slug: 'business',
   description: 'Money, markets, and enterprise across Rwanda.',
+  parent: null,
+  children: [{ id: 'c2', name: 'Economy', slug: 'economy' }],
 };
 
 function article(id: string, title: string): ArticleSummary {
@@ -32,6 +34,7 @@ function article(id: string, title: string): ArticleSummary {
     featuredImage: null,
     category: { id: 'c1', name: 'Business', slug: 'business' },
     author: { id: 'u1', displayName: 'Jane', avatarUrl: null },
+    topics: [],
   };
 }
 
@@ -50,6 +53,11 @@ describe('SectionPage', () => {
     expect(screen.getByText(/Money, markets/)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Coffee exports climb' })).toBeInTheDocument();
     expect(mockFetchArticles).toHaveBeenCalledWith({ category: 'business', limit: 24 });
+    // Sub-section chip links through to the child section.
+    expect(screen.getByRole('link', { name: 'Economy' })).toHaveAttribute(
+      'href',
+      '/section/economy',
+    );
   });
 
   it('calls notFound() for an unknown section', async () => {
