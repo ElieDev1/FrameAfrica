@@ -1,9 +1,17 @@
 import { ArticleCard } from '@/components/ArticleCard';
+import { BreakingTicker } from '@/components/BreakingTicker';
 import { HeadlineItem, MostRead } from '@/components/HeadlineList';
 import { NewsletterBox } from '@/components/NewsletterBox';
-import { fetchArticles, type ArticleSummary } from '@/lib/api';
+import { SectionBlock } from '@/components/SectionBlock';
+import { fetchArticles, fetchCategories, type ArticleSummary } from '@/lib/api';
 
 export const revalidate = 60;
+
+interface SectionData {
+  name: string;
+  slug: string;
+  articles: ArticleSummary[];
+}
 
 export default async function Home() {
   let latest: ArticleSummary[] = [];
@@ -39,48 +47,82 @@ export default async function Home() {
   const [lead, ...rest] = latest;
   const secondary = rest.slice(0, 4);
   const river = rest.slice(4);
+  const breaking = latest.filter((article) => article.isBreaking);
+
+  let sections: SectionData[] = [];
+  try {
+    const categories = (await fetchCategories()).slice(0, 3);
+    sections = await Promise.all(
+      categories.map(async (category) => ({
+        name: category.name,
+        slug: category.slug,
+        articles: (await fetchArticles({ category: category.slug, limit: 3 })).articles,
+      })),
+    );
+  } catch {
+    sections = [];
+  }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <h1 className="sr-only">Frame Africa — latest news</h1>
+    <>
+      <BreakingTicker articles={breaking} />
+      <div className="mx-auto max-w-6xl px-6 py-8">
+        <h1 className="sr-only">Frame Africa — latest news</h1>
 
-      <section
-        aria-label="Top stories"
-        className="grid gap-8 border-b border-border pb-10 lg:grid-cols-3"
-      >
-        <div className="lg:col-span-2">
-          <ArticleCard article={lead} featured />
-        </div>
-        {secondary.length > 0 && (
-          <div className="divide-y divide-border lg:border-l lg:border-border lg:pl-8">
-            {secondary.map((article) => (
-              <HeadlineItem key={article.id} article={article} />
-            ))}
+        <section
+          aria-label="Top stories"
+          className="grid gap-8 border-b border-border pb-10 lg:grid-cols-3"
+        >
+          <div className="lg:col-span-2">
+            <ArticleCard article={lead} featured />
           </div>
-        )}
-      </section>
-
-      <div className="mt-10 grid gap-10 lg:grid-cols-3">
-        <section aria-labelledby="latest" className="lg:col-span-2">
-          <h2 id="latest" className="mb-6 font-mono text-xs uppercase tracking-[0.18em] text-muted">
-            Latest
-          </h2>
-          {river.length > 0 ? (
-            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2">
-              {river.map((article) => (
-                <ArticleCard key={article.id} article={article} />
+          {secondary.length > 0 && (
+            <div className="divide-y divide-border lg:border-l lg:border-border lg:pl-8">
+              {secondary.map((article) => (
+                <HeadlineItem key={article.id} article={article} />
               ))}
             </div>
-          ) : (
-            <p className="font-body text-muted">More stories coming soon.</p>
           )}
         </section>
 
-        <aside className="flex flex-col gap-8">
-          <MostRead articles={popular} />
-          <NewsletterBox />
-        </aside>
+        <div className="mt-10 grid gap-10 lg:grid-cols-3">
+          <section aria-labelledby="latest" className="lg:col-span-2">
+            <h2
+              id="latest"
+              className="mb-6 font-mono text-xs uppercase tracking-[0.18em] text-muted"
+            >
+              Latest
+            </h2>
+            {river.length > 0 ? (
+              <div className="grid grid-cols-1 gap-10 sm:grid-cols-2">
+                {river.map((article) => (
+                  <ArticleCard key={article.id} article={article} />
+                ))}
+              </div>
+            ) : (
+              <p className="font-body text-muted">More stories coming soon.</p>
+            )}
+          </section>
+
+          <aside className="flex flex-col gap-8">
+            <MostRead articles={popular} />
+            <NewsletterBox />
+          </aside>
+        </div>
+
+        {sections.length > 0 && (
+          <div className="mt-12 flex flex-col gap-12">
+            {sections.map((section) => (
+              <SectionBlock
+                key={section.slug}
+                name={section.name}
+                slug={section.slug}
+                articles={section.articles}
+              />
+            ))}
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 }

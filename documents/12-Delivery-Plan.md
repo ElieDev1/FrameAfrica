@@ -57,7 +57,8 @@ until merged and note their PR.
 - [x] Homepage (featured hero + Latest river) and article page `/article/[slug]` as Server Components
 - [x] Typed web API client, idempotent dev seed, initial Prisma migration
 - [x] Dark-mode design tokens (from scaffold)
-- [x] Homepage upgraded to a magazine layout: hero + secondary headlines + **Most-read** sidebar (`sort=popular`) + newsletter teaser — _still to add: breaking ticker, per-section blocks, video strip_
+- [x] Homepage upgraded to a magazine layout: hero + secondary headlines + **Most-read** sidebar (`sort=popular`) + newsletter teaser
+- [x] Homepage blocks: **breaking-news ticker** + **per-section blocks** — _video/podcast strip still to add_
 - [x] Article page depth: **Related stories** (`GET /v1/articles/:slug/related`) + a share bar — _comments, author bio, reading-progress still to come_
 
 ### Slice 2 — Sections & navigation 🚧

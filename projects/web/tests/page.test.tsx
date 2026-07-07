@@ -1,12 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import Home from '../app/page';
-import { fetchArticles, type ArticleSummary } from '@/lib/api';
+import { fetchArticles, fetchCategories, type ArticleSummary } from '@/lib/api';
 
 jest.mock('@/lib/api', () => ({
   fetchArticles: jest.fn(),
+  fetchCategories: jest.fn(),
 }));
 
 const mockFetchArticles = fetchArticles as jest.MockedFunction<typeof fetchArticles>;
+const mockFetchCategories = fetchCategories as jest.MockedFunction<typeof fetchCategories>;
+
+beforeEach(() => mockFetchCategories.mockResolvedValue([]));
 
 function sampleArticle(id: string, title: string): ArticleSummary {
   return {

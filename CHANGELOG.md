@@ -40,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CMS newsroom UI (MVP):** staff-gated `/cms` (draft list with status badges), `/cms/new`, and `/cms/[id]` editor — create, edit, and submit-for-review a draft in the browser, backed by the BFF-authenticated CMS client. Reached via the header **Write** link.
 - **Search (MVP):** a `/search` page (results / empty / no-results) plus a header search box, running an interim keyword search over the API's `?q=` filter. OpenSearch-backed relevance and typo tolerance remain a follow-up.
 - **Article depth:** `GET /v1/articles/:slug/related` (up to 4 same-category stories) drives a **Related stories** block on the article page, plus a client **share bar** (X / Facebook / WhatsApp / copy-link).
+- **Editor workflow (MVP):** editor-gated `GET /v1/cms/review` + `POST /cms/articles/:id/publish|reject` and a `/cms/review` UI — submitted (`ready`) drafts can be **published** (→ live) or **rejected**. Seeds an editor account.
+- **Homepage blocks:** a full-width **breaking-news ticker** and **per-section blocks** (top sections, a few cards each).
 
 ### Changed
 - `06-UIUX-Content-Layout.md`: locked in concrete font families (Archivo, Source Serif 4, IBM Plex Mono) matching the design prototype; added a link to the prototype.
