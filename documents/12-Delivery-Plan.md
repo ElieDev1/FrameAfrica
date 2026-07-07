@@ -64,10 +64,10 @@ until merged and note their PR.
 - [x] Top-bar section nav + breadcrumbs (card/article kickers link to sections)
 - [ ] Tags and tag pages — _deferred (needs a `tag` schema)_
 
-### Slice 3 — Search
-- [ ] OpenSearch index + reindex on publish (`FR-READ-2`, `02` §5)
-- [ ] `GET /v1/search` with typo tolerance, filters, autocomplete
-- [ ] Search results UI + empty/"no results" state
+### Slice 3 — Search 🚧
+- [x] Search results UI + empty/"no results" state + header search box (`FR-READ-2`) — _interim keyword search over the API's Postgres `?q=` filter_
+- [ ] OpenSearch index + reindex on publish, for relevance + typo tolerance (`02` §5)
+- [ ] Dedicated `GET /v1/search` with filters + autocomplete
 
 ### Slice 4 — Auth & reader accounts  `FR-AUTH-*` 🚧
 - [x] Login; JWT access + HTTP-only refresh cookie with rotation & reuse detection (`FR-AUTH-2`, `-7`; `05` §3)

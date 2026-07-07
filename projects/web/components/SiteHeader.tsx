@@ -36,6 +36,15 @@ export async function SiteHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-4">
+          <form action="/search" className="hidden sm:block">
+            <input
+              name="q"
+              type="search"
+              placeholder="Search…"
+              aria-label="Search articles"
+              className="w-36 rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-body text-sm text-text outline-none transition-[width] focus:w-52 focus:border-primary"
+            />
+          </form>
           {user ? (
             <>
               {isStaff && (
