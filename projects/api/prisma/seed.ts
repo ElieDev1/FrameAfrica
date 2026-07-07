@@ -1,21 +1,88 @@
 // Frame Africa — development seed data.
 // Idempotent: re-running upserts the same rows. Run with `pnpm db:seed`.
 
-import { ArticleLanguage, ArticleStatus, PrismaClient, RoleName } from '@prisma/client';
+import { ArticleLanguage, ArticleStatus, Prisma, PrismaClient, RoleName } from '@prisma/client';
 import * as argon2 from 'argon2';
+import type { Block } from '../src/content/blocks/block.types';
+import { plainTextFromBlocks } from '../src/content/blocks/block.transform';
 
 const prisma = new PrismaClient();
 
 // Dev-only credentials for the seeded journalist (never used outside local dev).
 const JOURNALIST_PASSWORD = 'DevPass123!';
 
-const body = (lede: string): string =>
-  [
-    lede,
-    'KIGALI — The developments were confirmed by officials on Tuesday, capping weeks of anticipation across the sector and drawing reaction from partners around the region.',
-    'Analysts said the move signals continued momentum, though they cautioned that follow-through over the coming months will determine its lasting impact.',
-    'More reporting to follow as the story develops.',
-  ].join('\n\n');
+/**
+ * A bespoke, fully structured document for the flagship story, so the seed
+ * shows off every block type (subheads, inline photo, pull-quote, list,
+ * fact-box). Other articles get a solid generic block document below.
+ */
+const flagshipBlocks: Record<string, Block[]> = {
+  'rwanda-coffee-exports-hit-record-high': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'Rwanda’s coffee earnings reached a record this season as specialty buyers in Europe and Asia paid a growing premium for the country’s fully washed lots.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — Export receipts rose by double digits year on year, officials confirmed on Tuesday, driven by premium micro-lots from the hills of the Western Province and steady demand from roasters chasing traceable, high-scoring coffee.',
+    },
+    { type: 'heading', level: 2, text: 'A record season' },
+    {
+      type: 'paragraph',
+      text: 'Cooperatives reported stronger cherry prices at the washing station gate, a shift that growers said finally reflects the quality reputation Rwandan coffee has built at international cupping tables over the past decade.',
+    },
+    {
+      type: 'image',
+      url: '/seed/rwanda-coffee-exports-hit-record-high.jpg',
+      alt: 'Coffee cherries drying on raised beds in the Western Province',
+      caption: 'Fully washed cherries dry on raised beds before export grading.',
+      credit: 'Frame Africa',
+    },
+    {
+      type: 'pullquote',
+      text: 'For the first time, the price at the gate matches the reputation in the cup.',
+      attribution: 'Western Province cooperative manager',
+    },
+    { type: 'heading', level: 2, text: 'What it means for growers' },
+    {
+      type: 'list',
+      style: 'bullet',
+      items: [
+        'Higher farm-gate prices for fully washed cherry',
+        'Longer supply contracts with specialty roasters',
+        'Renewed investment in washing-station capacity',
+      ],
+    },
+    {
+      type: 'factbox',
+      title: 'Rwanda’s coffee at a glance',
+      body: 'Coffee is one of Rwanda’s leading agricultural exports, grown largely by smallholders and processed at washing stations that grade cherries for the specialty market. Fully washed lots command the highest premiums.',
+    },
+    {
+      type: 'paragraph',
+      text: 'Analysts cautioned that weather and global price swings will test the gains, but said the season marks a durable step up the value chain. More reporting to follow as the story develops.',
+    },
+  ],
+};
+
+/** A solid generic block document derived from an article's own summary fields. */
+function genericBlocks(a: { title: string; subtitle: string; excerpt: string }): Block[] {
+  return [
+    { type: 'paragraph', lede: true, text: a.excerpt },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — The developments were confirmed by officials on Tuesday, capping weeks of anticipation across the sector and drawing reaction from partners around the region.',
+    },
+    { type: 'heading', level: 2, text: 'Why it matters' },
+    {
+      type: 'paragraph',
+      text: 'Analysts said the move signals continued momentum, though they cautioned that follow-through over the coming months will determine its lasting impact.',
+    },
+    { type: 'factbox', title: 'The context', body: a.subtitle },
+    { type: 'paragraph', text: 'More reporting to follow as the story develops.' },
+  ];
+}
 
 async function main(): Promise<void> {
   const journalist = await prisma.role.upsert({
@@ -180,12 +247,16 @@ async function main(): Promise<void> {
   const now = Date.now();
   for (const a of articles) {
     const publishedAt = new Date(now - a.daysAgo * 24 * 60 * 60 * 1000);
+    const blocks = flagshipBlocks[a.slug] ?? genericBlocks(a);
     const data = {
       slug: a.slug,
       title: a.title,
       subtitle: a.subtitle,
       excerpt: a.excerpt,
-      body: body(a.excerpt),
+      // The structured document is the source of truth; the plain body (search /
+      // excerpt / preview) is derived from it, mirroring the CMS write path.
+      blocks: blocks as unknown as Prisma.InputJsonValue,
+      body: plainTextFromBlocks(blocks),
       authorId: author.id,
       categoryId: bySlug[a.category].id,
       status: ArticleStatus.published,

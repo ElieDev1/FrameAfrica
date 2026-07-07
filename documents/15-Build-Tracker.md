@@ -56,15 +56,15 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 
 ### WS1 — Structured article (block content model) 🔑 `[~]`
 *The article becomes a real multi-part document, not a plain textarea.*
-- [~] Schema: `Article.blocks` (structured JSON document) + migration
-- [ ] Shared **block schema** + types: `paragraph, heading, image, gallery, pullquote, blockquote, list, factbox, embed, video, divider`
-- [ ] **Validator + sanitiser** on write (strip scripts/unsafe HTML/attrs; allow-list; `05` §6) + unit tests
-- [ ] API serves `blocks` in article detail (legacy `body` → blocks fallback so old content still renders)
-- [ ] Web **BlockRenderer** + per-block components, brand-styled (captions, credits, pull-quotes, fact-boxes)
+- [x] Schema: `Article.blocks` (structured JSON document) + migration
+- [x] Shared **block schema** + types: `paragraph, heading, image, gallery, pullquote, blockquote, list, factbox, embed, divider`
+- [x] **Validator + sanitiser** on write (strip HTML/control chars, allow-list URLs, YouTube→nocookie, size caps; `05` §6) + unit tests
+- [x] API serves `blocks` in article detail (legacy `body` → blocks fallback so old content still renders)
+- [x] Web **BlockRenderer** + per-block components, brand-styled (captions, credits, pull-quotes, fact-boxes, safe embeds)
+- [x] Seed articles converted to real block documents (subheads, inline image, pull-quote, list, fact-box)
 - [ ] CMS **block editor** — add / reorder / edit / delete blocks; live preview
-- [ ] Reading aids: subhead anchors, reading-progress, sticky mobile share, "Updated" timestamp
-- [ ] Seed articles converted to real block documents (subheads, inline images, quotes, fact-boxes)
-- **DoD:** a published story renders as a designed document and staff author it block-by-block.
+- [ ] Reading aids: subhead anchors (done in renderer), reading-progress, sticky mobile share, "Updated" timestamp
+- **DoD:** a published story renders as a designed document and staff author it block-by-block. _(Read path done + verified e2e; authoring editor is the remaining piece.)_
 
 ### WS2 — Real taxonomy (sections · sub-sections · topics) `[ ]`
 - [ ] Nested section/sub-section model (already nestable) + **topic/tag** model + article↔topic link
