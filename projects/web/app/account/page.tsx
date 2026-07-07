@@ -28,7 +28,7 @@ export default async function AccountPage() {
 
       {isStaff && (
         <Link
-          href="/cms"
+          href="/dashboard"
           className="mt-8 inline-block font-mono text-sm text-primary hover:underline"
         >
           Go to the newsroom →

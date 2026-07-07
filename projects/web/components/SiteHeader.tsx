@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import { fetchCategories, type CategoryNode } from '@/lib/api';
 import { getSession } from '@/lib/session';
@@ -8,8 +9,11 @@ const MAX_SECTIONS = 6;
 const STAFF_ROLES = ['journalist', 'editor', 'admin'];
 const EDITOR_ROLES = ['editor', 'admin'];
 
-/** Top bar: brand + section nav + auth-aware actions. */
+/** Top bar: brand + section nav + auth-aware actions. Hidden on the dashboard. */
 export async function SiteHeader() {
+  const pathname = (await headers()).get('x-pathname') ?? '';
+  if (pathname.startsWith('/dashboard')) return null;
+
   let sections: CategoryNode[] = [];
   try {
     sections = (await fetchCategories()).slice(0, MAX_SECTIONS);
@@ -53,7 +57,7 @@ export async function SiteHeader() {
             <>
               {isStaff && (
                 <Link
-                  href="/cms"
+                  href="/dashboard"
                   className="hidden font-mono text-[11px] uppercase tracking-[0.14em] text-muted hover:text-primary sm:inline"
                 >
                   Write
@@ -61,7 +65,7 @@ export async function SiteHeader() {
               )}
               {isEditor && (
                 <Link
-                  href="/cms/review"
+                  href="/dashboard/review"
                   className="hidden font-mono text-[11px] uppercase tracking-[0.14em] text-muted hover:text-primary sm:inline"
                 >
                   Review

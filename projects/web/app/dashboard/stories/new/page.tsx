@@ -12,7 +12,7 @@ export default async function NewDraftPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
-      <Link href="/cms" className="font-mono text-xs text-primary hover:underline">
+      <Link href="/dashboard/stories" className="font-mono text-xs text-primary hover:underline">
         ← Newsroom
       </Link>
       <h1 className="mt-3 font-heading text-2xl font-black tracking-tight text-text">New draft</h1>

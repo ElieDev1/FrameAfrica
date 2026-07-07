@@ -15,7 +15,7 @@ export default async function ReviewPage() {
     <div className="mx-auto max-w-4xl px-6 py-10">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-3xl font-black tracking-tight text-text">Review queue</h1>
-        <Link href="/cms" className="font-mono text-xs text-primary hover:underline">
+        <Link href="/dashboard/stories" className="font-mono text-xs text-primary hover:underline">
           ← Newsroom
         </Link>
       </div>
@@ -29,7 +29,7 @@ export default async function ReviewPage() {
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <Link
-                    href={`/cms/${item.id}`}
+                    href={`/dashboard/stories/${item.id}`}
                     className="block truncate font-heading font-bold text-text hover:text-primary"
                   >
                     {item.title}

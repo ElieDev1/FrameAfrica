@@ -69,7 +69,7 @@ export async function createDraftAction(
   if (!res.ok) return { error: await errorMessage(res, 'Could not create the draft.') };
 
   const json = (await res.json()) as { data: { id: string } };
-  redirect(`/cms/${json.data.id}`);
+  redirect(`/dashboard/stories/${json.data.id}`);
 }
 
 export async function updateDraftAction(
@@ -92,8 +92,8 @@ export async function updateDraftAction(
   if (res.status === 401) redirect('/login');
   if (!res.ok) return { error: await errorMessage(res, 'Could not save the draft.') };
 
-  revalidatePath(`/cms/${id}`);
-  revalidatePath('/cms');
+  revalidatePath(`/dashboard/stories/${id}`);
+  revalidatePath('/dashboard/stories');
   return { savedAt: new Date().toISOString() };
 }
 
@@ -101,22 +101,22 @@ export async function submitDraftAction(id: string): Promise<void> {
   const res = await authedFetch(`/cms/articles/${id}/submit`, 'POST');
   if (res.status === 401) redirect('/login');
   if (!res.ok) throw new Error('Could not submit the draft for review.');
-  redirect('/cms');
+  redirect('/dashboard/stories');
 }
 
 export async function publishAction(id: string): Promise<void> {
   const res = await authedFetch(`/cms/articles/${id}/publish`, 'POST');
   if (res.status === 401) redirect('/login');
   if (!res.ok) throw new Error('Could not publish the article.');
-  revalidatePath('/cms/review');
+  revalidatePath('/dashboard/review');
   revalidatePath('/');
-  redirect('/cms/review');
+  redirect('/dashboard/review');
 }
 
 export async function rejectAction(id: string): Promise<void> {
   const res = await authedFetch(`/cms/articles/${id}/reject`, 'POST');
   if (res.status === 401) redirect('/login');
   if (!res.ok) throw new Error('Could not reject the article.');
-  revalidatePath('/cms/review');
-  redirect('/cms/review');
+  revalidatePath('/dashboard/review');
+  redirect('/dashboard/review');
 }
