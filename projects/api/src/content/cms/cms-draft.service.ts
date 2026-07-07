@@ -7,6 +7,7 @@ import {
 import { ArticleStatus, Prisma } from '@prisma/client';
 import { slugify } from '../../common/slug';
 import { PrismaService } from '../../prisma/prisma.service';
+import { plainTextFromBlocks, readTimeFromBlocks, sanitizeBlocks, type Block } from '../blocks';
 import type { DraftDetail, DraftListItem } from './cms.types';
 import type { CreateDraftDto } from './dto/create-draft.dto';
 import type { UpdateDraftDto } from './dto/update-draft.dto';
@@ -36,21 +37,26 @@ export class CmsDraftService {
   async createDraft(authorId: string, dto: CreateDraftDto): Promise<DraftDetail> {
     await this.assertCategoryExists(dto.categoryId);
 
-    const body = dto.body ?? '';
+    // A block document (when supplied) is the source of truth; the plain-text
+    // `body` is derived from it for excerpt/search/read-time. Otherwise fall
+    // back to the legacy plain `body`.
+    const content = resolveContent(dto.blocks, dto.body);
+
     const article = await this.prisma.article.create({
       data: {
         slug: await this.uniqueSlug(slugify(dto.title)),
         title: dto.title,
         subtitle: dto.subtitle ?? null,
         excerpt: dto.excerpt ?? null,
-        body,
+        body: content.body,
+        blocks: content.blocks ?? Prisma.DbNull,
         language: dto.language ?? 'en',
         isPremium: dto.isPremium ?? false,
         featuredImageUrl: dto.featuredImageUrl || null,
         featuredImageAlt: dto.featuredImageAlt || null,
         featuredImageCredit: dto.featuredImageCredit || null,
         status: ArticleStatus.draft,
-        readTimeMin: readTime(body),
+        readTimeMin: content.readTimeMin,
         author: { connect: { id: authorId } },
         category: { connect: { id: dto.categoryId } },
         revisions: {
@@ -58,7 +64,7 @@ export class CmsDraftService {
             {
               editor: { connect: { id: authorId } },
               title: dto.title,
-              body,
+              body: content.body,
               changeNote: 'Created',
             },
           ],
@@ -108,7 +114,14 @@ export class CmsDraftService {
     if (dto.featuredImageAlt !== undefined) data.featuredImageAlt = dto.featuredImageAlt || null;
     if (dto.featuredImageCredit !== undefined)
       data.featuredImageCredit = dto.featuredImageCredit || null;
-    if (dto.body !== undefined) {
+    // Blocks win when present (structured document); a derived plain body keeps
+    // excerpt/search/read-time in sync. A legacy plain `body` is still accepted.
+    if (dto.blocks !== undefined) {
+      const content = resolveContent(dto.blocks, undefined);
+      data.blocks = content.blocks ?? Prisma.DbNull;
+      data.body = content.body;
+      data.readTimeMin = content.readTimeMin;
+    } else if (dto.body !== undefined) {
       data.body = dto.body;
       data.readTimeMin = readTime(dto.body);
     }
@@ -122,7 +135,8 @@ export class CmsDraftService {
         {
           editor: { connect: { id: authorId } },
           title: dto.title ?? existing.title,
-          body: dto.body ?? existing.body,
+          // Snapshot the resolved body (derived from blocks when supplied).
+          body: (data.body as string | undefined) ?? existing.body,
           changeNote: dto.changeNote ?? null,
         },
       ],
@@ -190,6 +204,34 @@ function readTime(body: string): number {
   return Math.max(1, Math.ceil(words / 200));
 }
 
+/**
+ * Resolve the pair we persist for an article body. When a block document is
+ * supplied it is sanitised and becomes the source of truth, with the plain
+ * `body` (excerpt/search/read-time) derived from it. Otherwise the legacy plain
+ * `body` is used and no blocks are stored.
+ */
+function resolveContent(
+  rawBlocks: unknown[] | undefined,
+  rawBody: string | undefined,
+): { blocks: Prisma.InputJsonValue | null; body: string; readTimeMin: number } {
+  if (rawBlocks !== undefined) {
+    const blocks = sanitizeBlocks(rawBlocks);
+    const body = plainTextFromBlocks(blocks);
+    return {
+      blocks: blocks as unknown as Prisma.InputJsonValue,
+      body,
+      readTimeMin: readTimeFromBlocks(blocks),
+    };
+  }
+  const body = rawBody ?? '';
+  return { blocks: null, body, readTimeMin: readTime(body) };
+}
+
+/** Read the stored (already-sanitised) block document off an article row. */
+function readBlocks(value: Prisma.JsonValue | null): Block[] | null {
+  return Array.isArray(value) ? (value as unknown as Block[]) : null;
+}
+
 function toDraftListItem(article: DraftRow): DraftListItem {
   return {
     id: article.id,
@@ -209,6 +251,7 @@ function toDraftDetail(article: DraftRow): DraftDetail {
     subtitle: article.subtitle,
     excerpt: article.excerpt,
     body: article.body,
+    blocks: readBlocks(article.blocks),
     featuredImageUrl: article.featuredImageUrl,
     featuredImageAlt: article.featuredImageAlt,
     featuredImageCredit: article.featuredImageCredit,

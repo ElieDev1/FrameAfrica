@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsBoolean,
   IsEnum,
   IsOptional,
@@ -31,6 +32,15 @@ export class CreateDraftDto {
   @IsOptional()
   @IsString()
   body?: string;
+
+  /**
+   * The structured article document (block.types.ts). Shape is validated and
+   * sanitised in the service via `sanitizeBlocks`; here we only assert it's an
+   * array so obviously-wrong payloads are rejected early.
+   */
+  @IsOptional()
+  @IsArray()
+  blocks?: unknown[];
 
   @IsOptional()
   @IsEnum(ArticleLanguage)

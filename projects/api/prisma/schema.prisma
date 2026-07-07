@@ -171,7 +171,13 @@ model Article {
   slug         String        @unique
   title        String
   subtitle     String?
+  // Legacy plain-text body, kept for excerpt/search/read-time and as a fallback
+  // renderer for pre-block articles. The structured document lives in `blocks`.
   body         String
+  // The structured article document: an ordered list of typed blocks
+  // (documents/13 §2). Validated + sanitised on write (block.sanitizer.ts).
+  // Nullable while older rows carry only `body`.
+  blocks       Json?
   excerpt      String?
   authorId     String        @map("author_id") @db.Uuid
   categoryId   String        @map("category_id") @db.Uuid

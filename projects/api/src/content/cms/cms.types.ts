@@ -1,4 +1,5 @@
 import type { ArticleLanguage, ArticleStatus } from '@prisma/client';
+import type { Block } from '../blocks';
 
 interface CategoryRef {
   id: string;
@@ -23,6 +24,8 @@ export interface DraftDetail extends DraftListItem {
   subtitle: string | null;
   excerpt: string | null;
   body: string;
+  /** The structured block document, or null for legacy plain-body drafts. */
+  blocks: Block[] | null;
   featuredImageUrl: string | null;
   featuredImageAlt: string | null;
   featuredImageCredit: string | null;

@@ -85,6 +85,43 @@ describe('CmsDraftService', () => {
         service.createDraft('u1', { title: 'X title', categoryId: 'bad' }),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
+
+    it('sanitises a block document and derives the plain body from it', async () => {
+      const { service, prisma } = build();
+      prisma.category.findUnique.mockResolvedValue({ id: 'c1' });
+      prisma.article.findUnique.mockResolvedValue(null);
+      prisma.article.create.mockResolvedValue(row());
+
+      await service.createDraft('u1', {
+        title: 'My Draft',
+        categoryId: 'c1',
+        blocks: [
+          { type: 'heading', level: 2, text: 'Section' },
+          { type: 'paragraph', text: 'Body <b>with</b> markup' },
+        ],
+      });
+
+      const calls = prisma.article.create.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { data: Record<string, unknown> };
+      const blocks = arg.data.blocks as Array<{ type: string; text: string }>;
+      expect(blocks).toHaveLength(2);
+      expect(blocks[1].text).toBe('Body with markup'); // tags stripped
+      expect(arg.data.body).toBe('Section\n\nBody with markup'); // derived plain body
+    });
+
+    it('rejects a block document with an unsafe URL', async () => {
+      const { service, prisma } = build();
+      prisma.category.findUnique.mockResolvedValue({ id: 'c1' });
+      prisma.article.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.createDraft('u1', {
+          title: 'My Draft',
+          categoryId: 'c1',
+          blocks: [{ type: 'image', url: 'javascript:alert(1)', alt: 'x' }],
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
   });
 
   describe('getMyDraft', () => {

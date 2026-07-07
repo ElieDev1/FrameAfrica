@@ -1,4 +1,5 @@
 import type { ArticleLanguage } from '@prisma/client';
+import type { Block } from './blocks';
 
 /**
  * Public-facing response shapes for the content module. These are the only
@@ -42,8 +43,17 @@ export interface ArticleSummary {
 }
 
 export interface ArticleDetail extends ArticleSummary {
-  /** Full body when readable for free; a one-paragraph teaser when `isLocked`. */
+  /**
+   * Legacy plain body, kept for backward compatibility. Prefer `blocks` for
+   * rendering. A one-paragraph teaser when `isLocked`.
+   */
   body: string;
+  /**
+   * The structured article document. Pre-block articles are converted from
+   * `body` on the fly, so this is always populated. Trimmed to a preview when
+   * `isLocked`.
+   */
+  blocks: Block[];
   seo: unknown;
   viewCount: number;
   likeCount: number;
