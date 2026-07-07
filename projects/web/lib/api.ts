@@ -95,6 +95,8 @@ export interface CategoryDetail {
   name: string;
   slug: string;
   description: string | null;
+  parent: { name: string; slug: string } | null;
+  children: { id: string; name: string; slug: string }[];
 }
 
 export interface Pagination {

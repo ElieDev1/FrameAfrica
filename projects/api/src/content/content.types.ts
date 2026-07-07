@@ -77,4 +77,8 @@ export interface CategoryDetail {
   name: string;
   slug: string;
   description: string | null;
+  /** Parent section, for breadcrumbs (null for a top-level section). */
+  parent: { name: string; slug: string } | null;
+  /** Active sub-sections, for navigation chips. */
+  children: { id: string; name: string; slug: string }[];
 }

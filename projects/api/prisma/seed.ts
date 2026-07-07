@@ -133,34 +133,48 @@ async function main(): Promise<void> {
     create: { userId: editor.id, roleId: editorRole.id },
   });
 
-  // Top-level sections, then one nested child (Business › Economy).
-  const sections: { slug: string; name: string; sortOrder: number }[] = [
+  // A realistic nested taxonomy (documents/14 §5): top-level sections, each with
+  // sub-sections. Section pages aggregate their sub-sections' articles.
+  const topSections: { slug: string; name: string; sortOrder: number }[] = [
     { slug: 'rwanda', name: 'Rwanda', sortOrder: 1 },
     { slug: 'africa', name: 'Africa', sortOrder: 2 },
     { slug: 'business', name: 'Business', sortOrder: 3 },
     { slug: 'technology', name: 'Technology', sortOrder: 4 },
-    { slug: 'sports', name: 'Sports', sortOrder: 5 },
+    { slug: 'sports', name: 'Sport', sortOrder: 5 },
+  ];
+
+  const subSections: { slug: string; name: string; parent: string; sortOrder: number }[] = [
+    { slug: 'kigali', name: 'Kigali', parent: 'rwanda', sortOrder: 1 },
+    { slug: 'politics', name: 'Politics', parent: 'rwanda', sortOrder: 2 },
+    { slug: 'east-africa', name: 'East Africa', parent: 'africa', sortOrder: 1 },
+    { slug: 'world', name: 'World', parent: 'africa', sortOrder: 2 },
+    { slug: 'economy', name: 'Economy', parent: 'business', sortOrder: 1 },
+    { slug: 'markets', name: 'Markets', parent: 'business', sortOrder: 2 },
+    { slug: 'companies', name: 'Companies', parent: 'business', sortOrder: 3 },
+    { slug: 'ai', name: 'AI', parent: 'technology', sortOrder: 1 },
+    { slug: 'startups', name: 'Startups', parent: 'technology', sortOrder: 2 },
+    { slug: 'gadgets', name: 'Gadgets', parent: 'technology', sortOrder: 3 },
+    { slug: 'football', name: 'Football', parent: 'sports', sortOrder: 1 },
+    { slug: 'athletics', name: 'Athletics', parent: 'sports', sortOrder: 2 },
+    { slug: 'cycling', name: 'Cycling', parent: 'sports', sortOrder: 3 },
   ];
 
   const bySlug: Record<string, { id: string }> = {};
-  for (const section of sections) {
+  for (const section of topSections) {
     bySlug[section.slug] = await prisma.category.upsert({
       where: { slug: section.slug },
-      update: { name: section.name, sortOrder: section.sortOrder },
+      update: { name: section.name, sortOrder: section.sortOrder, parentId: null },
       create: section,
     });
   }
-
-  bySlug['economy'] = await prisma.category.upsert({
-    where: { slug: 'economy' },
-    update: { name: 'Economy', parentId: bySlug['business'].id, sortOrder: 1 },
-    create: {
-      slug: 'economy',
-      name: 'Economy',
-      parentId: bySlug['business'].id,
-      sortOrder: 1,
-    },
-  });
+  for (const sub of subSections) {
+    const parentId = bySlug[sub.parent].id;
+    bySlug[sub.slug] = await prisma.category.upsert({
+      where: { slug: sub.slug },
+      update: { name: sub.name, parentId, sortOrder: sub.sortOrder },
+      create: { slug: sub.slug, name: sub.name, parentId, sortOrder: sub.sortOrder },
+    });
+  }
 
   const articles: {
     slug: string;
@@ -190,7 +204,7 @@ async function main(): Promise<void> {
       subtitle: 'The campus continues to position the capital as a regional tech hub.',
       excerpt:
         'A dozen early-stage ventures move in this quarter, spanning fintech, health, and agritech.',
-      category: 'technology',
+      category: 'startups',
       readTimeMin: 5,
       daysAgo: 1,
     },
@@ -200,7 +214,7 @@ async function main(): Promise<void> {
       subtitle: 'Faster freight promises lower costs for landlocked economies.',
       excerpt:
         'Officials say the corridor will cut transit times between the coast and Kigali significantly.',
-      category: 'africa',
+      category: 'east-africa',
       readTimeMin: 6,
       daysAgo: 2,
     },
@@ -209,7 +223,7 @@ async function main(): Promise<void> {
       title: 'Amavubi name squad for crucial qualifier',
       subtitle: 'The national side face a decisive fixture at Amahoro Stadium.',
       excerpt: 'The coach recalls two overseas-based players ahead of the weekend clash.',
-      category: 'sports',
+      category: 'football',
       readTimeMin: 3,
       daysAgo: 2,
     },
@@ -228,7 +242,7 @@ async function main(): Promise<void> {
       title: 'Kigali unveils expanded green transport plan',
       subtitle: 'Electric buses and cycle lanes anchor the city’s next mobility phase.',
       excerpt: 'The plan targets cleaner air and shorter commutes across the capital.',
-      category: 'rwanda',
+      category: 'kigali',
       readTimeMin: 4,
       daysAgo: 4,
     },

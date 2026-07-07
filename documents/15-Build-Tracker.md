@@ -66,12 +66,13 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [x] CMS **block editor** — add / reorder / edit / delete every block type; empty-block pruning
 - **DoD met:** a published story renders as a designed document and staff author it block-by-block. Verified end-to-end (CMS create with blocks → sanitised → served → rendered).
 
-### WS2 — Real taxonomy (sections · sub-sections · topics) `[ ]`
-- [ ] Nested section/sub-section model (already nestable) + **topic/tag** model + article↔topic link
-- [ ] Admin taxonomy manager (create/edit/reorder/activate sections & topics)
-- [ ] Seed the real tree from `14 §5` (replace the 6 placeholder categories)
-- [ ] Section + sub-section pages (masthead, lead, river, sub-section chips, load-more, section ad slot)
+### WS2 — Real taxonomy (sections · sub-sections · topics) `[~]`
+- [x] Real nested tree seeded from `14 §5` (5 sections × sub-sections; replaces the 6 placeholders)
+- [x] **Section pages aggregate their sub-sections** (descendant-aware article listing) + **sub-section chips** + parent breadcrumb (verified e2e)
+- [ ] Load-more pagination on section pages + a section ad slot
+- [ ] **Topic/tag** model + article↔topic link
 - [ ] Topic pages with **Follow** + description; tags on articles link through
+- [ ] Admin taxonomy manager (create/edit/reorder/activate sections & topics)
 - **DoD:** the site's navigation reflects a real newsroom taxonomy end-to-end.
 
 ### WS3 — Media library (real uploads) `[ ]`

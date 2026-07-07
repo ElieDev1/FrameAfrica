@@ -107,18 +107,34 @@ describe('ContentService', () => {
       expect(prisma.article.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 2 }));
     });
 
-    it('restricts the query to published, non-deleted articles', async () => {
+    it('restricts to published, non-deleted articles in the section and its sub-sections', async () => {
+      prisma.category.findMany.mockResolvedValue([
+        { id: 'c1', slug: 'business', parentId: null },
+        { id: 'c2', slug: 'economy', parentId: 'c1' },
+        { id: 'c3', slug: 'sports', parentId: null },
+      ]);
       prisma.article.findMany.mockResolvedValue([]);
 
-      await service.listArticles({ category: 'rwanda' });
+      await service.listArticles({ category: 'business' });
 
       const calls = prisma.article.findMany.mock.calls as unknown[][];
       const call = calls[0]?.[0] as { where: Record<string, unknown> };
       expect(call.where).toMatchObject({
         status: 'published',
         deletedAt: null,
-        category: { slug: 'rwanda' },
+        categoryId: { in: ['c1', 'c2'] }, // section + its descendant, not the sibling
       });
+    });
+
+    it('matches no articles for an unknown section slug', async () => {
+      prisma.category.findMany.mockResolvedValue([{ id: 'c1', slug: 'business', parentId: null }]);
+      prisma.article.findMany.mockResolvedValue([]);
+
+      await service.listArticles({ category: 'does-not-exist' });
+
+      const calls = prisma.article.findMany.mock.calls as unknown[][];
+      const call = calls[0]?.[0] as { where: Record<string, unknown> };
+      expect(call.where).toMatchObject({ categoryId: { in: [] } });
     });
 
     it('orders by view count when sort=popular', async () => {
@@ -188,20 +204,27 @@ describe('ContentService', () => {
   });
 
   describe('getCategoryBySlug', () => {
-    it('returns an active category', async () => {
+    it('returns an active category with its parent and sub-sections', async () => {
       prisma.category.findFirst.mockResolvedValue({
         id: 'c1',
-        name: 'Rwanda',
-        slug: 'rwanda',
+        name: 'Business',
+        slug: 'business',
         description: null,
+        parent: null,
+        children: [{ id: 'c2', name: 'Economy', slug: 'economy' }],
       });
 
-      const category = await service.getCategoryBySlug('rwanda');
+      const category = await service.getCategoryBySlug('business');
 
-      expect(category).toMatchObject({ slug: 'rwanda', name: 'Rwanda' });
+      expect(category).toMatchObject({
+        slug: 'business',
+        name: 'Business',
+        parent: null,
+        children: [{ slug: 'economy' }],
+      });
       const calls = prisma.category.findFirst.mock.calls as unknown[][];
       const arg = calls[0]?.[0] as { where: Record<string, unknown> };
-      expect(arg.where).toMatchObject({ slug: 'rwanda', isActive: true });
+      expect(arg.where).toMatchObject({ slug: 'business', isActive: true });
     });
 
     it('throws NotFound for an unknown or inactive category', async () => {
