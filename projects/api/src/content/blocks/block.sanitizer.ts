@@ -122,9 +122,9 @@ function sanitizeImage(raw: unknown, i: number, j?: number) {
   if (!isRecord(raw)) {
     throw badBlock(i, 'image', 'image block is malformed', j);
   }
-  const url = safeHttpUrl(typeof raw.url === 'string' ? raw.url : '');
+  const url = safeImageUrl(typeof raw.url === 'string' ? raw.url : '');
   if (!url) {
-    throw badBlock(i, 'image', 'image needs a valid http(s) "url"', j);
+    throw badBlock(i, 'image', 'image needs a valid http(s) or /root-relative "url"', j);
   }
   // Alt text is required for accessibility (documents/06 §6, WCAG). An empty
   // string is allowed only as an explicit "decorative" signal.
@@ -173,6 +173,19 @@ function optionalText(value: unknown, max: number, i: number, type: string): str
   }
   const clean = stripText(value).slice(0, max);
   return clean || undefined;
+}
+
+/**
+ * Accept an image URL: either an absolute http(s) URL or a same-origin
+ * root-relative path (e.g. `/seed/photo.jpg` or `/media/…` served by our own
+ * app/CDN). Protocol-relative (`//host`) and everything else is rejected.
+ */
+export function safeImageUrl(value: string): string | null {
+  const trimmed = value.trim();
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//') && !/[\s<>\\]/.test(trimmed)) {
+    return trimmed.slice(0, 500);
+  }
+  return safeHttpUrl(trimmed);
 }
 
 /** Accept only absolute http(s) URLs; reject javascript:, data:, etc. */

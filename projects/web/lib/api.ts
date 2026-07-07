@@ -43,9 +43,36 @@ export interface ArticleSummary {
   author: AuthorSummary;
 }
 
+/** A photo inside a gallery block. */
+export interface BlockImage {
+  url: string;
+  alt: string;
+  caption?: string;
+  credit?: string;
+}
+
+/**
+ * A single unit of the structured article document (mirrors the API's block
+ * model, documents/13 §2). Text fields are pre-sanitised server-side and are
+ * additionally output-encoded by React on render.
+ */
+export type Block =
+  | { type: 'paragraph'; text: string; lede?: boolean }
+  | { type: 'heading'; level: 2 | 3; text: string }
+  | { type: 'image'; url: string; alt: string; caption?: string; credit?: string }
+  | { type: 'gallery'; images: BlockImage[] }
+  | { type: 'pullquote'; text: string; attribution?: string }
+  | { type: 'blockquote'; text: string; attribution?: string }
+  | { type: 'list'; style: 'bullet' | 'number'; items: string[] }
+  | { type: 'factbox'; title: string; body: string }
+  | { type: 'embed'; provider: 'youtube'; url: string; embedUrl: string; caption?: string }
+  | { type: 'divider' };
+
 export interface ArticleDetail extends ArticleSummary {
-  /** Full body when readable for free; a one-paragraph teaser when `isLocked`. */
+  /** Legacy plain body, kept for compatibility. Prefer `blocks` for rendering. */
   body: string;
+  /** The structured article document — always populated (converted if legacy). */
+  blocks: Block[];
   seo: unknown;
   viewCount: number;
   likeCount: number;

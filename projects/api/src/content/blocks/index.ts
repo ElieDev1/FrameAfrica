@@ -1,5 +1,11 @@
 export * from './block.types';
-export { sanitizeBlocks, stripText, safeHttpUrl, youtubeEmbedUrl } from './block.sanitizer';
+export {
+  sanitizeBlocks,
+  stripText,
+  safeHttpUrl,
+  safeImageUrl,
+  youtubeEmbedUrl,
+} from './block.sanitizer';
 export {
   plainTextFromBlocks,
   blocksFromPlainBody,
