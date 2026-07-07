@@ -299,6 +299,67 @@ async function main(): Promise<void> {
     });
   }
 
+  // Topics (followable subjects) + article tags (documents/14 §5.2).
+  const topicDefs: { slug: string; name: string; description: string }[] = [
+    {
+      slug: 'specialty-coffee',
+      name: 'Specialty coffee',
+      description: 'Rwanda’s specialty coffee — growers, washing stations, and the export market.',
+    },
+    { slug: 'exports', name: 'Exports', description: 'Rwanda’s export trade and earnings.' },
+    {
+      slug: 'startups',
+      name: 'Startups',
+      description: 'The ventures and founders building from Rwanda.',
+    },
+    {
+      slug: 'kigali-innovation-city',
+      name: 'Kigali Innovation City',
+      description: 'The campus positioning Kigali as a regional tech hub.',
+    },
+    {
+      slug: 'afcfta',
+      name: 'AfCFTA',
+      description: 'The African Continental Free Trade Area and regional integration.',
+    },
+    { slug: 'amavubi', name: 'Amavubi', description: 'Rwanda’s national football team.' },
+    {
+      slug: 'monetary-policy',
+      name: 'Monetary policy',
+      description: 'The central bank, interest rates, and inflation.',
+    },
+    {
+      slug: 'climate',
+      name: 'Climate',
+      description: 'Climate, clean energy, and the environment.',
+    },
+  ];
+  const topicBySlug: Record<string, { id: string }> = {};
+  for (const t of topicDefs) {
+    topicBySlug[t.slug] = await prisma.topic.upsert({
+      where: { slug: t.slug },
+      update: { name: t.name, description: t.description },
+      create: t,
+    });
+  }
+
+  const articleTopics: Record<string, string[]> = {
+    'rwanda-coffee-exports-hit-record-high': ['specialty-coffee', 'exports'],
+    'kigali-innovation-city-adds-startups': ['startups', 'kigali-innovation-city'],
+    'east-african-trade-corridor-upgrade': ['afcfta', 'exports'],
+    'amavubi-name-squad-for-qualifier': ['amavubi'],
+    'central-bank-holds-key-rate': ['monetary-policy'],
+    'kigali-green-transport-plan': ['climate'],
+  };
+  for (const [slug, topicSlugs] of Object.entries(articleTopics)) {
+    const article = await prisma.article.findUnique({ where: { slug }, select: { id: true } });
+    if (!article) continue;
+    await prisma.articleTopic.createMany({
+      data: topicSlugs.map((ts) => ({ articleId: article.id, topicId: topicBySlug[ts].id })),
+      skipDuplicates: true,
+    });
+  }
+
   // A reader plus a short comment thread so the article page isn't empty in dev.
   const readerRole = await prisma.role.upsert({
     where: { name: RoleName.reader },

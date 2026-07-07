@@ -27,6 +27,7 @@ const articleRow = (over: Record<string, unknown> = {}) => ({
   updatedAt: new Date('2026-01-02T00:00:00Z'),
   category: { id: 'c1', name: 'Rwanda', slug: 'rwanda' },
   author: { id: 'u1', displayName: 'Jane Doe', avatarUrl: null },
+  topics: [],
   ...over,
 });
 

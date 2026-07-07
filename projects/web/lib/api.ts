@@ -21,6 +21,12 @@ export interface CategoryRef {
   slug: string;
 }
 
+export interface TopicRef {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export interface FeaturedImage {
   url: string;
   alt: string | null;
@@ -41,6 +47,7 @@ export interface ArticleSummary {
   featuredImage: FeaturedImage | null;
   category: CategoryRef;
   author: AuthorSummary;
+  topics: TopicRef[];
 }
 
 /** A photo inside a gallery block. */
@@ -134,8 +141,16 @@ async function apiGet<T>(path: string, acceptStatuses: number[] = []): Promise<A
   return res.json() as Promise<ApiEnvelope<T>>;
 }
 
+export interface TopicDetail {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+}
+
 export interface ListArticlesParams {
   category?: string;
+  topic?: string;
   language?: ArticleLanguage;
   q?: string;
   sort?: 'latest' | 'popular';
@@ -148,6 +163,7 @@ export async function fetchArticles(
 ): Promise<{ articles: ArticleSummary[]; pagination?: Pagination }> {
   const search = new URLSearchParams();
   if (params.category) search.set('category', params.category);
+  if (params.topic) search.set('topic', params.topic);
   if (params.language) search.set('language', params.language);
   if (params.q) search.set('q', params.q);
   if (params.sort) search.set('sort', params.sort);
@@ -225,6 +241,19 @@ export async function fetchCategories(): Promise<CategoryNode[]> {
 export async function fetchCategory(slug: string): Promise<CategoryDetail | null> {
   try {
     const envelope = await apiGet<CategoryDetail>(`/categories/${encodeURIComponent(slug)}`);
+    return envelope.data;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+/** Returns the topic, or `null` if the API responds 404. */
+export async function fetchTopic(slug: string): Promise<TopicDetail | null> {
+  try {
+    const envelope = await apiGet<TopicDetail>(`/topics/${encodeURIComponent(slug)}`);
     return envelope.data;
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {

@@ -19,6 +19,12 @@ export interface CategoryRef {
   slug: string;
 }
 
+export interface TopicRef {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 /** Featured image + its required alt/credit metadata (documents/06 §6). */
 export interface FeaturedImage {
   url: string;
@@ -40,6 +46,7 @@ export interface ArticleSummary {
   featuredImage: FeaturedImage | null;
   category: CategoryRef;
   author: AuthorSummary;
+  topics: TopicRef[];
 }
 
 export interface ArticleDetail extends ArticleSummary {
@@ -69,6 +76,14 @@ export interface CategoryNode {
   slug: string;
   description: string | null;
   children: CategoryNode[];
+}
+
+/** A single active topic — the masthead of a topic page. */
+export interface TopicDetail {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
 }
 
 /** A single active category — the masthead of a section page. */

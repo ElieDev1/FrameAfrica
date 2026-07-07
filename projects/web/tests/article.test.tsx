@@ -37,6 +37,7 @@ function sampleArticle(): ArticleDetail {
     featuredImage: null,
     category: { id: 'c1', name: 'Business', slug: 'business' },
     author: { id: 'u1', displayName: 'Jane Uwase', avatarUrl: null },
+    topics: [],
     body: 'First paragraph.\n\nSecond paragraph.',
     blocks: [
       { type: 'paragraph', text: 'First paragraph.', lede: true },

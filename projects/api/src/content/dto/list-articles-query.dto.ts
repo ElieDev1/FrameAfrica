@@ -23,10 +23,15 @@ export class ListArticlesQueryDto {
   @IsString()
   cursor?: string;
 
-  /** Filter by category slug. */
+  /** Filter by category slug (aggregates the section's sub-sections). */
   @IsOptional()
   @IsString()
   category?: string;
+
+  /** Filter by topic/tag slug. */
+  @IsOptional()
+  @IsString()
+  topic?: string;
 
   @IsOptional()
   @IsEnum(ArticleLanguage)

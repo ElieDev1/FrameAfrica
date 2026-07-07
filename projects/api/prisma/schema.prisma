@@ -207,11 +207,41 @@ model Article {
   category  Category          @relation(fields: [categoryId], references: [id])
   revisions ArticleRevision[]
   comments  Comment[]
+  topics    ArticleTopic[]
 
   @@index([status, publishedAt])
   @@index([categoryId, publishedAt])
   @@index([authorId])
   @@map("article")
+}
+
+/// A followable subject (person, place, org, event) an article can be tagged
+/// with — orthogonal to the section taxonomy (documents/14 §5.2). Topics have
+/// their own pages and can be followed.
+model Topic {
+  id          String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  slug        String  @unique
+  name        String
+  description String?
+  isActive    Boolean @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  articles ArticleTopic[]
+
+  @@map("topic")
+}
+
+/// Article ↔ Topic tags (many-to-many).
+model ArticleTopic {
+  articleId String @map("article_id") @db.Uuid
+  topicId   String @map("topic_id") @db.Uuid
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  topic   Topic   @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, topicId])
+  @@index([topicId])
+  @@map("article_topic")
 }
 
 /// Reader comments on an article (documents/04 §6). Threaded one level via

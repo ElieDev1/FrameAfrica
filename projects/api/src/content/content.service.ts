@@ -3,7 +3,13 @@ import { ArticleStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListArticlesQueryDto } from './dto/list-articles-query.dto';
 import { blocksFromPlainBody, previewBlocks, type Block } from './blocks';
-import type { ArticleDetail, ArticleSummary, CategoryDetail, CategoryNode } from './content.types';
+import type {
+  ArticleDetail,
+  ArticleSummary,
+  CategoryDetail,
+  CategoryNode,
+  TopicDetail,
+} from './content.types';
 
 const DEFAULT_LIMIT = 20;
 
@@ -15,6 +21,10 @@ const DEFAULT_LIMIT = 20;
 const articleInclude = {
   category: { select: { id: true, name: true, slug: true } },
   author: { select: { id: true, displayName: true, avatarUrl: true } },
+  topics: {
+    include: { topic: { select: { id: true, name: true, slug: true } } },
+    orderBy: { topic: { name: 'asc' } },
+  },
 } satisfies Prisma.ArticleInclude;
 
 type ArticleWithRelations = Prisma.ArticleGetPayload<{
@@ -42,6 +52,7 @@ export class ContentService {
       status: ArticleStatus.published,
       deletedAt: null,
       ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
+      ...(query.topic ? { topics: { some: { topic: { slug: query.topic } } } } : {}),
       ...(query.language ? { language: query.language } : {}),
       ...(query.q
         ? {
@@ -131,6 +142,18 @@ export class ContentService {
     };
   }
 
+  /** A single active topic by slug (topic page masthead), or 404. */
+  async getTopicBySlug(slug: string): Promise<TopicDetail> {
+    const topic = await this.prisma.topic.findFirst({
+      where: { slug, isActive: true },
+      select: { id: true, name: true, slug: true, description: true },
+    });
+    if (!topic) {
+      throw new NotFoundException(`Topic "${slug}" was not found`);
+    }
+    return topic;
+  }
+
   /**
    * The category matching `slug` plus every descendant, as an id list. Returns
    * `[]` for an unknown/inactive slug so callers match no articles. Loads the
@@ -210,6 +233,7 @@ function toArticleSummary(article: ArticleWithRelations): ArticleSummary {
       : null,
     category: article.category,
     author: article.author,
+    topics: article.topics.map((t) => t.topic),
   };
 }
 

@@ -184,6 +184,23 @@ export default async function ArticlePage({ params }: PageProps) {
         <BlockRenderer blocks={article.blocks} />
       </div>
 
+      {article.topics.length > 0 && (
+        <nav aria-label="Topics" className="mt-10 flex flex-wrap items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-faint">
+            Topics
+          </span>
+          {article.topics.map((topic) => (
+            <Link
+              key={topic.id}
+              href={`/topic/${topic.slug}`}
+              className="rounded-full border border-border px-3 py-1 font-mono text-[11px] text-muted transition hover:border-primary hover:text-primary"
+            >
+              {topic.name}
+            </Link>
+          ))}
+        </nav>
+      )}
+
       {article.isLocked && (
         <div className="mt-8 flex flex-col items-center gap-3 rounded-xl border border-border-2 bg-surface px-6 py-10 text-center">
           <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-primary">
