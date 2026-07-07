@@ -62,8 +62,8 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [x] API serves `blocks` in article detail (legacy `body` → blocks fallback so old content still renders)
 - [x] Web **BlockRenderer** + per-block components, brand-styled (captions, credits, pull-quotes, fact-boxes, safe embeds)
 - [x] Seed articles converted to real block documents (subheads, inline image, pull-quote, list, fact-box)
+- [x] Reading aids: subhead anchors, reading-progress bar, sticky mobile share, "Updated" timestamp
 - [ ] CMS **block editor** — add / reorder / edit / delete blocks; live preview
-- [ ] Reading aids: subhead anchors (done in renderer), reading-progress, sticky mobile share, "Updated" timestamp
 - **DoD:** a published story renders as a designed document and staff author it block-by-block. _(Read path done + verified e2e; authoring editor is the remaining piece.)_
 
 ### WS2 — Real taxonomy (sections · sub-sections · topics) `[ ]`
