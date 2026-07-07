@@ -3,10 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { apiResponse } from '../common/http/api-response';
+import { AccountService } from './account.service';
 import { AuthService } from './auth.service';
 import type { AuthResult } from './auth.types';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 const REFRESH_COOKIE = 'refresh_token';
 // Scope the cookie to the auth routes so it isn't sent on every API call.
@@ -23,6 +27,7 @@ export class AuthController {
 
   constructor(
     private readonly auth: AuthService,
+    private readonly account: AccountService,
     config: ConfigService,
   ) {
     this.cookieSecure = config.get<string>('COOKIE_SECURE', 'true') !== 'false';
@@ -47,6 +52,31 @@ export class AuthController {
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const token = this.readRefreshCookie(req);
     return this.session(await this.auth.refresh(token), res);
+  }
+
+  @Throttle(AUTH_THROTTLE)
+  @Post('verify-email')
+  @HttpCode(200)
+  async verifyEmail(@Body() dto: VerifyEmailDto) {
+    await this.account.verifyEmail(dto.token);
+    return apiResponse({ verified: true });
+  }
+
+  // Always 202 whether or not the email exists — no account enumeration (`05` §3.4).
+  @Throttle(AUTH_THROTTLE)
+  @Post('password/forgot')
+  @HttpCode(202)
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.account.requestPasswordReset(dto.email);
+    return apiResponse({ requested: true });
+  }
+
+  @Throttle(AUTH_THROTTLE)
+  @Post('password/reset')
+  @HttpCode(200)
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.account.resetPassword(dto.token, dto.password);
+    return apiResponse({ reset: true });
   }
 
   @Post('logout')

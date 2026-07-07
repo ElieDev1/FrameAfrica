@@ -1,6 +1,7 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Prisma, RoleName, UserStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { AccountService } from './account.service';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
 import type { AuthResult, LoginInput, RegisterInput, SafeUser } from './auth.types';
@@ -22,10 +23,13 @@ const DUMMY_PASSWORD_HASH =
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly passwords: PasswordService,
     private readonly tokens: TokenService,
+    private readonly account: AccountService,
   ) {}
 
   async register(input: RegisterInput): Promise<AuthResult> {
@@ -67,6 +71,14 @@ export class AuthService {
         throw new ConflictException('Email is already registered');
       }
       throw error;
+    }
+
+    // Send the verification email, but don't fail signup if delivery hiccups —
+    // the reader can request a fresh link later.
+    try {
+      await this.account.sendVerification(user.id, user.email);
+    } catch (error) {
+      this.logger.error(`Failed to send verification email for ${user.id}`, error as Error);
     }
 
     return this.issueSession(user);

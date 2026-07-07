@@ -1,6 +1,7 @@
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import type { PrismaService } from '../prisma/prisma.service';
+import type { AccountService } from './account.service';
 import { AuthService } from './auth.service';
 import type { PasswordService } from './password.service';
 import type { TokenService } from './token.service';
@@ -35,12 +36,14 @@ function build() {
     rotateRefreshToken: jest.fn(),
     revokeToken: jest.fn(),
   };
+  const account = { sendVerification: jest.fn().mockResolvedValue(undefined) };
   const service = new AuthService(
     prisma as unknown as PrismaService,
     passwords as unknown as PasswordService,
     tokens as unknown as TokenService,
+    account as unknown as AccountService,
   );
-  return { service, prisma, passwords, tokens };
+  return { service, prisma, passwords, tokens, account };
 }
 
 describe('AuthService', () => {
@@ -54,7 +57,7 @@ describe('AuthService', () => {
     });
 
     it('hashes the password and returns a session without secrets', async () => {
-      const { service, prisma, passwords } = build();
+      const { service, prisma, passwords, account } = build();
       prisma.user.findUnique.mockResolvedValue(null);
       passwords.hash.mockResolvedValue('argon-hash');
       prisma.user.create.mockResolvedValue(userWithRoles());
@@ -76,6 +79,23 @@ describe('AuthService', () => {
         roles: ['reader'],
       });
       expect(res.user).not.toHaveProperty('passwordHash');
+      expect(account.sendVerification).toHaveBeenCalledWith('u1', 'reader@frameafrica.rw');
+    });
+
+    it('still returns a session if the verification email fails to send', async () => {
+      const { service, prisma, passwords, account } = build();
+      prisma.user.findUnique.mockResolvedValue(null);
+      passwords.hash.mockResolvedValue('argon-hash');
+      prisma.user.create.mockResolvedValue(userWithRoles());
+      account.sendVerification.mockRejectedValue(new Error('smtp down'));
+
+      const res = await service.register({
+        email: 'reader@frameafrica.rw',
+        password: 'pw12345',
+        displayName: 'Reader One',
+      });
+
+      expect(res.accessToken).toBe('access.jwt');
     });
 
     it('turns a race-losing duplicate email into a 409 (not a raw DB error)', async () => {

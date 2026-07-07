@@ -77,8 +77,8 @@ until merged and note their PR.
 - [x] RBAC guards (JwtAuthGuard + RolesGuard), deny-by-default; `GET /me` (`05` §4)
 - [x] Reader-account **UI**: `/signup`, `/login`, `/account` + auth-aware header, via a BFF session (tokens in the Next server's HTTP-only cookies)
 - [x] BFF session **refresh-on-expiry** (Next proxy rotates the access token) so logins survive past the access TTL — _refresh-lock for prefetch races is a follow-up_
-- [ ] Register + email verification (`FR-AUTH-1`) — _registration done; email verification pending_
-- [ ] Password reset (`FR-AUTH-5`)
+- [x] Register + email verification (`FR-AUTH-1`) — verification link on register; `POST /auth/verify-email` stamps `emailVerifiedAt` (single-use, hashed, 24h token)
+- [x] Password reset (`FR-AUTH-5`) — `POST /auth/password/forgot` (no enumeration) + `/auth/password/reset` (revokes all sessions); `/forgot-password` + `/reset-password` UI. _Mailer logs the link until SMTP is wired._
 - [ ] 2FA (TOTP) mandatory for staff (`FR-AUTH-6`)
 - [ ] Object-level authZ, applied per resource as write features land (`05` §4)
 - [ ] Bookmarks, reading history, followed categories (`FR-READ-5`, `-6`)
@@ -152,12 +152,13 @@ until merged and note their PR.
 > Slice 5 CMS — draft lifecycle + editor publish/reject + newsroom UI (#13, #16, #19);
 > homepage depth — breaking ticker, section blocks, Most-read (#18, #22); article
 > depth — related + share bar (#20); BFF session auto-refresh (#21). Slice 9's
-> global exception filter landed early (this branch).
+> global exception filter landed early (#23); email verification + password
+> reset (Slice 4 trust, `FR-AUTH-1`/`-5`, this branch).
 >
-> **Next up:** finish **Slice 4 trust** — email verification + password reset
-> (`FR-AUTH-1`, `-5`) — which unblocks credible accounts; or push **Slice 5**
-> (publish/schedule/embargo + a real rich-text editor). **Slice 3** OpenSearch and
-> **Slice 6** media are the other high-value follow-ups.
+> **Next up:** **Slice 5** (publish/schedule/embargo + a real rich-text editor)
+> or **Slice 3** OpenSearch; **Slice 6** media and staff 2FA (`FR-AUTH-6`) are the
+> other high-value follow-ups. A real SMTP transport (behind `MailerService`) is a
+> small standalone task whenever credentials exist.
 
 ---
 

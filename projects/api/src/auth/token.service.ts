@@ -115,4 +115,12 @@ export class TokenService {
       data: { revokedAt: new Date() },
     });
   }
+
+  /** Revoke every live refresh token for a user (e.g. after a password reset). */
+  async revokeAllForUser(userId: string): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
 }

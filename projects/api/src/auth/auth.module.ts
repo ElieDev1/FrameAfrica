@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { MailModule } from '../mail/mail.module';
+import { AccountService } from './account.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { OneTimeTokenService } from './one-time-token.service';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
 
@@ -20,9 +23,10 @@ import { TokenService } from './token.service';
         },
       }),
     }),
+    MailModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, PasswordService, TokenService],
+  providers: [AuthService, AccountService, PasswordService, TokenService, OneTimeTokenService],
   exports: [TokenService],
 })
 export class AuthModule {}

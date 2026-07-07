@@ -18,7 +18,12 @@ export default async function LoginPage() {
       <div className="mt-6">
         <LoginForm />
       </div>
-      <p className="mt-6 font-body text-sm text-muted">
+      <p className="mt-4 font-body text-sm text-muted">
+        <Link href="/forgot-password" className="text-primary hover:underline">
+          Forgot your password?
+        </Link>
+      </p>
+      <p className="mt-2 font-body text-sm text-muted">
         New here?{' '}
         <Link href="/signup" className="text-primary hover:underline">
           Create an account
