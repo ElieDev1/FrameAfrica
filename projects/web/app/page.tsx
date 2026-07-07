@@ -1,8 +1,13 @@
+import { AdSlot } from '@/components/AdSlot';
 import { ArticleCard } from '@/components/ArticleCard';
 import { BreakingTicker } from '@/components/BreakingTicker';
+import { EditorsPicks } from '@/components/EditorsPicks';
 import { HeadlineItem, MostRead } from '@/components/HeadlineList';
+import { MarketsWidget } from '@/components/MarketsWidget';
 import { NewsletterBox } from '@/components/NewsletterBox';
 import { SectionBlock } from '@/components/SectionBlock';
+import { VideoStrip } from '@/components/VideoStrip';
+import { WeatherWidget } from '@/components/WeatherWidget';
 import { fetchArticles, fetchCategories, type ArticleSummary } from '@/lib/api';
 
 export const revalidate = 60;
@@ -47,6 +52,7 @@ export default async function Home() {
   const [lead, ...rest] = latest;
   const secondary = rest.slice(0, 4);
   const river = rest.slice(4);
+  const picks = rest.slice(0, 3);
   const breaking = latest.filter((article) => article.isBreaking);
 
   let sections: SectionData[] = [];
@@ -85,6 +91,8 @@ export default async function Home() {
           )}
         </section>
 
+        <AdSlot variant="leaderboard" className="mt-10" />
+
         <div className="mt-10 grid gap-10 lg:grid-cols-3">
           <section aria-labelledby="latest" className="lg:col-span-2">
             <h2
@@ -106,7 +114,11 @@ export default async function Home() {
 
           <aside className="flex flex-col gap-8">
             <MostRead articles={popular} />
+            <EditorsPicks articles={picks} />
+            <WeatherWidget />
+            <MarketsWidget />
             <NewsletterBox />
+            <AdSlot variant="rectangle" />
           </aside>
         </div>
 
@@ -122,6 +134,10 @@ export default async function Home() {
             ))}
           </div>
         )}
+
+        <VideoStrip />
+
+        <AdSlot variant="leaderboard" className="mt-12" />
       </div>
     </>
   );

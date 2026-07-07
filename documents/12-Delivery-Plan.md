@@ -58,7 +58,7 @@ until merged and note their PR.
 - [x] Typed web API client, idempotent dev seed, initial Prisma migration
 - [x] Dark-mode design tokens (from scaffold)
 - [x] Homepage upgraded to a magazine layout: hero + secondary headlines + **Most-read** sidebar (`sort=popular`) + newsletter teaser
-- [x] Homepage blocks: **breaking-news ticker** + **per-section blocks** — _video/podcast strip still to add_
+- [x] Homepage blocks: **breaking-news ticker** + **per-section blocks** + **video/podcast strip** ("Watch & Listen"), plus sidebar widgets — **Editor's picks**, **Weather**, **Markets**, and labelled **Advertisement** slots (leaderboards + sidebar house ad) (`06` §4.1, `00` §4.2). _Weather/markets are static placeholders pending real feeds; ads are house ads pending the ad server (Slice 8)._
 - [x] Article page depth: **Related stories** (`GET /v1/articles/:slug/related`) + a share bar — _comments, author bio, reading-progress still to come_
 
 ### Slice 2 — Sections & navigation 🚧

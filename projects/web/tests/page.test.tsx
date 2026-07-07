@@ -46,9 +46,15 @@ describe('Home', () => {
     render(await Home());
 
     expect(screen.getByRole('heading', { name: 'Lead story' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Second story' })).toBeInTheDocument();
+    // "Second story" also appears under Editor's picks, so there may be more than one.
+    expect(screen.getAllByRole('heading', { name: 'Second story' }).length).toBeGreaterThan(0);
     expect(screen.getByRole('heading', { name: 'Most read' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Most read one' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: "Editor's picks" })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Weather' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Markets' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Watch & Listen/i })).toBeInTheDocument();
+    expect(screen.getAllByLabelText('Advertisement').length).toBeGreaterThan(0);
   });
 
   it('shows a friendly message when the API is unreachable', async () => {
