@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { ArticleCard } from '@/components/ArticleCard';
+import { LoadMore } from '@/components/LoadMore';
 import { fetchArticles, fetchTopic } from '@/lib/api';
 import { absoluteUrl } from '@/lib/site';
 
@@ -31,7 +31,7 @@ export default async function TopicPage({ params }: PageProps) {
     notFound();
   }
 
-  const { articles } = await fetchArticles({ topic: slug, limit: 24 });
+  const { articles, pagination } = await fetchArticles({ topic: slug, limit: 12 });
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
@@ -50,11 +50,11 @@ export default async function TopicPage({ params }: PageProps) {
           No stories tagged with this topic yet.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-10 pt-8 sm:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
-        </div>
+        <LoadMore
+          initialArticles={articles}
+          initialCursor={pagination?.nextCursor ?? null}
+          topic={slug}
+        />
       )}
     </div>
   );
