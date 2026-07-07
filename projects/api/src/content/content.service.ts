@@ -105,6 +105,31 @@ export class ContentService {
 
     return category;
   }
+
+  /** Up to 4 other published articles in the same category (empty if none / unknown slug). */
+  async getRelated(slug: string): Promise<ArticleSummary[]> {
+    const article = await this.prisma.article.findFirst({
+      where: { slug, status: ArticleStatus.published, deletedAt: null },
+      select: { id: true, categoryId: true },
+    });
+    if (!article) {
+      return [];
+    }
+
+    const rows = await this.prisma.article.findMany({
+      where: {
+        status: ArticleStatus.published,
+        deletedAt: null,
+        categoryId: article.categoryId,
+        id: { not: article.id },
+      },
+      include: articleInclude,
+      orderBy: [{ publishedAt: 'desc' }, { id: 'desc' }],
+      take: 4,
+    });
+
+    return rows.map(toArticleSummary);
+  }
 }
 
 function toArticleSummary(article: ArticleWithRelations): ArticleSummary {

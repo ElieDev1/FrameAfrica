@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reader accounts UI (MVP):** `/signup`, `/login`, and `/account` pages plus an auth-aware header, backed by a **BFF session** — the Next server holds tokens in HTTP-only cookies (`fa_access`/`fa_refresh`) and the browser never sees them (`05` §3.2, §7).
 - **CMS newsroom UI (MVP):** staff-gated `/cms` (draft list with status badges), `/cms/new`, and `/cms/[id]` editor — create, edit, and submit-for-review a draft in the browser, backed by the BFF-authenticated CMS client. Reached via the header **Write** link.
 - **Search (MVP):** a `/search` page (results / empty / no-results) plus a header search box, running an interim keyword search over the API's `?q=` filter. OpenSearch-backed relevance and typo tolerance remain a follow-up.
+- **Article depth:** `GET /v1/articles/:slug/related` (up to 4 same-category stories) drives a **Related stories** block on the article page, plus a client **share bar** (X / Facebook / WhatsApp / copy-link).
 
 ### Changed
 - `06-UIUX-Content-Layout.md`: locked in concrete font families (Archivo, Source Serif 4, IBM Plex Mono) matching the design prototype; added a link to the prototype.

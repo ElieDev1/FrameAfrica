@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { fetchArticle } from '@/lib/api';
+import { ArticleCard } from '@/components/ArticleCard';
+import { ShareBar } from '@/components/ShareBar';
+import { fetchArticle, fetchRelated } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 
 export const revalidate = 60;
@@ -27,6 +29,7 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound();
   }
 
+  const related = await fetchRelated(slug);
   const paragraphs = article.body.split('\n\n').filter(Boolean);
 
   return (
@@ -72,6 +75,10 @@ export default async function ArticlePage({ params }: PageProps) {
         {article.readTimeMin && <span>· {article.readTimeMin} min read</span>}
       </div>
 
+      <div className="mt-5">
+        <ShareBar title={article.title} />
+      </div>
+
       <div
         className="mt-8 aspect-[16/9] w-full rounded-xl bg-gradient-to-br from-surface-2 to-elev"
         aria-hidden
@@ -94,6 +101,22 @@ export default async function ArticlePage({ params }: PageProps) {
             Money, card) are coming soon.
           </p>
         </div>
+      )}
+
+      {related.length > 0 && (
+        <section aria-labelledby="related" className="mt-12 border-t border-border pt-8">
+          <h2
+            id="related"
+            className="mb-6 font-mono text-xs uppercase tracking-[0.18em] text-muted"
+          >
+            Related stories
+          </h2>
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+            {related.map((item) => (
+              <ArticleCard key={item.id} article={item} />
+            ))}
+          </div>
+        </section>
       )}
 
       <div className="mt-10 border-t border-border pt-6">

@@ -139,6 +139,18 @@ export async function fetchArticle(slug: string): Promise<ArticleDetail | null> 
   }
 }
 
+/** Up to 4 related articles (same category). Returns `[]` on any error. */
+export async function fetchRelated(slug: string): Promise<ArticleSummary[]> {
+  try {
+    const envelope = await apiGet<ArticleSummary[]>(
+      `/articles/${encodeURIComponent(slug)}/related`,
+    );
+    return envelope.data;
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchCategories(): Promise<CategoryNode[]> {
   const envelope = await apiGet<CategoryNode[]>('/categories');
   return envelope.data;

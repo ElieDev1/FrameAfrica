@@ -183,6 +183,31 @@ describe('ContentService', () => {
       await expect(service.getCategoryBySlug('nope')).rejects.toBeInstanceOf(NotFoundException);
     });
   });
+
+  describe('getRelated', () => {
+    it('returns other published articles in the same category', async () => {
+      prisma.article.findFirst.mockResolvedValue({ id: 'a1', categoryId: 'c1' });
+      prisma.article.findMany.mockResolvedValue([articleRow({ id: 'a2', slug: 's2' })]);
+
+      const res = await service.getRelated('s1');
+
+      expect(res).toHaveLength(1);
+      expect(res[0].slug).toBe('s2');
+      const calls = prisma.article.findMany.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { where: Record<string, unknown>; take: number };
+      expect(arg.where).toMatchObject({
+        status: 'published',
+        categoryId: 'c1',
+        id: { not: 'a1' },
+      });
+      expect(arg.take).toBe(4);
+    });
+
+    it('returns empty for an unknown slug', async () => {
+      prisma.article.findFirst.mockResolvedValue(null);
+      await expect(service.getRelated('nope')).resolves.toEqual([]);
+    });
+  });
 });
 
 describe('buildCategoryTree', () => {

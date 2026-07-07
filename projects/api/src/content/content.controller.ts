@@ -28,6 +28,11 @@ export class ContentController {
     return apiResponse(article);
   }
 
+  @Get('articles/:slug/related')
+  async getRelated(@Param('slug') slug: string) {
+    return apiResponse(await this.content.getRelated(slug));
+  }
+
   @Get('categories')
   async getCategories() {
     return apiResponse(await this.content.getCategoryTree());
