@@ -83,7 +83,7 @@ until merged and note their PR.
 
 ### Slice 5 — CMS & editorial workflow  `FR-PROD-*`, `FR-EDIT-*` 🚧
 - [x] Journalist draft lifecycle: create/edit (author-scoped) + a tracked revision on every save + submit for review (`FR-PROD-1`, `-5`, `-6`), role-gated
-- [ ] Editor workflow state machine: review → publish/reject, role-gated (`FR-EDIT-1`, `02` §6)
+- [x] Editor workflow: review queue + **publish/reject** (`ready` → `published`/`rejected`), editor-gated, with a `/cms/review` UI (`FR-EDIT-1`, `02` §6)
 - [ ] Publish now / schedule / embargo (`FR-EDIT-2`, `-3`)
 - [ ] Corrections & retractions with a public, dated log (`FR-EDIT-5`)
 - [ ] Feature as breaking news (`FR-EDIT-4`)

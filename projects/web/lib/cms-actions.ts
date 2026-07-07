@@ -100,3 +100,20 @@ export async function submitDraftAction(id: string): Promise<void> {
   if (!res.ok) throw new Error('Could not submit the draft for review.');
   redirect('/cms');
 }
+
+export async function publishAction(id: string): Promise<void> {
+  const res = await authedFetch(`/cms/articles/${id}/publish`, 'POST');
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not publish the article.');
+  revalidatePath('/cms/review');
+  revalidatePath('/');
+  redirect('/cms/review');
+}
+
+export async function rejectAction(id: string): Promise<void> {
+  const res = await authedFetch(`/cms/articles/${id}/reject`, 'POST');
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not reject the article.');
+  revalidatePath('/cms/review');
+  redirect('/cms/review');
+}

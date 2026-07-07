@@ -44,6 +44,28 @@ async function main(): Promise<void> {
     create: { userId: author.id, roleId: journalist.id },
   });
 
+  // An editor, to exercise the review → publish/reject workflow.
+  const editorRole = await prisma.role.upsert({
+    where: { name: RoleName.editor },
+    update: {},
+    create: { name: RoleName.editor },
+  });
+  const editor = await prisma.user.upsert({
+    where: { email: 'eric.mugisha@frameafrica.rw' },
+    update: { passwordHash },
+    create: {
+      email: 'eric.mugisha@frameafrica.rw',
+      displayName: 'Eric Mugisha',
+      emailVerifiedAt: new Date(),
+      passwordHash,
+    },
+  });
+  await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: editor.id, roleId: editorRole.id } },
+    update: {},
+    create: { userId: editor.id, roleId: editorRole.id },
+  });
+
   // Top-level sections, then one nested child (Business › Economy).
   const sections: { slug: string; name: string; sortOrder: number }[] = [
     { slug: 'rwanda', name: 'Rwanda', sortOrder: 1 },

@@ -5,6 +5,7 @@ import { Wordmark } from './Wordmark';
 
 const MAX_SECTIONS = 6;
 const STAFF_ROLES = ['journalist', 'editor', 'admin'];
+const EDITOR_ROLES = ['editor', 'admin'];
 
 /** Top bar: brand + section nav + auth-aware actions. */
 export async function SiteHeader() {
@@ -16,6 +17,7 @@ export async function SiteHeader() {
   }
   const user = await getSession();
   const isStaff = user?.roles.some((role) => STAFF_ROLES.includes(role)) ?? false;
+  const isEditor = user?.roles.some((role) => EDITOR_ROLES.includes(role)) ?? false;
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur">
@@ -53,6 +55,14 @@ export async function SiteHeader() {
                   className="font-mono text-xs uppercase tracking-[0.12em] text-muted hover:text-primary"
                 >
                   Write
+                </Link>
+              )}
+              {isEditor && (
+                <Link
+                  href="/cms/review"
+                  className="font-mono text-xs uppercase tracking-[0.12em] text-muted hover:text-primary"
+                >
+                  Review
                 </Link>
               )}
               <Link

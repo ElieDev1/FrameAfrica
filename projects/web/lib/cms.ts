@@ -8,6 +8,7 @@ const API_URL =
   process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/v1';
 
 const STAFF_ROLES = ['journalist', 'editor', 'admin'];
+const EDITOR_ROLES = ['editor', 'admin'];
 
 export type DraftStatus = 'draft' | 'in_progress' | 'rejected' | 'ready' | 'published' | string;
 
@@ -29,12 +30,46 @@ export interface DraftDetail extends DraftListItem {
   createdAt: string;
 }
 
+export interface ReviewItem {
+  id: string;
+  slug: string;
+  title: string;
+  status: DraftStatus;
+  updatedAt: string;
+  category: { id: string; name: string; slug: string };
+  author: { id: string; displayName: string };
+}
+
+/** True if the user holds an editor/admin role. */
+export function isEditor(user: SessionUser | null): boolean {
+  return user?.roles.some((role) => EDITOR_ROLES.includes(role)) ?? false;
+}
+
 /** Require a signed-in staff user, else redirect. Returns the user. */
 export async function requireStaff(): Promise<SessionUser> {
   const user = await getSession();
   if (!user) redirect('/login');
   if (!user.roles.some((role) => STAFF_ROLES.includes(role))) redirect('/account');
   return user;
+}
+
+/** Require a signed-in editor/admin, else redirect. Returns the user. */
+export async function requireEditor(): Promise<SessionUser> {
+  const user = await getSession();
+  if (!user) redirect('/login');
+  if (!isEditor(user)) redirect('/cms');
+  return user;
+}
+
+export async function listReviewQueue(): Promise<ReviewItem[]> {
+  const res = await fetch(`${API_URL}/cms/review`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load the review queue (${res.status})`);
+  const json = (await res.json()) as { data: ReviewItem[] };
+  return json.data;
 }
 
 async function authHeaders(): Promise<{ authorization: string }> {
