@@ -3,7 +3,14 @@
 **Document:** 12 — Delivery Plan
 **Version:** 1.0
 **Status:** Living document — tick boxes as PRs merge into `dev`.
-**Related:** `11-Roadmap.md` (milestones & rationale), `01-SRS.md` (requirements), `09-Git-Workflow.md` (branch/PR flow)
+**Related:** `13-Product-Plan.md` (**how we build now** — roles, content model, complete workspaces, Definition of Done), `11-Roadmap.md` (milestones), `01-SRS.md` (requirements), `09-Git-Workflow.md` (branch/PR flow)
+
+> **⚠ Approach reset (see `13-Product-Plan.md`).** We stop shipping thin slices and
+> rebuild **complete workspaces** on a **real content model** and **real section
+> taxonomy**, to a written **Definition of Done**. Build order now: (1) structured
+> article + rich editor, (2) section/topic taxonomy, (3) media library, (4) editor
+> desk, (5) live/developing stories, (6) the **Studio** (in-app flyers/social cards),
+> then the remaining role workspaces. The slices below stay as the history/tracker.
 
 ---
 

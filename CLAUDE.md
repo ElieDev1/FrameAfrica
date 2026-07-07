@@ -21,7 +21,8 @@ All design docs live in `documents/`:
 11. `documents/10-Coding-Standards.md` — conventions & Definition of Done
 12. `documents/11-Roadmap.md` — milestones (why/when)
 13. `documents/12-Delivery-Plan.md` — **live progress tracker (what's done / next), checkboxed**
-14. `documents/adr/` — architecture decisions
+14. `documents/13-Product-Plan.md` — **how we build now: roles, real content model + taxonomy, complete workspaces, Definition of Done**
+15. `documents/adr/` — architecture decisions
 
 ## Tech stack
 Next.js (React, TS) · NestJS (Node, TS) · PostgreSQL · OpenSearch · Redis · S3 · Cloudflare ·

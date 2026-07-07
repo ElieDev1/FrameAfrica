@@ -34,6 +34,7 @@ FrameAfrica/
 │   ├── 10-Coding-Standards.md        Coding conventions & Definition of Done
 │   ├── 11-Roadmap.md                 Product roadmap & milestones
 │   ├── 12-Delivery-Plan.md           Live progress tracker (checkboxed slices)
+│   ├── 13-Product-Plan.md            How we build: roles, content model, workspaces, DoD
 │   └── adr/                          Architecture Decision Records
 ├── projects/                     ← Next.js (web) + NestJS (api) codebase
 └── assets/                       ← brand assets (logo, icons)
@@ -54,7 +55,8 @@ FrameAfrica/
 11. **10 — Coding Standards** — conventions and Definition of Done.
 12. **11 — Roadmap** — milestones from MVP to scale.
 13. **12 — Delivery Plan** — live, checkboxed progress tracker (what's done / next).
-14. **adr/** — the record of key architecture decisions.
+14. **13 — Product Plan** — how we build now: roles, real content model + taxonomy, complete workspaces, Definition of Done.
+15. **adr/** — the record of key architecture decisions.
 
 ## Tech stack (summary)
 
