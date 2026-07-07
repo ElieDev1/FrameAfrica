@@ -80,8 +80,9 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 
 ### WS3 — Media library (real uploads) `[~]`
 - [x] Upload API (staff-gated multipart) + **local storage driver** (writes to `web/public/uploads`, same-origin URL) + `media_asset` catalogue (alt/credit/licence) + list — verified e2e. _(S3 driver + WebP/AVIF variants are the prod swap behind the same `save()` contract.)_
-- [ ] Media library UI (browse/upload) + **picker** wired into the block editor + featured-image picker
-- [ ] Galleries as first-class media; featured-image picker replaces URL-paste
+- [x] Media library UI — `/dashboard/media` (browse grid + upload form via a BFF action), + a nav item
+- [ ] A **picker** wired into the block editor + featured-image picker (replaces URL-paste)
+- [ ] Galleries as first-class media
 - **DoD:** staff upload real images/galleries; the DAM is the single source for media.
 
 ### WS4 — Editorial desk & workflow `[ ]`
