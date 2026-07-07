@@ -32,4 +32,9 @@ export class ContentController {
   async getCategories() {
     return apiResponse(await this.content.getCategoryTree());
   }
+
+  @Get('categories/:slug')
+  async getCategory(@Param('slug') slug: string) {
+    return apiResponse(await this.content.getCategoryBySlug(slug));
+  }
 }

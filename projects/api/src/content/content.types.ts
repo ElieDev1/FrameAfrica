@@ -52,3 +52,11 @@ export interface CategoryNode {
   description: string | null;
   children: CategoryNode[];
 }
+
+/** A single active category — the masthead of a section page. */
+export interface CategoryDetail {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+}

@@ -58,11 +58,11 @@ until merged and note their PR.
 - [x] Typed web API client, idempotent dev seed, initial Prisma migration
 - [x] Dark-mode design tokens (from scaffold)
 
-### Slice 2 — Sections & navigation
-- [ ] Category/section pages `/section/[slug]` with article river (`FR-READ-1`)
-- [ ] `GET /v1/categories/:slug/articles` endpoint
-- [ ] Top-bar section nav (with "More" overflow) + breadcrumbs
-- [ ] Tags and tag pages
+### Slice 2 — Sections & navigation 🚧
+- [x] Section pages `/section/[slug]` with masthead + article river (`FR-READ-1`)
+- [x] `GET /v1/categories/:slug` (section masthead); river via `GET /articles?category=`
+- [x] Top-bar section nav + breadcrumbs (card/article kickers link to sections)
+- [ ] Tags and tag pages — _deferred (needs a `tag` schema)_
 
 ### Slice 3 — Search
 - [ ] OpenSearch index + reindex on publish (`FR-READ-2`, `02` §5)

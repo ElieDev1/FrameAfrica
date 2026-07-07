@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ArticleStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListArticlesQueryDto } from './dto/list-articles-query.dto';
-import type { ArticleDetail, ArticleSummary, CategoryNode } from './content.types';
+import type { ArticleDetail, ArticleSummary, CategoryDetail, CategoryNode } from './content.types';
 
 const DEFAULT_LIMIT = 20;
 
@@ -85,6 +85,20 @@ export class ContentService {
     });
 
     return buildCategoryTree(categories);
+  }
+
+  /** A single active category by slug (section masthead), or 404. */
+  async getCategoryBySlug(slug: string): Promise<CategoryDetail> {
+    const category = await this.prisma.category.findFirst({
+      where: { slug, isActive: true },
+      select: { id: true, name: true, slug: true, description: true },
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category "${slug}" was not found`);
+    }
+
+    return category;
   }
 }
 

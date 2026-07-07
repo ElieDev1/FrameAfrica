@@ -36,13 +36,18 @@ export default async function ArticlePage({ params }: PageProps) {
           Home
         </Link>
         <span aria-hidden> › </span>
-        <span className="text-primary">{article.category.name}</span>
+        <Link href={`/section/${article.category.slug}`} className="text-primary hover:underline">
+          {article.category.name}
+        </Link>
       </nav>
 
       <div className="mb-3 flex items-center gap-2">
-        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-primary">
+        <Link
+          href={`/section/${article.category.slug}`}
+          className="font-mono text-[11px] uppercase tracking-[0.16em] text-primary hover:underline"
+        >
           {article.category.name}
-        </span>
+        </Link>
         {article.isBreaking && (
           <span className="rounded bg-accent-red px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-white">
             Breaking

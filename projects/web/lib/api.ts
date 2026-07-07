@@ -56,6 +56,13 @@ export interface CategoryNode {
   children: CategoryNode[];
 }
 
+export interface CategoryDetail {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+}
+
 export interface Pagination {
   nextCursor: string | null;
   hasMore: boolean;
@@ -133,4 +140,17 @@ export async function fetchArticle(slug: string): Promise<ArticleDetail | null> 
 export async function fetchCategories(): Promise<CategoryNode[]> {
   const envelope = await apiGet<CategoryNode[]>('/categories');
   return envelope.data;
+}
+
+/** Returns the category, or `null` if the API responds 404. */
+export async function fetchCategory(slug: string): Promise<CategoryDetail | null> {
+  try {
+    const envelope = await apiGet<CategoryDetail>(`/categories/${encodeURIComponent(slug)}`);
+    return envelope.data;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      return null;
+    }
+    throw error;
+  }
 }

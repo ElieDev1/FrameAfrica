@@ -7,6 +7,7 @@ type ServiceMock = {
   listArticles: jest.Mock;
   getArticleBySlug: jest.Mock;
   getCategoryTree: jest.Mock;
+  getCategoryBySlug: jest.Mock;
 };
 
 function mockResponse(): Pick<Response, 'status'> {
@@ -22,6 +23,7 @@ describe('ContentController', () => {
       listArticles: jest.fn(),
       getArticleBySlug: jest.fn(),
       getCategoryTree: jest.fn(),
+      getCategoryBySlug: jest.fn(),
     };
 
     const ref = await Test.createTestingModule({
@@ -73,5 +75,14 @@ describe('ContentController', () => {
     const res = await controller.getCategories();
 
     expect(res.data).toEqual([{ slug: 'news' }]);
+  });
+
+  it('wraps a single category and passes the slug through', async () => {
+    service.getCategoryBySlug.mockResolvedValue({ slug: 'rwanda', name: 'Rwanda' });
+
+    const res = await controller.getCategory('rwanda');
+
+    expect(res.data).toMatchObject({ slug: 'rwanda' });
+    expect(service.getCategoryBySlug).toHaveBeenCalledWith('rwanda');
   });
 });

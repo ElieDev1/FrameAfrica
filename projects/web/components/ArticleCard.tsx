@@ -5,9 +5,12 @@ import { formatDate } from '@/lib/format';
 function Badges({ article }: { article: ArticleSummary }) {
   return (
     <span className="flex items-center gap-2">
-      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
+      <Link
+        href={`/section/${article.category.slug}`}
+        className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary hover:underline"
+      >
         {article.category.name}
-      </span>
+      </Link>
       {article.isBreaking && (
         <span className="rounded bg-accent-red px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-white">
           Breaking

@@ -5,7 +5,7 @@ import { ContentService, buildCategoryTree } from './content.service';
 
 type PrismaMock = {
   article: { findMany: jest.Mock; findFirst: jest.Mock };
-  category: { findMany: jest.Mock };
+  category: { findMany: jest.Mock; findFirst: jest.Mock };
 };
 
 const articleRow = (over: Record<string, unknown> = {}) => ({
@@ -37,7 +37,7 @@ describe('ContentService', () => {
   beforeEach(async () => {
     prisma = {
       article: { findMany: jest.fn(), findFirst: jest.fn() },
-      category: { findMany: jest.fn() },
+      category: { findMany: jest.fn(), findFirst: jest.fn() },
     };
 
     const moduleRef = await Test.createTestingModule({
@@ -148,6 +148,29 @@ describe('ContentService', () => {
 
       expect(tree).toHaveLength(1);
       expect(tree[0].children[0].slug).toBe('rwanda');
+    });
+  });
+
+  describe('getCategoryBySlug', () => {
+    it('returns an active category', async () => {
+      prisma.category.findFirst.mockResolvedValue({
+        id: 'c1',
+        name: 'Rwanda',
+        slug: 'rwanda',
+        description: null,
+      });
+
+      const category = await service.getCategoryBySlug('rwanda');
+
+      expect(category).toMatchObject({ slug: 'rwanda', name: 'Rwanda' });
+      const calls = prisma.category.findFirst.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { where: Record<string, unknown> };
+      expect(arg.where).toMatchObject({ slug: 'rwanda', isActive: true });
+    });
+
+    it('throws NotFound for an unknown or inactive category', async () => {
+      prisma.category.findFirst.mockResolvedValue(null);
+      await expect(service.getCategoryBySlug('nope')).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 });
