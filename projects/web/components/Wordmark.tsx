@@ -1,22 +1,37 @@
 import Image from 'next/image';
+import logoDark from '@/public/brand/logo.png';
+import logoLight from '@/public/brand/logo-light.png';
 
-/** Aperture icon + FRAMEAFRICA wordmark (FRAME white, AFRICA orange). */
+/**
+ * The real Frame Africa logo (Africa + camera-aperture mark, "Frame Africa"
+ * wordmark, "NEWS. VIEWS. AFRICA." tagline). Two art files ship: the full-colour
+ * mark for the dark canvas and a light-background variant. Which one shows is
+ * driven by `data-theme` on <html> (see globals.css) — the theme is resolved
+ * before paint, so there's no flash.
+ */
 export function Wordmark({ size = 'md' }: { size?: 'md' | 'sm' }) {
-  const px = size === 'sm' ? 24 : 28;
-  const text = size === 'sm' ? 'text-base' : 'text-lg';
+  const h = size === 'sm' ? 26 : 34;
+  const w = Math.round((h * 800) / 240);
   return (
-    <span className="flex items-center gap-2">
+    <span className="inline-flex items-center" aria-label="Frame Africa">
       <Image
-        src="/brand/icon.png"
-        alt=""
-        width={px}
-        height={px}
+        src={logoDark}
+        alt="Frame Africa"
+        height={h}
+        width={w}
         priority
-        style={{ height: px, width: px }}
+        className="brand-logo brand-logo-dark"
+        style={{ height: h, width: 'auto' }}
       />
-      <span className={`font-heading font-black uppercase tracking-tight text-text ${text}`}>
-        Frame<span className="text-primary">Africa</span>
-      </span>
+      <Image
+        src={logoLight}
+        alt="Frame Africa"
+        height={h}
+        width={w}
+        priority
+        className="brand-logo brand-logo-light"
+        style={{ height: h, width: 'auto' }}
+      />
     </span>
   );
 }

@@ -63,11 +63,13 @@ export default async function ArticlePage({ params }: PageProps) {
         )}
       </div>
 
-      <h1 className="font-heading text-4xl font-black leading-tight tracking-tight text-text">
+      <h1 className="font-heading text-4xl font-black leading-[1.08] tracking-tight text-text md:text-5xl">
         {article.title}
       </h1>
 
-      {article.subtitle && <p className="mt-3 font-body text-xl text-muted">{article.subtitle}</p>}
+      {article.subtitle && (
+        <p className="mt-4 font-body text-xl leading-relaxed text-muted">{article.subtitle}</p>
+      )}
 
       <div className="mt-5 flex flex-wrap items-center gap-x-2 font-mono text-xs text-muted">
         <span className="text-text">{article.author.displayName}</span>
@@ -80,13 +82,22 @@ export default async function ArticlePage({ params }: PageProps) {
       </div>
 
       <div
-        className="mt-8 aspect-[16/9] w-full rounded-xl bg-gradient-to-br from-surface-2 to-elev"
+        className="media-fill mt-8 aspect-[16/9] w-full rounded-2xl ring-1 ring-border"
         aria-hidden
-      />
+      >
+        <span className="absolute left-5 top-5 font-mono text-[10px] uppercase tracking-[0.18em] text-text/70">
+          {article.category.name}
+        </span>
+      </div>
 
-      <div className="mt-8 flex flex-col gap-5 font-body text-lg leading-relaxed text-text">
+      <div className="mt-8 flex flex-col gap-5 font-body text-lg leading-[1.75] text-text">
         {paragraphs.map((paragraph, index) => (
-          <p key={index}>{paragraph}</p>
+          <p
+            key={index}
+            className={index === 0 ? 'text-[1.35rem] leading-[1.6] text-text/95' : undefined}
+          >
+            {paragraph}
+          </p>
         ))}
       </div>
 
