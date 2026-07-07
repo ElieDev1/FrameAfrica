@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { DraftForm } from '@/components/cms/DraftForm';
 import { StatusBadge } from '@/components/cms/StatusBadge';
-import { categoryOptions, getDraft, isEditable, requireStaff } from '@/lib/cms';
+import { categoryOptions, getDraft, isEditable, requireStaff, topicOptions } from '@/lib/cms';
 import { submitDraftAction, updateDraftAction } from '@/lib/cms-actions';
 
 export const metadata: Metadata = { title: 'Edit draft — Frame Africa' };
@@ -12,7 +12,11 @@ type PageProps = { params: Promise<{ id: string }> };
 export default async function EditDraftPage({ params }: PageProps) {
   await requireStaff();
   const { id } = await params;
-  const [draft, categories] = await Promise.all([getDraft(id), categoryOptions()]);
+  const [draft, categories, topics] = await Promise.all([
+    getDraft(id),
+    categoryOptions(),
+    topicOptions(),
+  ]);
   const editable = isEditable(draft.status);
 
   const updateAction = updateDraftAction.bind(null, id);
@@ -34,6 +38,7 @@ export default async function EditDraftPage({ params }: PageProps) {
             <DraftForm
               action={updateAction}
               categories={categories}
+              topics={topics}
               mode="edit"
               initial={{
                 title: draft.title,
@@ -42,6 +47,7 @@ export default async function EditDraftPage({ params }: PageProps) {
                 excerpt: draft.excerpt ?? '',
                 body: draft.body,
                 blocks: draft.blocks,
+                topicSlugs: draft.topics.map((t) => t.slug),
                 language: draft.language,
                 isPremium: draft.isPremium,
                 featuredImageUrl: draft.featuredImageUrl ?? '',

@@ -3,7 +3,13 @@ import { ArticleStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListArticlesQueryDto } from './dto/list-articles-query.dto';
 import { blocksFromPlainBody, previewBlocks, type Block } from './blocks';
-import type { ArticleDetail, ArticleSummary, CategoryDetail, CategoryNode } from './content.types';
+import type {
+  ArticleDetail,
+  ArticleSummary,
+  CategoryDetail,
+  CategoryNode,
+  TopicDetail,
+} from './content.types';
 
 const DEFAULT_LIMIT = 20;
 
@@ -134,6 +140,15 @@ export class ContentService {
       parent: category.parent,
       children: category.children,
     };
+  }
+
+  /** All active topics, alphabetical — for tag pickers and topic indexes. */
+  async listTopics(): Promise<TopicDetail[]> {
+    return this.prisma.topic.findMany({
+      where: { isActive: true },
+      select: { id: true, name: true, slug: true, description: true },
+      orderBy: { name: 'asc' },
+    });
   }
 
   /** A single active topic by slug (topic page masthead), or 404. */

@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { DraftForm } from '@/components/cms/DraftForm';
-import { categoryOptions, requireStaff } from '@/lib/cms';
+import { categoryOptions, requireStaff, topicOptions } from '@/lib/cms';
 import { createDraftAction } from '@/lib/cms-actions';
 
 export const metadata: Metadata = { title: 'New draft — Frame Africa' };
 
 export default async function NewDraftPage() {
   await requireStaff();
-  const categories = await categoryOptions();
+  const [categories, topics] = await Promise.all([categoryOptions(), topicOptions()]);
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
@@ -17,7 +17,12 @@ export default async function NewDraftPage() {
       </Link>
       <h1 className="mt-3 font-heading text-2xl font-black tracking-tight text-text">New draft</h1>
       <div className="mt-6">
-        <DraftForm action={createDraftAction} categories={categories} mode="create" />
+        <DraftForm
+          action={createDraftAction}
+          categories={categories}
+          topics={topics}
+          mode="create"
+        />
       </div>
     </div>
   );

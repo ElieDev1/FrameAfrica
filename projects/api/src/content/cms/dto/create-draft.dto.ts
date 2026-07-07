@@ -42,6 +42,12 @@ export class CreateDraftDto {
   @IsArray()
   blocks?: unknown[];
 
+  /** Topic slugs to tag this article with (unknown slugs are ignored). */
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  topics?: string[];
+
   @IsOptional()
   @IsEnum(ArticleLanguage)
   language?: ArticleLanguage;

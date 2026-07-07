@@ -40,6 +40,12 @@ export class UpdateDraftDto {
   @IsArray()
   blocks?: unknown[];
 
+  /** Topic slugs to tag this article with; replaces the existing set. */
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  topics?: string[];
+
   @IsOptional()
   @IsEnum(ArticleLanguage)
   language?: ArticleLanguage;
