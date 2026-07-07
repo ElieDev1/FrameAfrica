@@ -88,8 +88,30 @@ model User {
   revisions     ArticleRevision[] @relation("UserRevisions")
   tokens        UserToken[]
   comments      Comment[]
+  mediaAssets   MediaAsset[]
 
   @@map("user")
+}
+
+/// An uploaded media file in the library / DAM (documents/13 §5). The binary is
+/// held by the storage driver (local dir in dev, S3 in prod); this row is the
+/// catalogue entry with the required alt/credit/licence metadata (`06` §6).
+model MediaAsset {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  uploaderId   String   @map("uploader_id") @db.Uuid
+  url          String
+  alt          String?
+  credit       String?
+  licence      String?
+  mime         String
+  sizeBytes    Int      @map("size_bytes")
+  originalName String?  @map("original_name")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  uploader User @relation(fields: [uploaderId], references: [id])
+
+  @@index([uploaderId, createdAt])
+  @@map("media_asset")
 }
 
 /// Single-use, hashed, short-lived tokens for email verification and password

@@ -40,3 +40,6 @@ Thumbs.db
 
 # Misc
 *.local
+
+# Uploaded media (local storage driver writes here; real storage is S3 in prod)
+projects/web/public/uploads/

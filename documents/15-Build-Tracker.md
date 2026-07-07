@@ -78,9 +78,9 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Admin taxonomy manager (create/edit/reorder/activate sections & topics)
 - **DoD:** the site's navigation reflects a real newsroom taxonomy end-to-end.
 
-### WS3 — Media library (real uploads) `[ ]`
-- [ ] Signed S3 upload + responsive variants (WebP/AVIF), stored `media_asset` with alt/credit/licence
-- [ ] Media library UI (browse/search/upload) + **picker** wired into the block editor
+### WS3 — Media library (real uploads) `[~]`
+- [x] Upload API (staff-gated multipart) + **local storage driver** (writes to `web/public/uploads`, same-origin URL) + `media_asset` catalogue (alt/credit/licence) + list — verified e2e. _(S3 driver + WebP/AVIF variants are the prod swap behind the same `save()` contract.)_
+- [ ] Media library UI (browse/upload) + **picker** wired into the block editor + featured-image picker
 - [ ] Galleries as first-class media; featured-image picker replaces URL-paste
 - **DoD:** staff upload real images/galleries; the DAM is the single source for media.
 
