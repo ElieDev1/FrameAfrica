@@ -54,7 +54,7 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 > Dependencies flow top-to-bottom. The **article is the keystone** — most surfaces
 > render or produce articles, so its structure comes first.
 
-### WS1 — Structured article (block content model) 🔑 `[x]`
+### WS1 — Structured article (block content model) 🔑 `[~]`
 *The article becomes a real multi-part document, not a plain textarea.*
 - [x] Schema: `Article.blocks` (structured JSON document) + migration
 - [x] Shared **block schema** + types: `paragraph, heading, image, gallery, pullquote, blockquote, list, factbox, embed, divider`
@@ -62,19 +62,16 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [x] API serves `blocks` in article detail (legacy `body` → blocks fallback so old content still renders)
 - [x] Web **BlockRenderer** + per-block components, brand-styled (captions, credits, pull-quotes, fact-boxes, safe embeds)
 - [x] Seed articles converted to real block documents (subheads, inline image, pull-quote, list, fact-box)
-- [x] Reading aids: subhead anchors, reading-progress bar, sticky mobile share, "Updated" timestamp
-- [x] CMS **block editor** — add / reorder / edit / delete every block type; empty-block pruning
-- **DoD met:** a published story renders as a designed document and staff author it block-by-block. Verified end-to-end (CMS create with blocks → sanitised → served → rendered).
+- [ ] CMS **block editor** — add / reorder / edit / delete blocks; live preview
+- [ ] Reading aids: subhead anchors (done in renderer), reading-progress, sticky mobile share, "Updated" timestamp
+- **DoD:** a published story renders as a designed document and staff author it block-by-block. _(Read path done + verified e2e; authoring editor is the remaining piece.)_
 
-### WS2 — Real taxonomy (sections · sub-sections · topics) `[~]`
-- [x] Real nested tree seeded from `14 §5` (5 sections × sub-sections; replaces the 6 placeholders)
-- [x] **Section pages aggregate their sub-sections** (descendant-aware article listing) + **sub-section chips** + parent breadcrumb (verified e2e)
-- [ ] Load-more pagination on section pages + a section ad slot
-- [x] **Topic/tag** model + article↔topic link (`topic` + `article_topic` tables) + seed tags (verified e2e)
-- [x] Topic pages (`/topic/[slug]`) + description; tags on articles link through; `?topic=` article filter
-- [ ] **Follow** on topic/section/author pages (needs the follow model — WS7)
-- [ ] Topic authoring in the CMS (tag a draft with topics)
+### WS2 — Real taxonomy (sections · sub-sections · topics) `[ ]`
+- [ ] Nested section/sub-section model (already nestable) + **topic/tag** model + article↔topic link
 - [ ] Admin taxonomy manager (create/edit/reorder/activate sections & topics)
+- [ ] Seed the real tree from `14 §5` (replace the 6 placeholder categories)
+- [ ] Section + sub-section pages (masthead, lead, river, sub-section chips, load-more, section ad slot)
+- [ ] Topic pages with **Follow** + description; tags on articles link through
 - **DoD:** the site's navigation reflects a real newsroom taxonomy end-to-end.
 
 ### WS3 — Media library (real uploads) `[ ]`
@@ -178,10 +175,8 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 
 ## 3. Current focus
 
-> **Done:** **WS1 — Structured article (block content model)** ✅ — the keystone,
-> read + write, verified end-to-end.
-> **Now:** **WS2 — Real taxonomy** (sections / sub-sections / topics).
-> **Next:** WS3 media library, then WS4 editorial desk.
+> **Now:** **WS1 — Structured article (block content model)**, the keystone.
+> **Next:** WS2 taxonomy, then WS3 media, then WS4 editorial desk.
 
 Update this section and tick boxes above as each PR merges into `dev`.
 

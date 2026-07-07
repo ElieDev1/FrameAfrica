@@ -93,8 +93,6 @@ export default async function ArticlePage({ params }: PageProps) {
     getSession(),
   ]);
 
-  const updated = isMeaningfullyUpdated(article.publishedAt, article.updatedAt);
-
   return (
     <article className="mx-auto max-w-2xl px-6 py-10">
       <ReadingProgress />
