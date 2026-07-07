@@ -24,6 +24,7 @@ function sampleArticle(id: string, title: string): ArticleSummary {
     isBreaking: false,
     readTimeMin: 3,
     publishedAt: '2026-01-01T00:00:00.000Z',
+    featuredImage: null,
     category: { id: 'c1', name: 'Rwanda', slug: 'rwanda' },
     author: { id: 'u1', displayName: 'Jane Uwase', avatarUrl: null },
   };

@@ -144,6 +144,13 @@ function toArticleSummary(article: ArticleWithRelations): ArticleSummary {
     isBreaking: article.isBreaking,
     readTimeMin: article.readTimeMin,
     publishedAt: article.publishedAt?.toISOString() ?? null,
+    featuredImage: article.featuredImageUrl
+      ? {
+          url: article.featuredImageUrl,
+          alt: article.featuredImageAlt,
+          credit: article.featuredImageCredit,
+        }
+      : null,
     category: article.category,
     author: article.author,
   };

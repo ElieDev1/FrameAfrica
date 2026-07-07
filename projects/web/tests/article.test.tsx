@@ -24,6 +24,7 @@ function sampleArticle(): ArticleDetail {
     isBreaking: true,
     readTimeMin: 4,
     publishedAt: '2026-01-01T00:00:00.000Z',
+    featuredImage: null,
     category: { id: 'c1', name: 'Business', slug: 'business' },
     author: { id: 'u1', displayName: 'Jane Uwase', avatarUrl: null },
     body: 'First paragraph.\n\nSecond paragraph.',
@@ -48,6 +49,36 @@ describe('ArticlePage', () => {
     expect(screen.getByText('Jane Uwase')).toBeInTheDocument();
     expect(screen.getByText('First paragraph.')).toBeInTheDocument();
     expect(screen.getByText('Second paragraph.')).toBeInTheDocument();
+  });
+
+  it('renders the featured image with its alt text and credit', async () => {
+    mockFetchArticle.mockResolvedValue({
+      ...sampleArticle(),
+      featuredImage: {
+        url: '/seed/coffee.jpg',
+        alt: 'Coffee cherries drying',
+        credit: 'Frame Africa',
+      },
+    });
+
+    render(await ArticlePage({ params: Promise.resolve({ slug: 'rwanda-coffee' }) }));
+
+    expect(screen.getByAltText('Coffee cherries drying')).toBeInTheDocument();
+    expect(screen.getByText(/Frame Africa/)).toBeInTheDocument();
+  });
+
+  it('embeds NewsArticle JSON-LD structured data', async () => {
+    mockFetchArticle.mockResolvedValue(sampleArticle());
+
+    const { container } = render(
+      await ArticlePage({ params: Promise.resolve({ slug: 'rwanda-coffee' }) }),
+    );
+
+    const ld = container.querySelector('script[type="application/ld+json"]');
+    expect(ld).not.toBeNull();
+    const data = JSON.parse(ld?.innerHTML ?? '{}') as { '@type': string; headline: string };
+    expect(data['@type']).toBe('NewsArticle');
+    expect(data.headline).toBe('Rwanda coffee exports climb');
   });
 
   it('triggers notFound() when the article is missing', async () => {

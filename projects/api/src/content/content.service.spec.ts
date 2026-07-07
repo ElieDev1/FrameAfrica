@@ -67,6 +67,32 @@ describe('ContentService', () => {
       });
     });
 
+    it('maps a featured image with its alt + credit when present', async () => {
+      prisma.article.findMany.mockResolvedValue([
+        articleRow({
+          featuredImageUrl: '/seed/coffee.jpg',
+          featuredImageAlt: 'Coffee cherries',
+          featuredImageCredit: 'Frame Africa',
+        }),
+      ]);
+
+      const res = await service.listArticles({});
+
+      expect(res.items[0].featuredImage).toEqual({
+        url: '/seed/coffee.jpg',
+        alt: 'Coffee cherries',
+        credit: 'Frame Africa',
+      });
+    });
+
+    it('returns a null featured image when the article has none', async () => {
+      prisma.article.findMany.mockResolvedValue([articleRow()]);
+
+      const res = await service.listArticles({});
+
+      expect(res.items[0].featuredImage).toBeNull();
+    });
+
     it('signals another page and returns a cursor when over the limit', async () => {
       prisma.article.findMany.mockResolvedValue([
         articleRow({ id: 'a1' }),

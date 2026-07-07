@@ -1,5 +1,6 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import type { ArticleSummary } from '@/lib/api';
+import type { ArticleSummary, FeaturedImage } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 
 function Badges({ article }: { article: ArticleSummary }) {
@@ -35,13 +36,32 @@ function Meta({ article }: { article: ArticleSummary }) {
   );
 }
 
-/** A deliberate branded media panel (the seed has no images yet). */
-function Thumb({ featured, kicker }: { featured: boolean; kicker: string }) {
+/** The featured image, or a deliberate branded panel when the story has none. */
+function Thumb({
+  featured,
+  kicker,
+  image,
+}: {
+  featured: boolean;
+  kicker: string;
+  image: FeaturedImage | null;
+}) {
+  const aspect = featured ? 'aspect-[16/9]' : 'aspect-[16/10]';
+  if (image) {
+    return (
+      <div className={`relative w-full overflow-hidden rounded-xl ${aspect}`}>
+        <Image
+          src={image.url}
+          alt={image.alt ?? ''}
+          fill
+          sizes={featured ? '(max-width: 1024px) 100vw, 66vw' : '(max-width: 640px) 100vw, 33vw'}
+          className="object-cover"
+        />
+      </div>
+    );
+  }
   return (
-    <div
-      className={`media-fill w-full rounded-xl ${featured ? 'aspect-[16/9]' : 'aspect-[16/10]'}`}
-      aria-hidden
-    >
+    <div className={`media-fill w-full rounded-xl ${aspect}`} aria-hidden>
       <span className="absolute left-4 top-4 font-mono text-[10px] uppercase tracking-[0.18em] text-text/70">
         {kicker}
       </span>
@@ -65,7 +85,7 @@ export function ArticleCard({
         className="block overflow-hidden rounded-xl ring-1 ring-border transition-all duration-300 group-hover:ring-border-2"
       >
         <div className="transition-transform duration-500 group-hover:scale-[1.03]">
-          <Thumb featured={featured} kicker={article.category.name} />
+          <Thumb featured={featured} kicker={article.category.name} image={article.featuredImage} />
         </div>
       </Link>
       <div className="flex flex-col gap-2">

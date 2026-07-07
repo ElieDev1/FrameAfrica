@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ArticleCard } from '@/components/ArticleCard';
 import { fetchArticles, fetchCategory } from '@/lib/api';
+import { absoluteUrl } from '@/lib/site';
 
 export const revalidate = 60;
 
@@ -11,11 +12,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const category = await fetchCategory(slug);
   if (!category) {
-    return { title: 'Section not found — Frame Africa' };
+    return { title: 'Section not found' };
   }
+  const description = category.description ?? `The latest ${category.name} news from Frame Africa.`;
+  const path = `/section/${category.slug}`;
   return {
-    title: `${category.name} — Frame Africa`,
-    description: category.description ?? `The latest ${category.name} news from Frame Africa.`,
+    title: category.name,
+    description,
+    alternates: { canonical: path },
+    openGraph: { type: 'website', title: category.name, description, url: absoluteUrl(path) },
   };
 }
 

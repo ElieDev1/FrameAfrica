@@ -92,10 +92,10 @@ until merged and note their PR.
 - [ ] Feature as breaking news (`FR-EDIT-4`)
 - [x] CMS editor UI: `/cms` draft list + `/cms/new` + `/cms/[id]` editor (create/edit/submit), staff-gated (`06` §4.5) — _rich-text editor still a plain textarea for now_
 
-### Slice 6 — Media  `FR-PROD-2`
+### Slice 6 — Media  `FR-PROD-2` 🚧
 - [ ] Signed S3 upload + responsive image variants (WebP/AVIF) (`02` §5)
-- [ ] Featured image + galleries on articles
-- [ ] Credit / alt-text / licensing metadata
+- [x] Featured image on articles — `featured_image_url` on `article`, served by the read API and rendered with `next/image` across cards + article hero (falls back to the branded placeholder when absent). _Galleries still to come._
+- [x] Credit / alt-text metadata — `featured_image_alt` + `featured_image_credit`, rendered as image `alt` and a photo credit (`06` §6). _Licensing field with the DAM._
 
 ### Slice 7 — Comments & moderation  `FR-COMM-*`
 - [ ] Threaded comments, likes, reports (`FR-COMM-1`, `-2`)
@@ -115,7 +115,7 @@ until merged and note their PR.
 
 ### Slice 9 — Launch baseline
 - [x] Global exception filter → standard `{ error: { code, ... } }` envelope (`04` §2) — pulled early so the whole API shares one error contract; the `402` premium preview stays success-shaped
-- [ ] SEO: `NewsArticle` schema, XML + Google News sitemaps, OG/Twitter, `hreflang` (`01` §4.8)
+- [x] SEO essentials: `NewsArticle` JSON-LD, XML sitemap, `robots.txt`, canonical URLs, OpenGraph + Twitter cards (`01` §4.8) — _Google News sitemap + `hreflang` still to come (the latter needs i18n routing)_
 - [ ] Analytics event ingestion + admin overview (`FR-ADM-3`)
 - [ ] Backups + restore drill; pre-launch security checklist (`05` §16)
 - [ ] i18n EN/RW at launch (`FR-READ-7`)

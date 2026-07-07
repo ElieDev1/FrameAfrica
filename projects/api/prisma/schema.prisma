@@ -172,6 +172,12 @@ model Article {
   isPremium    Boolean       @default(false) @map("is_premium")
   isBreaking   Boolean       @default(false) @map("is_breaking")
   readTimeMin  Int?          @map("read_time_min")
+  // Featured image (documents/06 §6: images always carry alt + credit). A full
+  // media-asset/DAM table + signed S3 upload lands later; this denormalised
+  // featured image is the first media increment.
+  featuredImageUrl    String? @map("featured_image_url")
+  featuredImageAlt    String? @map("featured_image_alt")
+  featuredImageCredit String? @map("featured_image_credit")
   viewCount    BigInt        @default(0) @map("view_count")
   likeCount    Int           @default(0) @map("like_count")
   shareCount   Int           @default(0) @map("share_count")

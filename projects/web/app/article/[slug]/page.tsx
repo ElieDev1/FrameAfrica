@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArticleCard } from '@/components/ArticleCard';
 import { ShareBar } from '@/components/ShareBar';
-import { fetchArticle, fetchRelated } from '@/lib/api';
+import { fetchArticle, fetchRelated, type ArticleDetail } from '@/lib/api';
 import { formatDate } from '@/lib/format';
+import { absoluteUrl, SITE_NAME } from '@/lib/site';
 
 export const revalidate = 60;
 
@@ -14,12 +16,53 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const article = await fetchArticle(slug);
   if (!article) {
-    return { title: 'Article not found — Frame Africa' };
+    return { title: 'Article not found' };
   }
+  const description = article.excerpt ?? article.subtitle ?? undefined;
+  const path = `/article/${article.slug}`;
+  const images = article.featuredImage ? [{ url: article.featuredImage.url }] : undefined;
   return {
-    title: `${article.title} — Frame Africa`,
-    description: article.excerpt ?? article.subtitle ?? undefined,
+    title: article.title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: 'article',
+      title: article.title,
+      description,
+      url: absoluteUrl(path),
+      section: article.category.name,
+      publishedTime: article.publishedAt ?? undefined,
+      modifiedTime: article.updatedAt,
+      authors: [article.author.displayName],
+      images,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description,
+      images,
+    },
   };
+}
+
+/** schema.org NewsArticle structured data (documents/01 §4.8, SEO). */
+function newsArticleJsonLd(article: ArticleDetail): string {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: article.title,
+    description: article.excerpt ?? article.subtitle ?? undefined,
+    articleSection: article.category.name,
+    inLanguage: article.language,
+    datePublished: article.publishedAt ?? undefined,
+    dateModified: article.updatedAt,
+    author: { '@type': 'Person', name: article.author.displayName },
+    publisher: { '@type': 'Organization', name: SITE_NAME },
+    image: article.featuredImage ? [absoluteUrl(article.featuredImage.url)] : undefined,
+    mainEntityOfPage: absoluteUrl(`/article/${article.slug}`),
+    isAccessibleForFree: !article.isPremium,
+  };
+  return JSON.stringify(data);
 }
 
 export default async function ArticlePage({ params }: PageProps) {
@@ -34,6 +77,10 @@ export default async function ArticlePage({ params }: PageProps) {
 
   return (
     <article className="mx-auto max-w-2xl px-6 py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: newsArticleJsonLd(article) }}
+      />
       <nav aria-label="Breadcrumb" className="mb-6 font-mono text-xs text-muted">
         <Link href="/" className="hover:text-primary">
           Home
@@ -81,14 +128,34 @@ export default async function ArticlePage({ params }: PageProps) {
         <ShareBar title={article.title} />
       </div>
 
-      <div
-        className="media-fill mt-8 aspect-[16/9] w-full rounded-2xl ring-1 ring-border"
-        aria-hidden
-      >
-        <span className="absolute left-5 top-5 font-mono text-[10px] uppercase tracking-[0.18em] text-text/70">
-          {article.category.name}
-        </span>
-      </div>
+      {article.featuredImage ? (
+        <figure className="mt-8">
+          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl ring-1 ring-border">
+            <Image
+              src={article.featuredImage.url}
+              alt={article.featuredImage.alt ?? ''}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 680px"
+              className="object-cover"
+            />
+          </div>
+          {article.featuredImage.credit && (
+            <figcaption className="mt-2 font-mono text-[11px] text-faint">
+              Photo: {article.featuredImage.credit}
+            </figcaption>
+          )}
+        </figure>
+      ) : (
+        <div
+          className="media-fill mt-8 aspect-[16/9] w-full rounded-2xl ring-1 ring-border"
+          aria-hidden
+        >
+          <span className="absolute left-5 top-5 font-mono text-[10px] uppercase tracking-[0.18em] text-text/70">
+            {article.category.name}
+          </span>
+        </div>
+      )}
 
       <div className="mt-8 flex flex-col gap-5 font-body text-lg leading-[1.75] text-text">
         {paragraphs.map((paragraph, index) => (

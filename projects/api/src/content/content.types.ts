@@ -18,6 +18,13 @@ export interface CategoryRef {
   slug: string;
 }
 
+/** Featured image + its required alt/credit metadata (documents/06 §6). */
+export interface FeaturedImage {
+  url: string;
+  alt: string | null;
+  credit: string | null;
+}
+
 export interface ArticleSummary {
   id: string;
   slug: string;
@@ -29,6 +36,7 @@ export interface ArticleSummary {
   isBreaking: boolean;
   readTimeMin: number | null;
   publishedAt: string | null;
+  featuredImage: FeaturedImage | null;
   category: CategoryRef;
   author: AuthorSummary;
 }

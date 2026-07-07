@@ -194,6 +194,12 @@ async function main(): Promise<void> {
       isBreaking: a.isBreaking ?? false,
       readTimeMin: a.readTimeMin,
       viewCount: BigInt(views[a.slug] ?? 0),
+      // Bundled cover art under /public/seed (see documents/06 §6 — alt + credit
+      // are required). Real photography drops into the same field via the CMS
+      // image URL or the S3 upload pipeline once available.
+      featuredImageUrl: `/seed/${a.slug}.jpg`,
+      featuredImageAlt: a.title,
+      featuredImageCredit: 'Frame Africa',
       publishedAt,
       seo: {
         seoTitle: a.title,
