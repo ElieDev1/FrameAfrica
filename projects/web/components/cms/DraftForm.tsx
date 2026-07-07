@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import type { Block } from '@/lib/api';
-import type { CategoryOption, TopicOption } from '@/lib/cms';
+import type { CategoryOption } from '@/lib/cms';
 import type { DraftFormState } from '@/lib/cms-actions';
 import { BlockEditor } from './BlockEditor';
 
@@ -24,7 +24,6 @@ export interface DraftInitial {
   excerpt: string;
   body: string;
   blocks: Block[] | null;
-  topicSlugs: string[];
   language: string;
   isPremium: boolean;
   featuredImageUrl: string;
@@ -176,31 +175,6 @@ export function DraftForm({
           </div>
         </div>
       </fieldset>
-
-      {topics.length > 0 && (
-        <fieldset className="flex flex-col gap-2 rounded-xl border border-border p-4">
-          <legend className="px-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Topics
-          </legend>
-          <div className="flex flex-wrap gap-2">
-            {topics.map((topic) => (
-              <label
-                key={topic.slug}
-                className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border px-3 py-1 font-mono text-[11px] text-muted has-[:checked]:border-primary has-[:checked]:text-primary"
-              >
-                <input
-                  type="checkbox"
-                  name="topics"
-                  value={topic.slug}
-                  defaultChecked={selected.has(topic.slug)}
-                  className="accent-primary"
-                />
-                {topic.name}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-      )}
 
       <div className="flex flex-col gap-2">
         <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">

@@ -43,11 +43,6 @@ export class ContentController {
     return apiResponse(await this.content.getCategoryBySlug(slug));
   }
 
-  @Get('topics')
-  async getTopics() {
-    return apiResponse(await this.content.listTopics());
-  }
-
   @Get('topics/:slug')
   async getTopic(@Param('slug') slug: string) {
     return apiResponse(await this.content.getTopicBySlug(slug));

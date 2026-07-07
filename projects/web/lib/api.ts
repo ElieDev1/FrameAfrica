@@ -250,12 +250,6 @@ export async function fetchCategory(slug: string): Promise<CategoryDetail | null
   }
 }
 
-/** All active topics (for tag pickers and indexes). */
-export async function fetchTopics(): Promise<TopicDetail[]> {
-  const envelope = await apiGet<TopicDetail[]>('/topics');
-  return envelope.data;
-}
-
 /** Returns the topic, or `null` if the API responds 404. */
 export async function fetchTopic(slug: string): Promise<TopicDetail | null> {
   try {

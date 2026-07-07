@@ -142,15 +142,6 @@ export class ContentService {
     };
   }
 
-  /** All active topics, alphabetical — for tag pickers and topic indexes. */
-  async listTopics(): Promise<TopicDetail[]> {
-    return this.prisma.topic.findMany({
-      where: { isActive: true },
-      select: { id: true, name: true, slug: true, description: true },
-      orderBy: { name: 'asc' },
-    });
-  }
-
   /** A single active topic by slug (topic page masthead), or 404. */
   async getTopicBySlug(slug: string): Promise<TopicDetail> {
     const topic = await this.prisma.topic.findFirst({
