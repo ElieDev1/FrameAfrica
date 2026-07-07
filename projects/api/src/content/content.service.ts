@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ArticleStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListArticlesQueryDto } from './dto/list-articles-query.dto';
+import { blocksFromPlainBody, previewBlocks, type Block } from './blocks';
 import type { ArticleDetail, ArticleSummary, CategoryDetail, CategoryNode } from './content.types';
 
 const DEFAULT_LIMIT = 20;
@@ -162,9 +163,17 @@ function toArticleDetail(article: ArticleWithRelations): ArticleDetail {
   // until billing (documents/04-API-Design.md §7) lands.
   const isLocked = article.isPremium;
 
+  // Prefer the structured block document; older articles are converted from
+  // their plain body so the renderer always receives blocks. Premium stories
+  // expose only a preview until billing lands.
+  const stored = Array.isArray(article.blocks) ? (article.blocks as unknown as Block[]) : null;
+  const fullBlocks = stored ?? blocksFromPlainBody(article.body);
+  const blocks = isLocked ? previewBlocks(fullBlocks) : fullBlocks;
+
   return {
     ...toArticleSummary(article),
     body: isLocked ? previewParagraph(article.body) : article.body,
+    blocks,
     seo: article.seo,
     viewCount: Number(article.viewCount),
     likeCount: article.likeCount,

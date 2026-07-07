@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArticleCard } from '@/components/ArticleCard';
+import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { CommentsSection } from '@/components/CommentsSection';
 import { ShareBar } from '@/components/ShareBar';
 import { fetchArticle, fetchComments, fetchRelated, type ArticleDetail } from '@/lib/api';
@@ -79,7 +80,6 @@ export default async function ArticlePage({ params }: PageProps) {
     fetchComments(article.id),
     getSession(),
   ]);
-  const paragraphs = article.body.split('\n\n').filter(Boolean);
 
   return (
     <article className="mx-auto max-w-2xl px-6 py-10">
@@ -163,15 +163,8 @@ export default async function ArticlePage({ params }: PageProps) {
         </div>
       )}
 
-      <div className="mt-8 flex flex-col gap-5 font-body text-lg leading-[1.75] text-text">
-        {paragraphs.map((paragraph, index) => (
-          <p
-            key={index}
-            className={index === 0 ? 'text-[1.35rem] leading-[1.6] text-text/95' : undefined}
-          >
-            {paragraph}
-          </p>
-        ))}
+      <div className="mt-8">
+        <BlockRenderer blocks={article.blocks} />
       </div>
 
       {article.isLocked && (

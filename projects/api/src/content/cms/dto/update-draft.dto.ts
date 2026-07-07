@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsBoolean,
   IsEnum,
   IsOptional,
@@ -33,6 +34,11 @@ export class UpdateDraftDto {
   @IsOptional()
   @IsString()
   body?: string;
+
+  /** The structured article document; validated/sanitised in the service. */
+  @IsOptional()
+  @IsArray()
+  blocks?: unknown[];
 
   @IsOptional()
   @IsEnum(ArticleLanguage)
