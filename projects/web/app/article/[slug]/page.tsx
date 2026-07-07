@@ -3,9 +3,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArticleCard } from '@/components/ArticleCard';
+import { CommentsSection } from '@/components/CommentsSection';
 import { ShareBar } from '@/components/ShareBar';
-import { fetchArticle, fetchRelated, type ArticleDetail } from '@/lib/api';
+import { fetchArticle, fetchComments, fetchRelated, type ArticleDetail } from '@/lib/api';
 import { formatDate } from '@/lib/format';
+import { getSession } from '@/lib/session';
 import { absoluteUrl, SITE_NAME } from '@/lib/site';
 
 export const revalidate = 60;
@@ -72,7 +74,11 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound();
   }
 
-  const related = await fetchRelated(slug);
+  const [related, comments, user] = await Promise.all([
+    fetchRelated(slug),
+    fetchComments(article.id),
+    getSession(),
+  ]);
   const paragraphs = article.body.split('\n\n').filter(Boolean);
 
   return (
@@ -196,6 +202,13 @@ export default async function ArticlePage({ params }: PageProps) {
           </div>
         </section>
       )}
+
+      <CommentsSection
+        articleId={article.id}
+        slug={article.slug}
+        comments={comments}
+        signedIn={Boolean(user)}
+      />
 
       <div className="mt-10 border-t border-border pt-6">
         <Link href="/" className="font-mono text-xs text-primary hover:underline">

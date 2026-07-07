@@ -97,10 +97,10 @@ until merged and note their PR.
 - [x] Featured image on articles — `featured_image_url` on `article`, served by the read API and rendered with `next/image` across cards + article hero (falls back to the branded placeholder when absent). Staff attach one via the **CMS editor** (URL + alt + credit fields). _Galleries + upload still to come._
 - [x] Credit / alt-text metadata — `featured_image_alt` + `featured_image_credit`, authored in the CMS and rendered as image `alt` and a photo credit (`06` §6). _Licensing field with the DAM._
 
-### Slice 7 — Comments & moderation  `FR-COMM-*`
-- [ ] Threaded comments, likes, reports (`FR-COMM-1`, `-2`)
-- [ ] Rich-text/HTML sanitization to prevent stored XSS (`05` §6)
-- [ ] Moderation queue, hide/remove, user ban; AI spam pre-screen hook (`FR-COMM-3`, `-4`)
+### Slice 7 — Comments & moderation  `FR-COMM-*` 🚧
+- [x] Threaded comments (`FR-COMM-1`) — `GET/POST /v1/articles/:id/comments`, one-level replies, a `comment` table with a moderation `status`, and a comment thread + form on the article page (signed-in readers; rate-limited 5/min). _Likes + reports still to come (`FR-COMM-2`)._
+- [x] HTML sanitization to prevent stored XSS (`05` §6) — comment bodies are stored as plain text (markup stripped on write) and output-encoded by React on render.
+- [ ] Moderation queue, hide/remove, user ban; AI spam pre-screen hook (`FR-COMM-3`, `-4`) — _the `status` enum (visible/pending/hidden/removed) is in place; the moderation UI + actions are next._
 
 ### Slice 8 — Monetization  `FR-SUB-*`, `FR-AD-*`
 - [ ] Metered paywall (N free/period) → `402` preview when over meter (`FR-SUB-1`; `04` §7)

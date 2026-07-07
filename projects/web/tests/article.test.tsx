@@ -1,16 +1,26 @@
 import { render, screen } from '@testing-library/react';
 import ArticlePage from '../app/article/[slug]/page';
-import { fetchArticle, fetchRelated, type ArticleDetail } from '@/lib/api';
+import { fetchArticle, fetchComments, fetchRelated, type ArticleDetail } from '@/lib/api';
+import { getSession } from '@/lib/session';
 
 jest.mock('@/lib/api', () => ({
   fetchArticle: jest.fn(),
   fetchRelated: jest.fn(),
+  fetchComments: jest.fn(),
 }));
+jest.mock('@/lib/session', () => ({ getSession: jest.fn() }));
+jest.mock('@/lib/comments-actions', () => ({ postComment: jest.fn() }));
 
 const mockFetchArticle = fetchArticle as jest.MockedFunction<typeof fetchArticle>;
 const mockFetchRelated = fetchRelated as jest.MockedFunction<typeof fetchRelated>;
+const mockFetchComments = fetchComments as jest.MockedFunction<typeof fetchComments>;
+const mockGetSession = getSession as jest.MockedFunction<typeof getSession>;
 
-beforeEach(() => mockFetchRelated.mockResolvedValue([]));
+beforeEach(() => {
+  mockFetchRelated.mockResolvedValue([]);
+  mockFetchComments.mockResolvedValue([]);
+  mockGetSession.mockResolvedValue(null);
+});
 
 function sampleArticle(): ArticleDetail {
   return {
@@ -79,6 +89,40 @@ describe('ArticlePage', () => {
     const data = JSON.parse(ld?.innerHTML ?? '{}') as { '@type': string; headline: string };
     expect(data['@type']).toBe('NewsArticle');
     expect(data.headline).toBe('Rwanda coffee exports climb');
+  });
+
+  it('renders comments and prompts sign-in when signed out', async () => {
+    mockFetchArticle.mockResolvedValue(sampleArticle());
+    mockFetchComments.mockResolvedValue([
+      {
+        id: 'c1',
+        body: 'Great piece.',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        author: { id: 'u2', displayName: 'Ana K.', avatarUrl: null },
+        replies: [],
+      },
+    ]);
+
+    render(await ArticlePage({ params: Promise.resolve({ slug: 'rwanda-coffee' }) }));
+
+    expect(screen.getByText('Great piece.')).toBeInTheDocument();
+    expect(screen.getByText('Ana K.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /sign in/i })).toBeInTheDocument();
+  });
+
+  it('shows the comment form to a signed-in reader', async () => {
+    mockFetchArticle.mockResolvedValue(sampleArticle());
+    mockGetSession.mockResolvedValue({
+      id: 'u1',
+      email: 'reader@example.test',
+      displayName: 'Me',
+      avatarUrl: null,
+      roles: ['reader'],
+    });
+
+    render(await ArticlePage({ params: Promise.resolve({ slug: 'rwanda-coffee' }) }));
+
+    expect(screen.getByPlaceholderText(/add to the conversation/i)).toBeInTheDocument();
   });
 
   it('triggers notFound() when the article is missing', async () => {

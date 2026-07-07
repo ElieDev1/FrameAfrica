@@ -158,6 +158,35 @@ export async function fetchRelated(slug: string): Promise<ArticleSummary[]> {
   }
 }
 
+export interface CommentAuthor {
+  id: string;
+  displayName: string;
+  avatarUrl: string | null;
+}
+
+export interface Comment {
+  id: string;
+  body: string;
+  createdAt: string;
+  author: CommentAuthor;
+  replies: Comment[];
+}
+
+/** Visible comments for an article (fresh — not cached), or `[]` on any error. */
+export async function fetchComments(articleId: string): Promise<Comment[]> {
+  try {
+    const res = await fetch(`${API_URL}/articles/${encodeURIComponent(articleId)}/comments`, {
+      headers: { accept: 'application/json' },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const envelope = (await res.json()) as ApiEnvelope<Comment[]>;
+    return envelope.data;
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchCategories(): Promise<CategoryNode[]> {
   const envelope = await apiGet<CategoryNode[]>('/categories');
   return envelope.data;

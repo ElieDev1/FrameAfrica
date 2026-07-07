@@ -214,6 +214,50 @@ async function main(): Promise<void> {
     });
   }
 
+  // A reader plus a short comment thread so the article page isn't empty in dev.
+  const readerRole = await prisma.role.upsert({
+    where: { name: RoleName.reader },
+    update: {},
+    create: { name: RoleName.reader },
+  });
+  const reader = await prisma.user.upsert({
+    where: { email: 'aline.dev@frameafrica.rw' },
+    update: {},
+    create: {
+      email: 'aline.dev@frameafrica.rw',
+      displayName: 'Aline U.',
+      emailVerifiedAt: new Date(),
+      passwordHash,
+    },
+  });
+  await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: reader.id, roleId: readerRole.id } },
+    update: {},
+    create: { userId: reader.id, roleId: readerRole.id },
+  });
+
+  const coffee = await prisma.article.findUnique({
+    where: { slug: 'rwanda-coffee-exports-hit-record-high' },
+    select: { id: true },
+  });
+  if (coffee && (await prisma.comment.count({ where: { articleId: coffee.id } })) === 0) {
+    const top = await prisma.comment.create({
+      data: {
+        articleId: coffee.id,
+        authorId: reader.id,
+        body: 'Great to see specialty demand rewarding smallholder growers.',
+      },
+    });
+    await prisma.comment.create({
+      data: {
+        articleId: coffee.id,
+        authorId: author.id,
+        parentId: top.id,
+        body: 'Agreed — the Western Province lots have been exceptional this season.',
+      },
+    });
+  }
+
   const [categories, published] = await Promise.all([
     prisma.category.count(),
     prisma.article.count({ where: { status: ArticleStatus.published } }),
