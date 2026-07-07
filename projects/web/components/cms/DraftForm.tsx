@@ -3,8 +3,10 @@
 import type { ReactNode } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
+import type { Block } from '@/lib/api';
 import type { CategoryOption } from '@/lib/cms';
 import type { DraftFormState } from '@/lib/cms-actions';
+import { BlockEditor } from './BlockEditor';
 
 const LANGUAGES = [
   ['en', 'English'],
@@ -21,6 +23,7 @@ export interface DraftInitial {
   subtitle: string;
   excerpt: string;
   body: string;
+  blocks: Block[] | null;
   language: string;
   isPremium: boolean;
   featuredImageUrl: string;
@@ -170,15 +173,12 @@ export function DraftForm({
         </div>
       </fieldset>
 
-      <Field label="Body">
-        <textarea
-          name="body"
-          defaultValue={initial?.body}
-          rows={16}
-          className={`${inputClass} font-body leading-relaxed`}
-          placeholder="Write the story… (blank line between paragraphs)"
-        />
-      </Field>
+      <div className="flex flex-col gap-2">
+        <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">
+          Article body
+        </span>
+        <BlockEditor initialBlocks={initial?.blocks} initialBody={initial?.body ?? ''} />
+      </div>
 
       {mode === 'edit' && (
         <Field label="Change note (optional)">

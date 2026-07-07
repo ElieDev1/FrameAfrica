@@ -54,7 +54,7 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 > Dependencies flow top-to-bottom. The **article is the keystone** — most surfaces
 > render or produce articles, so its structure comes first.
 
-### WS1 — Structured article (block content model) 🔑 `[~]`
+### WS1 — Structured article (block content model) 🔑 `[x]`
 *The article becomes a real multi-part document, not a plain textarea.*
 - [x] Schema: `Article.blocks` (structured JSON document) + migration
 - [x] Shared **block schema** + types: `paragraph, heading, image, gallery, pullquote, blockquote, list, factbox, embed, divider`
@@ -63,8 +63,8 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [x] Web **BlockRenderer** + per-block components, brand-styled (captions, credits, pull-quotes, fact-boxes, safe embeds)
 - [x] Seed articles converted to real block documents (subheads, inline image, pull-quote, list, fact-box)
 - [x] Reading aids: subhead anchors, reading-progress bar, sticky mobile share, "Updated" timestamp
-- [ ] CMS **block editor** — add / reorder / edit / delete blocks; live preview
-- **DoD:** a published story renders as a designed document and staff author it block-by-block. _(Read path done + verified e2e; authoring editor is the remaining piece.)_
+- [x] CMS **block editor** — add / reorder / edit / delete every block type; empty-block pruning
+- **DoD met:** a published story renders as a designed document and staff author it block-by-block. Verified end-to-end (CMS create with blocks → sanitised → served → rendered).
 
 ### WS2 — Real taxonomy (sections · sub-sections · topics) `[ ]`
 - [ ] Nested section/sub-section model (already nestable) + **topic/tag** model + article↔topic link
@@ -175,8 +175,10 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 
 ## 3. Current focus
 
-> **Now:** **WS1 — Structured article (block content model)**, the keystone.
-> **Next:** WS2 taxonomy, then WS3 media, then WS4 editorial desk.
+> **Done:** **WS1 — Structured article (block content model)** ✅ — the keystone,
+> read + write, verified end-to-end.
+> **Now:** **WS2 — Real taxonomy** (sections / sub-sections / topics).
+> **Next:** WS3 media library, then WS4 editorial desk.
 
 Update this section and tick boxes above as each PR merges into `dev`.
 
