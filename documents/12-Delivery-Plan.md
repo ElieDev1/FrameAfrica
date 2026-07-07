@@ -72,6 +72,7 @@ until merged and note their PR.
 ### Slice 4 — Auth & reader accounts  `FR-AUTH-*` 🚧
 - [x] Login; JWT access + HTTP-only refresh cookie with rotation & reuse detection (`FR-AUTH-2`, `-7`; `05` §3)
 - [x] RBAC guards (JwtAuthGuard + RolesGuard), deny-by-default; `GET /me` (`05` §4)
+- [x] Reader-account **UI**: `/signup`, `/login`, `/account` + auth-aware header, via a BFF session (tokens in the Next server's HTTP-only cookies)
 - [ ] Register + email verification (`FR-AUTH-1`) — _registration done; email verification pending_
 - [ ] Password reset (`FR-AUTH-5`)
 - [ ] 2FA (TOTP) mandatory for staff (`FR-AUTH-6`)

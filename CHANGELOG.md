@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Auth core (MVP):** `POST /v1/auth/register|login|refresh|logout` and `GET /v1/me`, issuing a short-lived access JWT plus a rotating refresh token; new readers get the `reader` role. RBAC building blocks (`JwtAuthGuard`, `RolesGuard`, `@Roles`, `@CurrentUser`) and a `refresh_token` table/migration.
 - **CMS drafts (MVP):** staff-only draft lifecycle under `/v1/cms/articles` — create, list-own, get, update, and submit-for-review — gated by `JwtAuthGuard` + `RolesGuard` with per-author object-level scoping. Every save snapshots an `ArticleRevision` (new table/migration); titles auto-slug uniquely. First consumer of the RBAC layer.
 - **Sections & navigation (MVP):** `GET /v1/categories/:slug` (section masthead) plus a Next.js section page `/section/[slug]` (masthead + article river, SEO, 404). The site header now shows top-level section nav, and article-card kickers / article breadcrumbs link through to their section.
+- **Design alignment:** header and footer now match `documents/design-prototype` — aperture logo + FRAMEAFRICA wordmark (shared `Wordmark`), sticky header, and a 4-column footer (Sections/Company/Products/Legal) with tagline, legal line, and EN/RW/Français switcher.
+- **Reader accounts UI (MVP):** `/signup`, `/login`, and `/account` pages plus an auth-aware header, backed by a **BFF session** — the Next server holds tokens in HTTP-only cookies (`fa_access`/`fa_refresh`) and the browser never sees them (`05` §3.2, §7).
 
 ### Changed
 - `06-UIUX-Content-Layout.md`: locked in concrete font families (Archivo, Source Serif 4, IBM Plex Mono) matching the design prototype; added a link to the prototype.

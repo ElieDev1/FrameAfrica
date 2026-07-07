@@ -1,9 +1,12 @@
 import Link from 'next/link';
 import { fetchCategories, type CategoryNode } from '@/lib/api';
+import { getSession } from '@/lib/session';
+import { Wordmark } from './Wordmark';
 
 const MAX_SECTIONS = 6;
+const STAFF_ROLES = ['journalist', 'editor', 'admin'];
 
-/** Top bar: wordmark + primary section navigation (top-level categories). */
+/** Top bar: brand + section nav + auth-aware actions. */
 export async function SiteHeader() {
   let sections: CategoryNode[] = [];
   try {
@@ -11,12 +14,14 @@ export async function SiteHeader() {
   } catch {
     sections = []; // header still renders if the API is unreachable
   }
+  const user = await getSession();
+  const isStaff = user?.roles.some((role) => STAFF_ROLES.includes(role)) ?? false;
 
   return (
-    <header className="border-b border-border bg-surface">
-      <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-4">
-        <Link href="/" className="font-heading text-xl font-black tracking-tight text-text">
-          Frame<span className="text-primary">Africa</span>
+    <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-3">
+        <Link href="/" aria-label="Frame Africa — home">
+          <Wordmark />
         </Link>
         <nav className="hidden flex-wrap gap-4 md:flex">
           {sections.map((section) => (
@@ -29,6 +34,42 @@ export async function SiteHeader() {
             </Link>
           ))}
         </nav>
+
+        <div className="ml-auto flex items-center gap-4">
+          {user ? (
+            <>
+              {isStaff && (
+                <Link
+                  href="/cms"
+                  className="font-mono text-xs uppercase tracking-[0.12em] text-muted hover:text-primary"
+                >
+                  Write
+                </Link>
+              )}
+              <Link
+                href="/account"
+                className="font-mono text-xs uppercase tracking-[0.12em] text-text hover:text-primary"
+              >
+                {user.displayName}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="font-mono text-xs uppercase tracking-[0.12em] text-muted hover:text-primary"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-lg bg-primary px-3 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.12em] text-black hover:opacity-90"
+              >
+                Sign up
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );
