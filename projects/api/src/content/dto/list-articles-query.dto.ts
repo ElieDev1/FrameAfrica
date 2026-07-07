@@ -1,9 +1,16 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsEnum, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { ArticleLanguage } from '@prisma/client';
+
+export type ArticleSort = 'latest' | 'popular';
 
 /** Query params for `GET /articles` (public, published-only). */
 export class ListArticlesQueryDto {
+  /** Ordering: `latest` (default, newest first) or `popular` (most viewed). */
+  @IsOptional()
+  @IsIn(['latest', 'popular'])
+  sort?: ArticleSort;
+
   @IsOptional()
   @Type(() => Number)
   @IsInt()

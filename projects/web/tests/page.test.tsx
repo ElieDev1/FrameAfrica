@@ -28,15 +28,22 @@ function sampleArticle(id: string, title: string): ArticleSummary {
 describe('Home', () => {
   afterEach(() => jest.clearAllMocks());
 
-  it('renders the lead and latest stories from the API', async () => {
-    mockFetchArticles.mockResolvedValue({
-      articles: [sampleArticle('a1', 'Lead story'), sampleArticle('a2', 'Second story')],
-    });
+  it('renders the lead, secondary stories, and a Most-read list', async () => {
+    mockFetchArticles.mockImplementation((params) =>
+      Promise.resolve({
+        articles:
+          params?.sort === 'popular'
+            ? [sampleArticle('p1', 'Most read one')]
+            : [sampleArticle('a1', 'Lead story'), sampleArticle('a2', 'Second story')],
+      }),
+    );
 
     render(await Home());
 
     expect(screen.getByRole('heading', { name: 'Lead story' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Second story' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Most read' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Most read one' })).toBeInTheDocument();
   });
 
   it('shows a friendly message when the API is unreachable', async () => {

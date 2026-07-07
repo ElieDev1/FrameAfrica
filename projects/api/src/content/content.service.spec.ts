@@ -94,6 +94,16 @@ describe('ContentService', () => {
         category: { slug: 'rwanda' },
       });
     });
+
+    it('orders by view count when sort=popular', async () => {
+      prisma.article.findMany.mockResolvedValue([]);
+
+      await service.listArticles({ sort: 'popular' });
+
+      const calls = prisma.article.findMany.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { orderBy: unknown };
+      expect(arg.orderBy).toEqual([{ viewCount: 'desc' }, { id: 'desc' }]);
+    });
   });
 
   describe('getArticleBySlug', () => {

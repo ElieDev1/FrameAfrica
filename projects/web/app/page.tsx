@@ -1,19 +1,27 @@
 import { ArticleCard } from '@/components/ArticleCard';
+import { HeadlineItem, MostRead } from '@/components/HeadlineList';
+import { NewsletterBox } from '@/components/NewsletterBox';
 import { fetchArticles, type ArticleSummary } from '@/lib/api';
 
 export const revalidate = 60;
 
 export default async function Home() {
-  let articles: ArticleSummary[] = [];
+  let latest: ArticleSummary[] = [];
+  let popular: ArticleSummary[] = [];
   let failed = false;
 
   try {
-    ({ articles } = await fetchArticles({ limit: 12 }));
+    const [latestRes, popularRes] = await Promise.all([
+      fetchArticles({ limit: 13 }),
+      fetchArticles({ sort: 'popular', limit: 5 }),
+    ]);
+    latest = latestRes.articles;
+    popular = popularRes.articles;
   } catch {
     failed = true;
   }
 
-  if (failed || articles.length === 0) {
+  if (failed || latest.length === 0) {
     return (
       <div className="mx-auto max-w-6xl px-6 py-24 text-center">
         <h1 className="font-heading text-2xl font-bold text-text">
@@ -28,28 +36,51 @@ export default async function Home() {
     );
   }
 
-  const [lead, ...rest] = articles;
+  const [lead, ...rest] = latest;
+  const secondary = rest.slice(0, 4);
+  const river = rest.slice(4);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
       <h1 className="sr-only">Frame Africa — latest news</h1>
 
-      <section aria-label="Lead story" className="border-b border-border pb-10">
-        <ArticleCard article={lead} featured />
+      <section
+        aria-label="Top stories"
+        className="grid gap-8 border-b border-border pb-10 lg:grid-cols-3"
+      >
+        <div className="lg:col-span-2">
+          <ArticleCard article={lead} featured />
+        </div>
+        {secondary.length > 0 && (
+          <div className="divide-y divide-border lg:border-l lg:border-border lg:pl-8">
+            {secondary.map((article) => (
+              <HeadlineItem key={article.id} article={article} />
+            ))}
+          </div>
+        )}
       </section>
 
-      {rest.length > 0 && (
-        <section aria-labelledby="latest" className="pt-10">
+      <div className="mt-10 grid gap-10 lg:grid-cols-3">
+        <section aria-labelledby="latest" className="lg:col-span-2">
           <h2 id="latest" className="mb-6 font-mono text-xs uppercase tracking-[0.18em] text-muted">
             Latest
           </h2>
-          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
-            {rest.map((article) => (
-              <ArticleCard key={article.id} article={article} />
-            ))}
-          </div>
+          {river.length > 0 ? (
+            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2">
+              {river.map((article) => (
+                <ArticleCard key={article.id} article={article} />
+              ))}
+            </div>
+          ) : (
+            <p className="font-body text-muted">More stories coming soon.</p>
+          )}
         </section>
-      )}
+
+        <aside className="flex flex-col gap-8">
+          <MostRead articles={popular} />
+          <NewsletterBox />
+        </aside>
+      </div>
     </div>
   );
 }

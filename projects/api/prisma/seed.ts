@@ -145,6 +145,16 @@ async function main(): Promise<void> {
     },
   ];
 
+  // Seeded view counts so "Most read" (sort=popular) has meaningful ordering.
+  const views: Record<string, number> = {
+    'rwanda-coffee-exports-hit-record-high': 4200,
+    'kigali-innovation-city-adds-startups': 3100,
+    'east-african-trade-corridor-upgrade': 1800,
+    'amavubi-name-squad-for-qualifier': 5600,
+    'central-bank-holds-key-rate': 900,
+    'kigali-green-transport-plan': 2500,
+  };
+
   const now = Date.now();
   for (const a of articles) {
     const publishedAt = new Date(now - a.daysAgo * 24 * 60 * 60 * 1000);
@@ -161,6 +171,7 @@ async function main(): Promise<void> {
       isPremium: a.isPremium ?? false,
       isBreaking: a.isBreaking ?? false,
       readTimeMin: a.readTimeMin,
+      viewCount: BigInt(views[a.slug] ?? 0),
       publishedAt,
       seo: {
         seoTitle: a.title,

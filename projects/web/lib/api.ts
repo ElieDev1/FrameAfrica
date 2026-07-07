@@ -102,6 +102,7 @@ export interface ListArticlesParams {
   category?: string;
   language?: ArticleLanguage;
   q?: string;
+  sort?: 'latest' | 'popular';
   limit?: number;
   cursor?: string;
 }
@@ -113,6 +114,7 @@ export async function fetchArticles(
   if (params.category) search.set('category', params.category);
   if (params.language) search.set('language', params.language);
   if (params.q) search.set('q', params.q);
+  if (params.sort) search.set('sort', params.sort);
   if (params.limit) search.set('limit', String(params.limit));
   if (params.cursor) search.set('cursor', params.cursor);
 

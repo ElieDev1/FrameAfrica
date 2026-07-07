@@ -48,10 +48,15 @@ export class ContentService {
         : {}),
     };
 
+    const orderBy: Prisma.ArticleOrderByWithRelationInput[] =
+      query.sort === 'popular'
+        ? [{ viewCount: 'desc' }, { id: 'desc' }]
+        : [{ publishedAt: 'desc' }, { id: 'desc' }];
+
     const rows = await this.prisma.article.findMany({
       where,
       include: articleInclude,
-      orderBy: [{ publishedAt: 'desc' }, { id: 'desc' }],
+      orderBy,
       take: limit + 1,
       ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
     });
