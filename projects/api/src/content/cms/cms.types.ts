@@ -1,6 +1,12 @@
 import type { ArticleLanguage, ArticleStatus } from '@prisma/client';
 import type { Block } from '../blocks';
 
+interface TopicRef {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 interface CategoryRef {
   id: string;
   name: string;
@@ -26,6 +32,7 @@ export interface DraftDetail extends DraftListItem {
   body: string;
   /** The structured block document, or null for legacy plain-body drafts. */
   blocks: Block[] | null;
+  topics: TopicRef[];
   featuredImageUrl: string | null;
   featuredImageAlt: string | null;
   featuredImageCredit: string | null;

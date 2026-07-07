@@ -21,6 +21,7 @@ const EDITABLE: ArticleStatus[] = [
 
 const draftInclude = {
   category: { select: { id: true, name: true, slug: true } },
+  topics: { include: { topic: { select: { id: true, name: true, slug: true } } } },
 } satisfies Prisma.ArticleInclude;
 
 type DraftRow = Prisma.ArticleGetPayload<{ include: typeof draftInclude }>;
@@ -41,6 +42,7 @@ export class CmsDraftService {
     // `body` is derived from it for excerpt/search/read-time. Otherwise fall
     // back to the legacy plain `body`.
     const content = resolveContent(dto.blocks, dto.body);
+    const topicIds = await this.resolveTopicIds(dto.topics);
 
     const article = await this.prisma.article.create({
       data: {
@@ -50,6 +52,9 @@ export class CmsDraftService {
         excerpt: dto.excerpt ?? null,
         body: content.body,
         blocks: content.blocks ?? Prisma.DbNull,
+        ...(topicIds.length
+          ? { topics: { create: topicIds.map((id) => ({ topic: { connect: { id } } })) } }
+          : {}),
         language: dto.language ?? 'en',
         isPremium: dto.isPremium ?? false,
         featuredImageUrl: dto.featuredImageUrl || null,
@@ -129,6 +134,14 @@ export class CmsDraftService {
       await this.assertCategoryExists(dto.categoryId);
       data.category = { connect: { id: dto.categoryId } };
     }
+    if (dto.topics !== undefined) {
+      const topicIds = await this.resolveTopicIds(dto.topics);
+      // Replace the whole tag set with the submitted one.
+      data.topics = {
+        deleteMany: {},
+        create: topicIds.map((id) => ({ topic: { connect: { id } } })),
+      };
+    }
 
     data.revisions = {
       create: [
@@ -174,6 +187,17 @@ export class CmsDraftService {
       throw new ConflictException(`Cannot edit an article in "${article.status}" state`);
     }
     return article;
+  }
+
+  /** Map submitted topic slugs to ids, silently dropping any that don't exist. */
+  private async resolveTopicIds(slugs: string[] | undefined): Promise<string[]> {
+    if (!slugs || slugs.length === 0) return [];
+    const unique = [...new Set(slugs)];
+    const topics = await this.prisma.topic.findMany({
+      where: { slug: { in: unique }, isActive: true },
+      select: { id: true },
+    });
+    return topics.map((t) => t.id);
   }
 
   private async assertCategoryExists(categoryId: string): Promise<void> {
@@ -252,6 +276,7 @@ function toDraftDetail(article: DraftRow): DraftDetail {
     excerpt: article.excerpt,
     body: article.body,
     blocks: readBlocks(article.blocks),
+    topics: article.topics.map((t) => t.topic),
     featuredImageUrl: article.featuredImageUrl,
     featuredImageAlt: article.featuredImageAlt,
     featuredImageCredit: article.featuredImageCredit,

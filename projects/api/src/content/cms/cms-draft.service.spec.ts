@@ -16,6 +16,7 @@ const row = (over: Record<string, unknown> = {}) => ({
   createdAt: new Date('2026-01-01T00:00:00Z'),
   updatedAt: new Date('2026-01-02T00:00:00Z'),
   category: { id: 'c1', name: 'Rwanda', slug: 'rwanda' },
+  topics: [],
   ...over,
 });
 
@@ -29,6 +30,7 @@ function build() {
       update: jest.fn(),
     },
     category: { findUnique: jest.fn() },
+    topic: { findMany: jest.fn() },
   };
   const service = new CmsDraftService(prisma as unknown as PrismaService);
   return { service, prisma };
@@ -107,6 +109,24 @@ describe('CmsDraftService', () => {
       expect(blocks).toHaveLength(2);
       expect(blocks[1].text).toBe('Body with markup'); // tags stripped
       expect(arg.data.body).toBe('Section\n\nBody with markup'); // derived plain body
+    });
+
+    it('tags the draft with the resolved topic ids', async () => {
+      const { service, prisma } = build();
+      prisma.category.findUnique.mockResolvedValue({ id: 'c1' });
+      prisma.article.findUnique.mockResolvedValue(null);
+      prisma.topic.findMany.mockResolvedValue([{ id: 't1' }, { id: 't2' }]);
+      prisma.article.create.mockResolvedValue(row());
+
+      await service.createDraft('u1', {
+        title: 'My Draft',
+        categoryId: 'c1',
+        topics: ['climate', 'exports'],
+      });
+
+      const calls = prisma.article.create.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { data: { topics?: { create: unknown[] } } };
+      expect(arg.data.topics?.create).toHaveLength(2);
     });
 
     it('rejects a block document with an unsafe URL', async () => {

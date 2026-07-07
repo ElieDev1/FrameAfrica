@@ -3,7 +3,13 @@ import { ArticleStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListArticlesQueryDto } from './dto/list-articles-query.dto';
 import { blocksFromPlainBody, previewBlocks, type Block } from './blocks';
-import type { ArticleDetail, ArticleSummary, CategoryDetail, CategoryNode } from './content.types';
+import type {
+  ArticleDetail,
+  ArticleSummary,
+  CategoryDetail,
+  CategoryNode,
+  TopicDetail,
+} from './content.types';
 
 const DEFAULT_LIMIT = 20;
 

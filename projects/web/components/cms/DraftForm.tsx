@@ -59,15 +59,18 @@ function SaveButton({ label }: { label: string }) {
 export function DraftForm({
   action,
   categories,
+  topics,
   initial,
   mode,
 }: {
   action: Action;
   categories: CategoryOption[];
+  topics: TopicOption[];
   initial?: DraftInitial;
   mode: 'create' | 'edit';
 }) {
   const [state, formAction] = useActionState(action, {});
+  const selected = new Set(initial?.topicSlugs ?? []);
 
   return (
     <form action={formAction} className="flex flex-col gap-5">

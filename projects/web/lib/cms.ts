@@ -133,6 +133,17 @@ export async function categoryOptions(): Promise<CategoryOption[]> {
   return out;
 }
 
+export interface TopicOption {
+  slug: string;
+  name: string;
+}
+
+/** All active topics as `{ slug, name }` options for the draft tag picker. */
+export async function topicOptions(): Promise<TopicOption[]> {
+  const topics = await fetchTopics();
+  return topics.map((t) => ({ slug: t.slug, name: t.name }));
+}
+
 export function isEditable(status: DraftStatus): boolean {
   return status === 'draft' || status === 'in_progress' || status === 'rejected';
 }
