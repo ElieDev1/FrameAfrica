@@ -1,5 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
-import { fetchCategories, type Block } from './api';
+import { fetchCategories, fetchTopics, type Block, type TopicRef } from './api';
 import { getAccessToken, getSession, type SessionUser } from './session';
 
 /** Server-side helpers for the newsroom (CMS). All calls are authenticated. */
@@ -29,6 +29,7 @@ export interface DraftDetail extends DraftListItem {
   body: string;
   /** The structured block document, or null for legacy plain-body drafts. */
   blocks: Block[] | null;
+  topics: TopicRef[];
   featuredImageUrl: string | null;
   featuredImageAlt: string | null;
   featuredImageCredit: string | null;

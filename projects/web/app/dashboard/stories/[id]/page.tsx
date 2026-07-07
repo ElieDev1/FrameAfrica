@@ -47,6 +47,7 @@ export default async function EditDraftPage({ params }: PageProps) {
                 excerpt: draft.excerpt ?? '',
                 body: draft.body,
                 blocks: draft.blocks,
+                topicSlugs: draft.topics.map((t) => t.slug),
                 language: draft.language,
                 isPremium: draft.isPremium,
                 featuredImageUrl: draft.featuredImageUrl ?? '',

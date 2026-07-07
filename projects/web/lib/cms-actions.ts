@@ -55,6 +55,8 @@ function draftPayload(formData: FormData) {
     // The structured document authored in the block editor; the API derives the
     // plain body from it and sanitises every block on write.
     blocks: parseBlocks(formData),
+    // Selected topic slugs (checkbox group); the API replaces the tag set.
+    topics: formData.getAll('topics').map(String),
     language: String(formData.get('language') || 'en'),
     isPremium: formData.get('isPremium') === 'on',
     featuredImageUrl: String(formData.get('featuredImageUrl') ?? '').trim() || undefined,
