@@ -86,7 +86,7 @@ until merged and note their PR.
 - [ ] Publish now / schedule / embargo (`FR-EDIT-2`, `-3`)
 - [ ] Corrections & retractions with a public, dated log (`FR-EDIT-5`)
 - [ ] Feature as breaking news (`FR-EDIT-4`)
-- [ ] Distraction-free CMS editor UI (`06` §4.5)
+- [x] CMS editor UI: `/cms` draft list + `/cms/new` + `/cms/[id]` editor (create/edit/submit), staff-gated (`06` §4.5) — _rich-text editor still a plain textarea for now_
 
 ### Slice 6 — Media  `FR-PROD-2`
 - [ ] Signed S3 upload + responsive image variants (WebP/AVIF) (`02` §5)
