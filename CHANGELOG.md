@@ -42,8 +42,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Article depth:** `GET /v1/articles/:slug/related` (up to 4 same-category stories) drives a **Related stories** block on the article page, plus a client **share bar** (X / Facebook / WhatsApp / copy-link).
 - **Editor workflow (MVP):** editor-gated `GET /v1/cms/review` + `POST /cms/articles/:id/publish|reject` and a `/cms/review` UI — submitted (`ready`) drafts can be **published** (→ live) or **rejected**. Seeds an editor account.
 - **Homepage blocks:** a full-width **breaking-news ticker** and **per-section blocks** (top sections, a few cards each).
+- **Global exception filter (API):** every unhandled error now returns the standard `{ error: { code, message, details?, requestId } }` envelope (`04-API-Design.md` §2), with status→code mapping (`NOT_FOUND`, `VALIDATION_ERROR`, `UNAUTHENTICATED`, `FORBIDDEN`, `CONFLICT`, `RATE_LIMITED`, `PAYMENT_REQUIRED`, `INTERNAL_ERROR`). The `ValidationPipe` now emits per-field `details` (`{ field, issue }`); 5xx errors are logged server-side but reported generically so no internal detail leaks (`05` §8). The `402` premium preview stays success-shaped.
 
 ### Changed
+- Reconciled `12-Delivery-Plan.md` §4 "Current focus" with what has actually merged (Slices 1–5 + homepage/article depth), replacing the stale "Slice 1 done / next up to be chosen" note.
 - `06-UIUX-Content-Layout.md`: locked in concrete font families (Archivo, Source Serif 4, IBM Plex Mono) matching the design prototype; added a link to the prototype.
 - Scoped Prettier to code (`projects/**` + config); hand-authored docs (`*.md`, `documents/`) are excluded from formatting.
 - Aligned Jest to v29 across `web` and `api` so a single test-runner version is used monorepo-wide.

@@ -114,7 +114,7 @@ until merged and note their PR.
 - [ ] Basic ads + public notices / tenders / obituaries (`FR-AD-1`, `-3`)
 
 ### Slice 9 — Launch baseline
-- [ ] Global exception filter → standard `{ error: { code, ... } }` envelope (`04` §2)
+- [x] Global exception filter → standard `{ error: { code, ... } }` envelope (`04` §2) — pulled early so the whole API shares one error contract; the `402` premium preview stays success-shaped
 - [ ] SEO: `NewsArticle` schema, XML + Google News sitemaps, OG/Twitter, `hreflang` (`01` §4.8)
 - [ ] Analytics event ingestion + admin overview (`FR-ADM-3`)
 - [ ] Backups + restore drill; pre-launch security checklist (`05` §16)
@@ -146,11 +146,18 @@ until merged and note their PR.
 
 ## 4. Current focus
 
-> **Done:** Phase 1 · Slice 1 — Public reading (#6).
-> **Next up:** _to be chosen_. Recommended: **Slice 4 — Auth & reader accounts**, which
-> unblocks the most downstream MVP work (CMS, comments, paywall). Slices 2–3
-> (sections, search) are smaller reader-facing alternatives if we want to finish the
-> public read surface first.
+> **Done so far (Phase 1):** Slice 1 public reading (#6); Slice 2 sections & nav
+> (#14, tags deferred); Slice 3 interim Postgres search (#17, OpenSearch pending);
+> Slice 4 auth core — login/JWT/refresh/RBAC + reader-account BFF UI (#11, #12);
+> Slice 5 CMS — draft lifecycle + editor publish/reject + newsroom UI (#13, #16, #19);
+> homepage depth — breaking ticker, section blocks, Most-read (#18, #22); article
+> depth — related + share bar (#20); BFF session auto-refresh (#21). Slice 9's
+> global exception filter landed early (this branch).
+>
+> **Next up:** finish **Slice 4 trust** — email verification + password reset
+> (`FR-AUTH-1`, `-5`) — which unblocks credible accounts; or push **Slice 5**
+> (publish/schedule/embargo + a real rich-text editor). **Slice 3** OpenSearch and
+> **Slice 6** media are the other high-value follow-ups.
 
 ---
 
