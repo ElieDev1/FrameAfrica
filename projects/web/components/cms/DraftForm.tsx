@@ -1,12 +1,13 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import type { Block } from '@/lib/api';
 import type { CategoryOption, TopicOption } from '@/lib/cms';
 import type { DraftFormState } from '@/lib/cms-actions';
 import { BlockEditor } from './BlockEditor';
+import { MediaPicker } from './MediaPicker';
 
 const LANGUAGES = [
   ['en', 'English'],
@@ -72,6 +73,11 @@ export function DraftForm({
 }) {
   const [state, formAction] = useActionState(action, {});
   const selected = new Set(initial?.topicSlugs ?? []);
+  const [featured, setFeatured] = useState({
+    url: initial?.featuredImageUrl ?? '',
+    alt: initial?.featuredImageAlt ?? '',
+    credit: initial?.featuredImageCredit ?? '',
+  });
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -143,22 +149,30 @@ export function DraftForm({
         <legend className="px-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
           Featured image
         </legend>
-        <Field label="Image URL">
-          <input
-            name="featuredImageUrl"
-            type="url"
-            defaultValue={initial?.featuredImageUrl}
-            maxLength={500}
-            placeholder="https://…  (upload coming soon)"
-            className={inputClass}
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="min-w-[14rem] flex-1">
+            <Field label="Image URL">
+              <input
+                name="featuredImageUrl"
+                value={featured.url}
+                onChange={(e) => setFeatured((f) => ({ ...f, url: e.target.value }))}
+                maxLength={500}
+                placeholder="/uploads/…  or  https://…"
+                className={inputClass}
+              />
+            </Field>
+          </div>
+          <MediaPicker
+            onSelect={(a) => setFeatured({ url: a.url, alt: a.alt ?? '', credit: a.credit ?? '' })}
           />
-        </Field>
+        </div>
         <div className="flex flex-wrap gap-4">
           <div className="min-w-[16rem] flex-1">
             <Field label="Alt text (for accessibility)">
               <input
                 name="featuredImageAlt"
-                defaultValue={initial?.featuredImageAlt}
+                value={featured.alt}
+                onChange={(e) => setFeatured((f) => ({ ...f, alt: e.target.value }))}
                 maxLength={300}
                 className={inputClass}
               />
@@ -168,7 +182,8 @@ export function DraftForm({
             <Field label="Credit">
               <input
                 name="featuredImageCredit"
-                defaultValue={initial?.featuredImageCredit}
+                value={featured.credit}
+                onChange={(e) => setFeatured((f) => ({ ...f, credit: e.target.value }))}
                 maxLength={200}
                 className={inputClass}
               />

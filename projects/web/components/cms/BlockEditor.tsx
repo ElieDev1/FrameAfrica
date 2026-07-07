@@ -2,6 +2,7 @@
 
 import { useId, useMemo, useState } from 'react';
 import type { Block } from '@/lib/api';
+import { MediaPicker } from './MediaPicker';
 
 /**
  * The newsroom block editor — authors build a structured article document
@@ -280,12 +281,24 @@ function BlockFields({
     case 'image':
       return (
         <div className="flex flex-col gap-2">
-          <input
-            className={input}
-            value={block.url}
-            placeholder="Image URL (https://… or /seed/…)"
-            onChange={(e) => onPatch({ url: e.target.value })}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              className={input}
+              style={{ flex: 1, minWidth: '12rem' }}
+              value={block.url}
+              placeholder="Image URL (https://… or /seed/…)"
+              onChange={(e) => onPatch({ url: e.target.value })}
+            />
+            <MediaPicker
+              onSelect={(a) =>
+                onPatch({
+                  url: a.url,
+                  alt: a.alt ?? '',
+                  ...(a.credit ? { credit: a.credit } : {}),
+                })
+              }
+            />
+          </div>
           <input
             className={input}
             value={block.alt}
@@ -352,13 +365,26 @@ function BlockFields({
               </button>
             </div>
           ))}
-          <button
-            type="button"
-            className="self-start rounded border border-border px-2 py-1 font-mono text-[11px] text-muted hover:border-primary hover:text-primary"
-            onClick={() => onPatch({ images: [...block.images, { url: '', alt: '' }] })}
-          >
-            + Add photo
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="self-start rounded border border-border px-2 py-1 font-mono text-[11px] text-muted hover:border-primary hover:text-primary"
+              onClick={() => onPatch({ images: [...block.images, { url: '', alt: '' }] })}
+            >
+              + Add blank
+            </button>
+            <MediaPicker
+              label="Add from library"
+              onSelect={(a) =>
+                onPatch({
+                  images: [
+                    ...block.images,
+                    { url: a.url, alt: a.alt ?? '', ...(a.credit ? { credit: a.credit } : {}) },
+                  ],
+                })
+              }
+            />
+          </div>
         </div>
       );
 

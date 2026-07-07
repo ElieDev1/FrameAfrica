@@ -78,12 +78,12 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Admin taxonomy manager (create/edit/reorder/activate sections & topics)
 - **DoD:** the site's navigation reflects a real newsroom taxonomy end-to-end.
 
-### WS3 — Media library (real uploads) `[~]`
+### WS3 — Media library (real uploads) `[x]`
 - [x] Upload API (staff-gated multipart) + **local storage driver** (writes to `web/public/uploads`, same-origin URL) + `media_asset` catalogue (alt/credit/licence) + list — verified e2e. _(S3 driver + WebP/AVIF variants are the prod swap behind the same `save()` contract.)_
 - [x] Media library UI — `/dashboard/media` (browse grid + upload form via a BFF action), + a nav item
-- [ ] A **picker** wired into the block editor + featured-image picker (replaces URL-paste)
-- [ ] Galleries as first-class media
-- **DoD:** staff upload real images/galleries; the DAM is the single source for media.
+- [x] A **media picker** ("Choose from library") wired into the block editor (image + gallery) **and** the featured-image field — replaces URL-paste
+- [x] Galleries pull from the library (add-from-library on the gallery block)
+- **DoD met (dev):** staff upload real images and pick them across the editor + featured image; the library is the source. _(S3 driver + WebP/AVIF variants remain the prod-storage swap.)_
 
 ### WS4 — Editorial desk & workflow `[ ]`
 - [ ] Full status machine (`draft→…→published`) with role transitions + assignments
@@ -180,10 +180,12 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 
 ## 3. Current focus
 
-> **Done:** **WS1 — Structured article (block content model)** ✅ — the keystone,
-> read + write, verified end-to-end.
-> **Now:** **WS2 — Real taxonomy** (sections / sub-sections / topics).
-> **Next:** WS3 media library, then WS4 editorial desk.
+> **Done:** **WS1 — Structured article** ✅, **WS2 — Real taxonomy** ✅
+> (nested sections + topics + CMS authoring + load-more), and **WS3 — Media
+> library** ✅ (uploads + storage driver + library UI + editor/featured picker).
+> **Now:** **WS4 — Editorial desk & workflow** (schedule/embargo, corrections,
+> review desk, homepage curation).
+> **Next:** WS5 live coverage, then WS6 Studio.
 
 Update this section and tick boxes above as each PR merges into `dev`.
 

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import type { MediaAsset } from './cms';
 import { getAccessToken } from './session';
 
 const API_URL =
@@ -10,6 +11,23 @@ const API_URL =
 export interface UploadState {
   error?: string;
   uploadedUrl?: string;
+}
+
+/** Fetch the media library for the client-side picker (empty on any error). */
+export async function listMediaAction(): Promise<MediaAsset[]> {
+  const token = await getAccessToken();
+  if (!token) return [];
+  try {
+    const res = await fetch(`${API_URL}/cms/media`, {
+      headers: { authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as { data: MediaAsset[] };
+    return json.data;
+  } catch {
+    return [];
+  }
 }
 
 /**
