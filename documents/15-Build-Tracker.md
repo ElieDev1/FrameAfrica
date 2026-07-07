@@ -69,7 +69,8 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 ### WS2 — Real taxonomy (sections · sub-sections · topics) `[~]`
 - [x] Real nested tree seeded from `14 §5` (5 sections × sub-sections; replaces the 6 placeholders)
 - [x] **Section pages aggregate their sub-sections** (descendant-aware article listing) + **sub-section chips** + parent breadcrumb (verified e2e)
-- [ ] Load-more pagination on section pages + a section ad slot
+- [x] Load-more pagination on section **and** topic pages (cursor-based, via a server action)
+- [ ] A section ad slot (lands with the ad server, WS9)
 - [x] **Topic/tag** model + article↔topic link (`topic` + `article_topic` tables) + seed tags (verified e2e)
 - [x] Topic pages (`/topic/[slug]`) + description; tags on articles link through; `?topic=` article filter
 - [ ] **Follow** on topic/section/author pages (needs the follow model — WS7)
@@ -77,9 +78,9 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Admin taxonomy manager (create/edit/reorder/activate sections & topics)
 - **DoD:** the site's navigation reflects a real newsroom taxonomy end-to-end.
 
-### WS3 — Media library (real uploads) `[ ]`
-- [ ] Signed S3 upload + responsive variants (WebP/AVIF), stored `media_asset` with alt/credit/licence
-- [ ] Media library UI (browse/search/upload) + **picker** wired into the block editor
+### WS3 — Media library (real uploads) `[~]`
+- [x] Upload API (staff-gated multipart) + **local storage driver** (writes to `web/public/uploads`, same-origin URL) + `media_asset` catalogue (alt/credit/licence) + list — verified e2e. _(S3 driver + WebP/AVIF variants are the prod swap behind the same `save()` contract.)_
+- [ ] Media library UI (browse/upload) + **picker** wired into the block editor + featured-image picker
 - [ ] Galleries as first-class media; featured-image picker replaces URL-paste
 - **DoD:** staff upload real images/galleries; the DAM is the single source for media.
 

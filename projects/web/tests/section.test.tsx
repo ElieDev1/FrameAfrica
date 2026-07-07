@@ -52,7 +52,7 @@ describe('SectionPage', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Business' })).toBeInTheDocument();
     expect(screen.getByText(/Money, markets/)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Coffee exports climb' })).toBeInTheDocument();
-    expect(mockFetchArticles).toHaveBeenCalledWith({ category: 'business', limit: 24 });
+    expect(mockFetchArticles).toHaveBeenCalledWith({ category: 'business', limit: 12 });
     // Sub-section chip links through to the child section.
     expect(screen.getByRole('link', { name: 'Economy' })).toHaveAttribute(
       'href',
