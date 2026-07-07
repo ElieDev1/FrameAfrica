@@ -20,7 +20,7 @@ export default async function EditDraftPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
-      <Link href="/cms" className="font-mono text-xs text-primary hover:underline">
+      <Link href="/dashboard/stories" className="font-mono text-xs text-primary hover:underline">
         ← Newsroom
       </Link>
       <div className="mt-3 flex items-center gap-3">

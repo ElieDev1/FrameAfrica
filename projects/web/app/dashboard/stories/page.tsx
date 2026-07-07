@@ -15,7 +15,7 @@ export default async function NewsroomPage() {
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-3xl font-black tracking-tight text-text">Newsroom</h1>
         <Link
-          href="/cms/new"
+          href="/dashboard/stories/new"
           className="rounded-lg bg-primary px-4 py-2 font-heading font-bold text-black hover:opacity-90"
         >
           New draft
@@ -30,7 +30,7 @@ export default async function NewsroomPage() {
             <li key={draft.id} className="flex items-center justify-between gap-4 px-4 py-3">
               <div className="min-w-0">
                 <Link
-                  href={`/cms/${draft.id}`}
+                  href={`/dashboard/stories/${draft.id}`}
                   className="block truncate font-heading font-bold text-text hover:text-primary"
                 >
                   {draft.title}

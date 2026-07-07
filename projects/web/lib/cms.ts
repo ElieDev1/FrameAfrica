@@ -60,7 +60,15 @@ export async function requireStaff(): Promise<SessionUser> {
 export async function requireEditor(): Promise<SessionUser> {
   const user = await getSession();
   if (!user) redirect('/login');
-  if (!isEditor(user)) redirect('/cms');
+  if (!isEditor(user)) redirect('/dashboard');
+  return user;
+}
+
+/** Require a signed-in admin, else redirect. Returns the user. */
+export async function requireAdmin(): Promise<SessionUser> {
+  const user = await getSession();
+  if (!user) redirect('/login');
+  if (!user.roles.includes('admin')) redirect('/dashboard');
   return user;
 }
 

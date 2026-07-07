@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import { fetchCategories, type CategoryNode } from '@/lib/api';
 import { Wordmark } from './Wordmark';
@@ -19,6 +20,9 @@ function ColumnHeading({ children }: { children: string }) {
 }
 
 export async function SiteFooter() {
+  const pathname = (await headers()).get('x-pathname') ?? '';
+  if (pathname.startsWith('/dashboard')) return null;
+
   let sections: CategoryNode[] = [];
   try {
     sections = (await fetchCategories()).slice(0, 5);
