@@ -179,10 +179,12 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 
 ## 3. Current focus
 
-> **Done:** **WS1 — Structured article (block content model)** ✅ — the keystone,
-> read + write, verified end-to-end.
-> **Now:** **WS2 — Real taxonomy** (sections / sub-sections / topics).
-> **Next:** WS3 media library, then WS4 editorial desk.
+> **Done:** **WS1 — Structured article** ✅, **WS2 — Real taxonomy** ✅
+> (nested sections + topics + CMS authoring + load-more), and **WS3 — Media
+> library** ✅ (uploads + storage driver + library UI + editor/featured picker).
+> **Now:** **WS4 — Editorial desk & workflow** (schedule/embargo, corrections,
+> review desk, homepage curation).
+> **Next:** WS5 live coverage, then WS6 Studio.
 
 Update this section and tick boxes above as each PR merges into `dev`.
 

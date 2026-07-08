@@ -145,6 +145,30 @@ export async function topicOptions(): Promise<TopicOption[]> {
   return topics.map((t) => ({ slug: t.slug, name: t.name }));
 }
 
+export interface MediaAsset {
+  id: string;
+  url: string;
+  alt: string | null;
+  credit: string | null;
+  licence: string | null;
+  mime: string;
+  sizeBytes: number;
+  originalName: string | null;
+  createdAt: string;
+}
+
+/** The staff media library (newest first). */
+export async function listMedia(): Promise<MediaAsset[]> {
+  const res = await fetch(`${API_URL}/cms/media`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load the media library (${res.status})`);
+  const json = (await res.json()) as { data: MediaAsset[] };
+  return json.data;
+}
+
 export function isEditable(status: DraftStatus): boolean {
   return status === 'draft' || status === 'in_progress' || status === 'rejected';
 }
