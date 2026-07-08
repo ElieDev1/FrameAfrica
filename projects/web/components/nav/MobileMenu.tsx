@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { CategoryNode } from '@/lib/api';
+import { staffNav } from '@/lib/staff-nav';
 
 /**
  * Mobile navigation: a hamburger button that opens a full-height drawer with
@@ -14,12 +15,14 @@ export function MobileMenu({
   signedIn,
   isStaff,
   isEditor,
+  isAdmin,
   firstName,
 }: {
   sections: CategoryNode[];
   signedIn: boolean;
   isStaff: boolean;
   isEditor: boolean;
+  isAdmin: boolean;
   firstName: string | null;
 }) {
   const [open, setOpen] = useState(false);
@@ -131,24 +134,24 @@ export function MobileMenu({
                   >
                     {firstName ?? 'Account'}
                   </Link>
-                  {isStaff && (
-                    <Link
-                      href="/dashboard"
-                      onClick={close}
-                      className="rounded-lg border border-border px-4 py-2 text-center font-mono text-xs uppercase tracking-[0.14em] text-muted"
-                    >
-                      Newsroom
-                    </Link>
-                  )}
-                  {isEditor && (
-                    <Link
-                      href="/dashboard/review"
-                      onClick={close}
-                      className="rounded-lg border border-border px-4 py-2 text-center font-mono text-xs uppercase tracking-[0.14em] text-muted"
-                    >
-                      Review queue
-                    </Link>
-                  )}
+                  {isStaff &&
+                    staffNav({ isEditor, isAdmin }).map((group) => (
+                      <div key={group.section} className="mt-2">
+                        <p className="px-1 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-faint">
+                          {group.section}
+                        </p>
+                        {group.links.map((link) => (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={close}
+                            className="block rounded-lg px-3 py-2 font-body text-sm text-muted hover:text-primary"
+                          >
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                    ))}
                 </>
               ) : (
                 <>
