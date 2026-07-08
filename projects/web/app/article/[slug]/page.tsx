@@ -8,8 +8,10 @@ import { CommentsSection } from '@/components/CommentsSection';
 import { LikeButton } from '@/components/LikeButton';
 import { LiveFeed } from '@/components/LiveFeed';
 import { ReadingProgress } from '@/components/ReadingProgress';
+import { SaveButton } from '@/components/SaveButton';
 import { ShareBar } from '@/components/ShareBar';
 import { StickyShare } from '@/components/StickyShare';
+import { getBookmarkStatus } from '@/lib/bookmarks-actions';
 import { getLikeStatus } from '@/lib/likes-actions';
 import {
   fetchArticle,
@@ -96,12 +98,13 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound();
   }
 
-  const [related, comments, user, likeStatus, liveUpdates] = await Promise.all([
+  const [related, comments, user, likeStatus, liveUpdates, bookmark] = await Promise.all([
     fetchRelated(slug),
     fetchComments(article.id),
     getSession(),
     getLikeStatus(article.id),
     fetchLiveUpdates(slug),
+    getBookmarkStatus(article.id),
   ]);
 
   const updated = isMeaningfullyUpdated(article.publishedAt, article.updatedAt);
@@ -169,6 +172,11 @@ export default async function ArticlePage({ params }: PageProps) {
           articleId={article.id}
           initialLiked={likeStatus?.liked ?? false}
           initialCount={likeStatus?.likeCount ?? article.likeCount}
+          signedIn={Boolean(user)}
+        />
+        <SaveButton
+          articleId={article.id}
+          initialSaved={bookmark?.saved ?? false}
           signedIn={Boolean(user)}
         />
         <ShareBar title={article.title} />

@@ -18,6 +18,10 @@ jest.mock('@/lib/likes-actions', () => ({
 jest.mock('@/lib/live-actions', () => ({
   pollLiveUpdates: jest.fn().mockResolvedValue([]),
 }));
+jest.mock('@/lib/bookmarks-actions', () => ({
+  getBookmarkStatus: jest.fn().mockResolvedValue(null),
+  toggleBookmark: jest.fn(),
+}));
 
 const mockFetchArticle = fetchArticle as jest.MockedFunction<typeof fetchArticle>;
 const mockFetchRelated = fetchRelated as jest.MockedFunction<typeof fetchRelated>;

@@ -12,6 +12,7 @@ import { ContentModule } from './content/content.module';
 import { MediaModule } from './media/media.module';
 import { LikesModule } from './likes/likes.module';
 import { LiveModule } from './live/live.module';
+import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { CommentsModule } from './comments/comments.module';
 import { BillingModule } from './billing/billing.module';
 import { AdsModule } from './ads/ads.module';
@@ -35,6 +36,7 @@ import { AdminModule } from './admin/admin.module';
     MediaModule,
     LikesModule,
     LiveModule,
+    BookmarksModule,
     CommentsModule,
     BillingModule,
     AdsModule,
