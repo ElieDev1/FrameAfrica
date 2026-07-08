@@ -4,6 +4,7 @@ import { fetchCategories, type CategoryNode } from '@/lib/api';
 import { getSession } from '@/lib/session';
 import { DesktopSectionNav } from './nav/DesktopSectionNav';
 import { MobileMenu } from './nav/MobileMenu';
+import { StaffMenu } from './nav/StaffMenu';
 import { ThemeToggle } from './ThemeToggle';
 import { Wordmark } from './Wordmark';
 
@@ -26,6 +27,7 @@ export async function SiteHeader() {
   const user = await getSession();
   const isStaff = user?.roles.some((role) => STAFF_ROLES.includes(role)) ?? false;
   const isEditor = user?.roles.some((role) => EDITOR_ROLES.includes(role)) ?? false;
+  const isAdmin = user?.roles.includes('admin') ?? false;
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-surface/80 backdrop-blur-xl">
@@ -50,22 +52,7 @@ export async function SiteHeader() {
           <div className="hidden items-center gap-4 md:flex">
             {user ? (
               <>
-                {isStaff && (
-                  <Link
-                    href="/dashboard"
-                    className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted hover:text-primary"
-                  >
-                    Write
-                  </Link>
-                )}
-                {isEditor && (
-                  <Link
-                    href="/dashboard/review"
-                    className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted hover:text-primary"
-                  >
-                    Review
-                  </Link>
-                )}
+                {isStaff && <StaffMenu isEditor={isEditor} isAdmin={isAdmin} />}
                 <Link
                   href="/account"
                   className="rounded-full border border-border-2 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-text transition-colors hover:border-primary hover:text-primary"
@@ -96,6 +83,7 @@ export async function SiteHeader() {
             signedIn={Boolean(user)}
             isStaff={isStaff}
             isEditor={isEditor}
+            isAdmin={isAdmin}
             firstName={user?.displayName.split(' ')[0] ?? null}
           />
         </div>
