@@ -25,6 +25,10 @@ const articleInclude = {
     include: { topic: { select: { id: true, name: true, slug: true } } },
     orderBy: { topic: { name: 'asc' } },
   },
+  corrections: {
+    select: { id: true, note: true, createdAt: true },
+    orderBy: { createdAt: 'asc' },
+  },
 } satisfies Prisma.ArticleInclude;
 
 type ArticleWithRelations = Prisma.ArticleGetPayload<{
@@ -268,6 +272,11 @@ function toArticleDetail(article: ArticleWithRelations): ArticleDetail {
     likeCount: article.likeCount,
     shareCount: article.shareCount,
     updatedAt: article.updatedAt.toISOString(),
+    corrections: article.corrections.map((c) => ({
+      id: c.id,
+      note: c.note,
+      createdAt: c.createdAt.toISOString(),
+    })),
     isLocked,
   };
 }
