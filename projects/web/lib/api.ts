@@ -43,6 +43,7 @@ export interface ArticleSummary {
   isPremium: boolean;
   isBreaking: boolean;
   isFeatured: boolean;
+  isLive: boolean;
   readTimeMin: number | null;
   publishedAt: string | null;
   featuredImage: FeaturedImage | null;
@@ -258,6 +259,30 @@ export async function fetchCategory(slug: string): Promise<CategoryDetail | null
       return null;
     }
     throw error;
+  }
+}
+
+export interface LiveUpdate {
+  id: string;
+  headline: string | null;
+  body: string;
+  isKeyEvent: boolean;
+  createdAt: string;
+  author: string;
+}
+
+/** An article's live-coverage updates (newest first), or `[]` on any error. */
+export async function fetchLiveUpdates(slug: string): Promise<LiveUpdate[]> {
+  try {
+    const res = await fetch(`${API_URL}/articles/${encodeURIComponent(slug)}/live`, {
+      headers: { accept: 'application/json' },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const envelope = (await res.json()) as ApiEnvelope<LiveUpdate[]>;
+    return envelope.data;
+  } catch {
+    return [];
   }
 }
 

@@ -42,6 +42,7 @@ export interface ArticleSummary {
   isPremium: boolean;
   isBreaking: boolean;
   isFeatured: boolean;
+  isLive: boolean;
   readTimeMin: number | null;
   publishedAt: string | null;
   featuredImage: FeaturedImage | null;

@@ -92,11 +92,12 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [x] **Homepage curation** — editors pin/unpin a published story as the front-page **lead** (`is_featured` + `featured_at`); the homepage hero + Editor's Picks read the featured set (fallback: latest); `?featured=` filter + editor toggle. Verified e2e (pin → appears, unpin → gone, non-editor → 403). _(Per-section curation + drag-arrange remain.)_
 - **DoD:** an editor runs the whole pipeline from assignment to a curated front page.
 
-### WS5 — Live / developing coverage `[ ]`
-- [ ] Live-post model (entries under a story) + real-time delivery (SSE)
-- [ ] Reader **Live page**: LIVE badge, "updated Xm ago", newest-first stream, key events
-- [ ] Newsroom composer for posting live updates
-- **DoD:** readers watch a story update in real time, CNN-style.
+### WS5 — Live / developing coverage `[~]`
+- [x] Live-update model (`live_update`) + `isLive` on the article; staff post/end endpoints; public feed endpoint
+- [x] Reader **live feed** on the article — pulsing **LIVE** badge, "Updated Xm ago", newest-first stream, **key-event** flags; **auto-refreshes every 20s** (polling) so updates appear without a reload
+- [x] Newsroom **composer** on the published-story page (headline + body + key-event, and "End coverage")
+- [ ] Push-based real-time (SSE) upgrade over the 20s poll; a dedicated `/live` index
+- **DoD (core met):** readers watch a story update without refreshing (verified e2e); SSE + a live index are the enhancement.
 
 ### WS6 — Studio (in-app design) `[ ]`
 - [ ] Canvas editor for flyers / social cards / posters (brand templates, text, image, export PNG)

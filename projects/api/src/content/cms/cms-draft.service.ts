@@ -280,6 +280,7 @@ function toDraftDetail(article: DraftRow): DraftDetail {
     topics: article.topics.map((t) => t.topic),
     reviewNote: article.reviewNote,
     isFeatured: article.isFeatured,
+    isLive: article.isLive,
     featuredImageUrl: article.featuredImageUrl,
     featuredImageAlt: article.featuredImageAlt,
     featuredImageCredit: article.featuredImageCredit,

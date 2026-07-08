@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CorrectionForm } from '@/components/cms/CorrectionForm';
 import { DraftForm } from '@/components/cms/DraftForm';
+import { LiveComposer } from '@/components/cms/LiveComposer';
 import { StatusBadge } from '@/components/cms/StatusBadge';
 import {
   categoryOptions,
@@ -99,6 +100,11 @@ export default async function EditDraftPage({ params }: PageProps) {
             >
               View published article →
             </Link>
+          )}
+          {draft.status === 'published' && (
+            <div className="mt-5 border-t border-border pt-4">
+              <LiveComposer articleId={draft.id} slug={draft.slug} isLive={draft.isLive} />
+            </div>
           )}
           {draft.status === 'published' && isEditor(user) && (
             <div className="mt-5 border-t border-border pt-4">
