@@ -118,6 +118,7 @@ describe('ArticlePage', () => {
         id: 'c1',
         body: 'Great piece.',
         createdAt: '2026-01-01T00:00:00.000Z',
+        likeCount: 0,
         author: { id: 'u2', displayName: 'Ana K.', avatarUrl: null },
         replies: [],
       },

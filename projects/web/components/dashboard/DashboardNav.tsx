@@ -28,6 +28,7 @@ function itemsFor(role: DashboardRole): { section: string; items: NavItem[] }[] 
 
   if (role === 'editor' || role === 'admin') {
     groups[0].items.push({ href: '/dashboard/review', label: 'Review queue', icon: '⧗' });
+    groups[0].items.push({ href: '/dashboard/moderation', label: 'Moderation', icon: '⚑' });
   }
   if (role === 'admin') {
     groups.push({
