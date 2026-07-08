@@ -24,10 +24,18 @@ export default async function AllArticlesPage({ searchParams }: PageProps) {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <h1 className="font-heading text-2xl font-black tracking-tight text-text">All articles</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-heading text-2xl font-black tracking-tight text-text">All articles</h1>
+        <Link
+          href="/dashboard/stories/new"
+          className="rounded-lg bg-primary px-4 py-2 font-heading text-sm font-bold text-black hover:opacity-90"
+        >
+          ＋ New article
+        </Link>
+      </div>
       <p className="mt-2 font-body text-muted">
-        Every article across the newsroom. As an admin you can open and edit any of them, whatever
-        the author or status.
+        Every article across the newsroom. As an admin you can open and edit any of them, publish or
+        archive directly, or delete — whatever the author or status.
       </p>
 
       <div className="mt-5 flex flex-wrap gap-2">

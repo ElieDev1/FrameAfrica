@@ -170,6 +170,16 @@ export class CommentsService {
     return updated;
   }
 
+  /** Hard-ish delete: soft-delete a comment so it leaves every public thread. */
+  async softDelete(commentId: string): Promise<{ id: string; deleted: true }> {
+    await this.assertComment(commentId);
+    await this.prisma.comment.update({
+      where: { id: commentId },
+      data: { deletedAt: new Date(), status: CommentStatus.removed },
+    });
+    return { id: commentId, deleted: true };
+  }
+
   private async assertComment(commentId: string): Promise<void> {
     const comment = await this.prisma.comment.findFirst({
       where: { id: commentId, deletedAt: null },

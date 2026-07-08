@@ -1,10 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   ParseUUIDPipe,
   Patch,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -16,12 +19,14 @@ import { Roles } from '../../common/auth/roles.decorator';
 import { RolesGuard } from '../../common/auth/roles.guard';
 import { apiResponse } from '../../common/http/api-response';
 import { CmsDraftService } from './cms-draft.service';
+import { CreateDraftDto } from './dto/create-draft.dto';
 import { UpdateDraftDto } from './dto/update-draft.dto';
 
 /**
- * Admin newsroom: edit ANY article regardless of author or status (documents/07
- * UC-ADMIN — "admin can edit available news"). Object-level ownership does not
- * apply here; the admin role is the authorisation.
+ * Admin newsroom — full CRUD over ANY article regardless of author or status
+ * (documents/07 UC-ADMIN). Unlike the journalist/editor flows, the admin isn't
+ * bound by object ownership or the review workflow: create-and-publish, edit,
+ * publish/unpublish/archive, soft-delete and restore are all direct.
  */
 @Controller('cms/admin/articles')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -39,6 +44,20 @@ export class CmsAdminController {
     );
   }
 
+  @Get('trash')
+  async trash() {
+    return apiResponse(await this.drafts.listDeleted());
+  }
+
+  @Post()
+  async create(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateDraftDto,
+    @Query('publish') publish?: string,
+  ) {
+    return apiResponse(await this.drafts.createAsAdmin(user.id, dto, publish === 'true'));
+  }
+
   @Get(':id')
   async getOne(@Param('id', ParseUUIDPipe) id: string) {
     return apiResponse(await this.drafts.getAny(id));
@@ -51,6 +70,36 @@ export class CmsAdminController {
     @Body() dto: UpdateDraftDto,
   ) {
     return apiResponse(await this.drafts.updateAny(user.id, id, dto));
+  }
+
+  @Post(':id/publish')
+  @HttpCode(200)
+  async publish(@Param('id', ParseUUIDPipe) id: string) {
+    return apiResponse(await this.drafts.setStatusAny(id, 'publish'));
+  }
+
+  @Post(':id/unpublish')
+  @HttpCode(200)
+  async unpublish(@Param('id', ParseUUIDPipe) id: string) {
+    return apiResponse(await this.drafts.setStatusAny(id, 'unpublish'));
+  }
+
+  @Post(':id/archive')
+  @HttpCode(200)
+  async archive(@Param('id', ParseUUIDPipe) id: string) {
+    return apiResponse(await this.drafts.setStatusAny(id, 'archive'));
+  }
+
+  @Post(':id/restore')
+  @HttpCode(200)
+  async restore(@Param('id', ParseUUIDPipe) id: string) {
+    return apiResponse(await this.drafts.restoreAny(id));
+  }
+
+  @Delete(':id')
+  @HttpCode(200)
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    return apiResponse(await this.drafts.deleteAny(id));
   }
 }
 

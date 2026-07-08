@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { type FlaggedComment, moderateComment } from '@/lib/comments-actions';
+import { deleteComment, type FlaggedComment, moderateComment } from '@/lib/comments-actions';
 
 type Action = 'keep' | 'hide' | 'remove';
 
@@ -26,6 +26,19 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
     startTransition(async () => {
       try {
         await moderateComment(id, action);
+        setQueue((q) => q.filter((c) => c.id !== id));
+      } finally {
+        setBusy(null);
+      }
+    });
+  }
+
+  function removeComment(id: string) {
+    if (!confirm('Delete this comment permanently?')) return;
+    setBusy(id);
+    startTransition(async () => {
+      try {
+        await deleteComment(id);
         setQueue((q) => q.filter((c) => c.id !== id));
       } finally {
         setBusy(null);
@@ -63,7 +76,7 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
           <p className="mb-3 whitespace-pre-line font-body text-[0.95rem] leading-relaxed text-text">
             {c.body}
           </p>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {ACTIONS.map((a) => (
               <button
                 key={a.action}
@@ -75,6 +88,14 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
                 {a.label}
               </button>
             ))}
+            <button
+              type="button"
+              disabled={busy === c.id}
+              onClick={() => removeComment(c.id)}
+              className="rounded-md border border-accent-red/40 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-accent-red transition-colors hover:bg-accent-red/10 disabled:opacity-50"
+            >
+              Delete
+            </button>
           </div>
         </li>
       ))}

@@ -36,6 +36,7 @@ function itemsFor(role: DashboardRole): { section: string; items: NavItem[] }[] 
       items: [
         { href: '/dashboard/monitor', label: 'Monitor', icon: '◉' },
         { href: '/dashboard/articles', label: 'All articles', icon: '▤' },
+        { href: '/dashboard/taxonomy', label: 'Taxonomy', icon: '⋔' },
         { href: '/dashboard/users', label: 'Users & roles', icon: '☷' },
         { href: '/dashboard/settings', label: 'Settings', icon: '⚙' },
       ],

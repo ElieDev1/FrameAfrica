@@ -114,3 +114,11 @@ export async function moderateComment(
   if (!res.ok) throw new Error('Could not moderate this comment.');
   revalidatePath('/dashboard/moderation');
 }
+
+/** Moderator/admin: permanently remove a comment (soft-delete). */
+export async function deleteComment(id: string): Promise<void> {
+  const res = await authed(`/cms/comments/${id}`, 'DELETE');
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not delete this comment.');
+  revalidatePath('/dashboard/moderation');
+}
