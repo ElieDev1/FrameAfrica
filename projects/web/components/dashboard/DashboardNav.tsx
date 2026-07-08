@@ -34,6 +34,8 @@ function itemsFor(role: DashboardRole): { section: string; items: NavItem[] }[] 
     groups.push({
       section: 'Administration',
       items: [
+        { href: '/dashboard/monitor', label: 'Monitor', icon: '◉' },
+        { href: '/dashboard/articles', label: 'All articles', icon: '▤' },
         { href: '/dashboard/users', label: 'Users & roles', icon: '☷' },
         { href: '/dashboard/settings', label: 'Settings', icon: '⚙' },
       ],

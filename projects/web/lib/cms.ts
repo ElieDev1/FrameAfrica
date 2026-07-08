@@ -122,6 +122,77 @@ export async function getDraft(id: string): Promise<DraftDetail> {
   return json.data;
 }
 
+/** Admin: every article (any author/status), optionally filtered. */
+export async function listAllArticles(
+  filter: { status?: string; q?: string } = {},
+): Promise<DraftListItem[]> {
+  const search = new URLSearchParams();
+  if (filter.status) search.set('status', filter.status);
+  if (filter.q) search.set('q', filter.q);
+  const query = search.toString();
+  const res = await fetch(`${API_URL}/cms/admin/articles${query ? `?${query}` : ''}`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load articles (${res.status})`);
+  const json = (await res.json()) as { data: DraftListItem[] };
+  return json.data;
+}
+
+/** Admin: load any article for editing. */
+export async function getAnyArticle(id: string): Promise<DraftDetail> {
+  const res = await fetch(`${API_URL}/cms/admin/articles/${id}`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (res.status === 404) notFound();
+  if (!res.ok) throw new Error(`Failed to load article (${res.status})`);
+  const json = (await res.json()) as { data: DraftDetail };
+  return json.data;
+}
+
+export interface AdminOverview {
+  users: { total: number; active: number; suspended: number; newLast7Days: number };
+  articles: { total: number; published: number; inPipeline: number };
+  comments: { visible: number; flagged: number };
+  recentArticles: {
+    id: string;
+    slug: string;
+    title: string;
+    status: string;
+    publishedAt: string | null;
+    author: string;
+  }[];
+  recentComments: {
+    id: string;
+    body: string;
+    createdAt: string;
+    author: string;
+    articleSlug: string;
+  }[];
+  recentUsers: {
+    id: string;
+    displayName: string;
+    email: string;
+    roles: string[];
+    createdAt: string;
+  }[];
+}
+
+/** Admin: system-wide activity snapshot for the monitoring dashboard. */
+export async function fetchOverview(): Promise<AdminOverview> {
+  const res = await fetch(`${API_URL}/admin/overview`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load overview (${res.status})`);
+  const json = (await res.json()) as { data: AdminOverview };
+  return json.data;
+}
+
 export interface CategoryOption {
   id: string;
   name: string;

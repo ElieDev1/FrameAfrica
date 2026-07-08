@@ -192,6 +192,46 @@ describe('CmsDraftService', () => {
     });
   });
 
+  describe('admin edit-any', () => {
+    it('updateAny edits a published article without an ownership scope', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue(row({ status: 'published' }));
+      prisma.article.update.mockResolvedValue(row({ title: 'Fixed', status: 'published' }));
+
+      await service.updateAny('admin1', 'a1', { title: 'Fixed' });
+
+      // Loaded without an authorId filter…
+      const find = prisma.article.findFirst.mock.calls as unknown[][];
+      expect((find[0]?.[0] as { where: Record<string, unknown> }).where).toMatchObject({
+        id: 'a1',
+        deletedAt: null,
+      });
+      expect((find[0]?.[0] as { where: Record<string, unknown> }).where).not.toHaveProperty(
+        'authorId',
+      );
+      // …and the revision is attributed to the acting admin.
+      const upd = prisma.article.update.mock.calls as unknown[][];
+      const arg = upd[0]?.[0] as { data: { revisions: { create: [{ editor: unknown }] } } };
+      expect(arg.data.revisions.create[0].editor).toEqual({ connect: { id: 'admin1' } });
+    });
+
+    it('getAny 404s when the article is missing', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue(null);
+      await expect(service.getAny('a1')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('listAll filters by status and query', async () => {
+      const { service, prisma } = build();
+      prisma.article.findMany.mockResolvedValue([row()]);
+      await service.listAll({ status: 'published' as never, q: 'coffee' });
+      const calls = prisma.article.findMany.mock.calls as unknown[][];
+      const where = (calls[0]?.[0] as { where: Record<string, unknown> }).where;
+      expect(where).toMatchObject({ deletedAt: null, status: 'published' });
+      expect(where).toHaveProperty('OR');
+    });
+  });
+
   describe('submitDraft', () => {
     it('moves an editable draft to ready', async () => {
       const { service, prisma } = build();

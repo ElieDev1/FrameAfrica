@@ -118,6 +118,32 @@ export async function submitDraftAction(id: string): Promise<void> {
   redirect('/dashboard/stories');
 }
 
+/** Admin: edit ANY article (any author/status) via the admin endpoint. */
+export async function updateAnyArticleAction(
+  id: string,
+  _prev: DraftFormState,
+  formData: FormData,
+): Promise<DraftFormState> {
+  const payload = {
+    ...draftPayload(formData),
+    changeNote: String(formData.get('changeNote') ?? '').trim() || undefined,
+  };
+  if (payload.title.length < 3) return { error: 'Title must be at least 3 characters.' };
+
+  let res: Response;
+  try {
+    res = await authedFetch(`/cms/admin/articles/${id}`, 'PATCH', payload);
+  } catch {
+    return { error: 'Could not reach the server. Please try again.' };
+  }
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) return { error: await errorMessage(res, 'Could not save the article.') };
+
+  revalidatePath(`/dashboard/articles/${id}`);
+  revalidatePath('/dashboard/articles');
+  return { savedAt: new Date().toISOString() };
+}
+
 export async function publishAction(id: string): Promise<void> {
   const res = await authedFetch(`/cms/articles/${id}/publish`, 'POST');
   if (res.status === 401) redirect('/login');
