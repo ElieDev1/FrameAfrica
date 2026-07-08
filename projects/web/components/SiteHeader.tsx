@@ -7,7 +7,7 @@ import { MobileMenu } from './nav/MobileMenu';
 import { ThemeToggle } from './ThemeToggle';
 import { Wordmark } from './Wordmark';
 
-const MAX_SECTIONS = 8;
+const MAX_SECTIONS = 10;
 const STAFF_ROLES = ['journalist', 'editor', 'admin'];
 const EDITOR_ROLES = ['editor', 'admin'];
 
@@ -29,11 +29,11 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-surface/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-3">
+      {/* Utility row: brand + search + account. */}
+      <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-3">
         <Link href="/" aria-label="Frame Africa — home" className="shrink-0">
           <Wordmark />
         </Link>
-        <DesktopSectionNav sections={navSections} />
 
         <div className="ml-auto flex items-center gap-3">
           <form action="/search" className="hidden md:block">
@@ -42,12 +42,12 @@ export async function SiteHeader() {
               type="search"
               placeholder="Search…"
               aria-label="Search articles"
-              className="w-36 rounded-full border border-border bg-surface-2 px-4 py-1.5 font-body text-sm text-text outline-none transition-[width,border-color] focus:w-52 focus:border-primary"
+              className="w-40 rounded-full border border-border bg-surface-2 px-4 py-1.5 font-body text-sm text-text outline-none transition-[width,border-color] focus:w-56 focus:border-primary"
             />
           </form>
           <ThemeToggle />
 
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-4 md:flex">
             {user ? (
               <>
                 {isStaff && (
@@ -77,13 +77,13 @@ export async function SiteHeader() {
               <>
                 <Link
                   href="/login"
-                  className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted hover:text-primary"
+                  className="whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted hover:text-primary"
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/signup"
-                  className="rounded-full bg-primary px-4 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-black shadow-[0_2px_16px_-4px_var(--color-primary)] transition-transform hover:-translate-y-px"
+                  className="whitespace-nowrap rounded-full bg-primary px-4 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-black shadow-[0_2px_16px_-4px_var(--color-primary)] transition-transform hover:-translate-y-px"
                 >
                   Subscribe
                 </Link>
@@ -100,6 +100,15 @@ export async function SiteHeader() {
           />
         </div>
       </div>
+
+      {/* Section bar (desktop): the primary sections with sub-section dropdowns. */}
+      {navSections.length > 0 && (
+        <div className="hidden border-t border-border/60 md:block">
+          <div className="mx-auto max-w-6xl px-4">
+            <DesktopSectionNav sections={navSections} />
+          </div>
+        </div>
+      )}
     </header>
   );
 }
