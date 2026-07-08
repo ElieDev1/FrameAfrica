@@ -33,6 +33,7 @@ export function staffNav({
     groups.push({
       section: 'Editorial',
       links: [
+        { href: '/dashboard/copydesk', label: 'Copy desk' },
         { href: '/dashboard/review', label: 'Review queue' },
         { href: '/dashboard/moderation', label: 'Moderation' },
       ],

@@ -118,6 +118,50 @@ export async function submitDraftAction(id: string): Promise<void> {
   redirect('/dashboard/stories');
 }
 
+/** Sub-editor copy-edit save (PATCH the copy-desk article). */
+export async function copyEditSaveAction(
+  id: string,
+  _prev: DraftFormState,
+  formData: FormData,
+): Promise<DraftFormState> {
+  const payload = {
+    ...draftPayload(formData),
+    changeNote: String(formData.get('changeNote') ?? '').trim() || undefined,
+  };
+  if (payload.title.length < 3) return { error: 'Title must be at least 3 characters.' };
+
+  let res: Response;
+  try {
+    res = await authedFetch(`/cms/copydesk/${id}`, 'PATCH', payload);
+  } catch {
+    return { error: 'Could not reach the server. Please try again.' };
+  }
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) return { error: await errorMessage(res, 'Could not save the copy edit.') };
+
+  revalidatePath(`/dashboard/copydesk/${id}`);
+  return { savedAt: new Date().toISOString() };
+}
+
+/** Sub-editor: pass a copy-edited article to the editors' review queue. */
+export async function passCopyEditAction(id: string): Promise<void> {
+  const res = await authedFetch(`/cms/copydesk/${id}/pass`, 'POST');
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not pass the article to editors.');
+  revalidatePath('/dashboard/copydesk');
+  redirect('/dashboard/copydesk');
+}
+
+/** Sub-editor: return a copy-desk article to its writer with a note. */
+export async function returnCopyEditAction(id: string, formData: FormData): Promise<void> {
+  const note = String(formData.get('note') ?? '').trim();
+  const res = await authedFetch(`/cms/copydesk/${id}/return`, 'POST', note ? { note } : {});
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not return the article.');
+  revalidatePath('/dashboard/copydesk');
+  redirect('/dashboard/copydesk');
+}
+
 /** Admin direct status control on any article (publish/unpublish/archive/restore). */
 export async function adminArticleStatusAction(
   id: string,

@@ -7,8 +7,18 @@ import { getAccessToken, getSession, type SessionUser } from './session';
 const API_URL =
   process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/v1';
 
-const STAFF_ROLES = ['journalist', 'editor', 'admin'];
+const STAFF_ROLES = [
+  'journalist',
+  'sub_editor',
+  'photographer',
+  'editor',
+  'moderator',
+  'ads_manager',
+  'admin',
+];
 const EDITOR_ROLES = ['editor', 'admin'];
+const COPYDESK_ROLES = ['sub_editor', 'editor', 'admin'];
+const MODERATOR_ROLES = ['moderator', 'editor', 'admin'];
 
 export type DraftStatus = 'draft' | 'in_progress' | 'rejected' | 'ready' | 'published' | string;
 
@@ -76,6 +86,22 @@ export async function requireEditor(): Promise<SessionUser> {
   return user;
 }
 
+/** Require a sub-editor/editor/admin (copy desk access), else redirect. */
+export async function requireCopyDesk(): Promise<SessionUser> {
+  const user = await getSession();
+  if (!user) redirect('/login');
+  if (!user.roles.some((role) => COPYDESK_ROLES.includes(role))) redirect('/dashboard');
+  return user;
+}
+
+/** Require a moderator/editor/admin (comment moderation), else redirect. */
+export async function requireModerator(): Promise<SessionUser> {
+  const user = await getSession();
+  if (!user) redirect('/login');
+  if (!user.roles.some((role) => MODERATOR_ROLES.includes(role))) redirect('/dashboard');
+  return user;
+}
+
 /** Require a signed-in admin, else redirect. Returns the user. */
 export async function requireAdmin(): Promise<SessionUser> {
   const user = await getSession();
@@ -92,6 +118,31 @@ export async function listReviewQueue(): Promise<ReviewItem[]> {
   if (res.status === 401) redirect('/login');
   if (!res.ok) throw new Error(`Failed to load the review queue (${res.status})`);
   const json = (await res.json()) as { data: ReviewItem[] };
+  return json.data;
+}
+
+/** Sub-editor copy desk queue (articles in `copy_edit`). */
+export async function listCopyDesk(): Promise<ReviewItem[]> {
+  const res = await fetch(`${API_URL}/cms/copydesk`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load the copy desk (${res.status})`);
+  const json = (await res.json()) as { data: ReviewItem[] };
+  return json.data;
+}
+
+/** Load a copy-desk article for editing. */
+export async function getCopyDeskItem(id: string): Promise<DraftDetail> {
+  const res = await fetch(`${API_URL}/cms/copydesk/${id}`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (res.status === 404) notFound();
+  if (!res.ok) throw new Error(`Failed to load the article (${res.status})`);
+  const json = (await res.json()) as { data: DraftDetail };
   return json.data;
 }
 
