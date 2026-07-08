@@ -40,6 +40,15 @@ export default async function EditDraftPage({ params }: PageProps) {
         <StatusBadge status={draft.status} />
       </div>
 
+      {draft.reviewNote && (
+        <div className="mt-4 rounded-xl border-l-4 border-accent-red bg-surface px-4 py-3">
+          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-red">
+            Returned by an editor
+          </p>
+          <p className="mt-1 font-body text-sm text-text">{draft.reviewNote}</p>
+        </div>
+      )}
+
       {editable ? (
         <>
           <div className="mt-6">

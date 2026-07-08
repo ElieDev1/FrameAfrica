@@ -75,6 +75,18 @@ describe('CmsEditorService', () => {
 
       expect(res.status).toBe('rejected');
     });
+
+    it('stores a stripped return-note when one is given', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue(row({ status: 'ready' }));
+      prisma.article.update.mockResolvedValue(row({ status: 'rejected' }));
+
+      await service.reject('a1', 'Please add a <b>source</b> for the figure.');
+
+      const calls = prisma.article.update.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { data: { reviewNote: string | null } };
+      expect(arg.data.reviewNote).toBe('Please add a source for the figure.');
+    });
   });
 
   describe('addCorrection', () => {

@@ -202,7 +202,7 @@ describe('CmsDraftService', () => {
 
       expect(res.status).toBe('ready');
       expect(prisma.article.update).toHaveBeenCalledWith(
-        expect.objectContaining({ data: { status: 'ready' } }),
+        expect.objectContaining({ data: { status: 'ready', reviewNote: null } }),
       );
     });
   });

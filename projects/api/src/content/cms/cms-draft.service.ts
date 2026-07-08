@@ -168,7 +168,8 @@ export class CmsDraftService {
     await this.ownEditable(authorId, id);
     const updated = await this.prisma.article.update({
       where: { id },
-      data: { status: ArticleStatus.ready },
+      // Resubmitting clears any prior editor return-note.
+      data: { status: ArticleStatus.ready, reviewNote: null },
       include: draftInclude,
     });
     return toDraftDetail(updated);
@@ -277,6 +278,7 @@ function toDraftDetail(article: DraftRow): DraftDetail {
     body: article.body,
     blocks: readBlocks(article.blocks),
     topics: article.topics.map((t) => t.topic),
+    reviewNote: article.reviewNote,
     featuredImageUrl: article.featuredImageUrl,
     featuredImageAlt: article.featuredImageAlt,
     featuredImageCredit: article.featuredImageCredit,
