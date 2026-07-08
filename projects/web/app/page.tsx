@@ -40,7 +40,7 @@ export default async function Home() {
 
   if (failed || latest.length === 0) {
     return (
-      <div className="mx-auto max-w-6xl px-6 py-24 text-center">
+      <div className="mx-auto max-w-[1440px] px-6 py-24 text-center">
         <h1 className="font-heading text-2xl font-bold text-text">
           {failed ? 'News is taking a short break' : 'No stories yet'}
         </h1>
@@ -81,7 +81,7 @@ export default async function Home() {
   return (
     <>
       <BreakingTicker articles={breaking} />
-      <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="mx-auto max-w-[1440px] px-6 py-8">
         <h1 className="sr-only">Frame Africa — latest news</h1>
 
         <section

@@ -35,7 +35,7 @@ export default async function SectionPage({ params }: PageProps) {
   const { articles, pagination } = await fetchArticles({ category: slug, limit: 12 });
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto max-w-[1440px] px-6 py-8">
       <header className="border-b border-border pb-6">
         {category.parent ? (
           <nav aria-label="Breadcrumb" className="font-mono text-xs text-muted">

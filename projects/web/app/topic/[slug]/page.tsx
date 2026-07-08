@@ -34,7 +34,7 @@ export default async function TopicPage({ params }: PageProps) {
   const { articles, pagination } = await fetchArticles({ topic: slug, limit: 12 });
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto max-w-[1440px] px-6 py-8">
       <header className="border-b border-border pb-6">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Topic</p>
         <h1 className="mt-1 font-heading text-4xl font-black tracking-tight text-text">

@@ -32,7 +32,7 @@ export async function SiteFooter() {
 
   return (
     <footer className="border-t border-border bg-surface">
-      <div className="mx-auto max-w-6xl px-6 py-12">
+      <div className="mx-auto max-w-[1440px] px-6 py-12">
         <Wordmark />
         <p className="mt-3 max-w-sm font-body text-sm text-muted">
           Independent journalism from Kigali for the continent and its diaspora.

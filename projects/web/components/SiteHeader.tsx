@@ -32,7 +32,7 @@ export async function SiteHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-surface/80 backdrop-blur-xl">
       {/* Utility row: brand + search + account. */}
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-3">
+      <div className="mx-auto flex max-w-[1440px] items-center gap-4 px-6 py-3">
         <Link href="/" aria-label="Frame Africa — home" className="shrink-0">
           <Wordmark />
         </Link>
@@ -92,7 +92,7 @@ export async function SiteHeader() {
       {/* Section bar (desktop): the primary sections with sub-section dropdowns. */}
       {navSections.length > 0 && (
         <div className="hidden border-t border-border/60 md:block">
-          <div className="mx-auto max-w-6xl px-4">
+          <div className="mx-auto max-w-[1440px] px-4">
             <DesktopSectionNav sections={navSections} />
           </div>
         </div>
