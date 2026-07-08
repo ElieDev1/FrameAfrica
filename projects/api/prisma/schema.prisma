@@ -89,7 +89,6 @@ model User {
   tokens        UserToken[]
   comments      Comment[]
   mediaAssets   MediaAsset[]
-  corrections   ArticleCorrection[] @relation("UserCorrections")
 
   @@map("user")
 }
