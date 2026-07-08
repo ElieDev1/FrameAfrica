@@ -1,8 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ArticleStatus, CommentStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import type { CommentView } from './comments.types';
+import type { CommentView, FlaggedComment, LikeResult } from './comments.types';
 import type { CreateCommentDto } from './dto/create-comment.dto';
+
+export type ModerationAction = 'keep' | 'hide' | 'remove';
 
 const commentInclude = {
   author: { select: { id: true, displayName: true, avatarUrl: true } },
@@ -64,6 +66,127 @@ export class CommentsService {
     });
     return toView(created);
   }
+
+  /** Like a comment (idempotent; keeps the denormalised count accurate). */
+  async like(userId: string, commentId: string): Promise<LikeResult> {
+    await this.assertComment(commentId);
+    const existing = await this.prisma.commentLike.findUnique({
+      where: { userId_commentId: { userId, commentId } },
+      select: { userId: true },
+    });
+    if (!existing) {
+      await this.prisma.$transaction([
+        this.prisma.commentLike.create({ data: { userId, commentId } }),
+        this.prisma.comment.update({
+          where: { id: commentId },
+          data: { likeCount: { increment: 1 } },
+        }),
+      ]);
+    }
+    return { liked: true, likeCount: await this.likeCount(commentId) };
+  }
+
+  async unlike(userId: string, commentId: string): Promise<LikeResult> {
+    const existing = await this.prisma.commentLike.findUnique({
+      where: { userId_commentId: { userId, commentId } },
+      select: { userId: true },
+    });
+    if (existing) {
+      await this.prisma.$transaction([
+        this.prisma.commentLike.delete({ where: { userId_commentId: { userId, commentId } } }),
+        this.prisma.comment.update({
+          where: { id: commentId },
+          data: { likeCount: { decrement: 1 } },
+        }),
+      ]);
+    }
+    return { liked: false, likeCount: await this.likeCount(commentId) };
+  }
+
+  /** Flag a comment for moderator review (one report per user; idempotent). */
+  async report(userId: string, commentId: string, reason?: string): Promise<{ reported: true }> {
+    await this.assertComment(commentId);
+    try {
+      await this.prisma.$transaction([
+        this.prisma.commentReport.create({
+          data: { commentId, reporterId: userId, reason: reason?.slice(0, 500) || null },
+        }),
+        this.prisma.comment.update({
+          where: { id: commentId },
+          data: { reportCount: { increment: 1 } },
+        }),
+      ]);
+    } catch (error) {
+      // Duplicate report by the same user — a no-op, not an error.
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002')) {
+        throw error;
+      }
+    }
+    return { reported: true };
+  }
+
+  /** Moderation queue: reported comments and anything pending review. */
+  async listFlagged(): Promise<FlaggedComment[]> {
+    const rows = await this.prisma.comment.findMany({
+      where: {
+        deletedAt: null,
+        OR: [{ reportCount: { gt: 0 } }, { status: CommentStatus.pending }],
+      },
+      include: {
+        author: { select: { id: true, displayName: true, avatarUrl: true } },
+        article: { select: { slug: true, title: true } },
+      },
+      orderBy: [{ reportCount: 'desc' }, { createdAt: 'desc' }],
+      take: 100,
+    });
+    return rows.map((row) => ({
+      id: row.id,
+      body: row.body,
+      status: row.status,
+      reportCount: row.reportCount,
+      createdAt: row.createdAt.toISOString(),
+      author: row.author,
+      article: row.article,
+    }));
+  }
+
+  /** Moderator action: keep (clears flags), hide, or remove a comment. */
+  async moderate(
+    commentId: string,
+    action: ModerationAction,
+  ): Promise<{ id: string; status: string }> {
+    await this.assertComment(commentId);
+    const status =
+      action === 'keep'
+        ? CommentStatus.visible
+        : action === 'hide'
+          ? CommentStatus.hidden
+          : CommentStatus.removed;
+    const updated = await this.prisma.comment.update({
+      where: { id: commentId },
+      data: { status, reportCount: 0 },
+      select: { id: true, status: true },
+    });
+    return updated;
+  }
+
+  private async assertComment(commentId: string): Promise<void> {
+    const comment = await this.prisma.comment.findFirst({
+      where: { id: commentId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+  }
+
+  private async likeCount(commentId: string): Promise<number> {
+    const comment = await this.prisma.comment.findUnique({
+      where: { id: commentId },
+      select: { likeCount: true },
+    });
+    return comment?.likeCount ?? 0;
+  }
 }
 
 /** Strip any HTML and collapse surrounding whitespace — comments are plain text. */
@@ -76,6 +199,7 @@ function toView(row: CommentRow): CommentView {
     id: row.id,
     body: row.body,
     createdAt: row.createdAt.toISOString(),
+    likeCount: row.likeCount,
     author: row.author,
     replies: [],
   };

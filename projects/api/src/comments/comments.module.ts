@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { CommentActionsController } from './comment-actions.controller';
+import { CommentModerationController } from './comment-moderation.controller';
 import { CommentsController } from './comments.controller';
 import { CommentsService } from './comments.service';
 
 @Module({
   imports: [AuthModule], // provides TokenService for JwtAuthGuard
-  controllers: [CommentsController],
+  controllers: [CommentsController, CommentActionsController, CommentModerationController],
   providers: [CommentsService],
 })
 export class CommentsModule {}

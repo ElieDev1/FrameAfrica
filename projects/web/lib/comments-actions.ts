@@ -44,3 +44,73 @@ export async function postComment(
   revalidatePath(`/article/${slug}`);
   return { ok: true };
 }
+
+async function authed(path: string, method: string, body?: unknown): Promise<Response> {
+  const token = await getAccessToken();
+  if (!token) redirect('/login');
+  return fetch(`${API_URL}${path}`, {
+    method,
+    headers: {
+      authorization: `Bearer ${token}`,
+      ...(body ? { 'content-type': 'application/json' } : {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
+  });
+}
+
+export interface CommentLikeState {
+  liked: boolean;
+  likeCount: number;
+}
+
+/** Like / unlike a comment; returns the new state. */
+export async function toggleCommentLike(id: string, like: boolean): Promise<CommentLikeState> {
+  const res = await authed(`/comments/${id}/like`, like ? 'POST' : 'DELETE');
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not update your like.');
+  const json = (await res.json()) as { data: CommentLikeState };
+  return json.data;
+}
+
+/** Report a comment for moderation. */
+export async function reportComment(id: string): Promise<void> {
+  const res = await authed(`/comments/${id}/report`, 'POST', {});
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not report this comment.');
+}
+
+export interface FlaggedComment {
+  id: string;
+  body: string;
+  status: string;
+  reportCount: number;
+  createdAt: string;
+  author: { id: string; displayName: string; avatarUrl: string | null };
+  article: { slug: string; title: string };
+}
+
+/** Moderator/admin: the moderation queue (empty on any error). */
+export async function fetchModerationQueue(): Promise<FlaggedComment[]> {
+  const token = await getAccessToken();
+  if (!token) redirect('/login');
+  const res = await fetch(`${API_URL}/cms/moderation`, {
+    headers: { authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) return [];
+  const json = (await res.json()) as { data: FlaggedComment[] };
+  return json.data;
+}
+
+/** Moderator/admin: keep / hide / remove a flagged comment. */
+export async function moderateComment(
+  id: string,
+  action: 'keep' | 'hide' | 'remove',
+): Promise<void> {
+  const res = await authed(`/cms/comments/${id}/moderate`, 'POST', { action });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not moderate this comment.');
+  revalidatePath('/dashboard/moderation');
+}

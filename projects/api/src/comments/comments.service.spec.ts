@@ -11,6 +11,8 @@ const commentRow = (over: Record<string, unknown> = {}) => ({
   parentId: null as string | null,
   body: 'Hi',
   status: CommentStatus.visible,
+  likeCount: 0,
+  reportCount: 0,
   createdAt: new Date('2026-01-01T00:00:00Z'),
   updatedAt: new Date('2026-01-01T00:00:00Z'),
   deletedAt: null as Date | null,
@@ -20,8 +22,17 @@ const commentRow = (over: Record<string, unknown> = {}) => ({
 
 function build() {
   const prisma = {
-    comment: { findMany: jest.fn(), findFirst: jest.fn(), create: jest.fn() },
+    comment: {
+      findMany: jest.fn(),
+      findFirst: jest.fn(),
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+    commentLike: { findUnique: jest.fn(), create: jest.fn(), delete: jest.fn() },
+    commentReport: { create: jest.fn() },
     article: { findFirst: jest.fn() },
+    $transaction: jest.fn().mockResolvedValue([]),
   };
   const service = new CommentsService(prisma as unknown as PrismaService);
   return { service, prisma };
@@ -90,6 +101,45 @@ describe('CommentsService', () => {
 
       const { data } = firstArg<{ data: { parentId: string } }>(prisma.comment.create);
       expect(data.parentId).toBe('top1');
+    });
+  });
+
+  describe('like', () => {
+    it('likes once and returns the count', async () => {
+      const { service, prisma } = build();
+      prisma.comment.findFirst.mockResolvedValue({ id: 'c1' });
+      prisma.commentLike.findUnique.mockResolvedValue(null);
+      prisma.comment.findUnique.mockResolvedValue({ likeCount: 3 });
+
+      const res = await service.like('u1', 'c1');
+      expect(res).toEqual({ liked: true, likeCount: 3 });
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('report', () => {
+    it('flags a comment (idempotent on duplicate)', async () => {
+      const { service, prisma } = build();
+      prisma.comment.findFirst.mockResolvedValue({ id: 'c1' });
+      const res = await service.report('u1', 'c1', 'spam');
+      expect(res).toEqual({ reported: true });
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('moderate', () => {
+    it('hides a comment and clears the report count', async () => {
+      const { service, prisma } = build();
+      prisma.comment.findFirst.mockResolvedValue({ id: 'c1' });
+      prisma.comment.update.mockResolvedValue({ id: 'c1', status: 'hidden' });
+
+      const res = await service.moderate('c1', 'hide');
+      expect(res.status).toBe('hidden');
+      const { data } = firstArg<{ data: { status: string; reportCount: number } }>(
+        prisma.comment.update,
+      );
+      expect(data.status).toBe('hidden');
+      expect(data.reportCount).toBe(0);
     });
   });
 

@@ -1,9 +1,18 @@
 import Link from 'next/link';
 import type { Comment } from '@/lib/api';
 import { formatDate } from '@/lib/format';
+import { CommentActions } from './CommentActions';
 import { CommentForm } from './CommentForm';
 
-function CommentItem({ comment, isReply = false }: { comment: Comment; isReply?: boolean }) {
+function CommentItem({
+  comment,
+  signedIn,
+  isReply = false,
+}: {
+  comment: Comment;
+  signedIn: boolean;
+  isReply?: boolean;
+}) {
   return (
     <li className={isReply ? 'border-l border-border pl-4' : ''}>
       <article className="flex flex-col gap-1">
@@ -14,11 +23,12 @@ function CommentItem({ comment, isReply = false }: { comment: Comment; isReply?:
         <p className="whitespace-pre-line font-body text-[0.95rem] leading-relaxed text-text">
           {comment.body}
         </p>
+        <CommentActions id={comment.id} initialLikes={comment.likeCount} signedIn={signedIn} />
       </article>
       {comment.replies.length > 0 && (
         <ul className="mt-4 flex flex-col gap-4">
           {comment.replies.map((reply) => (
-            <CommentItem key={reply.id} comment={reply} isReply />
+            <CommentItem key={reply.id} comment={reply} signedIn={signedIn} isReply />
           ))}
         </ul>
       )}
@@ -72,7 +82,7 @@ export function CommentsSection({
       {comments.length > 0 ? (
         <ul className="flex flex-col gap-6">
           {comments.map((comment) => (
-            <CommentItem key={comment.id} comment={comment} />
+            <CommentItem key={comment.id} comment={comment} signedIn={signedIn} />
           ))}
         </ul>
       ) : (

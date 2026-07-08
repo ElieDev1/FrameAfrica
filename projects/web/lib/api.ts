@@ -225,6 +225,7 @@ export interface Comment {
   id: string;
   body: string;
   createdAt: string;
+  likeCount: number;
   author: CommentAuthor;
   replies: Comment[];
 }
