@@ -96,7 +96,9 @@ until merged and note their PR.
 ### Slice 5 — CMS & editorial workflow  `FR-PROD-*`, `FR-EDIT-*` 🚧
 - [x] Journalist draft lifecycle: create/edit (author-scoped) + a tracked revision on every save + submit for review (`FR-PROD-1`, `-5`, `-6`), role-gated
 - [x] Editor workflow: review queue + **publish/reject** (`ready` → `published`/`rejected`), editor-gated, with a `/cms/review` UI (`FR-EDIT-1`, `02` §6)
-- [ ] Publish now / schedule / embargo (`FR-EDIT-2`, `-3`)
+- [x] **Sub-editor copy desk** (WS14) — submitted drafts land on `copy_edit`; sub-editors polish then pass to editors (`ready`) or return to the writer (`/dashboard/copydesk`). Pipeline: draft → copy-edit → review → published.
+- [x] Publish now / **schedule / embargo** + **archive** (`FR-EDIT-2`, `-3`, WS15) — schedule at a future time (holds `embargoed`; an in-process `SchedulerService` publishes when due); archive removes a published story from the public site.
+- [x] **Admin full CRUD** (WS13) — create+publish/edit-any/publish/unpublish/archive/soft-delete→trash→restore for any article, plus taxonomy (sections/topics) CRUD (`/dashboard/articles`, `/dashboard/taxonomy`).
 - [ ] Corrections & retractions with a public, dated log (`FR-EDIT-5`)
 - [ ] Feature as breaking news (`FR-EDIT-4`)
 - [x] CMS editor UI: `/cms` draft list + `/cms/new` + `/cms/[id]` editor (create/edit/submit), staff-gated (`06` §4.5) — _rich-text editor still a plain textarea for now_
@@ -110,7 +112,7 @@ until merged and note their PR.
 - [x] Threaded comments (`FR-COMM-1`) — `GET/POST /v1/articles/:id/comments`, one-level replies, a `comment` table with a moderation `status`, and a comment thread + form on the article page (signed-in readers; rate-limited 5/min).
 - [x] Comment likes + reports (`FR-COMM-2`) — idempotent like/unlike + report endpoints, denormalised counts, like/report controls on each comment (WS7).
 - [x] HTML sanitization to prevent stored XSS (`05` §6) — comment bodies are stored as plain text (markup stripped on write) and output-encoded by React on render.
-- [x] Moderation queue, hide/remove (`FR-COMM-3`) — `/dashboard/moderation` for editors/moderators/admins with keep/hide/remove; flagged + pending comments surface automatically (WS7). _User ban + AI spam pre-screen still to come (`FR-COMM-4`)._
+- [x] Moderation queue, hide/remove, **delete**, **user ban** (`FR-COMM-3`, `-4`) — `/dashboard/moderation` for moderators/editors/admins: keep/hide/remove, delete a comment, and **ban/unban a user from commenting** (WS7, WS13, WS16). _AI spam pre-screen still to come._
 
 ### Slice 8 — Monetization  `FR-SUB-*`, `FR-AD-*`
 - [ ] Metered paywall (N free/period) → `402` preview when over meter (`FR-SUB-1`; `04` §7)
@@ -169,12 +171,17 @@ until merged and note their PR.
 > generated-password / forced first-login flow; admin integrations & API-key
 > settings; admin monitoring + edit-any-article; a site-wide staff "Newsroom"
 > nav; and **security & trust** — staff TOTP 2FA (mandatory for staff) + a real
-> SMTP email transport.
+> SMTP email transport. **Newsroom actors completed (WS13–WS16):** admin full
+> CRUD (articles + taxonomy + comments); sub-editor **copy desk**; editor
+> **schedule/embargo + archive**; moderator **user ban**. Every editorial office
+> role — journalist, sub-editor, editor, moderator, admin — is now functionally
+> complete (Ads Manager is the only office role still empty; it ships with ads).
 >
-> **Next up (critical, pre-monetization):** **Slice 6** media on S3 (signed
-> uploads + responsive variants), **Slice 4** account data export + erasure
-> (`FR-AUTH-8`), and **Slice 3** OpenSearch. **Slice 8 monetization** (metered
-> paywall + MoMo/Airtel + ads) is deferred until the core is solid.
+> **Next up:** the (secondary) **reader experience** — follow section/topic/author
+> + "For you", reading history, author pages, reading aids (progress/font/TTS).
+> Then the remaining **critical infra** slices: **Slice 6** media on S3, **Slice 4**
+> data export + erasure, **Slice 3** OpenSearch. **Slice 8 monetization** (paywall
+> + MoMo/Airtel + ads, with the Ads Manager role) is deferred until the core is solid.
 
 ---
 
