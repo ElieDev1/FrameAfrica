@@ -40,4 +40,16 @@ export class CommentModerationController {
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     return apiResponse(await this.comments.softDelete(id));
   }
+
+  @Post('users/:id/ban')
+  @HttpCode(200)
+  async ban(@Param('id', ParseUUIDPipe) id: string) {
+    return apiResponse(await this.comments.banUser(id));
+  }
+
+  @Post('users/:id/unban')
+  @HttpCode(200)
+  async unban(@Param('id', ParseUUIDPipe) id: string) {
+    return apiResponse(await this.comments.unbanUser(id));
+  }
 }

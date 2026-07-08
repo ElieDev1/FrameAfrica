@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ArticleStatus, CommentStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CommentView, FlaggedComment, LikeResult } from './comments.types';
@@ -33,6 +38,15 @@ export class CommentsService {
 
   /** Add a comment to a published article. */
   async create(userId: string, articleId: string, dto: CreateCommentDto): Promise<CommentView> {
+    // Banned users can still read, but not post (documents/14 §2).
+    const author = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { commentsBannedAt: true },
+    });
+    if (author?.commentsBannedAt) {
+      throw new ForbiddenException('You are banned from commenting');
+    }
+
     const article = await this.prisma.article.findFirst({
       where: { id: articleId, status: ArticleStatus.published, deletedAt: null },
       select: { id: true },
@@ -133,7 +147,9 @@ export class CommentsService {
         OR: [{ reportCount: { gt: 0 } }, { status: CommentStatus.pending }],
       },
       include: {
-        author: { select: { id: true, displayName: true, avatarUrl: true } },
+        author: {
+          select: { id: true, displayName: true, avatarUrl: true, commentsBannedAt: true },
+        },
         article: { select: { slug: true, title: true } },
       },
       orderBy: [{ reportCount: 'desc' }, { createdAt: 'desc' }],
@@ -145,9 +161,42 @@ export class CommentsService {
       status: row.status,
       reportCount: row.reportCount,
       createdAt: row.createdAt.toISOString(),
-      author: row.author,
+      author: {
+        id: row.author.id,
+        displayName: row.author.displayName,
+        avatarUrl: row.author.avatarUrl,
+        banned: row.author.commentsBannedAt !== null,
+      },
       article: row.article,
     }));
+  }
+
+  /** Ban a user from commenting (moderator). Their existing comments stay. */
+  async banUser(userId: string): Promise<{ id: string; banned: true }> {
+    await this.assertUser(userId);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { commentsBannedAt: new Date() },
+    });
+    return { id: userId, banned: true };
+  }
+
+  /** Lift a comment ban (moderator). */
+  async unbanUser(userId: string): Promise<{ id: string; banned: false }> {
+    await this.assertUser(userId);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { commentsBannedAt: null },
+    });
+    return { id: userId, banned: false };
+  }
+
+  private async assertUser(userId: string): Promise<void> {
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
   }
 
   /** Moderator action: keep (clears flags), hide, or remove a comment. */
