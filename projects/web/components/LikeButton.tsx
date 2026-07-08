@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
+import { HeartFilledIcon, HeartIcon } from '@/components/icons';
 import { toggleLike } from '@/lib/likes-actions';
 
 /**
@@ -29,7 +30,7 @@ export function LikeButton({
         href="/login"
         className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-1.5 font-mono text-xs text-muted transition hover:border-primary hover:text-primary"
       >
-        <span aria-hidden>♥</span>
+        <HeartIcon size={16} />
         {count} {count === 1 ? 'like' : 'likes'} · Sign in to like
       </Link>
     );
@@ -65,7 +66,7 @@ export function LikeButton({
           : 'border-border text-muted hover:border-primary hover:text-primary'
       }`}
     >
-      <span aria-hidden>{liked ? '♥' : '♡'}</span>
+      {liked ? <HeartFilledIcon size={16} /> : <HeartIcon size={16} />}
       {count} {count === 1 ? 'like' : 'likes'}
     </button>
   );

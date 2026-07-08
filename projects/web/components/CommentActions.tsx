@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { CheckIcon, FlagIcon, HeartFilledIcon, HeartIcon } from '@/components/icons';
 import { reportComment, toggleCommentLike } from '@/lib/comments-actions';
 
 /** Like + report controls for a single comment (client — talks to the BFF). */
@@ -19,9 +20,11 @@ export function CommentActions({
   const [, startTransition] = useTransition();
 
   if (!signedIn) {
-    return (
-      <div className="mt-1 font-mono text-[11px] text-faint">{likes > 0 ? `♥ ${likes}` : ''}</div>
-    );
+    return likes > 0 ? (
+      <div className="mt-1 flex items-center gap-1 font-mono text-[11px] text-faint">
+        <HeartIcon size={13} /> {likes}
+      </div>
+    ) : null;
   }
 
   function like() {
@@ -59,15 +62,22 @@ export function CommentActions({
         type="button"
         onClick={like}
         aria-pressed={liked}
-        className={liked ? 'text-accent-red' : 'text-muted hover:text-primary'}
+        aria-label={liked ? 'Unlike' : 'Like'}
+        className={`inline-flex items-center gap-1 ${liked ? 'text-accent-red' : 'text-muted hover:text-primary'}`}
       >
-        ♥ {likes}
+        {liked ? <HeartFilledIcon size={14} /> : <HeartIcon size={14} />} {likes}
       </button>
       {reported ? (
-        <span className="text-faint">Reported ✓</span>
+        <span className="inline-flex items-center gap-1 text-faint">
+          <CheckIcon size={13} /> Reported
+        </span>
       ) : (
-        <button type="button" onClick={report} className="text-muted hover:text-accent-red">
-          Report
+        <button
+          type="button"
+          onClick={report}
+          className="inline-flex items-center gap-1 text-muted hover:text-accent-red"
+        >
+          <FlagIcon size={13} /> Report
         </button>
       )}
     </div>

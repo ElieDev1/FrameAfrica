@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { BrandIcon, CheckIcon, LinkIcon } from '@/components/icons';
 
 /**
  * A compact share bar pinned to the bottom of the screen on mobile only, shown
@@ -18,11 +19,11 @@ export function StickyShare({ title }: { title: string }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const openers: Record<string, string> = {
-    X: `https://twitter.com/intent/tweet?text=${enc(title)}&url=${here()}`,
-    WhatsApp: `https://wa.me/?text=${enc(`${title} `)}${here()}`,
-    Facebook: `https://www.facebook.com/sharer/sharer.php?u=${here()}`,
-  };
+  const openers: { kind: 'x' | 'whatsapp' | 'facebook'; url: string }[] = [
+    { kind: 'x', url: `https://twitter.com/intent/tweet?text=${enc(title)}&url=${here()}` },
+    { kind: 'whatsapp', url: `https://wa.me/?text=${enc(`${title} `)}${here()}` },
+    { kind: 'facebook', url: `https://www.facebook.com/sharer/sharer.php?u=${here()}` },
+  ];
 
   async function copy() {
     try {
@@ -43,23 +44,25 @@ export function StickyShare({ title }: { title: string }) {
       <div className="mx-auto flex max-w-2xl items-center justify-between gap-2">
         <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">Share</span>
         <div className="flex items-center gap-2">
-          {Object.entries(openers).map(([kind, url]) => (
+          {openers.map(({ kind, url }) => (
             <a
               key={kind}
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-muted hover:border-primary hover:text-primary"
+              aria-label={`Share on ${kind}`}
+              className="grid h-9 w-9 place-items-center rounded-lg border border-border text-muted hover:border-primary hover:text-primary"
             >
-              {kind}
+              <BrandIcon name={kind} size={16} />
             </a>
           ))}
           <button
             type="button"
             onClick={copy}
-            className="rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-muted hover:border-primary hover:text-primary"
+            aria-label="Copy link"
+            className="grid h-9 w-9 place-items-center rounded-lg border border-border text-muted hover:border-primary hover:text-primary"
           >
-            {copied ? '✓' : 'Copy'}
+            {copied ? <CheckIcon size={16} /> : <LinkIcon size={16} />}
           </button>
         </div>
       </div>

@@ -1,3 +1,5 @@
+import { PlayIcon } from '@/components/icons';
+
 /**
  * Horizontal "Watch & Listen" strip (documents/06 §4.1). Placeholder items until
  * the media/video slice lands — the cards are clearly teasers (a Soon tag), not
@@ -24,11 +26,8 @@ export function VideoStrip() {
         {ITEMS.map((item) => (
           <article key={item.title} className="w-64 shrink-0">
             <div className="media-fill relative flex aspect-video items-center justify-center rounded-xl ring-1 ring-border">
-              <span
-                className="grid h-11 w-11 place-items-center rounded-full bg-black/40 text-text ring-1 ring-white/30 backdrop-blur"
-                aria-hidden
-              >
-                ▶
+              <span className="grid h-11 w-11 place-items-center rounded-full bg-black/40 pl-0.5 text-white ring-1 ring-white/30 backdrop-blur">
+                <PlayIcon size={18} />
               </span>
               <span className="absolute left-3 top-3 rounded bg-black/50 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-white">
                 {item.kind}
