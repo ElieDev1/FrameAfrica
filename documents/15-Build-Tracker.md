@@ -101,7 +101,8 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 
 ### WS6 — Studio (in-app design) `[~]`
 - [x] Canvas editor at `/dashboard/studio` — **brand templates** (Headline · Breaking · Quote), sizes (Square · Story · Wide), editable kicker/headline/source with the Frame Africa mark + colours, and **export to PNG** (in-app, no external software)
-- [ ] Drop an uploaded image into the card + "prefill from an article"
+- [x] **Background photo** — upload an image; it's drawn cover-fit under a legibility gradient with white text over it (export intact)
+- [ ] "Prefill from an article" (pull headline + featured image)
 - [ ] Auto social-share cards (OG images) generated per article
 - **DoD (core met):** staff produce & download branded graphics in-app; image backgrounds + auto OG cards are the enhancement.
 
