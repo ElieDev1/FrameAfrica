@@ -103,7 +103,24 @@ export class CmsDraftService {
 
   async updateDraft(authorId: string, id: string, dto: UpdateDraftDto): Promise<DraftDetail> {
     const existing = await this.ownEditable(authorId, id);
+    const data = await this.buildUpdateData(existing, dto, authorId);
+    const updated = await this.prisma.article.update({
+      where: { id },
+      data,
+      include: draftInclude,
+    });
+    return toDraftDetail(updated);
+  }
 
+  /**
+   * Build the update payload shared by author and admin edits, including a
+   * revision snapshot attributed to `editorId`.
+   */
+  private async buildUpdateData(
+    existing: DraftRow,
+    dto: UpdateDraftDto,
+    editorId: string,
+  ): Promise<Prisma.ArticleUpdateInput> {
     const data: Prisma.ArticleUpdateInput = {};
     if (dto.title !== undefined) {
       data.title = dto.title;
@@ -146,7 +163,7 @@ export class CmsDraftService {
     data.revisions = {
       create: [
         {
-          editor: { connect: { id: authorId } },
+          editor: { connect: { id: editorId } },
           title: dto.title ?? existing.title,
           // Snapshot the resolved body (derived from blocks when supplied).
           body: (data.body as string | undefined) ?? existing.body,
@@ -154,13 +171,56 @@ export class CmsDraftService {
         },
       ],
     };
+    return data;
+  }
 
+  // ── Admin: edit any article, regardless of author or status ──────────────
+
+  /** All articles (any author, any status), newest first, optionally filtered. */
+  async listAll(filter: { status?: ArticleStatus; q?: string } = {}): Promise<DraftListItem[]> {
+    const where: Prisma.ArticleWhereInput = { deletedAt: null };
+    if (filter.status) where.status = filter.status;
+    if (filter.q) {
+      where.OR = [
+        { title: { contains: filter.q, mode: 'insensitive' } },
+        { slug: { contains: filter.q, mode: 'insensitive' } },
+      ];
+    }
+    const rows = await this.prisma.article.findMany({
+      where,
+      include: draftInclude,
+      orderBy: { updatedAt: 'desc' },
+      take: 200,
+    });
+    return rows.map(toDraftListItem);
+  }
+
+  /** Load any article for admin editing. */
+  async getAny(id: string): Promise<DraftDetail> {
+    return toDraftDetail(await this.loadAny(id));
+  }
+
+  /** Admin update: no ownership scope and no editable-status restriction. */
+  async updateAny(editorId: string, id: string, dto: UpdateDraftDto): Promise<DraftDetail> {
+    const existing = await this.loadAny(id);
+    const data = await this.buildUpdateData(existing, dto, editorId);
     const updated = await this.prisma.article.update({
       where: { id },
       data,
       include: draftInclude,
     });
     return toDraftDetail(updated);
+  }
+
+  private async loadAny(id: string): Promise<DraftRow> {
+    const article = await this.prisma.article.findFirst({
+      where: { id, deletedAt: null },
+      include: draftInclude,
+    });
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+    return article;
   }
 
   /** Submit a draft for editorial review (→ `ready`). */
