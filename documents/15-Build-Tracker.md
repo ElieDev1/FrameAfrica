@@ -103,8 +103,8 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Auto social-share cards (OG images) generated per article
 - **DoD:** staff produce shareable graphics without external software.
 
-### WS7 — Reader engagement (complete) `[ ]`
-- [ ] Article **likes** + comment **likes** (per-user, de-duplicated)
+### WS7 — Reader engagement (complete) `[~]`
+- [~] Article **likes** — `article_like` (per-user, deduped) + `POST/DELETE/GET /v1/articles/:id/like` (auth), denormalised count kept in a transaction; a **like button** on the article page (optimistic, signed-out → login). Verified e2e (like/idempotent/unlike/401). _(Comment likes remain.)_
 - [ ] Comment **report/flag** → moderation queue; **moderation UI** (hide/remove/ban) + audit log
 - [ ] **Bookmarks / saved**, **reading history**, **follow** sections/topics/authors (in Account)
 - [ ] AI/heuristic spam pre-screen hook on comment create

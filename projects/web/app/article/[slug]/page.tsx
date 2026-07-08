@@ -5,9 +5,11 @@ import { notFound } from 'next/navigation';
 import { ArticleCard } from '@/components/ArticleCard';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { CommentsSection } from '@/components/CommentsSection';
+import { LikeButton } from '@/components/LikeButton';
 import { ReadingProgress } from '@/components/ReadingProgress';
 import { ShareBar } from '@/components/ShareBar';
 import { StickyShare } from '@/components/StickyShare';
+import { getLikeStatus } from '@/lib/likes-actions';
 import { fetchArticle, fetchComments, fetchRelated, type ArticleDetail } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import { getSession } from '@/lib/session';
@@ -87,10 +89,11 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound();
   }
 
-  const [related, comments, user] = await Promise.all([
+  const [related, comments, user, likeStatus] = await Promise.all([
     fetchRelated(slug),
     fetchComments(article.id),
     getSession(),
+    getLikeStatus(article.id),
   ]);
 
   const updated = isMeaningfullyUpdated(article.publishedAt, article.updatedAt);
@@ -147,7 +150,13 @@ export default async function ArticlePage({ params }: PageProps) {
         {updated && <span className="text-primary">· Updated {formatDate(article.updatedAt)}</span>}
       </div>
 
-      <div className="mt-5">
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <LikeButton
+          articleId={article.id}
+          initialLiked={likeStatus?.liked ?? false}
+          initialCount={likeStatus?.likeCount ?? article.likeCount}
+          signedIn={Boolean(user)}
+        />
         <ShareBar title={article.title} />
       </div>
 

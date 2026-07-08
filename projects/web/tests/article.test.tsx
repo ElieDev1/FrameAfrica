@@ -10,6 +10,10 @@ jest.mock('@/lib/api', () => ({
 }));
 jest.mock('@/lib/session', () => ({ getSession: jest.fn() }));
 jest.mock('@/lib/comments-actions', () => ({ postComment: jest.fn() }));
+jest.mock('@/lib/likes-actions', () => ({
+  getLikeStatus: jest.fn().mockResolvedValue(null),
+  toggleLike: jest.fn(),
+}));
 
 const mockFetchArticle = fetchArticle as jest.MockedFunction<typeof fetchArticle>;
 const mockFetchRelated = fetchRelated as jest.MockedFunction<typeof fetchRelated>;
@@ -114,7 +118,8 @@ describe('ArticlePage', () => {
 
     expect(screen.getByText('Great piece.')).toBeInTheDocument();
     expect(screen.getByText('Ana K.')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /sign in/i })).toBeInTheDocument();
+    // A sign-in prompt appears (the comment form; the like button also links to login).
+    expect(screen.getAllByRole('link', { name: /sign in/i }).length).toBeGreaterThan(0);
   });
 
   it('shows the comment form to a signed-in reader', async () => {
