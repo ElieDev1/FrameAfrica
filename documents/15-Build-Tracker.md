@@ -99,10 +99,11 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Push-based real-time (SSE) upgrade over the 20s poll; a dedicated `/live` index
 - **DoD (core met):** readers watch a story update without refreshing (verified e2e); SSE + a live index are the enhancement.
 
-### WS6 — Studio (in-app design) `[ ]`
-- [ ] Canvas editor for flyers / social cards / posters (brand templates, text, image, export PNG)
+### WS6 — Studio (in-app design) `[~]`
+- [x] Canvas editor at `/dashboard/studio` — **brand templates** (Headline · Breaking · Quote), sizes (Square · Story · Wide), editable kicker/headline/source with the Frame Africa mark + colours, and **export to PNG** (in-app, no external software)
+- [ ] Drop an uploaded image into the card + "prefill from an article"
 - [ ] Auto social-share cards (OG images) generated per article
-- **DoD:** staff produce shareable graphics without external software.
+- **DoD (core met):** staff produce & download branded graphics in-app; image backgrounds + auto OG cards are the enhancement.
 
 ### WS7 — Reader engagement (complete) `[~]`
 - [~] Article **likes** — `article_like` (per-user, deduped) + `POST/DELETE/GET /v1/articles/:id/like` (auth), denormalised count kept in a transaction; a **like button** on the article page (optimistic, signed-out → login). Verified e2e (like/idempotent/unlike/401). _(Comment likes remain.)_
