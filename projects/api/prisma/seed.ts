@@ -133,6 +133,28 @@ async function main(): Promise<void> {
     create: { userId: editor.id, roleId: editorRole.id },
   });
 
+  // An admin, with full access to every workspace (users, settings, etc.).
+  const adminRole = await prisma.role.upsert({
+    where: { name: RoleName.admin },
+    update: {},
+    create: { name: RoleName.admin },
+  });
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@frameafrica.rw' },
+    update: { passwordHash },
+    create: {
+      email: 'admin@frameafrica.rw',
+      displayName: 'Site Admin',
+      emailVerifiedAt: new Date(),
+      passwordHash,
+    },
+  });
+  await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: admin.id, roleId: adminRole.id } },
+    update: {},
+    create: { userId: admin.id, roleId: adminRole.id },
+  });
+
   // The full agreed nested taxonomy (documents/14 §5.1): top-level sections, each
   // with sub-sections. Section pages aggregate their sub-sections' articles; the
   // header shows the sections with sub-section dropdowns.
