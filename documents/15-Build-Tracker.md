@@ -87,8 +87,8 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 ### WS4 — Editorial desk & workflow `[~]`
 - [ ] Full status machine (`draft→…→published`) with role transitions + assignments
 - [ ] Review desk (queue, diff vs revision, approve/return with notes)
-- [ ] **Publish now / schedule / embargo** (runner publishes at time)
-- [x] **Corrections & retractions** — append-only `article_correction` log; editor-only `POST /cms/articles/:id/corrections` (note stripped of markup, published-only); a dated **Correction(s)** notice on the article page; an editor form on the published-story page (unit-tested; HTTP e2e pending DB availability)
+- [x] **Corrections & retractions** — append-only `article_correction` log; editor-only `POST /cms/articles/:id/corrections` (note stripped of markup, published-only); a dated **Correction(s)** notice on the article page; an editor form on the published-story page. Verified e2e (add → 201 markup-stripped, public shows the dated note, non-editor → 403)
+- [x] **Publish now / schedule / embargo** — scheduled publishing (PR #44, on `dev`)
 - [ ] **Homepage/section curation** (editor arranges lead + slots)
 - **DoD:** an editor runs the whole pipeline from assignment to a curated front page.
 
