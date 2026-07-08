@@ -1,4 +1,4 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import type { PrismaService } from '../../prisma/prisma.service';
 import { CmsEditorService } from './cms-editor.service';
 
@@ -17,6 +17,7 @@ const row = (over: Record<string, unknown> = {}) => ({
 function build() {
   const prisma = {
     article: { findMany: jest.fn(), findFirst: jest.fn(), update: jest.fn() },
+    articleCorrection: { create: jest.fn() },
   };
   return { service: new CmsEditorService(prisma as unknown as PrismaService), prisma };
 }
@@ -73,6 +74,41 @@ describe('CmsEditorService', () => {
       const res = await service.reject('a1');
 
       expect(res.status).toBe('rejected');
+    });
+  });
+
+  describe('addCorrection', () => {
+    it('appends a stripped note to a published article', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue({ status: 'published' });
+      prisma.articleCorrection.create.mockResolvedValue({
+        id: 'k1',
+        note: 'Fixed the date.',
+        createdAt: new Date('2026-01-03T00:00:00Z'),
+      });
+
+      const res = await service.addCorrection('a1', 'ed1', 'Fixed the <b>date</b>.');
+
+      expect(res.note).toBe('Fixed the date.');
+      const calls = prisma.articleCorrection.create.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { data: { note: string; editorId: string } };
+      expect(arg.data.note).toBe('Fixed the date.'); // markup stripped
+      expect(arg.data.editorId).toBe('ed1');
+    });
+
+    it('rejects an empty note', async () => {
+      const { service } = build();
+      await expect(service.addCorrection('a1', 'ed1', '   ')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+    });
+
+    it('refuses to correct a non-published article', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue({ status: 'draft' });
+      await expect(service.addCorrection('a1', 'ed1', 'A note')).rejects.toBeInstanceOf(
+        ConflictException,
+      );
     });
   });
 });

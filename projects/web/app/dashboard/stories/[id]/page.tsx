@@ -1,8 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { CorrectionForm } from '@/components/cms/CorrectionForm';
 import { DraftForm } from '@/components/cms/DraftForm';
 import { StatusBadge } from '@/components/cms/StatusBadge';
-import { categoryOptions, getDraft, isEditable, requireStaff, topicOptions } from '@/lib/cms';
+import {
+  categoryOptions,
+  getDraft,
+  isEditable,
+  isEditor,
+  requireStaff,
+  topicOptions,
+} from '@/lib/cms';
 import { submitDraftAction, updateDraftAction } from '@/lib/cms-actions';
 
 export const metadata: Metadata = { title: 'Edit draft — Frame Africa' };
@@ -10,7 +18,7 @@ export const metadata: Metadata = { title: 'Edit draft — Frame Africa' };
 type PageProps = { params: Promise<{ id: string }> };
 
 export default async function EditDraftPage({ params }: PageProps) {
-  await requireStaff();
+  const user = await requireStaff();
   const { id } = await params;
   const [draft, categories, topics] = await Promise.all([
     getDraft(id),
@@ -82,6 +90,11 @@ export default async function EditDraftPage({ params }: PageProps) {
             >
               View published article →
             </Link>
+          )}
+          {draft.status === 'published' && isEditor(user) && (
+            <div className="mt-5 border-t border-border pt-4">
+              <CorrectionForm articleId={draft.id} />
+            </div>
           )}
         </div>
       )}

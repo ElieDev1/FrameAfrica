@@ -225,11 +225,12 @@ model Article {
   updatedAt    DateTime      @updatedAt @map("updated_at")
   deletedAt    DateTime?     @map("deleted_at")
 
-  author    User              @relation(fields: [authorId], references: [id])
-  category  Category          @relation(fields: [categoryId], references: [id])
-  revisions ArticleRevision[]
-  comments  Comment[]
-  topics    ArticleTopic[]
+  author      User                @relation(fields: [authorId], references: [id])
+  category    Category            @relation(fields: [categoryId], references: [id])
+  revisions   ArticleRevision[]
+  comments    Comment[]
+  topics      ArticleTopic[]
+  corrections ArticleCorrection[]
 
   @@index([status, publishedAt])
   @@index([categoryId, publishedAt])
@@ -286,6 +287,23 @@ model Comment {
 
   @@index([articleId, status, createdAt])
   @@map("comment")
+}
+
+/// A public, dated correction or retraction note appended to a published
+/// article (documents/01 FR-EDIT-5). Append-only — the log is never edited, so
+/// the record of what changed and when is preserved (trust surface, `05` §13).
+model ArticleCorrection {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  articleId String   @map("article_id") @db.Uuid
+  note      String
+  editorId  String   @map("editor_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  editor  User    @relation("UserCorrections", fields: [editorId], references: [id])
+
+  @@index([articleId, createdAt])
+  @@map("article_correction")
 }
 
 /// Immutable snapshot captured on every draft save (documents/03 §3.5).

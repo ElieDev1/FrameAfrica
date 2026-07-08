@@ -151,6 +151,25 @@ export default async function ArticlePage({ params }: PageProps) {
         <ShareBar title={article.title} />
       </div>
 
+      {article.corrections.length > 0 && (
+        <aside
+          aria-label="Corrections"
+          className="mt-6 rounded-xl border-l-4 border-accent-yellow bg-surface px-4 py-3"
+        >
+          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-yellow">
+            {article.corrections.length === 1 ? 'Correction' : 'Corrections'}
+          </p>
+          <ul className="mt-1 flex flex-col gap-1.5">
+            {article.corrections.map((correction) => (
+              <li key={correction.id} className="font-body text-sm leading-relaxed text-muted">
+                <span className="text-faint">{formatDate(correction.createdAt)}: </span>
+                {correction.note}
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )}
+
       {article.featuredImage ? (
         <figure className="mt-8">
           <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl ring-1 ring-border">

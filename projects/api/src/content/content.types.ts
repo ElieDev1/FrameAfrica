@@ -49,6 +49,13 @@ export interface ArticleSummary {
   topics: TopicRef[];
 }
 
+/** A public, dated correction/retraction note on an article. */
+export interface CorrectionNote {
+  id: string;
+  note: string;
+  createdAt: string;
+}
+
 export interface ArticleDetail extends ArticleSummary {
   /**
    * Legacy plain body, kept for backward compatibility. Prefer `blocks` for
@@ -66,6 +73,8 @@ export interface ArticleDetail extends ArticleSummary {
   likeCount: number;
   shareCount: number;
   updatedAt: string;
+  /** Public, dated corrections/retractions, oldest first. */
+  corrections: CorrectionNote[];
   /** True when this is premium content and the caller has no active subscription. */
   isLocked: boolean;
 }
