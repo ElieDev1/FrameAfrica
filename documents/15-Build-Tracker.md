@@ -108,7 +108,8 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 ### WS7 — Reader engagement (complete) `[~]`
 - [~] Article **likes** — `article_like` (per-user, deduped) + `POST/DELETE/GET /v1/articles/:id/like` (auth), denormalised count kept in a transaction; a **like button** on the article page (optimistic, signed-out → login). Verified e2e (like/idempotent/unlike/401). _(Comment likes remain.)_
 - [ ] Comment **report/flag** → moderation queue; **moderation UI** (hide/remove/ban) + audit log
-- [ ] **Bookmarks / saved**, **reading history**, **follow** sections/topics/authors (in Account)
+- [x] **Bookmarks / saved** — `bookmark` table + `POST/DELETE/GET /v1/me/bookmarks/:id` + list; a **Save** button on the article + a **"Saved stories"** list in `/account`. Verified e2e (save/idempotent/list/unsave/401)
+- [ ] **Reading history** + **follow** sections/topics/authors (in Account)
 - [ ] AI/heuristic spam pre-screen hook on comment create
 - **DoD:** every interaction in `14 §2` works, with moderation and abuse controls.
 

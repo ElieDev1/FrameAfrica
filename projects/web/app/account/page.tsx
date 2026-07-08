@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { logout } from '@/lib/auth-actions';
+import { fetchSaved } from '@/lib/bookmarks-actions';
+import { formatDate } from '@/lib/format';
 import { getSession } from '@/lib/session';
 
 export const metadata: Metadata = { title: 'Your account — Frame Africa' };
@@ -15,6 +17,7 @@ export default async function AccountPage() {
   }
 
   const isStaff = user.roles.some((role) => STAFF_ROLES.includes(role));
+  const saved = await fetchSaved();
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">
@@ -34,6 +37,38 @@ export default async function AccountPage() {
           Go to the newsroom →
         </Link>
       )}
+
+      <section className="mt-10">
+        <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
+          Saved stories ({saved.length})
+        </h2>
+        {saved.length === 0 ? (
+          <p className="mt-3 font-body text-sm text-muted">
+            Nothing saved yet. Tap <span className="text-text">Save</span> on any story to keep it
+            here.
+          </p>
+        ) : (
+          <ul className="mt-3 divide-y divide-border rounded-xl border border-border">
+            {saved.map((article) => (
+              <li key={article.id} className="px-4 py-3">
+                <Link href={`/article/${article.slug}`} className="group block">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
+                    {article.category.name}
+                  </span>
+                  <p className="font-heading font-bold text-text group-hover:text-primary">
+                    {article.title}
+                  </p>
+                  {article.publishedAt && (
+                    <span className="font-mono text-[11px] text-faint">
+                      {formatDate(article.publishedAt)}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <form action={logout} className="mt-8 border-t border-border pt-6">
         <button
