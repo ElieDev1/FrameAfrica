@@ -118,6 +118,29 @@ export async function submitDraftAction(id: string): Promise<void> {
   redirect('/dashboard/stories');
 }
 
+/** Admin direct status control on any article (publish/unpublish/archive/restore). */
+export async function adminArticleStatusAction(
+  id: string,
+  action: 'publish' | 'unpublish' | 'archive' | 'restore',
+): Promise<void> {
+  const res = await authedFetch(`/cms/admin/articles/${id}/${action}`, 'POST');
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Could not ${action} the article.`);
+  revalidatePath('/');
+  revalidatePath('/dashboard/articles');
+  revalidatePath(`/dashboard/articles/${id}`);
+}
+
+/** Admin soft-delete → back to the list. */
+export async function adminDeleteArticleAction(id: string): Promise<void> {
+  const res = await authedFetch(`/cms/admin/articles/${id}`, 'DELETE');
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not delete the article.');
+  revalidatePath('/');
+  revalidatePath('/dashboard/articles');
+  redirect('/dashboard/articles');
+}
+
 /** Admin: edit ANY article (any author/status) via the admin endpoint. */
 export async function updateAnyArticleAction(
   id: string,

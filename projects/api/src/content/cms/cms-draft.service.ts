@@ -223,6 +223,68 @@ export class CmsDraftService {
     return article;
   }
 
+  /** Admin create — optionally publishing immediately (bypasses review). */
+  async createAsAdmin(
+    authorId: string,
+    dto: CreateDraftDto,
+    publish = false,
+  ): Promise<DraftDetail> {
+    const draft = await this.createDraft(authorId, dto);
+    return publish ? this.setStatusAny(draft.id, 'publish') : draft;
+  }
+
+  /** Admin direct status control: publish / unpublish / archive any article. */
+  async setStatusAny(
+    id: string,
+    action: 'publish' | 'unpublish' | 'archive',
+  ): Promise<DraftDetail> {
+    const existing = await this.loadAny(id);
+    let data: Prisma.ArticleUpdateInput;
+    if (action === 'publish') {
+      data = { status: ArticleStatus.published, publishedAt: existing.publishedAt ?? new Date() };
+    } else if (action === 'unpublish') {
+      data = { status: ArticleStatus.draft };
+    } else {
+      data = { status: ArticleStatus.archived };
+    }
+    const updated = await this.prisma.article.update({
+      where: { id },
+      data,
+      include: draftInclude,
+    });
+    return toDraftDetail(updated);
+  }
+
+  /** Admin soft-delete (recoverable). */
+  async deleteAny(id: string): Promise<{ id: string; deleted: true }> {
+    await this.loadAny(id);
+    await this.prisma.article.update({ where: { id }, data: { deletedAt: new Date() } });
+    return { id, deleted: true };
+  }
+
+  /** Admin restore of a soft-deleted article. */
+  async restoreAny(id: string): Promise<DraftDetail> {
+    const article = await this.prisma.article.findUnique({ where: { id }, include: draftInclude });
+    if (!article) throw new NotFoundException('Article not found');
+    const restored = await this.prisma.article.update({
+      where: { id },
+      data: { deletedAt: null },
+      include: draftInclude,
+    });
+    return toDraftDetail(restored);
+  }
+
+  /** Admin: soft-deleted articles (the trash), newest first. */
+  async listDeleted(): Promise<DraftListItem[]> {
+    const rows = await this.prisma.article.findMany({
+      where: { deletedAt: { not: null } },
+      include: draftInclude,
+      orderBy: { updatedAt: 'desc' },
+      take: 200,
+    });
+    return rows.map(toDraftListItem);
+  }
+
   /** Submit a draft for editorial review (→ `ready`). */
   async submitDraft(authorId: string, id: string): Promise<DraftDetail> {
     await this.ownEditable(authorId, id);

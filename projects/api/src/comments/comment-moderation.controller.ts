@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -32,5 +33,11 @@ export class CommentModerationController {
   @HttpCode(200)
   async moderate(@Param('id', ParseUUIDPipe) id: string, @Body() dto: ModerateCommentDto) {
     return apiResponse(await this.comments.moderate(id, dto.action));
+  }
+
+  @Delete('comments/:id')
+  @HttpCode(200)
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    return apiResponse(await this.comments.softDelete(id));
   }
 }

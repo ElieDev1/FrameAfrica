@@ -230,6 +230,41 @@ describe('CmsDraftService', () => {
       expect(where).toMatchObject({ deletedAt: null, status: 'published' });
       expect(where).toHaveProperty('OR');
     });
+
+    it('setStatusAny publish stamps publishedAt when missing', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue(row({ status: 'ready', publishedAt: null }));
+      prisma.article.update.mockResolvedValue(row({ status: 'published' }));
+      await service.setStatusAny('a1', 'publish');
+      const { data } = (prisma.article.update.mock.calls[0] as unknown[])[0] as {
+        data: { status: string; publishedAt: Date };
+      };
+      expect(data.status).toBe('published');
+      expect(data.publishedAt).toBeInstanceOf(Date);
+    });
+
+    it('deleteAny soft-deletes (sets deletedAt)', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue(row());
+      prisma.article.update.mockResolvedValue(row());
+      const res = await service.deleteAny('a1');
+      expect(res.deleted).toBe(true);
+      const { data } = (prisma.article.update.mock.calls[0] as unknown[])[0] as {
+        data: { deletedAt: Date };
+      };
+      expect(data.deletedAt).toBeInstanceOf(Date);
+    });
+
+    it('restoreAny clears deletedAt', async () => {
+      const { service, prisma } = build();
+      prisma.article.findUnique.mockResolvedValue(row({ deletedAt: new Date() }));
+      prisma.article.update.mockResolvedValue(row());
+      await service.restoreAny('a1');
+      const { data } = (prisma.article.update.mock.calls[0] as unknown[])[0] as {
+        data: { deletedAt: Date | null };
+      };
+      expect(data.deletedAt).toBeNull();
+    });
   });
 
   describe('submitDraft', () => {

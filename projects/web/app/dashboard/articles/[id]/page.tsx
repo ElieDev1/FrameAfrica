@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ArticleAdminActions } from '@/components/dashboard/ArticleAdminActions';
 import { DraftForm } from '@/components/cms/DraftForm';
 import { StatusBadge } from '@/components/cms/StatusBadge';
 import { categoryOptions, getAnyArticle, requireAdmin, topicOptions } from '@/lib/cms';
@@ -64,6 +65,10 @@ export default async function AdminEditArticlePage({ params }: PageProps) {
             featuredImageCredit: article.featuredImageCredit ?? '',
           }}
         />
+      </div>
+
+      <div className="mt-8">
+        <ArticleAdminActions id={article.id} status={article.status} />
       </div>
     </div>
   );
