@@ -26,6 +26,19 @@ export class MailerService {
     await this.deliver(email, 'Reset your Frame Africa password', link);
   }
 
+  /**
+   * Deliver a freshly generated temporary password (admin-created or -reset
+   * account). The recipient must change it at next sign-in.
+   */
+  async sendTemporaryPassword(email: string, temporaryPassword: string): Promise<void> {
+    const link = `${this.appUrl}/login`;
+    this.logger.log(
+      `[mail] to=${email} subject="Your Frame Africa temporary password" ` +
+        `password=${temporaryPassword} link=${link}`,
+    );
+    return Promise.resolve();
+  }
+
   private deliver(to: string, subject: string, link: string): Promise<void> {
     this.logger.log(`[mail] to=${to} subject="${subject}" link=${link}`);
     return Promise.resolve();

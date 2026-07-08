@@ -16,6 +16,8 @@ export interface SafeUser {
   displayName: string;
   avatarUrl: string | null;
   roles: string[];
+  /** True when the account is on a generated password and must set a new one. */
+  mustChangePassword: boolean;
 }
 
 export interface AuthResult {

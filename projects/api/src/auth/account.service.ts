@@ -74,4 +74,17 @@ export class AccountService {
     // A reset invalidates existing sessions — force re-login everywhere.
     await this.tokens.revokeAllForUser(userId);
   }
+
+  /**
+   * First-login password change: a user on a generated password (admin-created
+   * or admin-reset) sets their own password with no email token — they are
+   * already authenticated. Clears the `mustChangePassword` flag.
+   */
+  async setInitialPassword(userId: string, newPassword: string): Promise<void> {
+    const passwordHash = await this.passwords.hash(newPassword);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash, mustChangePassword: false },
+    });
+  }
 }

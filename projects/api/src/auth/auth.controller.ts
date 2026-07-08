@@ -1,11 +1,24 @@
-import { Body, Controller, HttpCode, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Post,
+  Req,
+  Res,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
+import type { AuthenticatedUser } from '../common/auth/authenticated-user';
+import { CurrentUser } from '../common/auth/current-user.decorator';
+import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { apiResponse } from '../common/http/api-response';
 import { AccountService } from './account.service';
 import { AuthService } from './auth.service';
 import type { AuthResult } from './auth.types';
+import { FirstPasswordDto } from './dto/first-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -77,6 +90,17 @@ export class AuthController {
   async resetPassword(@Body() dto: ResetPasswordDto) {
     await this.account.resetPassword(dto.token, dto.password);
     return apiResponse({ reset: true });
+  }
+
+  // First-login password change for a generated-password account. The caller
+  // is already authenticated (they signed in with the temp password), so no
+  // email token is required — just a valid access token.
+  @UseGuards(JwtAuthGuard)
+  @Post('password/first')
+  @HttpCode(200)
+  async firstPassword(@CurrentUser() user: AuthenticatedUser, @Body() dto: FirstPasswordDto) {
+    await this.account.setInitialPassword(user.id, dto.password);
+    return apiResponse({ changed: true });
   }
 
   @Post('logout')
