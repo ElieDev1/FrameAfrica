@@ -127,8 +127,9 @@ export async function publishAction(id: string): Promise<void> {
   redirect('/dashboard/review');
 }
 
-export async function rejectAction(id: string): Promise<void> {
-  const res = await authedFetch(`/cms/articles/${id}/reject`, 'POST');
+export async function rejectAction(id: string, formData: FormData): Promise<void> {
+  const note = String(formData.get('note') ?? '').trim();
+  const res = await authedFetch(`/cms/articles/${id}/reject`, 'POST', note ? { note } : {});
   if (res.status === 401) redirect('/login');
   if (!res.ok) throw new Error('Could not reject the article.');
   revalidatePath('/dashboard/review');

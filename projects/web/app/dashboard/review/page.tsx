@@ -41,7 +41,7 @@ export default async function ReviewPage() {
                 </div>
                 <StatusBadge status={item.status} />
               </div>
-              <div className="mt-4 flex gap-2">
+              <div className="mt-4 flex flex-wrap items-start gap-3">
                 <form action={publishAction.bind(null, item.id)}>
                   <button
                     type="submit"
@@ -50,12 +50,22 @@ export default async function ReviewPage() {
                     Publish
                   </button>
                 </form>
-                <form action={rejectAction.bind(null, item.id)}>
+                <form
+                  action={rejectAction.bind(null, item.id)}
+                  className="flex flex-1 flex-wrap items-start gap-2"
+                >
+                  <textarea
+                    name="note"
+                    rows={1}
+                    maxLength={1000}
+                    placeholder="Return note (optional) — what should the author fix?"
+                    className="min-w-[14rem] flex-1 rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-body text-sm text-text outline-none focus:border-primary"
+                  />
                   <button
                     type="submit"
                     className="rounded-lg border border-accent-red px-3 py-1.5 font-mono text-xs uppercase tracking-wide text-accent-red hover:bg-accent-red hover:text-white"
                   >
-                    Reject
+                    Return
                   </button>
                 </form>
               </div>

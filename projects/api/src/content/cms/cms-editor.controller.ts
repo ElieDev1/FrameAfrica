@@ -38,8 +38,17 @@ export class CmsEditorController {
 
   @Post('articles/:id/reject')
   @HttpCode(200)
-  async reject(@Param('id', ParseUUIDPipe) id: string) {
-    return apiResponse(await this.editor.reject(id));
+  async reject(@Param('id', ParseUUIDPipe) id: string, @Body() dto: RejectDto) {
+    return apiResponse(await this.editor.reject(id, dto.note));
+  }
+
+  @Post('articles/:id/corrections')
+  async addCorrection(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AddCorrectionDto,
+  ) {
+    return apiResponse(await this.editor.addCorrection(id, user.id, dto.note));
   }
 
   @Post('articles/:id/corrections')

@@ -75,6 +75,53 @@ describe('CmsEditorService', () => {
 
       expect(res.status).toBe('rejected');
     });
+
+    it('stores a stripped return-note when one is given', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue(row({ status: 'ready' }));
+      prisma.article.update.mockResolvedValue(row({ status: 'rejected' }));
+
+      await service.reject('a1', 'Please add a <b>source</b> for the figure.');
+
+      const calls = prisma.article.update.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { data: { reviewNote: string | null } };
+      expect(arg.data.reviewNote).toBe('Please add a source for the figure.');
+    });
+  });
+
+  describe('addCorrection', () => {
+    it('appends a stripped note to a published article', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue({ status: 'published' });
+      prisma.articleCorrection.create.mockResolvedValue({
+        id: 'k1',
+        note: 'Fixed the date.',
+        createdAt: new Date('2026-01-03T00:00:00Z'),
+      });
+
+      const res = await service.addCorrection('a1', 'ed1', 'Fixed the <b>date</b>.');
+
+      expect(res.note).toBe('Fixed the date.');
+      const calls = prisma.articleCorrection.create.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { data: { note: string; editorId: string } };
+      expect(arg.data.note).toBe('Fixed the date.'); // markup stripped
+      expect(arg.data.editorId).toBe('ed1');
+    });
+
+    it('rejects an empty note', async () => {
+      const { service } = build();
+      await expect(service.addCorrection('a1', 'ed1', '   ')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+    });
+
+    it('refuses to correct a non-published article', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue({ status: 'draft' });
+      await expect(service.addCorrection('a1', 'ed1', 'A note')).rejects.toBeInstanceOf(
+        ConflictException,
+      );
+    });
   });
 
   describe('addCorrection', () => {

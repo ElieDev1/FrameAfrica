@@ -33,6 +33,8 @@ export interface DraftDetail extends DraftListItem {
   /** The structured block document, or null for legacy plain-body drafts. */
   blocks: Block[] | null;
   topics: TopicRef[];
+  /** Editor's note when the draft was returned (rejected); null otherwise. */
+  reviewNote: string | null;
   featuredImageUrl: string | null;
   featuredImageAlt: string | null;
   featuredImageCredit: string | null;
