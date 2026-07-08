@@ -227,6 +227,18 @@ model UserRole {
   @@map("user_role")
 }
 
+/// Admin-managed configuration (integration API keys, feature flags). Secret
+/// values are stored here and only ever surfaced to admins masked; the raw
+/// value is read server-side by the services that need it.
+model AppSetting {
+  key       String   @id
+  value     String
+  isSecret  Boolean  @default(true) @map("is_secret")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_setting")
+}
+
 model Category {
   id          String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   parentId    String? @map("parent_id") @db.Uuid
