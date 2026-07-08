@@ -89,7 +89,7 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [~] Review desk — queue + publish + **return with a note** the author sees (cleared on resubmit); verified e2e. _(Diff vs revision + inline preview remain.)_
 - [x] **Corrections & retractions** — append-only `article_correction` log; editor-only `POST /cms/articles/:id/corrections` (note stripped of markup, published-only); a dated **Correction(s)** notice on the article page; an editor form on the published-story page. Verified e2e (add → 201 markup-stripped, public shows the dated note, non-editor → 403)
 - [x] **Publish now / schedule / embargo** — scheduled publishing (PR #44, on `dev`)
-- [ ] **Homepage/section curation** (editor arranges lead + slots)
+- [x] **Homepage curation** — editors pin/unpin a published story as the front-page **lead** (`is_featured` + `featured_at`); the homepage hero + Editor's Picks read the featured set (fallback: latest); `?featured=` filter + editor toggle. Verified e2e (pin → appears, unpin → gone, non-editor → 403). _(Per-section curation + drag-arrange remain.)_
 - **DoD:** an editor runs the whole pipeline from assignment to a curated front page.
 
 ### WS5 — Live / developing coverage `[ ]`

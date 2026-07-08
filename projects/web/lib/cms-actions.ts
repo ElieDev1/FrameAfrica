@@ -136,6 +136,15 @@ export async function rejectAction(id: string, formData: FormData): Promise<void
   redirect('/dashboard/review');
 }
 
+/** Pin/unpin a published article to the homepage (editor curation). */
+export async function featureAction(id: string, featured: boolean): Promise<void> {
+  const res = await authedFetch(`/cms/articles/${id}/feature`, 'POST', { featured });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not update the homepage feature.');
+  revalidatePath('/');
+  revalidatePath(`/dashboard/stories/${id}`);
+}
+
 export interface CorrectionState {
   error?: string;
   savedAt?: string;

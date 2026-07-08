@@ -279,6 +279,7 @@ function toDraftDetail(article: DraftRow): DraftDetail {
     blocks: readBlocks(article.blocks),
     topics: article.topics.map((t) => t.topic),
     reviewNote: article.reviewNote,
+    isFeatured: article.isFeatured,
     featuredImageUrl: article.featuredImageUrl,
     featuredImageAlt: article.featuredImageAlt,
     featuredImageCredit: article.featuredImageCredit,

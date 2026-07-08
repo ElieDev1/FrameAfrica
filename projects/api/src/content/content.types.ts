@@ -41,6 +41,7 @@ export interface ArticleSummary {
   language: ArticleLanguage;
   isPremium: boolean;
   isBreaking: boolean;
+  isFeatured: boolean;
   readTimeMin: number | null;
   publishedAt: string | null;
   featuredImage: FeaturedImage | null;
