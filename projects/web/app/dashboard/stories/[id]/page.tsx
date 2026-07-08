@@ -12,7 +12,12 @@ import {
   requireStaff,
   topicOptions,
 } from '@/lib/cms';
-import { featureAction, submitDraftAction, updateDraftAction } from '@/lib/cms-actions';
+import {
+  archiveAction,
+  featureAction,
+  submitDraftAction,
+  updateDraftAction,
+} from '@/lib/cms-actions';
 
 export const metadata: Metadata = { title: 'Edit draft — Frame Africa' };
 
@@ -127,6 +132,23 @@ export default async function EditDraftPage({ params }: PageProps) {
               <div className="mt-5 border-t border-border pt-4">
                 <CorrectionForm articleId={draft.id} />
               </div>
+              <form
+                action={archiveAction.bind(null, draft.id)}
+                className="mt-5 border-t border-border pt-4"
+              >
+                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+                  Archive
+                </p>
+                <p className="mt-1 font-body text-sm text-muted">
+                  Removes the story from the public site (keeps it in the newsroom).
+                </p>
+                <button
+                  type="submit"
+                  className="mt-2 rounded-lg border border-accent-red/50 px-4 py-2 font-mono text-xs uppercase tracking-wide text-accent-red hover:bg-accent-red/10"
+                >
+                  Archive article
+                </button>
+              </form>
             </div>
           )}
         </div>

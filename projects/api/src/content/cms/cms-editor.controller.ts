@@ -19,6 +19,7 @@ import { CmsEditorService } from './cms-editor.service';
 import { AddCorrectionDto } from './dto/add-correction.dto';
 import { FeatureDto } from './dto/feature.dto';
 import { RejectDto } from './dto/reject.dto';
+import { ScheduleDto } from './dto/schedule.dto';
 
 /** Editor-only review queue + publish/reject. */
 @Controller('cms')
@@ -42,6 +43,18 @@ export class CmsEditorController {
   @HttpCode(200)
   async reject(@Param('id', ParseUUIDPipe) id: string, @Body() dto: RejectDto) {
     return apiResponse(await this.editor.reject(id, dto.note));
+  }
+
+  @Post('articles/:id/schedule')
+  @HttpCode(200)
+  async schedule(@Param('id', ParseUUIDPipe) id: string, @Body() dto: ScheduleDto) {
+    return apiResponse(await this.editor.schedule(id, new Date(dto.scheduledAt)));
+  }
+
+  @Post('articles/:id/archive')
+  @HttpCode(200)
+  async archive(@Param('id', ParseUUIDPipe) id: string) {
+    return apiResponse(await this.editor.archive(id));
   }
 
   @Post('articles/:id/feature')

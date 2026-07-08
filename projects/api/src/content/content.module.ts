@@ -6,6 +6,7 @@ import { CmsCopydeskController } from './cms/cms-copydesk.controller';
 import { CmsDraftService } from './cms/cms-draft.service';
 import { CmsEditorController } from './cms/cms-editor.controller';
 import { CmsEditorService } from './cms/cms-editor.service';
+import { SchedulerService } from './cms/scheduler.service';
 import { ContentController } from './content.controller';
 import { ContentService } from './content.service';
 
@@ -18,6 +19,6 @@ import { ContentService } from './content.service';
     CmsAdminController,
     CmsCopydeskController,
   ],
-  providers: [ContentService, CmsDraftService, CmsEditorService],
+  providers: [ContentService, CmsDraftService, CmsEditorService, SchedulerService],
 })
 export class ContentModule {}

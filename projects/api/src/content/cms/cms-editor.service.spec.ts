@@ -16,7 +16,12 @@ const row = (over: Record<string, unknown> = {}) => ({
 
 function build() {
   const prisma = {
-    article: { findMany: jest.fn(), findFirst: jest.fn(), update: jest.fn() },
+    article: {
+      findMany: jest.fn(),
+      findFirst: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+    },
     articleCorrection: { create: jest.fn() },
   };
   return { service: new CmsEditorService(prisma as unknown as PrismaService), prisma };
@@ -62,6 +67,59 @@ describe('CmsEditorService', () => {
       const { service, prisma } = build();
       prisma.article.findFirst.mockResolvedValue(null);
       await expect(service.publish('a1')).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
+  describe('schedule', () => {
+    it('embargoes a ready article for a future time', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue(row({ status: 'ready' }));
+      prisma.article.update.mockResolvedValue(row({ status: 'embargoed' }));
+      const when = new Date(Date.now() + 3_600_000);
+
+      await service.schedule('a1', when);
+
+      const calls = prisma.article.update.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { data: { status: string; embargoUntil: Date } };
+      expect(arg.data.status).toBe('embargoed');
+      expect(arg.data.embargoUntil).toEqual(when);
+    });
+
+    it('rejects a past schedule time', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue(row({ status: 'ready' }));
+      await expect(service.schedule('a1', new Date(Date.now() - 1000))).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+    });
+  });
+
+  describe('archive', () => {
+    it('archives a published article', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue(row({ status: 'published' }));
+      prisma.article.update.mockResolvedValue(row({ status: 'archived' }));
+      const res = await service.archive('a1');
+      expect(res.status).toBe('archived');
+    });
+
+    it('refuses to archive a non-published article', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue(row({ status: 'ready' }));
+      await expect(service.archive('a1')).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('publishDue', () => {
+    it('promotes embargoed articles whose time has arrived', async () => {
+      const { service, prisma } = build();
+      prisma.article.updateMany.mockResolvedValue({ count: 2 });
+      const n = await service.publishDue(new Date('2026-07-09T12:00:00Z'));
+      expect(n).toBe(2);
+      const calls = prisma.article.updateMany.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { where: Record<string, unknown>; data: { status: string } };
+      expect(arg.where).toMatchObject({ status: 'embargoed' });
+      expect(arg.data.status).toBe('published');
     });
   });
 

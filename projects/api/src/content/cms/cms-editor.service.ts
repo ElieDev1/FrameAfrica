@@ -98,18 +98,88 @@ export class CmsEditorService {
     return article;
   }
 
-  /** Publish a submitted article (`ready` → `published`). */
+  /** Publish now (`ready` or a scheduled `embargoed` article → `published`). */
   async publish(id: string): Promise<ReviewItem> {
-    const article = await this.loadReviewable(id);
+    const article = await this.loadPublishable(id);
     const updated = await this.prisma.article.update({
       where: { id },
       data: {
         status: ArticleStatus.published,
         publishedAt: article.publishedAt ?? new Date(),
+        scheduledAt: null,
+        embargoUntil: null,
       },
       include: reviewInclude,
     });
     return toReviewItem(updated);
+  }
+
+  /**
+   * Schedule/embargo a reviewed article to go live at `when` (`ready` →
+   * `embargoed`). The in-process publisher (`publishDue`) flips it to
+   * `published` when due, so it stays hidden from public reads until then.
+   */
+  async schedule(id: string, when: Date): Promise<ReviewItem> {
+    await this.loadReviewable(id);
+    if (Number.isNaN(when.getTime()) || when.getTime() <= Date.now()) {
+      throw new BadRequestException('Schedule time must be in the future');
+    }
+    const updated = await this.prisma.article.update({
+      where: { id },
+      data: { status: ArticleStatus.embargoed, scheduledAt: when, embargoUntil: when },
+      include: reviewInclude,
+    });
+    return toReviewItem(updated);
+  }
+
+  /** Take a published article off the site (`published` → `archived`). */
+  async archive(id: string): Promise<ReviewItem> {
+    const article = await this.prisma.article.findFirst({
+      where: { id, deletedAt: null },
+      include: reviewInclude,
+    });
+    if (!article) throw new NotFoundException('Article not found');
+    if (article.status !== ArticleStatus.published) {
+      throw new ConflictException('Only published articles can be archived');
+    }
+    const updated = await this.prisma.article.update({
+      where: { id },
+      data: { status: ArticleStatus.archived },
+      include: reviewInclude,
+    });
+    return toReviewItem(updated);
+  }
+
+  /** Publisher tick: promote any scheduled article whose time has arrived. */
+  async publishDue(now = new Date()): Promise<number> {
+    const { count } = await this.prisma.article.updateMany({
+      where: {
+        status: ArticleStatus.embargoed,
+        embargoUntil: { lte: now },
+        deletedAt: null,
+      },
+      data: {
+        status: ArticleStatus.published,
+        publishedAt: now,
+        embargoUntil: null,
+        scheduledAt: null,
+      },
+    });
+    return count;
+  }
+
+  private async loadPublishable(id: string): Promise<ReviewRow> {
+    const article = await this.prisma.article.findFirst({
+      where: { id, deletedAt: null },
+      include: reviewInclude,
+    });
+    if (!article) throw new NotFoundException('Article not found');
+    if (article.status !== ArticleStatus.ready && article.status !== ArticleStatus.embargoed) {
+      throw new ConflictException(
+        `Only reviewed or scheduled articles can be published (this one is "${article.status}")`,
+      );
+    }
+    return article;
   }
 
   /**

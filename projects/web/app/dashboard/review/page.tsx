@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { StatusBadge } from '@/components/cms/StatusBadge';
 import { listReviewQueue, requireEditor } from '@/lib/cms';
-import { publishAction, rejectAction } from '@/lib/cms-actions';
+import { publishAction, rejectAction, scheduleAction } from '@/lib/cms-actions';
 import { formatDate } from '@/lib/format';
 
 export const metadata: Metadata = { title: 'Review queue — Frame Africa' };
@@ -47,7 +47,24 @@ export default async function ReviewPage() {
                     type="submit"
                     className="rounded-lg bg-primary px-3 py-1.5 font-mono text-xs uppercase tracking-wide text-black hover:opacity-90"
                   >
-                    Publish
+                    Publish now
+                  </button>
+                </form>
+                <form
+                  action={scheduleAction.bind(null, item.id)}
+                  className="flex items-center gap-2"
+                >
+                  <input
+                    type="datetime-local"
+                    name="scheduledAt"
+                    required
+                    className="rounded-lg border border-border bg-surface-2 px-2 py-1.5 font-mono text-xs text-text outline-none focus:border-primary"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-primary px-3 py-1.5 font-mono text-xs uppercase tracking-wide text-primary hover:bg-primary hover:text-black"
+                  >
+                    Schedule
                   </button>
                 </form>
                 <form
