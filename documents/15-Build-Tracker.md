@@ -78,12 +78,11 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Admin taxonomy manager (create/edit/reorder/activate sections & topics)
 - **DoD:** the site's navigation reflects a real newsroom taxonomy end-to-end.
 
-### WS3 — Media library (real uploads) `[x]`
+### WS3 — Media library (real uploads) `[~]`
 - [x] Upload API (staff-gated multipart) + **local storage driver** (writes to `web/public/uploads`, same-origin URL) + `media_asset` catalogue (alt/credit/licence) + list — verified e2e. _(S3 driver + WebP/AVIF variants are the prod swap behind the same `save()` contract.)_
-- [x] Media library UI — `/dashboard/media` (browse grid + upload form via a BFF action), + a nav item
-- [x] A **media picker** ("Choose from library") wired into the block editor (image + gallery) **and** the featured-image field — replaces URL-paste
-- [x] Galleries pull from the library (add-from-library on the gallery block)
-- **DoD met (dev):** staff upload real images and pick them across the editor + featured image; the library is the source. _(S3 driver + WebP/AVIF variants remain the prod-storage swap.)_
+- [ ] Media library UI (browse/upload) + **picker** wired into the block editor + featured-image picker
+- [ ] Galleries as first-class media; featured-image picker replaces URL-paste
+- **DoD:** staff upload real images/galleries; the DAM is the single source for media.
 
 ### WS4 — Editorial desk & workflow `[ ]`
 - [ ] Full status machine (`draft→…→published`) with role transitions + assignments
