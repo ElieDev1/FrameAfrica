@@ -42,6 +42,8 @@ export interface ArticleSummary {
   language: ArticleLanguage;
   isPremium: boolean;
   isBreaking: boolean;
+  isFeatured: boolean;
+  isLive: boolean;
   readTimeMin: number | null;
   publishedAt: string | null;
   featuredImage: FeaturedImage | null;
@@ -159,6 +161,7 @@ export interface TopicDetail {
 export interface ListArticlesParams {
   category?: string;
   topic?: string;
+  featured?: boolean;
   language?: ArticleLanguage;
   q?: string;
   sort?: 'latest' | 'popular';
@@ -172,6 +175,7 @@ export async function fetchArticles(
   const search = new URLSearchParams();
   if (params.category) search.set('category', params.category);
   if (params.topic) search.set('topic', params.topic);
+  if (params.featured) search.set('featured', 'true');
   if (params.language) search.set('language', params.language);
   if (params.q) search.set('q', params.q);
   if (params.sort) search.set('sort', params.sort);
@@ -255,6 +259,42 @@ export async function fetchCategory(slug: string): Promise<CategoryDetail | null
       return null;
     }
     throw error;
+  }
+}
+
+export interface LiveUpdate {
+  id: string;
+  headline: string | null;
+  body: string;
+  isKeyEvent: boolean;
+  createdAt: string;
+  author: string;
+}
+
+/** Compact article shape for the reader's "Saved" list. */
+export interface SavedArticle {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  excerpt: string | null;
+  publishedAt: string | null;
+  category: { name: string; slug: string };
+  featuredImage: { url: string; alt: string | null } | null;
+}
+
+/** An article's live-coverage updates (newest first), or `[]` on any error. */
+export async function fetchLiveUpdates(slug: string): Promise<LiveUpdate[]> {
+  try {
+    const res = await fetch(`${API_URL}/articles/${encodeURIComponent(slug)}/live`, {
+      headers: { accept: 'application/json' },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const envelope = (await res.json()) as ApiEnvelope<LiveUpdate[]>;
+    return envelope.data;
+  } catch {
+    return [];
   }
 }
 

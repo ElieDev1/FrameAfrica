@@ -7,9 +7,21 @@ jest.mock('@/lib/api', () => ({
   fetchArticle: jest.fn(),
   fetchRelated: jest.fn(),
   fetchComments: jest.fn(),
+  fetchLiveUpdates: jest.fn().mockResolvedValue([]),
 }));
 jest.mock('@/lib/session', () => ({ getSession: jest.fn() }));
 jest.mock('@/lib/comments-actions', () => ({ postComment: jest.fn() }));
+jest.mock('@/lib/likes-actions', () => ({
+  getLikeStatus: jest.fn().mockResolvedValue(null),
+  toggleLike: jest.fn(),
+}));
+jest.mock('@/lib/live-actions', () => ({
+  pollLiveUpdates: jest.fn().mockResolvedValue([]),
+}));
+jest.mock('@/lib/bookmarks-actions', () => ({
+  getBookmarkStatus: jest.fn().mockResolvedValue(null),
+  toggleBookmark: jest.fn(),
+}));
 
 const mockFetchArticle = fetchArticle as jest.MockedFunction<typeof fetchArticle>;
 const mockFetchRelated = fetchRelated as jest.MockedFunction<typeof fetchRelated>;
@@ -32,6 +44,8 @@ function sampleArticle(): ArticleDetail {
     language: 'en',
     isPremium: false,
     isBreaking: true,
+    isFeatured: false,
+    isLive: false,
     readTimeMin: 4,
     publishedAt: '2026-01-01T00:00:00.000Z',
     featuredImage: null,
@@ -113,7 +127,8 @@ describe('ArticlePage', () => {
 
     expect(screen.getByText('Great piece.')).toBeInTheDocument();
     expect(screen.getByText('Ana K.')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /sign in/i })).toBeInTheDocument();
+    // A sign-in prompt appears (the comment form; the like button also links to login).
+    expect(screen.getAllByRole('link', { name: /sign in/i }).length).toBeGreaterThan(0);
   });
 
   it('shows the comment form to a signed-in reader', async () => {

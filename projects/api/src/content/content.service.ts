@@ -57,6 +57,7 @@ export class ContentService {
       deletedAt: null,
       ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
       ...(query.topic ? { topics: { some: { topic: { slug: query.topic } } } } : {}),
+      ...(query.featured ? { isFeatured: true } : {}),
       ...(query.language ? { language: query.language } : {}),
       ...(query.q
         ? {
@@ -69,8 +70,9 @@ export class ContentService {
         : {}),
     };
 
-    const orderBy: Prisma.ArticleOrderByWithRelationInput[] =
-      query.sort === 'popular'
+    const orderBy: Prisma.ArticleOrderByWithRelationInput[] = query.featured
+      ? [{ featuredAt: 'desc' }, { id: 'desc' }]
+      : query.sort === 'popular'
         ? [{ viewCount: 'desc' }, { id: 'desc' }]
         : [{ publishedAt: 'desc' }, { id: 'desc' }];
 
@@ -235,6 +237,8 @@ function toArticleSummary(article: ArticleWithRelations): ArticleSummary {
     language: article.language,
     isPremium: article.isPremium,
     isBreaking: article.isBreaking,
+    isFeatured: article.isFeatured,
+    isLive: article.isLive,
     readTimeMin: article.readTimeMin,
     publishedAt: article.publishedAt?.toISOString() ?? null,
     featuredImage: article.featuredImageUrl

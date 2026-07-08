@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CorrectionForm } from '@/components/cms/CorrectionForm';
 import { DraftForm } from '@/components/cms/DraftForm';
+import { LiveComposer } from '@/components/cms/LiveComposer';
 import { StatusBadge } from '@/components/cms/StatusBadge';
 import {
   categoryOptions,

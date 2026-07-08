@@ -67,7 +67,7 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - **DoD met:** a published story renders as a designed document and staff author it block-by-block. Verified end-to-end (CMS create with blocks → sanitised → served → rendered).
 
 ### WS2 — Real taxonomy (sections · sub-sections · topics) `[~]`
-- [x] Real nested tree seeded from `14 §5` (5 sections × sub-sections; replaces the 6 placeholders)
+- [x] Real nested tree seeded from `14 §5.1` — **full 16-section tree + sub-sections** (78 categories); global header nav with **sub-section dropdowns** + a **mobile hamburger drawer**
 - [x] **Section pages aggregate their sub-sections** (descendant-aware article listing) + **sub-section chips** + parent breadcrumb (verified e2e)
 - [x] Load-more pagination on section **and** topic pages (cursor-based, via a server action)
 - [ ] A section ad slot (lands with the ad server, WS9)
@@ -92,21 +92,25 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] **Homepage/section curation** (editor arranges lead + slots)
 - **DoD:** an editor runs the whole pipeline from assignment to a curated front page.
 
-### WS5 — Live / developing coverage `[ ]`
-- [ ] Live-post model (entries under a story) + real-time delivery (SSE)
-- [ ] Reader **Live page**: LIVE badge, "updated Xm ago", newest-first stream, key events
-- [ ] Newsroom composer for posting live updates
-- **DoD:** readers watch a story update in real time, CNN-style.
+### WS5 — Live / developing coverage `[~]`
+- [x] Live-update model (`live_update`) + `isLive` on the article; staff post/end endpoints; public feed endpoint
+- [x] Reader **live feed** on the article — pulsing **LIVE** badge, "Updated Xm ago", newest-first stream, **key-event** flags; **auto-refreshes every 20s** (polling) so updates appear without a reload
+- [x] Newsroom **composer** on the published-story page (headline + body + key-event, and "End coverage")
+- [ ] Push-based real-time (SSE) upgrade over the 20s poll; a dedicated `/live` index
+- **DoD (core met):** readers watch a story update without refreshing (verified e2e); SSE + a live index are the enhancement.
 
-### WS6 — Studio (in-app design) `[ ]`
-- [ ] Canvas editor for flyers / social cards / posters (brand templates, text, image, export PNG)
+### WS6 — Studio (in-app design) `[~]`
+- [x] Canvas editor at `/dashboard/studio` — **brand templates** (Headline · Breaking · Quote), sizes (Square · Story · Wide), editable kicker/headline/source with the Frame Africa mark + colours, and **export to PNG** (in-app, no external software)
+- [x] **Background photo** — upload an image; it's drawn cover-fit under a legibility gradient with white text over it (export intact)
+- [ ] "Prefill from an article" (pull headline + featured image)
 - [ ] Auto social-share cards (OG images) generated per article
-- **DoD:** staff produce shareable graphics without external software.
+- **DoD (core met):** staff produce & download branded graphics in-app; image backgrounds + auto OG cards are the enhancement.
 
-### WS7 — Reader engagement (complete) `[ ]`
-- [ ] Article **likes** + comment **likes** (per-user, de-duplicated)
+### WS7 — Reader engagement (complete) `[~]`
+- [~] Article **likes** — `article_like` (per-user, deduped) + `POST/DELETE/GET /v1/articles/:id/like` (auth), denormalised count kept in a transaction; a **like button** on the article page (optimistic, signed-out → login). Verified e2e (like/idempotent/unlike/401). _(Comment likes remain.)_
 - [ ] Comment **report/flag** → moderation queue; **moderation UI** (hide/remove/ban) + audit log
-- [ ] **Bookmarks / saved**, **reading history**, **follow** sections/topics/authors (in Account)
+- [x] **Bookmarks / saved** — `bookmark` table + `POST/DELETE/GET /v1/me/bookmarks/:id` + list; a **Save** button on the article + a **"Saved stories"** list in `/account`. Verified e2e (save/idempotent/list/unsave/401)
+- [ ] **Reading history** + **follow** sections/topics/authors (in Account)
 - [ ] AI/heuristic spam pre-screen hook on comment create
 - **DoD:** every interaction in `14 §2` works, with moderation and abuse controls.
 
