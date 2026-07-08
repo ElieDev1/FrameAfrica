@@ -220,6 +220,30 @@ export async function publishAction(id: string): Promise<void> {
   redirect('/dashboard/review');
 }
 
+/** Schedule a reviewed article to publish at a future time (editor). */
+export async function scheduleAction(id: string, formData: FormData): Promise<void> {
+  const raw = String(formData.get('scheduledAt') ?? '').trim();
+  const when = raw ? new Date(raw) : null;
+  if (!when || Number.isNaN(when.getTime())) throw new Error('Pick a valid date and time.');
+  const res = await authedFetch(`/cms/articles/${id}/schedule`, 'POST', {
+    scheduledAt: when.toISOString(),
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not schedule the article.');
+  revalidatePath('/dashboard/review');
+  redirect('/dashboard/review');
+}
+
+/** Take a published article off the site (editor archive). */
+export async function archiveAction(id: string): Promise<void> {
+  const res = await authedFetch(`/cms/articles/${id}/archive`, 'POST');
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not archive the article.');
+  revalidatePath('/');
+  revalidatePath(`/dashboard/stories/${id}`);
+  revalidatePath('/dashboard/review');
+}
+
 export async function rejectAction(id: string, formData: FormData): Promise<void> {
   const note = String(formData.get('note') ?? '').trim();
   const res = await authedFetch(`/cms/articles/${id}/reject`, 'POST', note ? { note } : {});
