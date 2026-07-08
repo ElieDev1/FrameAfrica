@@ -18,7 +18,9 @@ import { apiResponse } from '../common/http/api-response';
 import { AccountService } from './account.service';
 import { AuthService } from './auth.service';
 import type { AuthResult } from './auth.types';
+import { TwoFactorService } from './two-factor.service';
 import { FirstPasswordDto } from './dto/first-password.dto';
+import { TwoFactorTokenDto } from './dto/two-factor.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -41,6 +43,7 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly account: AccountService,
+    private readonly twoFactor: TwoFactorService,
     config: ConfigService,
   ) {
     this.cookieSecure = config.get<string>('COOKIE_SECURE', 'true') !== 'false';
@@ -101,6 +104,29 @@ export class AuthController {
   async firstPassword(@CurrentUser() user: AuthenticatedUser, @Body() dto: FirstPasswordDto) {
     await this.account.setInitialPassword(user.id, dto.password);
     return apiResponse({ changed: true });
+  }
+
+  // ── Two-factor (TOTP) — all require an authenticated session ─────────────
+
+  @UseGuards(JwtAuthGuard)
+  @Post('2fa/setup')
+  @HttpCode(200)
+  async twoFactorSetup(@CurrentUser() user: AuthenticatedUser) {
+    return apiResponse(await this.twoFactor.beginSetup(user.id));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('2fa/enable')
+  @HttpCode(200)
+  async twoFactorEnable(@CurrentUser() user: AuthenticatedUser, @Body() dto: TwoFactorTokenDto) {
+    return apiResponse(await this.twoFactor.enable(user.id, dto.token));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('2fa/disable')
+  @HttpCode(200)
+  async twoFactorDisable(@CurrentUser() user: AuthenticatedUser, @Body() dto: TwoFactorTokenDto) {
+    return apiResponse(await this.twoFactor.disable(user.id, dto.token));
   }
 
   @Post('logout')

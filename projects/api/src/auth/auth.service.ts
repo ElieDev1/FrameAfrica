@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AccountService } from './account.service';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
+import { TwoFactorService } from './two-factor.service';
 import type { AuthResult, LoginInput, RegisterInput, SafeUser } from './auth.types';
 
 const withRoles = {
@@ -30,6 +31,7 @@ export class AuthService {
     private readonly passwords: PasswordService,
     private readonly tokens: TokenService,
     private readonly account: AccountService,
+    private readonly twoFactor: TwoFactorService,
   ) {}
 
   async register(input: RegisterInput): Promise<AuthResult> {
@@ -104,6 +106,18 @@ export class AuthService {
       throw new UnauthorizedException('Account is not active');
     }
 
+    // Second factor, when enabled. The message tokens let the client tell
+    // "prompt for a code" apart from "wrong code" (the error filter passes the
+    // message through; the code stays UNAUTHENTICATED either way).
+    if (user.twoFactorEnabled) {
+      if (!input.token) {
+        throw new UnauthorizedException('2FA_REQUIRED');
+      }
+      if (!user.twoFactorSecret || !this.twoFactor.verify(user.twoFactorSecret, input.token)) {
+        throw new UnauthorizedException('2FA_INVALID');
+      }
+    }
+
     await this.prisma.user.update({
       where: { id: user.id },
       data: { lastLoginAt: new Date() },
@@ -170,5 +184,6 @@ function toSafeUser(user: UserWithRoles, roles: string[]): SafeUser {
     avatarUrl: user.avatarUrl,
     roles,
     mustChangePassword: user.mustChangePassword,
+    twoFactorEnabled: user.twoFactorEnabled,
   };
 }

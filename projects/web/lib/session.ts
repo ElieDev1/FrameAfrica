@@ -20,6 +20,8 @@ export interface SessionUser {
   roles: string[];
   /** True when on a generated password — must set a new one before continuing. */
   mustChangePassword?: boolean;
+  /** True when TOTP two-factor is enabled on the account. */
+  twoFactorEnabled?: boolean;
 }
 
 /** The current user (via `/me`), or `null` when signed out / token expired. */

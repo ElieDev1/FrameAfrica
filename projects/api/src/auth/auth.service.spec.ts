@@ -5,6 +5,7 @@ import type { AccountService } from './account.service';
 import { AuthService } from './auth.service';
 import type { PasswordService } from './password.service';
 import type { TokenService } from './token.service';
+import type { TwoFactorService } from './two-factor.service';
 
 const userWithRoles = (over: Record<string, unknown> = {}) => ({
   id: 'u1',
@@ -37,13 +38,15 @@ function build() {
     revokeToken: jest.fn(),
   };
   const account = { sendVerification: jest.fn().mockResolvedValue(undefined) };
+  const twoFactor = { verify: jest.fn().mockReturnValue(true) };
   const service = new AuthService(
     prisma as unknown as PrismaService,
     passwords as unknown as PasswordService,
     tokens as unknown as TokenService,
     account as unknown as AccountService,
+    twoFactor as unknown as TwoFactorService,
   );
-  return { service, prisma, passwords, tokens, account };
+  return { service, prisma, passwords, tokens, account, twoFactor };
 }
 
 describe('AuthService', () => {
@@ -172,6 +175,48 @@ describe('AuthService', () => {
       expect(prisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({ where: { id: 'u1' } }),
       );
+    });
+
+    it('demands a 2FA code when the account has 2FA enabled', async () => {
+      const { service, prisma, passwords } = build();
+      prisma.user.findFirst.mockResolvedValue(
+        userWithRoles({ twoFactorEnabled: true, twoFactorSecret: 'SECRET' }),
+      );
+      passwords.verify.mockResolvedValue(true);
+
+      await expect(
+        service.login({ email: 'reader@frameafrica.rw', password: 'pw' }),
+      ).rejects.toMatchObject({ message: '2FA_REQUIRED' });
+    });
+
+    it('rejects an invalid 2FA code', async () => {
+      const { service, prisma, passwords, twoFactor } = build();
+      prisma.user.findFirst.mockResolvedValue(
+        userWithRoles({ twoFactorEnabled: true, twoFactorSecret: 'SECRET' }),
+      );
+      passwords.verify.mockResolvedValue(true);
+      twoFactor.verify.mockReturnValue(false);
+
+      await expect(
+        service.login({ email: 'reader@frameafrica.rw', password: 'pw', token: '000000' }),
+      ).rejects.toMatchObject({ message: '2FA_INVALID' });
+    });
+
+    it('accepts a valid 2FA code and issues a session', async () => {
+      const { service, prisma, passwords, twoFactor } = build();
+      prisma.user.findFirst.mockResolvedValue(
+        userWithRoles({ twoFactorEnabled: true, twoFactorSecret: 'SECRET' }),
+      );
+      passwords.verify.mockResolvedValue(true);
+      twoFactor.verify.mockReturnValue(true);
+      prisma.user.update.mockResolvedValue({});
+
+      const res = await service.login({
+        email: 'reader@frameafrica.rw',
+        password: 'pw',
+        token: '123456',
+      });
+      expect(res.accessToken).toBe('access.jwt');
     });
   });
 

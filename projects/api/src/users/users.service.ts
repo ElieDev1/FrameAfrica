@@ -10,6 +10,7 @@ export interface UserProfile {
   roles: string[];
   emailVerified: boolean;
   mustChangePassword: boolean;
+  twoFactorEnabled: boolean;
   createdAt: string;
 }
 
@@ -39,6 +40,7 @@ export class UsersService {
       roles: user.roles.map((membership) => membership.role.name),
       emailVerified: user.emailVerifiedAt !== null,
       mustChangePassword: user.mustChangePassword,
+      twoFactorEnabled: user.twoFactorEnabled,
       createdAt: user.createdAt.toISOString(),
     };
   }

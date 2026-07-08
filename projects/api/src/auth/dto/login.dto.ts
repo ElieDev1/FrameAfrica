@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MaxLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class LoginDto {
   @IsEmail()
@@ -7,4 +7,10 @@ export class LoginDto {
   @IsString()
   @MaxLength(128)
   password!: string;
+
+  /** TOTP code — required only when the account has 2FA enabled. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  token?: string;
 }
