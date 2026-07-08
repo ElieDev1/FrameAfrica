@@ -169,5 +169,6 @@ function toSafeUser(user: UserWithRoles, roles: string[]): SafeUser {
     displayName: user.displayName,
     avatarUrl: user.avatarUrl,
     roles,
+    mustChangePassword: user.mustChangePassword,
   };
 }

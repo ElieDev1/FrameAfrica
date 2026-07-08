@@ -9,6 +9,7 @@ export interface UserProfile {
   avatarUrl: string | null;
   roles: string[];
   emailVerified: boolean;
+  mustChangePassword: boolean;
   createdAt: string;
 }
 
@@ -37,6 +38,7 @@ export class UsersService {
       avatarUrl: user.avatarUrl,
       roles: user.roles.map((membership) => membership.role.name),
       emailVerified: user.emailVerifiedAt !== null,
+      mustChangePassword: user.mustChangePassword,
       createdAt: user.createdAt.toISOString(),
     };
   }

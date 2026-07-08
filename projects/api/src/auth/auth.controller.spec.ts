@@ -13,6 +13,7 @@ const authResult: AuthResult = {
     displayName: 'Reader One',
     avatarUrl: null,
     roles: ['reader'],
+    mustChangePassword: false,
   },
   accessToken: 'access.jwt',
   refreshToken: 'refresh-raw',

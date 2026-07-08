@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { ACCESS_COOKIE, REFRESH_COOKIE } from './session';
+import { ACCESS_COOKIE, getAccessToken, REFRESH_COOKIE } from './session';
 
 const API_URL =
   process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/v1';
@@ -27,10 +27,14 @@ function readRefreshToken(res: Response): string | null {
   return null;
 }
 
+interface AuthOutcome extends AuthFormState {
+  mustChangePassword?: boolean;
+}
+
 async function authenticate(
   path: '/auth/login' | '/auth/register',
   payload: Record<string, string>,
-): Promise<AuthFormState> {
+): Promise<AuthOutcome> {
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, {
@@ -50,13 +54,15 @@ async function authenticate(
     return { error: 'Please check your details and try again.' };
   }
 
-  const json = (await res.json()) as { data: { accessToken: string } };
+  const json = (await res.json()) as {
+    data: { accessToken: string; user?: { mustChangePassword?: boolean } };
+  };
   const jar = await cookies();
   jar.set(ACCESS_COOKIE, json.data.accessToken, cookieOptions);
   const refresh = readRefreshToken(res);
   if (refresh) jar.set(REFRESH_COOKIE, refresh, cookieOptions);
 
-  return {};
+  return { mustChangePassword: json.data.user?.mustChangePassword ?? false };
 }
 
 export async function login(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
@@ -65,7 +71,8 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
     password: String(formData.get('password') ?? ''),
   });
   if (result.error) return result;
-  redirect('/account');
+  // A generated-password account must set its own password before continuing.
+  redirect(result.mustChangePassword ? '/first-password' : '/account');
 }
 
 export async function register(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
@@ -75,6 +82,39 @@ export async function register(_prev: AuthFormState, formData: FormData): Promis
     password: String(formData.get('password') ?? ''),
   });
   if (result.error) return result;
+  redirect('/account');
+}
+
+/**
+ * First-login password change for a generated-password account. The user is
+ * already authenticated (they signed in with the temp password), so no email
+ * token is needed — just the current session.
+ */
+export async function setFirstPassword(
+  _prev: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const password = String(formData.get('password') ?? '');
+  const confirm = String(formData.get('confirm') ?? '');
+  if (password.length < 8) return { error: 'Use at least 8 characters.' };
+  if (password !== confirm) return { error: 'Passwords do not match.' };
+
+  const token = await getAccessToken();
+  if (!token) redirect('/login');
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/auth/password/first`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ password }),
+      cache: 'no-store',
+    });
+  } catch {
+    return { error: 'Could not reach the server. Please try again.' };
+  }
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) return { error: 'Could not update your password.' };
   redirect('/account');
 }
 

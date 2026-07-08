@@ -18,6 +18,8 @@ export interface SessionUser {
   displayName: string;
   avatarUrl: string | null;
   roles: string[];
+  /** True when on a generated password — must set a new one before continuing. */
+  mustChangePassword?: boolean;
 }
 
 /** The current user (via `/me`), or `null` when signed out / token expired. */

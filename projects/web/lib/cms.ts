@@ -61,6 +61,7 @@ export function isEditor(user: SessionUser | null): boolean {
 export async function requireStaff(): Promise<SessionUser> {
   const user = await getSession();
   if (!user) redirect('/login');
+  if (user.mustChangePassword) redirect('/first-password');
   if (!user.roles.some((role) => STAFF_ROLES.includes(role))) redirect('/account');
   return user;
 }
