@@ -89,6 +89,40 @@ describe('CmsEditorService', () => {
     });
   });
 
+  describe('setFeatured', () => {
+    it('pins a published article and stamps featuredAt', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue({ status: 'published' });
+      prisma.article.update.mockResolvedValue({ id: 'a1', isFeatured: true });
+
+      const res = await service.setFeatured('a1', true);
+
+      expect(res.isFeatured).toBe(true);
+      const calls = prisma.article.update.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { data: { isFeatured: boolean; featuredAt: Date | null } };
+      expect(arg.data.isFeatured).toBe(true);
+      expect(arg.data.featuredAt).toBeInstanceOf(Date);
+    });
+
+    it('unpins and clears featuredAt', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue({ status: 'published' });
+      prisma.article.update.mockResolvedValue({ id: 'a1', isFeatured: false });
+
+      await service.setFeatured('a1', false);
+
+      const calls = prisma.article.update.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { data: { featuredAt: Date | null } };
+      expect(arg.data.featuredAt).toBeNull();
+    });
+
+    it('refuses to feature a non-published article', async () => {
+      const { service, prisma } = build();
+      prisma.article.findFirst.mockResolvedValue({ status: 'draft' });
+      await expect(service.setFeatured('a1', true)).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
   describe('addCorrection', () => {
     it('appends a stripped note to a published article', async () => {
       const { service, prisma } = build();

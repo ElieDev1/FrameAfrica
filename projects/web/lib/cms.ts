@@ -32,6 +32,8 @@ export interface DraftDetail extends DraftListItem {
   topics: TopicRef[];
   /** Editor's note when the draft was returned (rejected); null otherwise. */
   reviewNote: string | null;
+  /** Whether the (published) article is pinned to the homepage. */
+  isFeatured: boolean;
   featuredImageUrl: string | null;
   featuredImageAlt: string | null;
   featuredImageCredit: string | null;

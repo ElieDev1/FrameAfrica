@@ -42,6 +42,7 @@ export interface ArticleSummary {
   language: ArticleLanguage;
   isPremium: boolean;
   isBreaking: boolean;
+  isFeatured: boolean;
   readTimeMin: number | null;
   publishedAt: string | null;
   featuredImage: FeaturedImage | null;
@@ -159,6 +160,7 @@ export interface TopicDetail {
 export interface ListArticlesParams {
   category?: string;
   topic?: string;
+  featured?: boolean;
   language?: ArticleLanguage;
   q?: string;
   sort?: 'latest' | 'popular';
@@ -172,6 +174,7 @@ export async function fetchArticles(
   const search = new URLSearchParams();
   if (params.category) search.set('category', params.category);
   if (params.topic) search.set('topic', params.topic);
+  if (params.featured) search.set('featured', 'true');
   if (params.language) search.set('language', params.language);
   if (params.q) search.set('q', params.q);
   if (params.sort) search.set('sort', params.sort);

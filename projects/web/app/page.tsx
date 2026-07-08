@@ -23,13 +23,17 @@ export default async function Home() {
   let popular: ArticleSummary[] = [];
   let failed = false;
 
+  let featured: ArticleSummary[] = [];
+
   try {
-    const [latestRes, popularRes] = await Promise.all([
+    const [latestRes, popularRes, featuredRes] = await Promise.all([
       fetchArticles({ limit: 13 }),
       fetchArticles({ sort: 'popular', limit: 5 }),
+      fetchArticles({ featured: true, limit: 5 }),
     ]);
     latest = latestRes.articles;
     popular = popularRes.articles;
+    featured = featuredRes.articles;
   } catch {
     failed = true;
   }
@@ -49,10 +53,15 @@ export default async function Home() {
     );
   }
 
-  const [lead, ...rest] = latest;
+  // Editor curation: the front-page lead is the newest editor-featured story
+  // (fallback: newest published). The river excludes the lead so it isn't
+  // shown twice; Editor's picks are the other featured stories (fallback: river).
+  const lead = featured[0] ?? latest[0];
+  const rest = latest.filter((article) => article.id !== lead.id);
   const secondary = rest.slice(0, 4);
   const river = rest.slice(4);
-  const picks = rest.slice(0, 3);
+  const featuredPicks = featured.filter((article) => article.id !== lead.id);
+  const picks = (featuredPicks.length > 0 ? featuredPicks : rest).slice(0, 3);
   const breaking = latest.filter((article) => article.isBreaking);
 
   let sections: SectionData[] = [];

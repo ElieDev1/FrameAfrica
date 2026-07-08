@@ -1,5 +1,15 @@
-import { Type } from 'class-transformer';
-import { IsEnum, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { ArticleLanguage } from '@prisma/client';
 
 export type ArticleSort = 'latest' | 'popular';
@@ -32,6 +42,12 @@ export class ListArticlesQueryDto {
   @IsOptional()
   @IsString()
   topic?: string;
+
+  /** Only editor-featured (homepage-pinned) articles, newest pin first. */
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  featured?: boolean;
 
   @IsOptional()
   @IsEnum(ArticleLanguage)

@@ -208,6 +208,10 @@ model Article {
   language     ArticleLanguage @default(en)
   isPremium    Boolean       @default(false) @map("is_premium")
   isBreaking   Boolean       @default(false) @map("is_breaking")
+  // Editor homepage curation: `isFeatured` pins a story to the front page;
+  // `featuredAt` orders the featured set (newest pin first).
+  isFeatured   Boolean       @default(false) @map("is_featured")
+  featuredAt   DateTime?     @map("featured_at")
   readTimeMin  Int?          @map("read_time_min")
   // The editor's note when a submitted draft is returned (rejected). Shown to
   // the author so they know what to fix; cleared when they resubmit.

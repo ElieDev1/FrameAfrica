@@ -11,7 +11,7 @@ import {
   requireStaff,
   topicOptions,
 } from '@/lib/cms';
-import { submitDraftAction, updateDraftAction } from '@/lib/cms-actions';
+import { featureAction, submitDraftAction, updateDraftAction } from '@/lib/cms-actions';
 
 export const metadata: Metadata = { title: 'Edit draft — Frame Africa' };
 
@@ -102,7 +102,25 @@ export default async function EditDraftPage({ params }: PageProps) {
           )}
           {draft.status === 'published' && isEditor(user) && (
             <div className="mt-5 border-t border-border pt-4">
-              <CorrectionForm articleId={draft.id} />
+              <form action={featureAction.bind(null, draft.id, !draft.isFeatured)}>
+                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+                  Homepage
+                </p>
+                <p className="mt-1 font-body text-sm text-muted">
+                  {draft.isFeatured
+                    ? 'This story is pinned as a homepage lead.'
+                    : 'Not featured on the homepage.'}
+                </p>
+                <button
+                  type="submit"
+                  className="mt-2 rounded-lg border border-primary px-4 py-2 font-mono text-xs uppercase tracking-wide text-primary hover:bg-primary hover:text-black"
+                >
+                  {draft.isFeatured ? 'Unpin from homepage' : 'Feature on homepage'}
+                </button>
+              </form>
+              <div className="mt-5 border-t border-border pt-4">
+                <CorrectionForm articleId={draft.id} />
+              </div>
             </div>
           )}
         </div>

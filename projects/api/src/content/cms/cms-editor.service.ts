@@ -112,6 +112,29 @@ export class CmsEditorService {
     };
   }
 
+  /**
+   * Pin/unpin a **published** article to the homepage (editor curation). Sets
+   * `featuredAt` so the featured set orders newest-pin-first.
+   */
+  async setFeatured(id: string, featured: boolean): Promise<{ id: string; isFeatured: boolean }> {
+    const article = await this.prisma.article.findFirst({
+      where: { id, deletedAt: null },
+      select: { status: true },
+    });
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+    if (article.status !== ArticleStatus.published) {
+      throw new ConflictException('Only published articles can be featured on the homepage');
+    }
+    const updated = await this.prisma.article.update({
+      where: { id },
+      data: { isFeatured: featured, featuredAt: featured ? new Date() : null },
+      select: { id: true, isFeatured: true },
+    });
+    return updated;
+  }
+
   private async loadReviewable(id: string): Promise<ReviewRow> {
     const article = await this.prisma.article.findFirst({
       where: { id, deletedAt: null },

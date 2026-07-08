@@ -24,6 +24,7 @@ describe('sitemap', () => {
           language: 'en',
           isPremium: false,
           isBreaking: false,
+          isFeatured: false,
           readTimeMin: 3,
           publishedAt: '2026-01-01T00:00:00.000Z',
           featuredImage: null,

@@ -29,6 +29,7 @@ const articleRow = (over: Record<string, unknown> = {}) => ({
   author: { id: 'u1', displayName: 'Jane Doe', avatarUrl: null },
   topics: [],
   corrections: [],
+  isFeatured: false,
   ...over,
 });
 

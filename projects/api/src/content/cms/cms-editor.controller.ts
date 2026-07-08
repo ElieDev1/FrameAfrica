@@ -17,6 +17,7 @@ import { RolesGuard } from '../../common/auth/roles.guard';
 import { apiResponse } from '../../common/http/api-response';
 import { CmsEditorService } from './cms-editor.service';
 import { AddCorrectionDto } from './dto/add-correction.dto';
+import { FeatureDto } from './dto/feature.dto';
 import { RejectDto } from './dto/reject.dto';
 
 /** Editor-only review queue + publish/reject. */
@@ -41,6 +42,12 @@ export class CmsEditorController {
   @HttpCode(200)
   async reject(@Param('id', ParseUUIDPipe) id: string, @Body() dto: RejectDto) {
     return apiResponse(await this.editor.reject(id, dto.note));
+  }
+
+  @Post('articles/:id/feature')
+  @HttpCode(200)
+  async feature(@Param('id', ParseUUIDPipe) id: string, @Body() dto: FeatureDto) {
+    return apiResponse(await this.editor.setFeatured(id, dto.featured));
   }
 
   @Post('articles/:id/corrections')
