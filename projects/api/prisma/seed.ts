@@ -133,30 +133,103 @@ async function main(): Promise<void> {
     create: { userId: editor.id, roleId: editorRole.id },
   });
 
-  // A realistic nested taxonomy (documents/14 §5): top-level sections, each with
-  // sub-sections. Section pages aggregate their sub-sections' articles.
+  // The full agreed nested taxonomy (documents/14 §5.1): top-level sections, each
+  // with sub-sections. Section pages aggregate their sub-sections' articles; the
+  // header shows the sections with sub-section dropdowns.
   const topSections: { slug: string; name: string; sortOrder: number }[] = [
-    { slug: 'rwanda', name: 'Rwanda', sortOrder: 1 },
-    { slug: 'africa', name: 'Africa', sortOrder: 2 },
-    { slug: 'business', name: 'Business', sortOrder: 3 },
-    { slug: 'technology', name: 'Technology', sortOrder: 4 },
-    { slug: 'sports', name: 'Sport', sortOrder: 5 },
+    { slug: 'news', name: 'News', sortOrder: 1 },
+    { slug: 'business', name: 'Business', sortOrder: 2 },
+    { slug: 'technology', name: 'Technology', sortOrder: 3 },
+    { slug: 'sports', name: 'Sport', sortOrder: 4 },
+    { slug: 'opinion', name: 'Opinion', sortOrder: 5 },
+    { slug: 'culture', name: 'Culture & Life', sortOrder: 6 },
+    { slug: 'health', name: 'Health', sortOrder: 7 },
+    { slug: 'environment', name: 'Environment & Climate', sortOrder: 8 },
+    { slug: 'multimedia', name: 'Multimedia', sortOrder: 9 },
+    { slug: 'notices', name: 'Notices', sortOrder: 10 },
+    { slug: 'education', name: 'Education', sortOrder: 11 },
+    { slug: 'agriculture', name: 'Agriculture', sortOrder: 12 },
+    { slug: 'science', name: 'Science', sortOrder: 13 },
+    { slug: 'investigations', name: 'Investigations', sortOrder: 14 },
+    { slug: 'fact-check', name: 'Fact Check', sortOrder: 15 },
+    { slug: 'live', name: 'Live', sortOrder: 16 },
   ];
 
   const subSections: { slug: string; name: string; parent: string; sortOrder: number }[] = [
-    { slug: 'kigali', name: 'Kigali', parent: 'rwanda', sortOrder: 1 },
-    { slug: 'politics', name: 'Politics', parent: 'rwanda', sortOrder: 2 },
-    { slug: 'east-africa', name: 'East Africa', parent: 'africa', sortOrder: 1 },
-    { slug: 'world', name: 'World', parent: 'africa', sortOrder: 2 },
+    // News
+    { slug: 'rwanda', name: 'Rwanda', parent: 'news', sortOrder: 1 },
+    { slug: 'kigali', name: 'Kigali', parent: 'news', sortOrder: 2 },
+    { slug: 'east-africa', name: 'East Africa', parent: 'news', sortOrder: 3 },
+    { slug: 'africa', name: 'Africa', parent: 'news', sortOrder: 4 },
+    { slug: 'world', name: 'World', parent: 'news', sortOrder: 5 },
+    { slug: 'politics', name: 'Politics', parent: 'news', sortOrder: 6 },
+    { slug: 'diplomacy', name: 'Diplomacy', parent: 'news', sortOrder: 7 },
+    { slug: 'crime-justice', name: 'Crime & Justice', parent: 'news', sortOrder: 8 },
+    // Business
     { slug: 'economy', name: 'Economy', parent: 'business', sortOrder: 1 },
     { slug: 'markets', name: 'Markets', parent: 'business', sortOrder: 2 },
     { slug: 'companies', name: 'Companies', parent: 'business', sortOrder: 3 },
-    { slug: 'ai', name: 'AI', parent: 'technology', sortOrder: 1 },
-    { slug: 'startups', name: 'Startups', parent: 'technology', sortOrder: 2 },
-    { slug: 'gadgets', name: 'Gadgets', parent: 'technology', sortOrder: 3 },
+    { slug: 'banking-finance', name: 'Banking & Finance', parent: 'business', sortOrder: 4 },
+    { slug: 'agribusiness', name: 'Agribusiness', parent: 'business', sortOrder: 5 },
+    { slug: 'startups', name: 'Startups & Tech', parent: 'business', sortOrder: 6 },
+    { slug: 'real-estate', name: 'Real Estate', parent: 'business', sortOrder: 7 },
+    { slug: 'personal-finance', name: 'Personal Finance', parent: 'business', sortOrder: 8 },
+    // Technology
+    { slug: 'mobile', name: 'Mobile', parent: 'technology', sortOrder: 1 },
+    { slug: 'internet', name: 'Internet', parent: 'technology', sortOrder: 2 },
+    { slug: 'ai', name: 'AI', parent: 'technology', sortOrder: 3 },
+    { slug: 'fintech', name: 'Fintech', parent: 'technology', sortOrder: 4 },
+    { slug: 'gadgets', name: 'Gadgets', parent: 'technology', sortOrder: 5 },
+    // Sport
     { slug: 'football', name: 'Football', parent: 'sports', sortOrder: 1 },
     { slug: 'athletics', name: 'Athletics', parent: 'sports', sortOrder: 2 },
-    { slug: 'cycling', name: 'Cycling', parent: 'sports', sortOrder: 3 },
+    { slug: 'basketball', name: 'Basketball', parent: 'sports', sortOrder: 3 },
+    { slug: 'cycling', name: 'Cycling', parent: 'sports', sortOrder: 4 },
+    { slug: 'volleyball', name: 'Volleyball', parent: 'sports', sortOrder: 5 },
+    { slug: 'motorsport', name: 'Motorsport', parent: 'sports', sortOrder: 6 },
+    // Opinion
+    { slug: 'editorials', name: 'Editorials', parent: 'opinion', sortOrder: 1 },
+    { slug: 'op-eds', name: 'Op-Eds', parent: 'opinion', sortOrder: 2 },
+    { slug: 'columns', name: 'Columns', parent: 'opinion', sortOrder: 3 },
+    { slug: 'letters', name: 'Letters', parent: 'opinion', sortOrder: 4 },
+    { slug: 'cartoons', name: 'Cartoons', parent: 'opinion', sortOrder: 5 },
+    // Culture & Life
+    { slug: 'arts', name: 'Arts', parent: 'culture', sortOrder: 1 },
+    { slug: 'music', name: 'Music', parent: 'culture', sortOrder: 2 },
+    { slug: 'film-tv', name: 'Film & TV', parent: 'culture', sortOrder: 3 },
+    { slug: 'books', name: 'Books', parent: 'culture', sortOrder: 4 },
+    { slug: 'food-drink', name: 'Food & Drink', parent: 'culture', sortOrder: 5 },
+    { slug: 'fashion', name: 'Fashion', parent: 'culture', sortOrder: 6 },
+    { slug: 'travel', name: 'Travel & Tourism', parent: 'culture', sortOrder: 7 },
+    { slug: 'lifestyle', name: 'Lifestyle', parent: 'culture', sortOrder: 8 },
+    { slug: 'religion', name: 'Religion', parent: 'culture', sortOrder: 9 },
+    // Health
+    { slug: 'public-health', name: 'Public Health', parent: 'health', sortOrder: 1 },
+    { slug: 'wellness', name: 'Wellness', parent: 'health', sortOrder: 2 },
+    { slug: 'medicine', name: 'Medicine', parent: 'health', sortOrder: 3 },
+    // Environment & Climate
+    { slug: 'climate', name: 'Climate', parent: 'environment', sortOrder: 1 },
+    { slug: 'conservation', name: 'Conservation', parent: 'environment', sortOrder: 2 },
+    { slug: 'energy', name: 'Energy', parent: 'environment', sortOrder: 3 },
+    // Education
+    { slug: 'schools', name: 'Schools', parent: 'education', sortOrder: 1 },
+    { slug: 'higher-education', name: 'Higher Education', parent: 'education', sortOrder: 2 },
+    { slug: 'skills', name: 'Skills', parent: 'education', sortOrder: 3 },
+    // Agriculture
+    { slug: 'crops', name: 'Crops', parent: 'agriculture', sortOrder: 1 },
+    { slug: 'livestock', name: 'Livestock', parent: 'agriculture', sortOrder: 2 },
+    { slug: 'agri-tech', name: 'Agri-tech', parent: 'agriculture', sortOrder: 3 },
+    // Multimedia
+    { slug: 'video', name: 'Video', parent: 'multimedia', sortOrder: 1 },
+    { slug: 'podcasts', name: 'Podcasts', parent: 'multimedia', sortOrder: 2 },
+    { slug: 'galleries', name: 'Photo Galleries', parent: 'multimedia', sortOrder: 3 },
+    { slug: 'data', name: 'Data & Interactives', parent: 'multimedia', sortOrder: 4 },
+    // Notices
+    { slug: 'tenders', name: 'Tenders', parent: 'notices', sortOrder: 1 },
+    { slug: 'obituaries', name: 'Obituaries', parent: 'notices', sortOrder: 2 },
+    { slug: 'public-notices', name: 'Public Notices', parent: 'notices', sortOrder: 3 },
+    { slug: 'announcements', name: 'Announcements', parent: 'notices', sortOrder: 4 },
+    { slug: 'jobs', name: 'Jobs', parent: 'notices', sortOrder: 5 },
   ];
 
   const bySlug: Record<string, { id: string }> = {};

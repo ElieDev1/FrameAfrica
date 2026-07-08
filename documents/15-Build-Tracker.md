@@ -67,7 +67,7 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - **DoD met:** a published story renders as a designed document and staff author it block-by-block. Verified end-to-end (CMS create with blocks → sanitised → served → rendered).
 
 ### WS2 — Real taxonomy (sections · sub-sections · topics) `[~]`
-- [x] Real nested tree seeded from `14 §5` (5 sections × sub-sections; replaces the 6 placeholders)
+- [x] Real nested tree seeded from `14 §5.1` — **full 16-section tree + sub-sections** (78 categories); global header nav with **sub-section dropdowns** + a **mobile hamburger drawer**
 - [x] **Section pages aggregate their sub-sections** (descendant-aware article listing) + **sub-section chips** + parent breadcrumb (verified e2e)
 - [x] Load-more pagination on section **and** topic pages (cursor-based, via a server action)
 - [ ] A section ad slot (lands with the ad server, WS9)
