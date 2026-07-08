@@ -26,6 +26,6 @@ export interface FlaggedComment {
   status: string;
   reportCount: number;
   createdAt: string;
-  author: CommentAuthor;
+  author: CommentAuthor & { banned: boolean };
   article: { slug: string; title: string };
 }

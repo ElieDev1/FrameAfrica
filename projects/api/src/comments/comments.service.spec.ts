@@ -32,6 +32,12 @@ function build() {
     commentLike: { findUnique: jest.fn(), create: jest.fn(), delete: jest.fn() },
     commentReport: { create: jest.fn() },
     article: { findFirst: jest.fn() },
+    user: {
+      // Not banned by default so create() proceeds.
+      findUnique: jest.fn().mockResolvedValue({ commentsBannedAt: null }),
+      findFirst: jest.fn().mockResolvedValue({ id: 'u1' }),
+      update: jest.fn(),
+    },
     $transaction: jest.fn().mockResolvedValue([]),
   };
   const service = new CommentsService(prisma as unknown as PrismaService);
@@ -140,6 +146,34 @@ describe('CommentsService', () => {
       );
       expect(data.status).toBe('hidden');
       expect(data.reportCount).toBe(0);
+    });
+  });
+
+  describe('ban', () => {
+    it('blocks a banned user from commenting', async () => {
+      const { service, prisma } = build();
+      prisma.user.findUnique.mockResolvedValue({ commentsBannedAt: new Date() });
+      await expect(service.create('u1', 'a1', { body: 'hi' })).rejects.toMatchObject({
+        status: 403,
+      });
+    });
+
+    it('banUser stamps commentsBannedAt', async () => {
+      const { service, prisma } = build();
+      prisma.user.findFirst.mockResolvedValue({ id: 'u2' });
+      const res = await service.banUser('u2');
+      expect(res).toEqual({ id: 'u2', banned: true });
+      const { data } = firstArg<{ data: { commentsBannedAt: Date } }>(prisma.user.update);
+      expect(data.commentsBannedAt).toBeInstanceOf(Date);
+    });
+
+    it('unbanUser clears commentsBannedAt', async () => {
+      const { service, prisma } = build();
+      prisma.user.findFirst.mockResolvedValue({ id: 'u2' });
+      const res = await service.unbanUser('u2');
+      expect(res).toEqual({ id: 'u2', banned: false });
+      const { data } = firstArg<{ data: { commentsBannedAt: Date | null } }>(prisma.user.update);
+      expect(data.commentsBannedAt).toBeNull();
     });
   });
 

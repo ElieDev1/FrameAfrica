@@ -2,7 +2,12 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { deleteComment, type FlaggedComment, moderateComment } from '@/lib/comments-actions';
+import {
+  deleteComment,
+  type FlaggedComment,
+  moderateComment,
+  setUserCommentBan,
+} from '@/lib/comments-actions';
 
 type Action = 'keep' | 'hide' | 'remove';
 
@@ -46,6 +51,20 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
     });
   }
 
+  function toggleBan(id: string, userId: string, banned: boolean) {
+    setBusy(id);
+    startTransition(async () => {
+      try {
+        await setUserCommentBan(userId, banned);
+        setQueue((q) =>
+          q.map((c) => (c.author.id === userId ? { ...c, author: { ...c.author, banned } } : c)),
+        );
+      } finally {
+        setBusy(null);
+      }
+    });
+  }
+
   if (queue.length === 0) {
     return (
       <p className="rounded-lg border border-border bg-surface px-4 py-8 text-center font-body text-sm text-muted">
@@ -60,6 +79,11 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
         <li key={c.id} className="rounded-lg border border-border bg-surface p-4">
           <div className="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 font-mono text-[11px] text-muted">
             <span className="text-text">{c.author.displayName}</span>
+            {c.author.banned && (
+              <span className="rounded bg-accent-red/15 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em] text-accent-red">
+                banned
+              </span>
+            )}
             <span>on</span>
             <Link href={`/article/${c.article.slug}`} className="text-primary hover:underline">
               {c.article.title}
@@ -95,6 +119,14 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
               className="rounded-md border border-accent-red/40 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-accent-red transition-colors hover:bg-accent-red/10 disabled:opacity-50"
             >
               Delete
+            </button>
+            <button
+              type="button"
+              disabled={busy === c.id}
+              onClick={() => toggleBan(c.id, c.author.id, !c.author.banned)}
+              className="ml-auto rounded-md border border-border px-3 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted transition-colors hover:text-accent-red disabled:opacity-50"
+            >
+              {c.author.banned ? 'Unban author' : 'Ban author'}
             </button>
           </div>
         </li>

@@ -86,7 +86,7 @@ export interface FlaggedComment {
   status: string;
   reportCount: number;
   createdAt: string;
-  author: { id: string; displayName: string; avatarUrl: string | null };
+  author: { id: string; displayName: string; avatarUrl: string | null; banned: boolean };
   article: { slug: string; title: string };
 }
 
@@ -120,5 +120,13 @@ export async function deleteComment(id: string): Promise<void> {
   const res = await authed(`/cms/comments/${id}`, 'DELETE');
   if (res.status === 401) redirect('/login');
   if (!res.ok) throw new Error('Could not delete this comment.');
+  revalidatePath('/dashboard/moderation');
+}
+
+/** Moderator/admin: ban or unban a user from commenting. */
+export async function setUserCommentBan(userId: string, banned: boolean): Promise<void> {
+  const res = await authed(`/cms/users/${userId}/${banned ? 'ban' : 'unban'}`, 'POST', {});
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error('Could not update the ban.');
   revalidatePath('/dashboard/moderation');
 }
