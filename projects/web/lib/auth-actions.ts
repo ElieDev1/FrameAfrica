@@ -9,6 +9,8 @@ const API_URL =
 
 export interface AuthFormState {
   error?: string;
+  /** Login only: the account has 2FA on — prompt for an authenticator code. */
+  twoFactorRequired?: boolean;
 }
 
 const cookieOptions = {
@@ -17,6 +19,16 @@ const cookieOptions = {
   secure: process.env.NODE_ENV === 'production',
   path: '/',
 };
+
+/** The API's error message (our envelope), or '' if it can't be read. */
+async function errorMessage(res: Response): Promise<string> {
+  try {
+    const json = (await res.json()) as { error?: { message?: string } };
+    return json.error?.message ?? '';
+  } catch {
+    return '';
+  }
+}
 
 function readRefreshToken(res: Response): string | null {
   const headers = res.headers as unknown as { getSetCookie?: () => string[] };
@@ -48,7 +60,15 @@ async function authenticate(
   }
 
   if (!res.ok) {
-    if (res.status === 401) return { error: 'Invalid email or password.' };
+    if (res.status === 401) {
+      // Distinguish the 2FA step from bad credentials via the message token.
+      const message = await errorMessage(res);
+      if (message === '2FA_REQUIRED') return { twoFactorRequired: true };
+      if (message === '2FA_INVALID') {
+        return { twoFactorRequired: true, error: 'That code is not valid — try again.' };
+      }
+      return { error: 'Invalid email or password.' };
+    }
     if (res.status === 409) return { error: 'That email is already registered.' };
     if (res.status === 429) return { error: 'Too many attempts — please wait a moment.' };
     return { error: 'Please check your details and try again.' };
@@ -66,10 +86,13 @@ async function authenticate(
 }
 
 export async function login(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
+  const token = String(formData.get('token') ?? '').trim();
   const result = await authenticate('/auth/login', {
     email: String(formData.get('email') ?? ''),
     password: String(formData.get('password') ?? ''),
+    ...(token ? { token } : {}),
   });
+  if (result.twoFactorRequired) return result;
   if (result.error) return result;
   // A generated-password account must set its own password before continuing.
   redirect(result.mustChangePassword ? '/first-password' : '/account');

@@ -63,6 +63,8 @@ export async function requireStaff(): Promise<SessionUser> {
   if (!user) redirect('/login');
   if (user.mustChangePassword) redirect('/first-password');
   if (!user.roles.some((role) => STAFF_ROLES.includes(role))) redirect('/account');
+  // 2FA is mandatory for staff (05 §3.3, FR-AUTH-6): enrol before the dashboard.
+  if (!user.twoFactorEnabled) redirect('/account/security');
   return user;
 }
 

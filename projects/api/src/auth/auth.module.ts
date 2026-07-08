@@ -8,6 +8,7 @@ import { AuthService } from './auth.service';
 import { OneTimeTokenService } from './one-time-token.service';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
+import { TwoFactorService } from './two-factor.service';
 
 @Module({
   imports: [
@@ -26,7 +27,14 @@ import { TokenService } from './token.service';
     MailModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, AccountService, PasswordService, TokenService, OneTimeTokenService],
+  providers: [
+    AuthService,
+    AccountService,
+    PasswordService,
+    TokenService,
+    OneTimeTokenService,
+    TwoFactorService,
+  ],
   exports: [TokenService, PasswordService, AccountService],
 })
 export class AuthModule {}

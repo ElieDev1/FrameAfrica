@@ -5,6 +5,7 @@ import type { AccountService } from './account.service';
 import { AuthController } from './auth.controller';
 import type { AuthService } from './auth.service';
 import type { AuthResult } from './auth.types';
+import type { TwoFactorService } from './two-factor.service';
 
 const authResult: AuthResult = {
   user: {
@@ -14,6 +15,7 @@ const authResult: AuthResult = {
     avatarUrl: null,
     roles: ['reader'],
     mustChangePassword: false,
+    twoFactorEnabled: false,
   },
   accessToken: 'access.jwt',
   refreshToken: 'refresh-raw',
@@ -32,10 +34,16 @@ function build() {
     requestPasswordReset: jest.fn().mockResolvedValue(undefined),
     resetPassword: jest.fn().mockResolvedValue(undefined),
   };
+  const twoFactor = {
+    beginSetup: jest.fn(),
+    enable: jest.fn(),
+    disable: jest.fn(),
+  };
   const config = { get: () => 'false' } as unknown as ConfigService;
   const controller = new AuthController(
     auth as unknown as AuthService,
     account as unknown as AccountService,
+    twoFactor as unknown as TwoFactorService,
     config,
   );
   const cookie = jest.fn();
