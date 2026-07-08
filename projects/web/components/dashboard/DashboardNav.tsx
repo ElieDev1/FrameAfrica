@@ -21,6 +21,7 @@ function itemsFor(role: DashboardRole): { section: string; items: NavItem[] }[] 
         { href: '/dashboard/stories', label: 'My stories', icon: '✎' },
         { href: '/dashboard/stories/new', label: 'New story', icon: '＋', exact: true },
         { href: '/dashboard/media', label: 'Media library', icon: '▣' },
+        { href: '/dashboard/studio', label: 'Studio', icon: '◆' },
       ],
     },
   ];
