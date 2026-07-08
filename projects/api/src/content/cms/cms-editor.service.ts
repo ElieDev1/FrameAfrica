@@ -1,6 +1,12 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ArticleStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { stripText } from '../blocks';
 
 const reviewInclude = {
   category: { select: { id: true, name: true, slug: true } },
@@ -17,6 +23,12 @@ export interface ReviewItem {
   updatedAt: string;
   category: { id: string; name: string; slug: string };
   author: { id: string; displayName: string };
+}
+
+export interface CorrectionItem {
+  id: string;
+  note: string;
+  createdAt: string;
 }
 
 /**
@@ -60,6 +72,40 @@ export class CmsEditorService {
       include: reviewInclude,
     });
     return toReviewItem(updated);
+  }
+
+  /**
+   * Append a public, dated correction/retraction note to a **published** article
+   * (`FR-EDIT-5`). Append-only: the log is never edited or deleted. The note is
+   * stripped of markup on write (`05` §6).
+   */
+  async addCorrection(
+    articleId: string,
+    editorId: string,
+    rawNote: string,
+  ): Promise<CorrectionItem> {
+    const note = stripText(rawNote);
+    if (!note) {
+      throw new BadRequestException('A correction note is required');
+    }
+    const article = await this.prisma.article.findFirst({
+      where: { id: articleId, deletedAt: null },
+      select: { status: true },
+    });
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+    if (article.status !== ArticleStatus.published) {
+      throw new ConflictException('Corrections can only be added to published articles');
+    }
+    const correction = await this.prisma.articleCorrection.create({
+      data: { articleId, editorId, note: note.slice(0, 1000) },
+    });
+    return {
+      id: correction.id,
+      note: correction.note,
+      createdAt: correction.createdAt.toISOString(),
+    };
   }
 
   private async loadReviewable(id: string): Promise<ReviewRow> {

@@ -134,3 +134,30 @@ export async function rejectAction(id: string): Promise<void> {
   revalidatePath('/dashboard/review');
   redirect('/dashboard/review');
 }
+
+export interface CorrectionState {
+  error?: string;
+  savedAt?: string;
+}
+
+/** Append a public, dated correction to a published article (editor-only). */
+export async function addCorrectionAction(
+  id: string,
+  _prev: CorrectionState,
+  formData: FormData,
+): Promise<CorrectionState> {
+  const note = String(formData.get('note') ?? '').trim();
+  if (note.length < 3) return { error: 'Write a short correction note (at least 3 characters).' };
+
+  let res: Response;
+  try {
+    res = await authedFetch(`/cms/articles/${id}/corrections`, 'POST', { note });
+  } catch {
+    return { error: 'Could not reach the server. Please try again.' };
+  }
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) return { error: await errorMessage(res, 'Could not add the correction.') };
+
+  revalidatePath(`/dashboard/stories/${id}`);
+  return { savedAt: new Date().toISOString() };
+}
