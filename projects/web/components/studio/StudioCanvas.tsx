@@ -5,14 +5,14 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * Frame Africa Studio — an in-app maker for social cards / flyers, so staff
  * produce branded graphics without external software (documents/13 §6). Renders
- * to an HTML canvas and exports a PNG. Supports uploading a background photo
- * (drawn cover-fit under a readability gradient). Pure client, no backend.
+ * to an HTML canvas and exports a PNG. Supports a background photo (cover-fit
+ * under a readability gradient), a chosen text colour, and the real brand logo.
+ * Pure client, no backend.
  */
 
 const BRAND = {
   primary: '#f39200',
   red: '#e2231a',
-  yellow: '#ffc20e',
   ink: '#0b0b0b',
   paper: '#faf8f4',
   white: '#ffffff',
@@ -33,12 +33,19 @@ const TEMPLATES: { key: TemplateKey; label: string }[] = [
   { key: 'quote', label: 'Quote' },
 ];
 
+const SWATCHES = ['#ffffff', '#0b0b0b', '#f39200', '#ffc20e', '#e2231a'] as const;
+
 interface Design {
   template: TemplateKey;
   size: SizeKey;
   kicker: string;
   headline: string;
   source: string;
+  textColor: string;
+}
+
+function loaded(img: HTMLImageElement | null): img is HTMLImageElement {
+  return Boolean(img && img.complete && img.naturalWidth > 0);
 }
 
 function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
@@ -67,38 +74,26 @@ function drawCover(ctx: CanvasRenderingContext2D, img: HTMLImageElement, w: numb
   ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
 }
 
-/** Draw the aperture ring brand mark centred at (x, y). */
-function apertureMark(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
-  ctx.save();
-  ctx.strokeStyle = BRAND.primary;
-  ctx.lineWidth = r * 0.16;
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.fillStyle = BRAND.red;
-  ctx.beginPath();
-  ctx.arc(x, y, r * 0.42, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
-
-function draw(ctx: CanvasRenderingContext2D, d: Design, img: HTMLImageElement | null) {
+function draw(
+  ctx: CanvasRenderingContext2D,
+  d: Design,
+  photo: HTMLImageElement | null,
+  logo: HTMLImageElement | null,
+) {
   const { w, h } = SIZES[d.size];
   const pad = w * 0.08;
   const sans = 'system-ui, "Segoe UI", Roboto, sans-serif';
 
-  const hasImage = Boolean(img);
-  const dark = hasImage || d.template !== 'quote';
+  const hasPhoto = Boolean(photo);
   const bg =
     d.template === 'breaking' ? BRAND.red : d.template === 'quote' ? BRAND.paper : BRAND.ink;
-  const fg = dark ? BRAND.white : BRAND.ink;
-  const accent = d.template === 'breaking' && !hasImage ? BRAND.white : BRAND.primary;
+  const accent = d.template === 'breaking' && !hasPhoto ? BRAND.white : BRAND.primary;
 
-  // Background: solid brand colour, or the uploaded photo with a legibility scrim.
+  // Background: solid brand colour, or the uploaded photo under a legibility scrim.
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, w, h);
-  if (img) {
-    drawCover(ctx, img, w, h);
+  if (photo) {
+    drawCover(ctx, photo, w, h);
     const g = ctx.createLinearGradient(0, 0, 0, h);
     g.addColorStop(0, 'rgba(11,11,11,0.35)');
     g.addColorStop(0.55, 'rgba(11,11,11,0.55)');
@@ -113,17 +108,19 @@ function draw(ctx: CanvasRenderingContext2D, d: Design, img: HTMLImageElement | 
     ctx.fillRect(0, 0, w, h);
   }
 
-  // Brand header.
-  apertureMark(ctx, pad + 22, pad + 8, 22);
+  // Brand header: the real logo lockup.
   ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = fg;
-  ctx.font = `800 ${w * 0.032}px ${sans}`;
-  ctx.fillText('FRAME AFRICA', pad + 58, pad + 18);
-  ctx.fillStyle = accent;
-  ctx.font = `700 ${w * 0.017}px ${sans}`;
-  ctx.fillText('N E W S .   V I E W S .   A F R I C A .', pad + 58, pad + 42);
+  if (loaded(logo)) {
+    const logoH = w * 0.055;
+    const logoW = logoH * (logo.naturalWidth / logo.naturalHeight);
+    ctx.drawImage(logo, pad, pad, logoW, logoH);
+  } else {
+    ctx.fillStyle = d.textColor;
+    ctx.font = `800 ${w * 0.034}px ${sans}`;
+    ctx.fillText('FRAME AFRICA', pad, pad + w * 0.03);
+  }
 
-  // Content anchored near the bottom (works well over photos).
+  // Content anchored near the bottom (reads well over photos).
   const isQuote = d.template === 'quote';
   const headSize = w * (d.size === 'wide' ? 0.062 : isQuote ? 0.07 : 0.078);
   ctx.font = `${isQuote ? '700' : '800'} ${headSize}px ${sans}`;
@@ -138,7 +135,7 @@ function draw(ctx: CanvasRenderingContext2D, d: Design, img: HTMLImageElement | 
   const sourceH = d.source.trim() ? w * 0.05 : 0;
   const kickerH = d.kicker.trim() ? w * 0.06 : 0;
   const blockH = kickerH + lines.length * lineH + sourceH;
-  let y = h - pad * 1.3 - blockH + headSize; // baseline of the first content line
+  let y = h - pad * 1.3 - blockH + headSize;
 
   if (d.kicker.trim()) {
     ctx.fillStyle = accent;
@@ -148,7 +145,7 @@ function draw(ctx: CanvasRenderingContext2D, d: Design, img: HTMLImageElement | 
   }
 
   ctx.font = `${isQuote ? '700' : '800'} ${headSize}px ${sans}`;
-  ctx.fillStyle = fg;
+  ctx.fillStyle = d.textColor;
   for (const line of lines) {
     ctx.fillText(line, pad, y);
     y += lineH;
@@ -164,7 +161,7 @@ function draw(ctx: CanvasRenderingContext2D, d: Design, img: HTMLImageElement | 
   // Footer bar.
   ctx.fillStyle = accent;
   ctx.fillRect(0, h - pad * 0.9, w, w * 0.012);
-  ctx.fillStyle = fg;
+  ctx.fillStyle = d.textColor;
   ctx.font = `700 ${w * 0.02}px ${sans}`;
   ctx.fillText('frameafrica.rw', pad, h - pad * 0.35);
 }
@@ -174,16 +171,32 @@ const input =
 
 export function StudioCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imgRef = useRef<HTMLImageElement | null>(null);
-  const [imgReady, setImgReady] = useState(0);
-  const [hasImage, setHasImage] = useState(false);
+  const photoRef = useRef<HTMLImageElement | null>(null);
+  const logoDarkRef = useRef<HTMLImageElement | null>(null);
+  const logoLightRef = useRef<HTMLImageElement | null>(null);
+  const [ready, setReady] = useState(0); // bumps to trigger a redraw
+  const [hasPhoto, setHasPhoto] = useState(false);
   const [design, setDesign] = useState<Design>({
     template: 'headline',
     size: 'square',
     kicker: 'Business',
     headline: 'Rwanda coffee exports hit a record high',
     source: 'Frame Africa',
+    textColor: '#ffffff',
   });
+
+  // Preload the real brand logo (dark-bg + light-bg variants) once.
+  useEffect(() => {
+    const bump = () => setReady((n) => n + 1);
+    const dark = new Image();
+    dark.onload = bump;
+    dark.src = '/brand/logo.png';
+    logoDarkRef.current = dark;
+    const light = new Image();
+    light.onload = bump;
+    light.src = '/brand/logo-light.png';
+    logoLightRef.current = light;
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -192,8 +205,12 @@ export function StudioCanvas() {
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext('2d');
-    if (ctx) draw(ctx, design, imgRef.current);
-  }, [design, imgReady]);
+    if (!ctx) return;
+    // Light background with no photo → use the light-variant logo; else the dark one.
+    const lightBg = design.template === 'quote' && !hasPhoto;
+    const logo = lightBg ? logoLightRef.current : logoDarkRef.current;
+    draw(ctx, design, photoRef.current, logo);
+  }, [design, ready, hasPhoto]);
 
   const set = (patch: Partial<Design>) => setDesign((d) => ({ ...d, ...patch }));
 
@@ -204,9 +221,9 @@ export function StudioCanvas() {
     reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        imgRef.current = img;
-        setHasImage(true);
-        setImgReady((n) => n + 1);
+        photoRef.current = img;
+        setHasPhoto(true);
+        setReady((n) => n + 1);
       };
       img.src = String(reader.result);
     };
@@ -214,9 +231,9 @@ export function StudioCanvas() {
   }
 
   function removeImage() {
-    imgRef.current = null;
-    setHasImage(false);
-    setImgReady((n) => n + 1);
+    photoRef.current = null;
+    setHasPhoto(false);
+    setReady((n) => n + 1);
   }
 
   function download() {
@@ -277,7 +294,7 @@ export function StudioCanvas() {
               onChange={onPickImage}
               className="min-w-0 flex-1 font-body text-xs text-muted file:mr-2 file:rounded-lg file:border-0 file:bg-primary/15 file:px-2.5 file:py-1.5 file:font-mono file:text-[11px] file:text-primary"
             />
-            {hasImage && (
+            {hasPhoto && (
               <button
                 type="button"
                 onClick={removeImage}
@@ -286,6 +303,33 @@ export function StudioCanvas() {
                 Remove
               </button>
             )}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+            Text colour
+          </span>
+          <div className="flex items-center gap-2">
+            {SWATCHES.map((c) => (
+              <button
+                key={c}
+                type="button"
+                aria-label={`Text colour ${c}`}
+                onClick={() => set({ textColor: c })}
+                className={`h-7 w-7 rounded-full border-2 transition ${
+                  design.textColor.toLowerCase() === c ? 'border-primary' : 'border-border'
+                }`}
+                style={{ backgroundColor: c }}
+              />
+            ))}
+            <input
+              type="color"
+              value={design.textColor}
+              onChange={(e) => set({ textColor: e.target.value })}
+              aria-label="Custom text colour"
+              className="h-7 w-9 cursor-pointer rounded border border-border bg-transparent"
+            />
           </div>
         </div>
 
