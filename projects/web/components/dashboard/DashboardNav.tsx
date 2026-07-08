@@ -12,7 +12,19 @@ interface NavItem {
   exact?: boolean;
 }
 
-function itemsFor(role: DashboardRole): { section: string; items: NavItem[] }[] {
+function itemsFor(roles: string[]): { section: string; items: NavItem[] }[] {
+  const has = (...r: string[]) => r.some((x) => roles.includes(x));
+  const desk: NavItem[] = [];
+  if (has('sub_editor', 'editor', 'admin')) {
+    desk.push({ href: '/dashboard/copydesk', label: 'Copy desk', icon: '✍' });
+  }
+  if (has('editor', 'admin')) {
+    desk.push({ href: '/dashboard/review', label: 'Review queue', icon: '⧗' });
+  }
+  if (has('moderator', 'editor', 'admin')) {
+    desk.push({ href: '/dashboard/moderation', label: 'Moderation', icon: '⚑' });
+  }
+
   const groups: { section: string; items: NavItem[] }[] = [
     {
       section: 'Newsroom',
@@ -22,15 +34,12 @@ function itemsFor(role: DashboardRole): { section: string; items: NavItem[] }[] 
         { href: '/dashboard/stories/new', label: 'New story', icon: '＋', exact: true },
         { href: '/dashboard/media', label: 'Media library', icon: '▣' },
         { href: '/dashboard/studio', label: 'Studio', icon: '◆' },
+        ...desk,
       ],
     },
   ];
 
-  if (role === 'editor' || role === 'admin') {
-    groups[0].items.push({ href: '/dashboard/review', label: 'Review queue', icon: '⧗' });
-    groups[0].items.push({ href: '/dashboard/moderation', label: 'Moderation', icon: '⚑' });
-  }
-  if (role === 'admin') {
+  if (has('admin')) {
     groups.push({
       section: 'Administration',
       items: [
@@ -45,9 +54,9 @@ function itemsFor(role: DashboardRole): { section: string; items: NavItem[] }[] 
   return groups;
 }
 
-export function DashboardNav({ role }: { role: DashboardRole }) {
+export function DashboardNav({ roles }: { roles: string[] }) {
   const pathname = usePathname();
-  const groups = itemsFor(role);
+  const groups = itemsFor(roles);
 
   const isActive = (item: NavItem) =>
     item.exact

@@ -285,13 +285,43 @@ export class CmsDraftService {
     return rows.map(toDraftListItem);
   }
 
-  /** Submit a draft for editorial review (→ `ready`). */
+  /** Submit a draft into the sub-editor copy desk (→ `copy_edit`). */
   async submitDraft(authorId: string, id: string): Promise<DraftDetail> {
     await this.ownEditable(authorId, id);
     const updated = await this.prisma.article.update({
       where: { id },
-      // Resubmitting clears any prior editor return-note.
-      data: { status: ArticleStatus.ready, reviewNote: null },
+      // Resubmitting clears any prior return-note.
+      data: { status: ArticleStatus.copy_edit, reviewNote: null },
+      include: draftInclude,
+    });
+    return toDraftDetail(updated);
+  }
+
+  /** Load a copy-desk article (status `copy_edit`) for a sub-editor to edit. */
+  async getForCopyEdit(id: string): Promise<DraftDetail> {
+    const article = await this.prisma.article.findFirst({
+      where: { id, status: ArticleStatus.copy_edit, deletedAt: null },
+      include: draftInclude,
+    });
+    if (!article) {
+      throw new NotFoundException('Article is not on the copy desk');
+    }
+    return toDraftDetail(article);
+  }
+
+  /** Sub-editor copy-edit: update a `copy_edit` article (any author). */
+  async copyEdit(editorId: string, id: string, dto: UpdateDraftDto): Promise<DraftDetail> {
+    const existing = await this.prisma.article.findFirst({
+      where: { id, status: ArticleStatus.copy_edit, deletedAt: null },
+      include: draftInclude,
+    });
+    if (!existing) {
+      throw new NotFoundException('Article is not on the copy desk');
+    }
+    const data = await this.buildUpdateData(existing, dto, editorId);
+    const updated = await this.prisma.article.update({
+      where: { id },
+      data,
       include: draftInclude,
     });
     return toDraftDetail(updated);

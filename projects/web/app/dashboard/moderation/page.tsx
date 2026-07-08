@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { ModerationQueue } from '@/components/dashboard/ModerationQueue';
-import { requireEditor } from '@/lib/cms';
+import { requireModerator } from '@/lib/cms';
 import { fetchModerationQueue } from '@/lib/comments-actions';
 
 export const metadata: Metadata = { title: 'Moderation' };
 
 export default async function ModerationPage() {
-  await requireEditor();
+  await requireModerator();
   const queue = await fetchModerationQueue();
 
   return (

@@ -268,16 +268,16 @@ describe('CmsDraftService', () => {
   });
 
   describe('submitDraft', () => {
-    it('moves an editable draft to ready', async () => {
+    it('moves an editable draft onto the copy desk (copy_edit)', async () => {
       const { service, prisma } = build();
       prisma.article.findFirst.mockResolvedValue(row({ status: 'draft' }));
-      prisma.article.update.mockResolvedValue(row({ status: 'ready' }));
+      prisma.article.update.mockResolvedValue(row({ status: 'copy_edit' }));
 
       const res = await service.submitDraft('u1', 'a1');
 
-      expect(res.status).toBe('ready');
+      expect(res.status).toBe('copy_edit');
       expect(prisma.article.update).toHaveBeenCalledWith(
-        expect.objectContaining({ data: { status: 'ready', reviewNote: null } }),
+        expect.objectContaining({ data: { status: 'copy_edit', reviewNote: null } }),
       );
     });
   });

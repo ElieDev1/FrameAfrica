@@ -49,6 +49,55 @@ export class CmsEditorService {
     return rows.map(toReviewItem);
   }
 
+  // ── Sub-editor copy desk (status `copy_edit`) ────────────────────────────
+
+  /** Articles on the copy desk awaiting a sub-editor, oldest first. */
+  async listCopyDeskQueue(): Promise<ReviewItem[]> {
+    const rows = await this.prisma.article.findMany({
+      where: { status: ArticleStatus.copy_edit, deletedAt: null },
+      include: reviewInclude,
+      orderBy: { updatedAt: 'asc' },
+    });
+    return rows.map(toReviewItem);
+  }
+
+  /** Copy-editing done → pass to the editors' review queue (`ready`). */
+  async passCopyEdit(id: string): Promise<ReviewItem> {
+    await this.loadInStage(id, ArticleStatus.copy_edit);
+    const updated = await this.prisma.article.update({
+      where: { id },
+      data: { status: ArticleStatus.ready, reviewNote: null },
+      include: reviewInclude,
+    });
+    return toReviewItem(updated);
+  }
+
+  /** Send a copy-desk article back to its writer (`copy_edit` → `rejected`). */
+  async returnCopyEdit(id: string, rawNote?: string): Promise<ReviewItem> {
+    await this.loadInStage(id, ArticleStatus.copy_edit);
+    const note = rawNote ? stripText(rawNote).slice(0, 1000) : '';
+    const updated = await this.prisma.article.update({
+      where: { id },
+      data: { status: ArticleStatus.rejected, reviewNote: note || null },
+      include: reviewInclude,
+    });
+    return toReviewItem(updated);
+  }
+
+  private async loadInStage(id: string, status: ArticleStatus): Promise<ReviewRow> {
+    const article = await this.prisma.article.findFirst({
+      where: { id, deletedAt: null },
+      include: reviewInclude,
+    });
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+    if (article.status !== status) {
+      throw new ConflictException(`Article is not in "${status}" (it is "${article.status}")`);
+    }
+    return article;
+  }
+
   /** Publish a submitted article (`ready` → `published`). */
   async publish(id: string): Promise<ReviewItem> {
     const article = await this.loadReviewable(id);

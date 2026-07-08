@@ -1,21 +1,30 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { DashboardNav, type DashboardRole } from '@/components/dashboard/DashboardNav';
+import { DashboardNav } from '@/components/dashboard/DashboardNav';
 import { DashboardTopbar } from '@/components/dashboard/DashboardTopbar';
 import { Wordmark } from '@/components/Wordmark';
 import { requireStaff } from '@/lib/cms';
 
 export const metadata: Metadata = { title: 'Dashboard' };
 
-function highestRole(roles: string[]): DashboardRole {
-  if (roles.includes('admin')) return 'admin';
-  if (roles.includes('editor')) return 'editor';
-  return 'journalist';
+// A short display label for the topbar (nav itself is capability-based).
+const ROLE_ORDER = [
+  'admin',
+  'editor',
+  'sub_editor',
+  'moderator',
+  'ads_manager',
+  'photographer',
+  'journalist',
+];
+
+function primaryRole(roles: string[]): string {
+  return ROLE_ORDER.find((r) => roles.includes(r)) ?? 'staff';
 }
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await requireStaff();
-  const role = highestRole(user.roles);
+  const role = primaryRole(user.roles).replace('_', ' ');
 
   return (
     <div className="flex min-h-screen bg-bg">
@@ -23,7 +32,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <Link href="/dashboard" className="px-2">
           <Wordmark size="sm" />
         </Link>
-        <DashboardNav role={role} />
+        <DashboardNav roles={user.roles} />
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <DashboardTopbar name={user.displayName} role={role} />
