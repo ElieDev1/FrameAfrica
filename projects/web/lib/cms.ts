@@ -34,6 +34,8 @@ export interface DraftDetail extends DraftListItem {
   reviewNote: string | null;
   /** Whether the (published) article is pinned to the homepage. */
   isFeatured: boolean;
+  /** Whether the (published) article is in live/developing coverage. */
+  isLive: boolean;
   featuredImageUrl: string | null;
   featuredImageAlt: string | null;
   featuredImageCredit: string | null;

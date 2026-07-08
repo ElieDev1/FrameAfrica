@@ -238,6 +238,7 @@ function toArticleSummary(article: ArticleWithRelations): ArticleSummary {
     isPremium: article.isPremium,
     isBreaking: article.isBreaking,
     isFeatured: article.isFeatured,
+    isLive: article.isLive,
     readTimeMin: article.readTimeMin,
     publishedAt: article.publishedAt?.toISOString() ?? null,
     featuredImage: article.featuredImageUrl

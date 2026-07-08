@@ -91,8 +91,27 @@ model User {
   mediaAssets   MediaAsset[]
   corrections   ArticleCorrection[] @relation("UserCorrections")
   likes         ArticleLike[]
+  liveUpdates   LiveUpdate[]        @relation("UserLiveUpdates")
 
   @@map("user")
+}
+
+/// A timestamped entry in a story's live/developing coverage (documents/14 §1,
+/// FR-LIVE). Readers see these appear newest-first while the story is `isLive`.
+model LiveUpdate {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  articleId  String   @map("article_id") @db.Uuid
+  authorId   String   @map("author_id") @db.Uuid
+  headline   String?
+  body       String
+  isKeyEvent Boolean  @default(false) @map("is_key_event")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  author  User    @relation("UserLiveUpdates", fields: [authorId], references: [id])
+
+  @@index([articleId, createdAt])
+  @@map("live_update")
 }
 
 /// A reader's like on an article (one per user per article). The denormalised
@@ -228,6 +247,9 @@ model Article {
   // `featuredAt` orders the featured set (newest pin first).
   isFeatured   Boolean       @default(false) @map("is_featured")
   featuredAt   DateTime?     @map("featured_at")
+  // Live/developing coverage: when true the article shows a LIVE banner and its
+  // real-time update feed (documents/14 §1).
+  isLive       Boolean       @default(false) @map("is_live")
   readTimeMin  Int?          @map("read_time_min")
   // The editor's note when a submitted draft is returned (rejected). Shown to
   // the author so they know what to fix; cleared when they resubmit.
@@ -256,6 +278,7 @@ model Article {
   topics      ArticleTopic[]
   corrections ArticleCorrection[]
   likes       ArticleLike[]
+  liveUpdates LiveUpdate[]
 
   @@index([status, publishedAt])
   @@index([categoryId, publishedAt])

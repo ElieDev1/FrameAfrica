@@ -6,11 +6,18 @@ import { ArticleCard } from '@/components/ArticleCard';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { CommentsSection } from '@/components/CommentsSection';
 import { LikeButton } from '@/components/LikeButton';
+import { LiveFeed } from '@/components/LiveFeed';
 import { ReadingProgress } from '@/components/ReadingProgress';
 import { ShareBar } from '@/components/ShareBar';
 import { StickyShare } from '@/components/StickyShare';
 import { getLikeStatus } from '@/lib/likes-actions';
-import { fetchArticle, fetchComments, fetchRelated, type ArticleDetail } from '@/lib/api';
+import {
+  fetchArticle,
+  fetchComments,
+  fetchLiveUpdates,
+  fetchRelated,
+  type ArticleDetail,
+} from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import { getSession } from '@/lib/session';
 import { absoluteUrl, SITE_NAME } from '@/lib/site';
@@ -89,11 +96,12 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound();
   }
 
-  const [related, comments, user, likeStatus] = await Promise.all([
+  const [related, comments, user, likeStatus, liveUpdates] = await Promise.all([
     fetchRelated(slug),
     fetchComments(article.id),
     getSession(),
     getLikeStatus(article.id),
+    fetchLiveUpdates(slug),
   ]);
 
   const updated = isMeaningfullyUpdated(article.publishedAt, article.updatedAt);
@@ -123,7 +131,13 @@ export default async function ArticlePage({ params }: PageProps) {
         >
           {article.category.name}
         </Link>
-        {article.isBreaking && (
+        {article.isLive && (
+          <span className="inline-flex items-center gap-1 rounded bg-accent-red px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-white">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" aria-hidden />
+            Live
+          </span>
+        )}
+        {article.isBreaking && !article.isLive && (
           <span className="rounded bg-accent-red px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-white">
             Breaking
           </span>
@@ -206,6 +220,10 @@ export default async function ArticlePage({ params }: PageProps) {
             {article.category.name}
           </span>
         </div>
+      )}
+
+      {(article.isLive || liveUpdates.length > 0) && (
+        <LiveFeed slug={article.slug} initialUpdates={liveUpdates} live={article.isLive} />
       )}
 
       <div className="mt-8">

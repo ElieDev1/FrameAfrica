@@ -7,12 +7,16 @@ jest.mock('@/lib/api', () => ({
   fetchArticle: jest.fn(),
   fetchRelated: jest.fn(),
   fetchComments: jest.fn(),
+  fetchLiveUpdates: jest.fn().mockResolvedValue([]),
 }));
 jest.mock('@/lib/session', () => ({ getSession: jest.fn() }));
 jest.mock('@/lib/comments-actions', () => ({ postComment: jest.fn() }));
 jest.mock('@/lib/likes-actions', () => ({
   getLikeStatus: jest.fn().mockResolvedValue(null),
   toggleLike: jest.fn(),
+}));
+jest.mock('@/lib/live-actions', () => ({
+  pollLiveUpdates: jest.fn().mockResolvedValue([]),
 }));
 
 const mockFetchArticle = fetchArticle as jest.MockedFunction<typeof fetchArticle>;
@@ -37,6 +41,7 @@ function sampleArticle(): ArticleDetail {
     isPremium: false,
     isBreaking: true,
     isFeatured: false,
+    isLive: false,
     readTimeMin: 4,
     publishedAt: '2026-01-01T00:00:00.000Z',
     featuredImage: null,

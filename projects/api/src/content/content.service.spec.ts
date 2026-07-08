@@ -30,6 +30,7 @@ const articleRow = (over: Record<string, unknown> = {}) => ({
   topics: [],
   corrections: [],
   isFeatured: false,
+  isLive: false,
   ...over,
 });
 
