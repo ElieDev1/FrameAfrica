@@ -85,10 +85,12 @@ until merged and note their PR.
 - [x] Reader-account **UI**: `/signup`, `/login`, `/account` + auth-aware header, via a BFF session (tokens in the Next server's HTTP-only cookies)
 - [x] BFF session **refresh-on-expiry** (Next proxy rotates the access token) so logins survive past the access TTL — _refresh-lock for prefetch races is a follow-up_
 - [x] Register + email verification (`FR-AUTH-1`) — verification link on register; `POST /auth/verify-email` stamps `emailVerifiedAt` (single-use, hashed, 24h token)
-- [x] Password reset (`FR-AUTH-5`) — `POST /auth/password/forgot` (no enumeration) + `/auth/password/reset` (revokes all sessions); `/forgot-password` + `/reset-password` UI. _Mailer logs the link until SMTP is wired._
-- [ ] 2FA (TOTP) mandatory for staff (`FR-AUTH-6`)
+- [x] Password reset (`FR-AUTH-5`) — `POST /auth/password/forgot` (no enumeration) + `/auth/password/reset` (revokes all sessions); `/forgot-password` + `/reset-password` UI.
+- [x] Real transactional email (SMTP via nodemailer, HTML templates) behind `MailerService`, with a console fallback in dev — verification, reset, and admin temp-password mails now deliver (WS12).
+- [x] 2FA (TOTP) mandatory for staff (`FR-AUTH-6`) — native RFC 6238; `/account/security` enrol (QR + key), login code step, dashboard enforces enrolment for staff (WS12).
+- [x] **Admin user management** — create/list users, assign/revoke roles, suspend/reactivate, reset passwords; generated first password + forced first-login reset (no email code), later resets emailed (WS8).
 - [ ] Object-level authZ, applied per resource as write features land (`05` §4)
-- [ ] Bookmarks, reading history, followed categories (`FR-READ-5`, `-6`)
+- [ ] Bookmarks, reading history, followed categories (`FR-READ-5`, `-6`) — _bookmarks live; history/follows pending_
 - [ ] Data export + account erasure (`FR-AUTH-8`; `05` §9)
 
 ### Slice 5 — CMS & editorial workflow  `FR-PROD-*`, `FR-EDIT-*` 🚧
@@ -105,9 +107,10 @@ until merged and note their PR.
 - [x] Credit / alt-text metadata — `featured_image_alt` + `featured_image_credit`, authored in the CMS and rendered as image `alt` and a photo credit (`06` §6). _Licensing field with the DAM._
 
 ### Slice 7 — Comments & moderation  `FR-COMM-*` 🚧
-- [x] Threaded comments (`FR-COMM-1`) — `GET/POST /v1/articles/:id/comments`, one-level replies, a `comment` table with a moderation `status`, and a comment thread + form on the article page (signed-in readers; rate-limited 5/min). _Likes + reports still to come (`FR-COMM-2`)._
+- [x] Threaded comments (`FR-COMM-1`) — `GET/POST /v1/articles/:id/comments`, one-level replies, a `comment` table with a moderation `status`, and a comment thread + form on the article page (signed-in readers; rate-limited 5/min).
+- [x] Comment likes + reports (`FR-COMM-2`) — idempotent like/unlike + report endpoints, denormalised counts, like/report controls on each comment (WS7).
 - [x] HTML sanitization to prevent stored XSS (`05` §6) — comment bodies are stored as plain text (markup stripped on write) and output-encoded by React on render.
-- [ ] Moderation queue, hide/remove, user ban; AI spam pre-screen hook (`FR-COMM-3`, `-4`) — _the `status` enum (visible/pending/hidden/removed) is in place; the moderation UI + actions are next._
+- [x] Moderation queue, hide/remove (`FR-COMM-3`) — `/dashboard/moderation` for editors/moderators/admins with keep/hide/remove; flagged + pending comments surface automatically (WS7). _User ban + AI spam pre-screen still to come (`FR-COMM-4`)._
 
 ### Slice 8 — Monetization  `FR-SUB-*`, `FR-AD-*`
 - [ ] Metered paywall (N free/period) → `402` preview when over meter (`FR-SUB-1`; `04` §7)
@@ -123,7 +126,8 @@ until merged and note their PR.
 ### Slice 9 — Launch baseline
 - [x] Global exception filter → standard `{ error: { code, ... } }` envelope (`04` §2) — pulled early so the whole API shares one error contract; the `402` premium preview stays success-shaped
 - [x] SEO essentials: `NewsArticle` JSON-LD, XML sitemap, `robots.txt`, canonical URLs, OpenGraph + Twitter cards (`01` §4.8) — _Google News sitemap + `hreflang` still to come (the latter needs i18n routing)_
-- [ ] Analytics event ingestion + admin overview (`FR-ADM-3`)
+- [~] Admin overview + monitoring (`FR-ADM-3`) — `/dashboard/monitor` with user/article/comment stats + recent-activity feeds, and **edit-any-article** for admins regardless of author/status (WS10). _Event-level analytics ingestion still pending._
+- [x] Admin integrations & API keys — `/dashboard/settings` to store integration keys (YouTube, AI, payments, custom) in an `app_setting` table, surfaced masked and read server-side (WS9).
 - [ ] Backups + restore drill; pre-launch security checklist (`05` §16)
 - [ ] i18n EN/RW at launch (`FR-READ-7`)
 
@@ -160,12 +164,17 @@ until merged and note their PR.
 > homepage depth — breaking ticker, section blocks, Most-read (#18, #22); article
 > depth — related + share bar (#20); BFF session auto-refresh (#21). Slice 9's
 > global exception filter landed early (#23); email verification + password
-> reset (Slice 4 trust, `FR-AUTH-1`/`-5`, this branch).
+> reset (Slice 4 trust, `FR-AUTH-1`/`-5`). **Recent (WS7–WS12):** comment likes +
+> reports + moderation queue (Slice 7 ✅); admin user management with a
+> generated-password / forced first-login flow; admin integrations & API-key
+> settings; admin monitoring + edit-any-article; a site-wide staff "Newsroom"
+> nav; and **security & trust** — staff TOTP 2FA (mandatory for staff) + a real
+> SMTP email transport.
 >
-> **Next up:** **Slice 5** (publish/schedule/embargo + a real rich-text editor)
-> or **Slice 3** OpenSearch; **Slice 6** media and staff 2FA (`FR-AUTH-6`) are the
-> other high-value follow-ups. A real SMTP transport (behind `MailerService`) is a
-> small standalone task whenever credentials exist.
+> **Next up (critical, pre-monetization):** **Slice 6** media on S3 (signed
+> uploads + responsive variants), **Slice 4** account data export + erasure
+> (`FR-AUTH-8`), and **Slice 3** OpenSearch. **Slice 8 monetization** (metered
+> paywall + MoMo/Airtel + ads) is deferred until the core is solid.
 
 ---
 
