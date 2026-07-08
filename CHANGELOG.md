@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Review desk — return with a note (WS4):** when an editor returns a submitted draft, they can attach a **note** explaining what to fix. The note is stripped of markup, stored on the article (`review_note`), and shown to the author as a **"Returned by an editor"** banner on the draft; **resubmitting clears it**. The review-queue "Reject" action is now a **"Return"** with an optional note field. Verified end-to-end (submit → return with note → author sees stripped note → resubmit clears it). Diff-vs-revision + inline preview remain.
 - **Media library — uploads (WS3, backend):** staff can upload real images instead of pasting URLs. A new `media_asset` catalogue table (url, alt, credit, licence, mime, size) + migration; a staff-gated `POST /v1/cms/media` (multipart) that **validates type (JPEG/PNG/WebP/GIF/AVIF) and size (≤8 MB)**, stores the binary via a swappable **storage driver** (local driver writes to `web/public/uploads`, so files are served same-origin at `/uploads/…`; S3/CDN slots in behind the same `save()` contract for prod), and records the asset; plus `GET /v1/cms/media` to browse the library. Verified end-to-end (upload → 201 → catalogued → listed → on disk). The library UI + a picker wired into the block editor are the next increment.
 - **Load-more on section & topic pages (WS2):** section and topic story rivers now start with a first page of 12 and grow via a **"Load more stories"** button (cursor-paginated, through a server action) with loading + error states — no more hard 24-story cap. A section ad slot lands with the ad server (WS9).
 - **CMS topic authoring (WS2):** journalists can now **tag a draft with topics** from the story editor — a chip picker (backed by a new `GET /v1/topics` list) whose selection is saved on create/edit; the API resolves slugs to ids and replaces the draft's tag set (unknown slugs ignored). Draft payloads carry their `topics`. Verified end-to-end (a draft created with `climate, exports` reads back tagged with both).
@@ -74,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BFF sessions now **refresh on expiry**: a Next proxy rotates the access token (using the stored refresh cookie) when it expires, so logins survive past the ~15-minute access TTL instead of silently signing out.
 
 ### Fixed
+- **Prisma schema was invalid on `dev`:** a merge had dropped the `User.corrections` back-relation for the `article_correction` table, so `ArticleCorrection.editor` had no opposite field — `prisma validate`/`generate` failed (masked locally by a stale client + mock-based tests). Restored the relation so migrations and client generation work.
 - CI is now green end-to-end (format, lint, type-check, test, build): the API generates the Prisma client on `postinstall`, resolving type-unsafe `PrismaClient` lint errors, and the Jest version mismatch that crashed the API test suite is gone.
 
 ### Deprecated

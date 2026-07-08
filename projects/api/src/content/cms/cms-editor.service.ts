@@ -63,12 +63,16 @@ export class CmsEditorService {
     return toReviewItem(updated);
   }
 
-  /** Send a submitted article back to its author (`ready` → `rejected`). */
-  async reject(id: string): Promise<ReviewItem> {
+  /**
+   * Send a submitted article back to its author (`ready` → `rejected`) with an
+   * optional note explaining what to fix. The note is stripped of markup.
+   */
+  async reject(id: string, rawNote?: string): Promise<ReviewItem> {
     await this.loadReviewable(id);
+    const note = rawNote ? stripText(rawNote).slice(0, 1000) : '';
     const updated = await this.prisma.article.update({
       where: { id },
-      data: { status: ArticleStatus.rejected },
+      data: { status: ArticleStatus.rejected, reviewNote: note || null },
       include: reviewInclude,
     });
     return toReviewItem(updated);
