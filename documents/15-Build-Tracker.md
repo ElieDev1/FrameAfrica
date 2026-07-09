@@ -134,10 +134,11 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] **MoMo & Airtel** + card payments with signed, idempotent webhooks (`05` §8)
 - **DoD:** a reader subscribes with mobile money and reads premium content.
 
-### WS11 — Newsletters & notifications `[ ]`
+### WS11 — Newsletters & notifications `[~]`
+- [x] **In-app notifications** (`14 §6.3`) — real dashboard bell (unread badge, list, mark read/all, deep links); newsroom emits on **publish** (→ author: live) and **return/reject** (→ author: changes requested). `/v1/me/notifications` API, unit-tested + verified e2e. _(SSE push is the enhancement over the 60s poll.)_
 - [ ] Newsletter subscribe + digests (delivery/open/click analytics), SMTP transport wired
-- [ ] Breaking-news alerts + web push; **per-role in-app notifications** (`14 §6.3`) via SSE
-- **DoD:** readers get newsletters/alerts; staff get real, role-relevant notifications.
+- [ ] Breaking-news alerts + web push; reader comment-reply notifications (needs a reader bell / WS16)
+- **DoD (core met):** staff get real, role-relevant notifications; newsletters + reader push remain.
 
 ### WS12 — Search (OpenSearch) `[ ]`
 - [ ] OpenSearch index + reindex on publish; `GET /v1/search` with filters + autocomplete + highlights
