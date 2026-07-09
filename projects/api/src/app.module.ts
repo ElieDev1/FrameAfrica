@@ -15,6 +15,7 @@ import { LiveModule } from './live/live.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { FollowsModule } from './follows/follows.module';
 import { HistoryModule } from './history/history.module';
+import { FeedModule } from './feed/feed.module';
 import { CommentsModule } from './comments/comments.module';
 import { BillingModule } from './billing/billing.module';
 import { AdsModule } from './ads/ads.module';
@@ -41,6 +42,7 @@ import { AdminModule } from './admin/admin.module';
     BookmarksModule,
     FollowsModule,
     HistoryModule,
+    FeedModule,
     CommentsModule,
     BillingModule,
     AdsModule,

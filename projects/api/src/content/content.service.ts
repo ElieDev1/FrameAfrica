@@ -201,6 +201,39 @@ export class ContentService {
     return ids;
   }
 
+  /**
+   * Expand a set of category ids to include every descendant, preserving input
+   * order. Following a parent section then surfaces its sub-sections' stories.
+   * Returns `[]` for an empty input (no DB hit).
+   */
+  private async expandCategorySubtrees(rootIds: string[]): Promise<string[]> {
+    if (rootIds.length === 0) return [];
+    const all = await this.prisma.category.findMany({
+      where: { isActive: true },
+      select: { id: true, parentId: true },
+    });
+    const childrenByParent = new Map<string, string[]>();
+    for (const c of all) {
+      if (c.parentId) {
+        const siblings = childrenByParent.get(c.parentId) ?? [];
+        siblings.push(c.id);
+        childrenByParent.set(c.parentId, siblings);
+      }
+    }
+
+    const result: string[] = [];
+    const seen = new Set<string>();
+    const queue = [...rootIds];
+    for (let i = 0; i < queue.length; i += 1) {
+      const id = queue[i];
+      if (seen.has(id)) continue;
+      seen.add(id);
+      result.push(id);
+      queue.push(...(childrenByParent.get(id) ?? []));
+    }
+    return result;
+  }
+
   /** Up to 4 other published articles in the same category (empty if none / unknown slug). */
   async getRelated(slug: string): Promise<ArticleSummary[]> {
     const article = await this.prisma.article.findFirst({
@@ -224,6 +257,82 @@ export class ContentService {
     });
 
     return rows.map(toArticleSummary);
+  }
+
+  /**
+   * A signed-in reader's personalised feed: published stories from the sections
+   * and topics they follow, plus sections they read a lot (reading history).
+   * Falls back to the latest news when there's no signal yet
+   * (`personalized: false`). Cursor-paginated, same shape as `listArticles`.
+   */
+  async personalizedFeed(
+    userId: string,
+    query: ListArticlesQueryDto,
+  ): Promise<{
+    items: ArticleSummary[];
+    nextCursor: string | null;
+    hasMore: boolean;
+    personalized: boolean;
+  }> {
+    const limit = query.limit ?? DEFAULT_LIMIT;
+
+    const [follows, history] = await Promise.all([
+      this.prisma.follow.findMany({
+        where: { userId },
+        select: { categoryId: true, topicId: true },
+      }),
+      this.prisma.readingHistory.findMany({
+        where: { userId },
+        orderBy: { viewedAt: 'desc' },
+        take: 30,
+        select: { article: { select: { categoryId: true } } },
+      }),
+    ]);
+
+    const followedCategoryIds = follows
+      .map((f) => f.categoryId)
+      .filter((id): id is string => Boolean(id));
+    const followedTopicIds = follows
+      .map((f) => f.topicId)
+      .filter((id): id is string => Boolean(id));
+    const historyCategoryIds = history.map((h) => h.article.categoryId);
+    const signalCategoryIds = [...new Set([...followedCategoryIds, ...historyCategoryIds])];
+    // Following a parent section should surface its sub-sections' stories too.
+    const categoryIds = await this.expandCategorySubtrees(signalCategoryIds);
+
+    const personalized =
+      followedCategoryIds.length > 0 ||
+      followedTopicIds.length > 0 ||
+      historyCategoryIds.length > 0;
+
+    const or: Prisma.ArticleWhereInput[] = [];
+    if (categoryIds.length > 0) {
+      or.push({ categoryId: { in: categoryIds } });
+    }
+    if (followedTopicIds.length > 0) {
+      or.push({ topics: { some: { topicId: { in: followedTopicIds } } } });
+    }
+
+    const where: Prisma.ArticleWhereInput = {
+      status: ArticleStatus.published,
+      deletedAt: null,
+      // No signal yet → no OR filter, so this degrades to "latest news".
+      ...(or.length > 0 ? { OR: or } : {}),
+    };
+
+    const rows = await this.prisma.article.findMany({
+      where,
+      include: articleInclude,
+      orderBy: [{ publishedAt: 'desc' }, { id: 'desc' }],
+      take: limit + 1,
+      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+    });
+
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const nextCursor = hasMore ? page[page.length - 1].id : null;
+
+    return { items: page.map(toArticleSummary), nextCursor, hasMore, personalized };
   }
 }
 
