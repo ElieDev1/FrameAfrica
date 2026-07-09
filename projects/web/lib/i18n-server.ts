@@ -12,5 +12,6 @@ export async function getLocale(): Promise<Locale> {
 
   const accept = (await headers()).get('accept-language')?.toLowerCase() ?? '';
   if (accept.includes('rw')) return 'rw';
+  if (accept.includes('fr')) return 'fr';
   return DEFAULT_LOCALE;
 }

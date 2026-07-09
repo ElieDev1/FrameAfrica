@@ -5,7 +5,7 @@ import { useTransition } from 'react';
 import { LOCALES, type Locale } from '@/lib/i18n';
 import { setLocalePreference } from '@/lib/i18n-actions';
 
-const LABELS: Record<Locale, string> = { en: 'EN', rw: 'RW' };
+const LABELS: Record<Locale, string> = { en: 'EN', rw: 'RW', fr: 'FR' };
 
 /**
  * Language switcher: persists the `fa-locale` cookie (via a server action) and
