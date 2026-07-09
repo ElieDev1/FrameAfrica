@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { CmsAdminController } from './cms/cms-admin.controller';
 import { CmsController } from './cms/cms.controller';
 import { CmsCopydeskController } from './cms/cms-copydesk.controller';
@@ -11,7 +12,7 @@ import { ContentController } from './content.controller';
 import { ContentService } from './content.service';
 
 @Module({
-  imports: [AuthModule], // provides TokenService for JwtAuthGuard
+  imports: [AuthModule, NotificationsModule], // TokenService for JwtAuthGuard; NotificationsService for emits
   controllers: [
     ContentController,
     CmsController,

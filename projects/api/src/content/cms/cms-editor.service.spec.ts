@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import type { PrismaService } from '../../prisma/prisma.service';
+import type { NotificationsService } from '../../notifications/notifications.service';
 import { CmsEditorService } from './cms-editor.service';
 
 const row = (over: Record<string, unknown> = {}) => ({
@@ -24,7 +25,15 @@ function build() {
     },
     articleCorrection: { create: jest.fn() },
   };
-  return { service: new CmsEditorService(prisma as unknown as PrismaService), prisma };
+  const notifications = { create: jest.fn().mockResolvedValue(undefined) };
+  return {
+    service: new CmsEditorService(
+      prisma as unknown as PrismaService,
+      notifications as unknown as NotificationsService,
+    ),
+    prisma,
+    notifications,
+  };
 }
 
 describe('CmsEditorService', () => {
@@ -43,8 +52,8 @@ describe('CmsEditorService', () => {
   });
 
   describe('publish', () => {
-    it('publishes a ready article and stamps publishedAt', async () => {
-      const { service, prisma } = build();
+    it('publishes a ready article, stamps publishedAt, and notifies the author', async () => {
+      const { service, prisma, notifications } = build();
       prisma.article.findFirst.mockResolvedValue(row({ status: 'ready', publishedAt: null }));
       prisma.article.update.mockResolvedValue(row({ status: 'published' }));
 
@@ -55,6 +64,9 @@ describe('CmsEditorService', () => {
       const arg = calls[0]?.[0] as { data: Record<string, unknown> };
       expect(arg.data.status).toBe('published');
       expect(arg.data.publishedAt).toBeInstanceOf(Date);
+      expect(notifications.create).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 'u1', type: 'article_published' }),
+      );
     });
 
     it('refuses to publish an article that is not in review', async () => {

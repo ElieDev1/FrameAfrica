@@ -4,8 +4,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ArticleStatus, Prisma } from '@prisma/client';
+import { ArticleStatus, NotificationType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 import { stripText } from '../blocks';
 
 const reviewInclude = {
@@ -37,7 +38,10 @@ export interface CorrectionItem {
  */
 @Injectable()
 export class CmsEditorService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   /** Articles submitted for review (status `ready`), oldest first. */
   async listReviewQueue(): Promise<ReviewItem[]> {
@@ -81,7 +85,19 @@ export class CmsEditorService {
       data: { status: ArticleStatus.rejected, reviewNote: note || null },
       include: reviewInclude,
     });
+    await this.notifyReturned(updated, note);
     return toReviewItem(updated);
+  }
+
+  /** Notify an author their submission was returned for changes. */
+  private async notifyReturned(article: ReviewRow, note: string): Promise<void> {
+    await this.notifications.create({
+      userId: article.author.id,
+      type: NotificationType.article_returned,
+      title: `Changes requested: “${article.title}”`,
+      body: note || null,
+      link: `/dashboard/stories/${article.id}`,
+    });
   }
 
   private async loadInStage(id: string, status: ArticleStatus): Promise<ReviewRow> {
@@ -110,6 +126,12 @@ export class CmsEditorService {
         embargoUntil: null,
       },
       include: reviewInclude,
+    });
+    await this.notifications.create({
+      userId: updated.author.id,
+      type: NotificationType.article_published,
+      title: `Your story is live: “${updated.title}”`,
+      link: `/article/${updated.slug}`,
     });
     return toReviewItem(updated);
   }
@@ -194,6 +216,7 @@ export class CmsEditorService {
       data: { status: ArticleStatus.rejected, reviewNote: note || null },
       include: reviewInclude,
     });
+    await this.notifyReturned(updated, note);
     return toReviewItem(updated);
   }
 
