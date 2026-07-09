@@ -151,7 +151,7 @@ export function DashboardNav({
                       <Link
                         href={item.href}
                         aria-current={active ? 'page' : undefined}
-                        className={`flex items-center gap-3 rounded-lg px-3 py-2 font-body text-sm transition-colors ${
+                        className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                           active
                             ? 'bg-primary/15 font-semibold text-primary'
                             : 'text-muted hover:bg-surface-2 hover:text-text'
