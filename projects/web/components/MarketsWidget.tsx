@@ -1,16 +1,13 @@
-/**
- * Markets snapshot (FX + a couple of indices). Indicative static values for now
- * — a real markets feed (documents/00 §4.2 widgets) drops in behind the same
- * shape later.
- */
-const ROWS = [
-  { name: 'USD / RWF', value: '1,330', change: +0.3 },
-  { name: 'EUR / RWF', value: '1,440', change: -0.1 },
-  { name: 'RSE All-Share', value: '145.2', change: +0.6 },
-  { name: 'Brent Crude', value: '$82.4', change: -0.4 },
-] as const;
+import { TrendingDownIcon, TrendingUpIcon } from '@/components/icons';
+import { fetchMarkets } from '@/lib/widgets';
 
-export function MarketsWidget() {
+/**
+ * Live markets — FX (USD/EUR/GBP → RWF) + crypto (BTC/ETH), refreshed every
+ * 15 min. Stock indices/commodities land later behind a keyed provider.
+ */
+export async function MarketsWidget() {
+  const rows = await fetchMarkets();
+
   return (
     <section aria-labelledby="markets" className="rounded-xl border border-border bg-surface p-4">
       <div className="mb-3 flex items-baseline justify-between">
@@ -18,25 +15,36 @@ export function MarketsWidget() {
           Markets
         </h2>
         <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-          Indicative
+          {rows.length > 0 ? 'Live' : 'Unavailable'}
         </span>
       </div>
-      <ul className="flex flex-col gap-2.5">
-        {ROWS.map((r) => {
-          const up = r.change >= 0;
-          return (
-            <li key={r.name} className="flex items-center justify-between gap-3">
-              <span className="font-heading text-sm font-semibold text-text">{r.name}</span>
-              <span className="flex items-baseline gap-2 font-mono text-sm">
-                <span className="text-text">{r.value}</span>
-                <span className={up ? 'text-accent-green' : 'text-accent-red'}>
-                  {up ? '▲' : '▼'} {Math.abs(r.change).toFixed(1)}%
+      {rows.length > 0 ? (
+        <ul className="flex flex-col gap-2.5">
+          {rows.map((r) => {
+            const up = (r.change ?? 0) >= 0;
+            return (
+              <li key={r.name} className="flex items-center justify-between gap-3">
+                <span className="font-heading text-sm font-semibold text-text">{r.name}</span>
+                <span className="flex items-center gap-2 font-mono text-sm">
+                  <span className="text-text">{r.value}</span>
+                  {r.change !== undefined && (
+                    <span
+                      className={`inline-flex items-center gap-0.5 ${
+                        up ? 'text-accent-green' : 'text-accent-red'
+                      }`}
+                    >
+                      {up ? <TrendingUpIcon size={14} /> : <TrendingDownIcon size={14} />}
+                      {Math.abs(r.change).toFixed(1)}%
+                    </span>
+                  )}
                 </span>
-              </span>
-            </li>
-          );
-        })}
-      </ul>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="font-body text-sm text-muted">Markets are unavailable right now.</p>
+      )}
     </section>
   );
 }
