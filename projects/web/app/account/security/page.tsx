@@ -32,12 +32,13 @@ export default async function SecurityPage() {
       </p>
 
       {isStaff && !user.twoFactorEnabled && (
-        <div className="mt-4 rounded-xl border-l-4 border-accent-red bg-surface px-4 py-3">
-          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-red">
-            Required for staff
+        <div className="mt-4 rounded-xl border-l-4 border-primary bg-surface px-4 py-3">
+          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-primary">
+            Recommended for staff
           </p>
           <p className="mt-1 font-body text-sm text-text">
-            Newsroom accounts must enable two-factor authentication to access the dashboard.
+            Two-factor authentication adds an extra layer of protection to your newsroom account.
+            Enabling it is optional for now.
           </p>
         </div>
       )}
