@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ClearHistoryButton } from '@/components/account/ClearHistoryButton';
+import { DeleteAccountForm } from '@/components/account/DeleteAccountForm';
 import { FollowedList } from '@/components/account/FollowedList';
 import { logout } from '@/lib/auth-actions';
 import { fetchSaved } from '@/lib/bookmarks-actions';
@@ -115,6 +116,25 @@ export default async function AccountPage() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="mt-10 border-t border-border pt-6">
+        <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
+          Privacy &amp; data
+        </h2>
+        <p className="mt-3 font-body text-sm text-muted">
+          Download a copy of everything we hold about you, or permanently delete your account
+          (Rwanda Law N° 058/2021).
+        </p>
+        <div className="mt-4 flex flex-col gap-4">
+          <a
+            href="/account/export"
+            className="inline-flex w-fit items-center rounded-lg border border-border px-4 py-2 font-mono text-xs uppercase tracking-wide text-muted transition hover:border-primary hover:text-primary"
+          >
+            Download my data
+          </a>
+          <DeleteAccountForm />
+        </div>
       </section>
 
       <form action={logout} className="mt-8 border-t border-border pt-6">
