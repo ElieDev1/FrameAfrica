@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Staff 2FA is now opt-in, not forced.** The dashboard no longer forces staff to enrol in two-factor before entering the newsroom. The full 2FA feature stays in place — users can enable it at `/account/security` and login still requires a code when it's on — and mandatory enrolment can be switched back on any time by setting `ENFORCE_STAFF_2FA=true`.
+
 ### Added
 - **Seed: second admin + a large article corpus (~320).** Added a second admin (`newsroom.admin@frameafrica.rw`), 20 hand-written flagship stories, plus a **deterministic generator** that fills **every category** with well-detailed multi-block articles (~300 total) — for exercising pagination/"load more", section aggregation, Most-read, and the premium paywall. Generated content is stable across re-seeds (idempotent), varies by subject/angle/place, and sprinkles breaking/premium/featured flags; cover-less stories use the branded placeholder.
 - **Reader UI overhaul — real widgets + advanced layout (WS17, phases 3–5):** the homepage **Weather** and **Markets** widgets now show **real live data** — weather for Kigali/Nairobi/Lagos/Kinshasa from **Open-Meteo** (WMO codes → SVG weather icons), and **Markets** from live **FX (USD/EUR/GBP → RWF)** + **crypto (BTC/ETH with 24h trend)** via free keyless APIs, all fetched server-side with 15-min caching and graceful "unavailable" fallbacks (indices/commodities land later behind a keyed provider). The **homepage** was rebuilt for wide screens (~1440px): a stronger hero, a 3-column "Latest" river with `SectionHeading` connectors, full-width **section bands**, and a sticky rail; **ads** gained IAB units (billboard, half-page sticky, in-feed native) alongside the leaderboard. The **article page** and **comments** were polished (breadcrumb/related use icon connectors, read-time clock icon, comment avatars + icon actions).
