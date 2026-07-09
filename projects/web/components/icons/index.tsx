@@ -159,6 +159,95 @@ export const LogOutIcon = (p: IconProps) => (
   </Stroke>
 );
 
+// Dashboard nav icons
+export const GridIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <rect x="3" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="14" width="7" height="7" rx="1" />
+    <rect x="3" y="14" width="7" height="7" rx="1" />
+  </Stroke>
+);
+export const FileTextIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+    <path d="M14 2v5h5M8 13h8M8 17h8M8 9h2" />
+  </Stroke>
+);
+export const ImageIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <circle cx="9" cy="9" r="2" />
+    <path d="m21 15-5-5L5 21" />
+  </Stroke>
+);
+export const SparklesIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9Z" />
+    <path d="M19 15v4M21 17h-4" />
+  </Stroke>
+);
+export const PenIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+  </Stroke>
+);
+export const ClipboardCheckIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <rect x="8" y="2" width="8" height="4" rx="1" />
+    <path d="M9 4H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2" />
+    <path d="m9 14 2 2 4-4" />
+  </Stroke>
+);
+export const ActivityIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+  </Stroke>
+);
+export const LayersIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="m12 2 9 5-9 5-9-5 9-5Z" />
+    <path d="m3 12 9 5 9-5M3 17l9 5 9-5" />
+  </Stroke>
+);
+export const TagIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M9 5H4a1 1 0 0 0-1 1v5l9 9 7-7-9-9Z" />
+    <circle cx="7" cy="9" r="1.2" />
+  </Stroke>
+);
+export const UsersIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+  </Stroke>
+);
+export const SettingsIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+  </Stroke>
+);
+export const ChevronDownIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="m6 9 6 6 6-6" />
+  </Stroke>
+);
+export const PanelLeftIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <path d="M9 3v18" />
+  </Stroke>
+);
+export const BellIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+  </Stroke>
+);
+
 // ── Weather icons (WMO code → icon) ───────────────────────────────────────────
 
 const SunIcon = (p: IconProps) => (

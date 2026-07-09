@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Redesigned dashboard shell.** A proper newsroom app shell: a richer top bar with a brand, admin **search**, a **"New story"** quick-create, theme toggle, and a **profile menu** (account / view site / sign out); a sticky, scrollable **sidebar**; and a working **mobile drawer** (the dashboard previously had no navigation on mobile). Content sits in a centered max-width column.
+- **Redesigned dashboard shell.** A proper newsroom app shell: a richer top bar with a brand, admin **search**, a **"New story"** quick-create, **notifications** bell, theme toggle, and a **profile menu** (account / view site / sign out); a **collapsible** sidebar (full ↔ icons-only, remembered) whose logo + toggle sit in a fixed header aligned with the top bar (they read as one strip) while only the nav scrolls; **real SVG icons** on every nav item; **collapsible nav groups**; and a working **mobile drawer** (the dashboard previously had no navigation on mobile). Content sits in a centered max-width column.
 
 ### Fixed
 - **Slimmer scrollbars app-wide, and none on the dashboard sidebar.** Global thin scrollbars (Firefox + WebKit) with a `no-scrollbar` opt-out applied to the dashboard sidebar/drawer, which still scroll when needed but show no bar.

@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
-import { Archivo, Source_Serif_4, IBM_Plex_Mono } from 'next/font/google';
+import { Libre_Franklin, Source_Serif_4, IBM_Plex_Mono } from 'next/font/google';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site';
 import './globals.css';
 
-const archivo = Archivo({
+// Heading / UI face — a clean, news-appropriate grotesk (keeps the same CSS var).
+const heading = Libre_Franklin({
   variable: '--font-archivo',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800', '900'],
@@ -49,6 +50,19 @@ export const metadata: Metadata = {
 // dark) so the page never flashes the wrong palette.
 const themeScript = `(function(){try{var t=localStorage.getItem('fa-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
 
+// Injected raw so the ::-webkit-scrollbar rules survive (Tailwind/Lightning CSS
+// strips them from the stylesheet). Slim bars everywhere; `.no-scrollbar` hides
+// them entirely (still scrollable) — used by the dashboard sidebar/drawer.
+const scrollbarCss = `
+*{scrollbar-width:thin;scrollbar-color:var(--color-border-2) transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--color-border-2);border-radius:9999px}
+::-webkit-scrollbar-thumb:hover{background:var(--color-faint)}
+::-webkit-scrollbar-track{background:transparent}
+.no-scrollbar{scrollbar-width:none}
+.no-scrollbar::-webkit-scrollbar{display:none;width:0;height:0}
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -59,10 +73,11 @@ export default function RootLayout({
       lang="en"
       data-theme="dark"
       suppressHydrationWarning
-      className={`${archivo.variable} ${sourceSerif.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${heading.variable} ${sourceSerif.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <style dangerouslySetInnerHTML={{ __html: scrollbarCss }} />
       </head>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
