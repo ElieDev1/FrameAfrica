@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { fetchCategories, type CategoryNode } from '@/lib/api';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 import { getSession } from '@/lib/session';
 import { SearchIcon } from './icons';
 import { DesktopSectionNav } from './nav/DesktopSectionNav';
@@ -29,6 +31,7 @@ export async function SiteHeader() {
     allSections = [];
   }
   const navSections = allSections.slice(0, MAX_SECTIONS);
+  const locale = await getLocale();
   const user = await getSession();
   const isStaff = user?.roles.some((role) => STAFF_ROLES.includes(role)) ?? false;
   const isEditor = user?.roles.some((role) => EDITOR_ROLES.includes(role)) ?? false;
@@ -66,8 +69,8 @@ export async function SiteHeader() {
             <input
               name="q"
               type="search"
-              placeholder="Search…"
-              aria-label="Search articles"
+              placeholder={t(locale, 'nav.searchPlaceholder')}
+              aria-label={t(locale, 'nav.searchAria')}
               className="w-44 rounded-full border border-border bg-surface-2 py-1.5 pl-9 pr-4 font-body text-sm text-text outline-none transition-[width,border-color] focus:w-64 focus:border-primary"
             />
           </form>
@@ -80,7 +83,7 @@ export async function SiteHeader() {
                 href="/for-you"
                 className="hidden text-sm font-medium text-muted transition-colors hover:text-primary md:inline"
               >
-                For You
+                {t(locale, 'nav.forYou')}
               </Link>
               {isStaff && <StaffMenu isEditor={isEditor} isAdmin={isAdmin} />}
               <Link
@@ -96,13 +99,13 @@ export async function SiteHeader() {
                 href="/login"
                 className="hidden text-sm font-medium text-muted transition-colors hover:text-primary md:inline"
               >
-                Sign in
+                {t(locale, 'nav.signIn')}
               </Link>
               <Link
                 href="/signup"
                 className="hidden rounded-full bg-primary px-3.5 py-1.5 text-sm font-semibold text-black transition-transform hover:-translate-y-px md:inline"
               >
-                Subscribe
+                {t(locale, 'nav.subscribe')}
               </Link>
             </>
           )}
