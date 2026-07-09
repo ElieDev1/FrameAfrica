@@ -156,9 +156,11 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] "Because you follow…" rails on the homepage for signed-in readers (grouped by subject)
 - **DoD (core met):** a signed-in reader gets a personalised feed; per-subject rails are the enhancement.
 
-### WS15 — Internationalisation (EN / RW / FR) `[ ]`
-- [ ] Locale routing + UI strings + per-article language variants + `hreflang` + language switcher
-- **DoD:** the product is usable in English, Kinyarwanda, and French.
+### WS15 — Internationalisation (EN / RW / FR) `[~]`
+- [x] **Locale core (EN + Kinyarwanda)** — cookie/`Accept-Language` locale, `i18n` dictionary + `t()`, **language switcher**, translated masthead/footer, `<html lang>` per locale. Unit-tested + verified e2e (RW flips chrome + lang).
+- [ ] Extend the dictionary to all UI strings; add **French**
+- [ ] Per-article **language variants** (translation-group linking) + `hreflang` (needs per-locale URLs / route-based i18n)
+- **DoD (core met):** the chrome is usable in English + Kinyarwanda; full string coverage, FR, and per-article translations remain.
 
 ### WS16 — PWA / offline / data-saver `[ ]`
 - [ ] Installable PWA, offline saved-article reading, low-data mode
