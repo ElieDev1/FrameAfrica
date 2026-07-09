@@ -85,6 +85,11 @@ export const FlagIcon = (p: IconProps) => (
     <line x1="4" y1="22" x2="4" y2="15" />
   </Stroke>
 );
+export const ShieldIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </Stroke>
+);
 export const ChevronRightIcon = (p: IconProps) => (
   <Stroke {...p}>
     <path d="m9 18 6-6-6-6" />

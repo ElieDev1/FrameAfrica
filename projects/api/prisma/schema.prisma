@@ -71,6 +71,13 @@ enum NotificationType {
   comment_reply
 }
 
+enum TipStatus {
+  new
+  reviewing
+  actioned
+  dismissed
+}
+
 model User {
   id                 String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   email              String     @unique @db.Citext
@@ -509,6 +516,20 @@ model ArticleCorrection {
 
   @@index([articleId, createdAt])
   @@map("article_correction")
+}
+
+/// A confidential news tip from the public (documents/14 §7 secure tips). No
+/// author link — tips are anonymous unless the tipster volunteers `contact`.
+/// Message + contact are stripped of markup on write.
+model Tip {
+  id        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  message   String
+  contact   String?
+  status    TipStatus @default(new)
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([status, createdAt])
+  @@map("tip")
 }
 
 /// Immutable snapshot captured on every draft save (documents/03 §3.5).

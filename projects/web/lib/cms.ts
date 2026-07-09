@@ -251,6 +251,28 @@ export async function fetchOverview(): Promise<AdminOverview> {
   return json.data;
 }
 
+export type TipStatus = 'new' | 'reviewing' | 'actioned' | 'dismissed';
+
+export interface TipItem {
+  id: string;
+  message: string;
+  contact: string | null;
+  status: TipStatus;
+  createdAt: string;
+}
+
+/** The confidential tips inbox (editor/moderator/admin). */
+export async function fetchTips(): Promise<TipItem[]> {
+  const res = await fetch(`${API_URL}/tips`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load tips (${res.status})`);
+  const json = (await res.json()) as { data: TipItem[] };
+  return json.data;
+}
+
 export interface AuditEntry {
   id: string;
   action: string;

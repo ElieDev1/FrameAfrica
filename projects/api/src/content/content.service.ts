@@ -115,6 +115,31 @@ export class ContentService {
     return buildCategoryTree(categories);
   }
 
+  /** Public corrections log: dated notes on published stories, newest first. */
+  async listCorrections(
+    limit = 50,
+  ): Promise<
+    { id: string; note: string; createdAt: string; article: { slug: string; title: string } }[]
+  > {
+    const rows = await this.prisma.articleCorrection.findMany({
+      where: { article: { status: ArticleStatus.published, deletedAt: null } },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        note: true,
+        createdAt: true,
+        article: { select: { slug: true, title: true } },
+      },
+    });
+    return rows.map((r) => ({
+      id: r.id,
+      note: r.note,
+      createdAt: r.createdAt.toISOString(),
+      article: r.article,
+    }));
+  }
+
   /** A single active category by slug (section masthead) with its parent + active
    * sub-sections (for breadcrumb + sub-section chips), or 404. */
   async getCategoryBySlug(slug: string): Promise<CategoryDetail> {
