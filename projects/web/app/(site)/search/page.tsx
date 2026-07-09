@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
-import { ArticleCard } from '@/components/ArticleCard';
-import { fetchArticles, type ArticleSummary } from '@/lib/api';
+import Link from 'next/link';
+import { HighlightedSnippet } from '@/components/HighlightedSnippet';
+import { formatDate } from '@/lib/format';
+import { searchArticles, type SearchResult } from '@/lib/api';
 
 export const metadata: Metadata = { title: 'Search — Frame Africa' };
 
@@ -9,18 +11,18 @@ type PageProps = { searchParams: Promise<{ q?: string }> };
 export default async function SearchPage({ searchParams }: PageProps) {
   const query = ((await searchParams).q ?? '').trim();
 
-  let results: ArticleSummary[] = [];
+  let results: SearchResult[] = [];
   let failed = false;
   if (query) {
     try {
-      ({ articles: results } = await fetchArticles({ q: query, limit: 30 }));
+      ({ results } = await searchArticles({ q: query, limit: 30 }));
     } catch {
       failed = true;
     }
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
+    <div className="mx-auto max-w-3xl px-6 py-10">
       <h1 className="font-heading text-3xl font-black tracking-tight text-text">Search</h1>
 
       <form action="/search" className="mt-6 flex gap-2">
@@ -56,11 +58,29 @@ export default async function SearchPage({ searchParams }: PageProps) {
           <p className="mt-8 font-mono text-xs uppercase tracking-[0.12em] text-muted">
             {results.length} result{results.length === 1 ? '' : 's'} for “{query}”
           </p>
-          <div className="mt-6 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
-            {results.map((article) => (
-              <ArticleCard key={article.id} article={article} />
+          <ul className="mt-4 divide-y divide-border border-t border-border">
+            {results.map((r) => (
+              <li key={r.id} className="py-5">
+                <Link href={`/article/${r.slug}`} className="group block">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
+                    {r.category.name}
+                    {r.publishedAt && (
+                      <span className="ml-2 text-faint">{formatDate(r.publishedAt)}</span>
+                    )}
+                  </span>
+                  <h2 className="mt-1 font-heading text-xl font-bold text-text group-hover:text-primary">
+                    {r.title}
+                  </h2>
+                  {r.snippet && (
+                    <HighlightedSnippet
+                      snippet={r.snippet}
+                      className="mt-1 block font-body text-sm leading-relaxed text-muted"
+                    />
+                  )}
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </>
       )}
     </div>

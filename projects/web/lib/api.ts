@@ -187,6 +187,42 @@ export async function fetchArticles(
   return { articles: envelope.data, pagination: envelope.meta.pagination };
 }
 
+export interface SearchResult {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  excerpt: string | null;
+  publishedAt: string | null;
+  /** Snippet with matched terms wrapped in the U+0002/U+0003 highlight marks. */
+  snippet: string;
+  category: { name: string; slug: string };
+  featuredImage: { url: string; alt: string | null } | null;
+}
+
+/** Full-text search over published articles (relevance-ranked, with snippets). */
+export async function searchArticles(params: {
+  q: string;
+  language?: ArticleLanguage;
+  limit?: number;
+  page?: number;
+}): Promise<{ results: SearchResult[]; hasMore: boolean }> {
+  const search = new URLSearchParams({ q: params.q });
+  if (params.language) search.set('language', params.language);
+  if (params.limit) search.set('limit', String(params.limit));
+  if (params.page) search.set('page', String(params.page));
+
+  const res = await fetch(`${API_URL}/search?${search.toString()}`, {
+    headers: { accept: 'application/json' },
+    cache: 'no-store',
+  });
+  if (!res.ok) {
+    throw new ApiError(res.status, `search failed with ${res.status}`);
+  }
+  const envelope = (await res.json()) as ApiEnvelope<SearchResult[]>;
+  return { results: envelope.data, hasMore: Boolean(envelope.meta.pagination?.hasMore) };
+}
+
 /**
  * Returns the article, or `null` if the API responds 404. A 402 response still
  * carries a valid (locked/preview) payload — see `ArticleDetail.isLocked`.
