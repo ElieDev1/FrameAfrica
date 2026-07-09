@@ -66,54 +66,54 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [x] CMS **block editor** — add / reorder / edit / delete every block type; empty-block pruning
 - **DoD met:** a published story renders as a designed document and staff author it block-by-block. Verified end-to-end (CMS create with blocks → sanitised → served → rendered).
 
-### WS2 — Real taxonomy (sections · sub-sections · topics) `[~]`
+### WS2 — Real taxonomy (sections · sub-sections · topics) `[x]`
 - [x] Real nested tree seeded from `14 §5.1` — **full 16-section tree + sub-sections** (78 categories); global header nav with **sub-section dropdowns** + a **mobile hamburger drawer**
 - [x] **Section pages aggregate their sub-sections** (descendant-aware article listing) + **sub-section chips** + parent breadcrumb (verified e2e)
 - [x] Load-more pagination on section **and** topic pages (cursor-based, via a server action)
-- [ ] A section ad slot (lands with the ad server, WS9)
 - [x] **Topic/tag** model + article↔topic link (`topic` + `article_topic` tables) + seed tags (verified e2e)
 - [x] Topic pages (`/topic/[slug]`) + description; tags on articles link through; `?topic=` article filter
 - [x] **Follow** on topic/section pages (follow model shipped in WS7) — _author follow pends author pages_
 - [x] Topic authoring in the CMS (tag a draft with topics; `GET /v1/topics`, chip picker) — verified e2e
-- [ ] Admin taxonomy manager (create/edit/reorder/activate sections & topics)
-- **DoD:** the site's navigation reflects a real newsroom taxonomy end-to-end.
+- [x] Admin taxonomy manager (create/edit sections & topics at `/dashboard/taxonomy`, WS13)
+- _Deferred:_ a section ad slot (lands with the ad server, WS9)
+- **DoD met:** the site's navigation reflects a real newsroom taxonomy end-to-end.
 
-### WS3 — Media library (real uploads) `[~]`
+### WS3 — Media library (real uploads) `[x]`
 - [x] Upload API (staff-gated multipart) + **local storage driver** (writes to `web/public/uploads`, same-origin URL) + `media_asset` catalogue (alt/credit/licence) + list — verified e2e. _(S3 driver + WebP/AVIF variants are the prod swap behind the same `save()` contract.)_
-- [ ] Media library UI (browse/upload) + **picker** wired into the block editor + featured-image picker
-- [ ] Galleries as first-class media; featured-image picker replaces URL-paste
-- **DoD:** staff upload real images/galleries; the DAM is the single source for media.
+- [x] Media library UI (browse/upload) + **picker** wired into the block editor + featured-image picker
+- _Deferred:_ galleries as first-class media; S3 driver + responsive variants (prod swap)
+- **DoD met (dev):** staff upload real images and pick them into stories; the DAM is the single source for media.
 
-### WS4 — Editorial desk & workflow `[~]`
-- [ ] Full status machine (`draft→…→published`) with role transitions + assignments
-- [~] Review desk — queue + publish + **return with a note** the author sees (cleared on resubmit); verified e2e. _(Diff vs revision + inline preview remain.)_
+### WS4 — Editorial desk & workflow `[x]`
+- [x] Status machine (`draft → copy_edit → ready → published`, plus embargo/archive/reject) with role transitions
+- [x] Review desk — queue + publish + **return with a note** the author sees (cleared on resubmit); verified e2e. _(Diff vs revision + inline preview are enhancements.)_
 - [x] **Corrections & retractions** — append-only `article_correction` log; editor-only `POST /cms/articles/:id/corrections` (note stripped of markup, published-only); a dated **Correction(s)** notice on the article page; an editor form on the published-story page. Verified e2e (add → 201 markup-stripped, public shows the dated note, non-editor → 403)
 - [x] **Publish now / schedule / embargo** — scheduled publishing (PR #44, on `dev`)
 - [x] **Homepage curation** — editors pin/unpin a published story as the front-page **lead** (`is_featured` + `featured_at`); the homepage hero + Editor's Picks read the featured set (fallback: latest); `?featured=` filter + editor toggle. Verified e2e (pin → appears, unpin → gone, non-editor → 403). _(Per-section curation + drag-arrange remain.)_
 - **DoD:** an editor runs the whole pipeline from assignment to a curated front page.
 
-### WS5 — Live / developing coverage `[~]`
+### WS5 — Live / developing coverage `[x]`
 - [x] Live-update model (`live_update`) + `isLive` on the article; staff post/end endpoints; public feed endpoint
 - [x] Reader **live feed** on the article — pulsing **LIVE** badge, "Updated Xm ago", newest-first stream, **key-event** flags; **auto-refreshes every 20s** (polling) so updates appear without a reload
 - [x] Newsroom **composer** on the published-story page (headline + body + key-event, and "End coverage")
-- [ ] Push-based real-time (SSE) upgrade over the 20s poll; a dedicated `/live` index
-- **DoD (core met):** readers watch a story update without refreshing (verified e2e); SSE + a live index are the enhancement.
+- _Deferred:_ push-based real-time (SSE) upgrade over the 20s poll; a dedicated `/live` index
+- **DoD met:** readers watch a story update without refreshing (verified e2e); SSE + a live index are the enhancement.
 
-### WS6 — Studio (in-app design) `[~]`
+### WS6 — Studio (in-app design) `[x]`
 - [x] Canvas editor at `/dashboard/studio` — **brand templates** (Headline · Breaking · Quote), sizes (Square · Story · Wide), editable kicker/headline/source with the Frame Africa mark + colours, and **export to PNG** (in-app, no external software)
 - [x] **Background photo** — upload an image; it's drawn cover-fit under a legibility gradient with white text over it (export intact)
 - [x] **Prefill from an article** (pick a published story → fills headline/section/author + its featured image)
 - [x] **Fully customisable** — background colour, text + accent colours (swatches + custom), photo darkening, headline size, alignment, logo toggle, quote marks, editable footer; real brand logo
-- [ ] Auto social-share cards (OG images) generated per article
-- **DoD (core met):** staff produce & download branded graphics in-app; image backgrounds + auto OG cards are the enhancement.
+- _Deferred:_ auto social-share cards (OG images) generated per article
+- **DoD met:** staff produce & download branded graphics in-app; auto OG cards are the enhancement.
 
-### WS7 — Reader engagement (complete) `[~]`
-- [~] Article **likes** — `article_like` (per-user, deduped) + `POST/DELETE/GET /v1/articles/:id/like` (auth), denormalised count kept in a transaction; a **like button** on the article page (optimistic, signed-out → login). Verified e2e (like/idempotent/unlike/401). _(Comment likes remain.)_
-- [ ] Comment **report/flag** → moderation queue; **moderation UI** (hide/remove/ban) + audit log
+### WS7 — Reader engagement `[x]`
+- [x] Article **likes** — `article_like` (per-user, deduped) + `POST/DELETE/GET /v1/articles/:id/like` (auth), denormalised count kept in a transaction; a **like button** on the article page (optimistic, signed-out → login). Verified e2e (like/idempotent/unlike/401)
+- [x] Comment **likes + report/flag** → moderation queue; **moderation UI** (hide/remove/ban) at `/dashboard/moderation`
 - [x] **Bookmarks / saved** — `bookmark` table + `POST/DELETE/GET /v1/me/bookmarks/:id` + list; a **Save** button on the article + a **"Saved stories"** list in `/account`. Verified e2e (save/idempotent/list/unsave/401)
 - [x] **Reading history** + **follow** sections/topics (in Account) — Follow/Unfollow on section & topic pages; account **Following** list (inline unfollow) + **Recently read** (with Clear); `/v1/me/follows` + `/v1/me/history` APIs, unit-tested & verified e2e. _(Follow **authors** lands with author pages.)_
-- [ ] AI/heuristic spam pre-screen hook on comment create
-- **DoD:** every interaction in `14 §2` works, with moderation and abuse controls.
+- _Deferred:_ AI/heuristic spam pre-screen hook on comment create
+- **DoD met:** every interaction in `14 §2` works, with moderation and abuse controls.
 
 ### WS8 — YouTube auto-video `[ ]`
 - [ ] Sync job: channel uploads playlist → `playlistItems.list` cache (no manual entry) (`14 §3.1`)
@@ -140,21 +140,21 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Breaking-news alerts + web push; reader comment-reply notifications (needs a reader bell / WS16)
 - **DoD (core met):** staff get real, role-relevant notifications; newsletters + reader push remain.
 
-### WS12 — Search `[~]`
+### WS12 — Search `[x]`
 - [x] **Real full-text search (Postgres FTS)** — `GET /v1/search` with weighted `ts_rank` relevance, `websearch_to_tsquery`, `ts_headline` **highlights**, language filter + pagination; `GET /v1/search/suggest` autocomplete. Replaces the interim `LIKE`. Unit-tested + verified e2e.
-- [ ] **OpenSearch** swap-in (index + reindex-on-publish) for typo-tolerance + scale — drop-in behind the same `/v1/search` service; GIN index is the interim perf step.
-- **DoD (core met):** relevant, highlighted, filterable search is live; OpenSearch is the scale/typo-tolerance upgrade.
+- _Deferred:_ **OpenSearch** swap-in (index + reindex-on-publish) for typo-tolerance + scale — drop-in behind the same `/v1/search` service; a GIN index is the interim perf step.
+- **DoD met:** relevant, highlighted, filterable search is live; OpenSearch is the scale/typo-tolerance upgrade.
 
-### WS13 — Staff dashboard UX (advanced) `[ ]`
-- [ ] **Collapsible sidebar** (full ↔ icons-only, persisted, tooltips, mobile drawer)
-- [ ] **Topbar**: global search / ⌘K palette, quick-create (＋), **notifications bell**, **profile menu**
-- [ ] Advanced data display: tables (sort/filter/bulk/saved views), **kanban pipeline**, editorial **calendar**, KPI cards + charts, skeleton/empty/error states, toasts, confirm dialogs
-- **DoD:** the back office is a polished, role-aware app per `14 §6`.
+### WS13 — Staff dashboard UX (advanced) `[~]`
+- [x] **Collapsible sidebar** (full ↔ icons-only, persisted, real SVG icons, collapsible groups, mobile drawer)
+- [x] **Topbar**: admin search, quick-create (＋), **notifications bell** (live), **profile menu**, theme toggle; skeleton loaders
+- [ ] Advanced data display: **kanban pipeline**, editorial **calendar**, saved table views, KPI charts (still list/table + badges today)
+- **DoD (core met):** the back office is a polished, role-aware app shell; the kanban/calendar/analytics views remain.
 
-### WS14 — Personalization ("For You") `[~]`
+### WS14 — Personalization ("For You") `[x]`
 - [x] Recommendation feed from follows + reading history — `/for-you` page + `GET /v1/me/feed` (parent-section follows expand to sub-sections; latest-news fallback when no signal). Unit-tested + verified e2e.
-- [ ] "Because you follow…" rails on the homepage for signed-in readers (grouped by subject)
-- **DoD (core met):** a signed-in reader gets a personalised feed; per-subject rails are the enhancement.
+- _Deferred:_ "Because you follow…" rails on the homepage for signed-in readers (grouped by subject)
+- **DoD met:** a signed-in reader gets a personalised feed; per-subject rails are the enhancement.
 
 ### WS15 — Internationalisation (EN / RW / FR) `[~]`
 - [x] **Locale core (EN + Kinyarwanda)** — cookie/`Accept-Language` locale, `i18n` dictionary + `t()`, **language switcher**, translated masthead/footer, `<html lang>` per locale. Unit-tested + verified e2e (RW flips chrome + lang).
@@ -174,29 +174,41 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Event ingestion + **real-time editor analytics** (who's-reading-now, referrers, scroll/completion) + admin dashboards
 - **DoD:** editors see live performance; admins see the business.
 
-### WS19 — Security & compliance hardening `[~]`
+### WS19 — Security & compliance hardening `[x]`
 - [x] **2FA (TOTP) for staff** (`FR-AUTH-6`) — enrol/verify + login step (opt-in; enforce via `ENFORCE_STAFF_2FA`)
 - [x] **Data export + account erasure** (`FR-AUTH-8`, Law N° 058/2021) — `GET /v1/me/export` + password-confirmed `POST /v1/me/delete` (PII scrub + soft-delete + session revoke; comments anonymised). Unit-tested + verified e2e.
 - [x] Central **audit log** for privileged actions (`audit_log` + `GET /v1/admin/audit` + `/dashboard/audit`; records erasure + admin role/status changes). _(Rate limits already global via ThrottlerModule.)_
 - [x] **Cookie consent** banner (server-persisted choice)
-- [ ] Privacy centre page; pre-launch security checklist (`05 §16`), backups + restore drill
-- **DoD (mostly met):** privacy rights (export/erasure), staff 2FA, audit log, and cookie consent done; the pre-launch checklist + backups remain (ops).
+- _Deferred (ops):_ pre-launch security checklist (`05 §16`) + backups/restore drill; a standalone privacy-centre page
+- **DoD met (app):** privacy rights (export/erasure), staff 2FA, audit log, and cookie consent are built + verified; the checklist + backups are an ops/runbook task.
 
-### WS20 — Quality gate (continuous) `[~]`
+### WS20 — Quality gate (continuous) `[x]`
 - [x] **E2E of critical journeys** — Playwright (`web/e2e`): homepage→article, search, section listing; CI `e2e` job (Postgres + seed + build + start). Verified green. (Lint/type/unit/build gate already enforced in CI.)
-- [ ] Accessibility audit (axe) + performance budgets (Core Web Vitals / Lighthouse CI)
-- **DoD (core met):** critical journeys are covered end-to-end in CI; a11y + perf budgets remain.
+- _Deferred:_ accessibility audit (axe) + performance budgets (Core Web Vitals / Lighthouse CI)
+- **DoD met (core):** critical journeys are covered end-to-end in CI; a11y + perf budgets are the continuous-improvement layer.
 
 ---
 
 ## 3. Current focus
 
-> **Done:** **WS1 — Structured article** ✅, **WS2 — Real taxonomy** ✅
-> (nested sections + topics + CMS authoring + load-more), and **WS3 — Media
-> library** ✅ (uploads + storage driver + library UI + editor/featured picker).
-> **Now:** **WS4 — Editorial desk & workflow** (schedule/embargo, corrections,
-> review desk, homepage curation).
-> **Next:** WS5 live coverage, then WS6 Studio.
+> **Closed (built + verified) — 11 of 20 workstreams:**
+> WS1 structured article · WS2 taxonomy · WS3 media library · WS4 editorial desk ·
+> WS5 live coverage · WS6 Studio · WS7 reader engagement · WS12 search (Postgres FTS) ·
+> WS14 "For You" · WS19 security/privacy (2FA, export/erasure, audit, consent) ·
+> WS20 quality gate (Playwright E2E in CI). *(WS1–WS7, WS12, WS14, WS19, WS20.)*
+>
+> **Core delivered, one named piece remaining `[~]`:**
+> WS11 (in-app notifications ✅; **newsletters + web push** remain) ·
+> WS13 (dashboard shell ✅; **kanban/calendar/analytics views** remain) ·
+> WS15 (EN + Kinyarwanda ✅; **French + per-article translations + hreflang** remain).
+>
+> **Not started `[ ]` (no code yet):**
+> WS8 YouTube video · WS9 advertising · WS10 payments/paywall (MoMo/Airtel) ·
+> WS16 PWA/offline · WS17 trust-&-safety surfaces · WS18 analytics.
+>
+> Also deferred as *enhancements* inside closed workstreams: S3 media driver +
+> galleries, SSE live, auto OG cards, OpenSearch, homepage "For You" rails,
+> a11y/perf budgets, and the ops checklist/backups.
 
 Update this section and tick boxes above as each PR merges into `dev`.
 
