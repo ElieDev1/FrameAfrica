@@ -74,37 +74,46 @@ body {
    a raw <style> in the root layout, because Tailwind v4 / Lightning CSS strips
    the ::-webkit-scrollbar pseudo-element rules from this file. */
 
-/* Breaking-news ticker: a seamless marquee. The track holds two copies of the
-   headlines and slides left by half its width, so the loop is invisible. Pauses
-   on hover; stops entirely for readers who prefer reduced motion. */
-@keyframes fa-marquee {
+/* Breaking-news ticker: each headline rolls up from the bottom as it becomes
+   active; a progress bar tracks the rotation. Both freeze on hover (.fa-paused)
+   and reduced-motion readers get a static, instant swap. */
+@keyframes fa-breaking-in {
   from {
-    transform: translateX(0);
+    transform: translateY(115%);
+    opacity: 0;
   }
   to {
-    transform: translateX(-50%);
+    transform: translateY(0);
+    opacity: 1;
   }
 }
-.fa-marquee {
-  display: flex;
-  width: max-content;
-  min-width: 100%;
-  animation: fa-marquee 45s linear infinite;
-  will-change: transform;
+.fa-breaking-item {
+  animation: fa-breaking-in 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.fa-marquee-wrap:hover .fa-marquee {
+@keyframes fa-breaking-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+.fa-breaking-progress {
+  animation-name: fa-breaking-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+.fa-paused {
   animation-play-state: paused;
 }
 @media (prefers-reduced-motion: reduce) {
-  .fa-marquee {
+  .fa-breaking-item {
     animation: none;
   }
-}
-
-/* Headlines dissolve at the right edge instead of hard-clipping. */
-.fa-marquee-wrap {
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 4rem), transparent 100%);
-  mask-image: linear-gradient(to right, #000 calc(100% - 4rem), transparent 100%);
+  .fa-breaking-progress {
+    animation: none;
+    width: 100%;
+  }
 }
 
 /* The "Breaking" flag: a right-pointing notch, like a broadcast lower-third. */
