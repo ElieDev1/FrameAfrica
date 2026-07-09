@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import Home from '../app/page';
+import Home from '../app/(site)/page';
 import { fetchArticles, fetchCategories, type ArticleSummary } from '@/lib/api';
 
 jest.mock('@/lib/api', () => ({

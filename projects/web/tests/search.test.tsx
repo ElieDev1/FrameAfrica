@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import SearchPage from '../app/search/page';
+import SearchPage from '../app/(site)/search/page';
 import { fetchArticles, type ArticleSummary } from '@/lib/api';
 
 jest.mock('@/lib/api', () => ({ fetchArticles: jest.fn() }));

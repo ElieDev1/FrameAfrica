@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import ArticlePage from '../app/article/[slug]/page';
+import ArticlePage from '../app/(site)/article/[slug]/page';
 import { fetchArticle, fetchComments, fetchRelated, type ArticleDetail } from '@/lib/api';
 import { getSession } from '@/lib/session';
 
