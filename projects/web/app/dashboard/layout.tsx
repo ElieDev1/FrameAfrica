@@ -28,15 +28,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="flex min-h-screen bg-bg">
-      <aside className="hidden w-60 shrink-0 flex-col gap-8 border-r border-border bg-surface px-4 py-6 md:flex">
+      <aside className="no-scrollbar sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-6 overflow-y-auto border-r border-border bg-surface px-3 py-5 md:flex">
         <Link href="/dashboard" className="px-2">
           <Wordmark size="sm" />
         </Link>
         <DashboardNav roles={user.roles} />
+        <p className="mt-auto px-2 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
+          Frame Africa · Newsroom
+        </p>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <DashboardTopbar name={user.displayName} role={role} />
-        <main className="flex-1 px-6 py-8">{children}</main>
+        <DashboardTopbar name={user.displayName} role={role} roles={user.roles} />
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">{children}</main>
       </div>
     </div>
   );

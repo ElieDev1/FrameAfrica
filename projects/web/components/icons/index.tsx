@@ -136,6 +136,28 @@ export const EyeIcon = (p: IconProps) => (
     <circle cx="12" cy="12" r="3" />
   </Stroke>
 );
+export const SearchIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-4.3-4.3" />
+  </Stroke>
+);
+export const PlusIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M12 5v14M5 12h14" />
+  </Stroke>
+);
+export const MenuIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M4 6h16M4 12h16M4 18h16" />
+  </Stroke>
+);
+export const LogOutIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <path d="m16 17 5-5-5-5M21 12H9" />
+  </Stroke>
+);
 
 // ── Weather icons (WMO code → icon) ───────────────────────────────────────────
 
