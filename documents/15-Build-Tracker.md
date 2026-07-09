@@ -140,9 +140,10 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Breaking-news alerts + web push; reader comment-reply notifications (needs a reader bell / WS16)
 - **DoD (core met):** staff get real, role-relevant notifications; newsletters + reader push remain.
 
-### WS12 — Search (OpenSearch) `[ ]`
-- [ ] OpenSearch index + reindex on publish; `GET /v1/search` with filters + autocomplete + highlights
-- **DoD:** relevant, typo-tolerant, filterable search replaces the interim Postgres `LIKE`.
+### WS12 — Search `[~]`
+- [x] **Real full-text search (Postgres FTS)** — `GET /v1/search` with weighted `ts_rank` relevance, `websearch_to_tsquery`, `ts_headline` **highlights**, language filter + pagination; `GET /v1/search/suggest` autocomplete. Replaces the interim `LIKE`. Unit-tested + verified e2e.
+- [ ] **OpenSearch** swap-in (index + reindex-on-publish) for typo-tolerance + scale — drop-in behind the same `/v1/search` service; GIN index is the interim perf step.
+- **DoD (core met):** relevant, highlighted, filterable search is live; OpenSearch is the scale/typo-tolerance upgrade.
 
 ### WS13 — Staff dashboard UX (advanced) `[ ]`
 - [ ] **Collapsible sidebar** (full ↔ icons-only, persisted, tooltips, mobile drawer)
