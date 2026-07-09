@@ -66,37 +66,39 @@ enum CommentStatus {
 }
 
 model User {
-  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  email            String    @unique @db.Citext
-  phone            String?   @unique
-  passwordHash     String?   @map("password_hash")
-  displayName      String    @map("display_name")
-  avatarUrl        String?   @map("avatar_url")
-  status           UserStatus @default(active)
-  emailVerifiedAt  DateTime? @map("email_verified_at")
-  twoFactorEnabled Boolean   @default(false) @map("two_factor_enabled")
-  twoFactorSecret  String?   @map("two_factor_secret")
-  mustChangePassword Boolean @default(false) @map("must_change_password")
-  commentsBannedAt DateTime? @map("comments_banned_at")
-  preferences      Json      @default("{}")
-  lastLoginAt      DateTime? @map("last_login_at")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-  deletedAt        DateTime? @map("deleted_at")
+  id                 String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email              String     @unique @db.Citext
+  phone              String?    @unique
+  passwordHash       String?    @map("password_hash")
+  displayName        String     @map("display_name")
+  avatarUrl          String?    @map("avatar_url")
+  status             UserStatus @default(active)
+  emailVerifiedAt    DateTime?  @map("email_verified_at")
+  twoFactorEnabled   Boolean    @default(false) @map("two_factor_enabled")
+  twoFactorSecret    String?    @map("two_factor_secret")
+  mustChangePassword Boolean    @default(false) @map("must_change_password")
+  commentsBannedAt   DateTime?  @map("comments_banned_at")
+  preferences        Json       @default("{}")
+  lastLoginAt        DateTime?  @map("last_login_at")
+  createdAt          DateTime   @default(now()) @map("created_at")
+  updatedAt          DateTime   @updatedAt @map("updated_at")
+  deletedAt          DateTime?  @map("deleted_at")
 
-  roles         UserRole[]
-  articles      Article[]
-  refreshTokens RefreshToken[]
-  revisions     ArticleRevision[] @relation("UserRevisions")
-  tokens        UserToken[]
-  comments      Comment[]
-  mediaAssets   MediaAsset[]
-  corrections   ArticleCorrection[] @relation("UserCorrections")
-  likes         ArticleLike[]
-  liveUpdates   LiveUpdate[]        @relation("UserLiveUpdates")
-  bookmarks     Bookmark[]
-  commentLikes  CommentLike[]
+  roles          UserRole[]
+  articles       Article[]
+  refreshTokens  RefreshToken[]
+  revisions      ArticleRevision[]   @relation("UserRevisions")
+  tokens         UserToken[]
+  comments       Comment[]
+  mediaAssets    MediaAsset[]
+  corrections    ArticleCorrection[] @relation("UserCorrections")
+  likes          ArticleLike[]
+  liveUpdates    LiveUpdate[]        @relation("UserLiveUpdates")
+  bookmarks      Bookmark[]
+  commentLikes   CommentLike[]
   commentReports CommentReport[]
+  follows        Follow[]
+  readingHistory ReadingHistory[]
 
   @@map("user")
 }
@@ -114,6 +116,43 @@ model Bookmark {
   @@id([userId, articleId])
   @@index([userId, createdAt])
   @@map("bookmark")
+}
+
+/// A reader's follow of a section (category) or a topic. Exactly one of
+/// `categoryId` / `topicId` is set (enforced in the service). Followed subjects
+/// drive the account "Following" list and the personalised "For You" feed
+/// (documents/14 §2, FR-READ-6).
+model Follow {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  categoryId String?  @map("category_id") @db.Uuid
+  topicId    String?  @map("topic_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  topic    Topic?    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId])
+  @@unique([userId, topicId])
+  @@index([userId, createdAt])
+  @@map("follow")
+}
+
+/// A reader's reading history: one row per user per article, `viewedAt` bumped
+/// on each read. Powers the account "Recently read" list and the personalised
+/// feed (documents/14 §2, FR-READ-6). Recorded only for signed-in readers.
+model ReadingHistory {
+  userId    String   @map("user_id") @db.Uuid
+  articleId String   @map("article_id") @db.Uuid
+  viewedAt  DateTime @default(now()) @map("viewed_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+  @@index([userId, viewedAt])
+  @@map("reading_history")
 }
 
 /// A timestamped entry in a story's live/developing coverage (documents/14 §1,
@@ -208,9 +247,9 @@ model RefreshToken {
 }
 
 model Role {
-  id          String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name        RoleName   @unique
-  permissions Json       @default("{}")
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name        RoleName @unique
+  permissions Json     @default("{}")
 
   users UserRole[]
 
@@ -249,69 +288,71 @@ model Category {
   sortOrder   Int     @default(0) @map("sort_order")
   isActive    Boolean @default(true) @map("is_active")
 
-  parent   Category?  @relation("CategoryToChildren", fields: [parentId], references: [id])
-  children Category[] @relation("CategoryToChildren")
-  articles Article[]
+  parent    Category?  @relation("CategoryToChildren", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryToChildren")
+  articles  Article[]
+  followers Follow[]
 
   @@map("category")
 }
 
 model Article {
-  id           String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  slug         String        @unique
-  title        String
-  subtitle     String?
+  id                  String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  slug                String          @unique
+  title               String
+  subtitle            String?
   // Legacy plain-text body, kept for excerpt/search/read-time and as a fallback
   // renderer for pre-block articles. The structured document lives in `blocks`.
-  body         String
+  body                String
   // The structured article document: an ordered list of typed blocks
   // (documents/13 §2). Validated + sanitised on write (block.sanitizer.ts).
   // Nullable while older rows carry only `body`.
-  blocks       Json?
-  excerpt      String?
-  authorId     String        @map("author_id") @db.Uuid
-  categoryId   String        @map("category_id") @db.Uuid
-  status       ArticleStatus @default(draft)
-  language     ArticleLanguage @default(en)
-  isPremium    Boolean       @default(false) @map("is_premium")
-  isBreaking   Boolean       @default(false) @map("is_breaking")
+  blocks              Json?
+  excerpt             String?
+  authorId            String          @map("author_id") @db.Uuid
+  categoryId          String          @map("category_id") @db.Uuid
+  status              ArticleStatus   @default(draft)
+  language            ArticleLanguage @default(en)
+  isPremium           Boolean         @default(false) @map("is_premium")
+  isBreaking          Boolean         @default(false) @map("is_breaking")
   // Editor homepage curation: `isFeatured` pins a story to the front page;
   // `featuredAt` orders the featured set (newest pin first).
-  isFeatured   Boolean       @default(false) @map("is_featured")
-  featuredAt   DateTime?     @map("featured_at")
+  isFeatured          Boolean         @default(false) @map("is_featured")
+  featuredAt          DateTime?       @map("featured_at")
   // Live/developing coverage: when true the article shows a LIVE banner and its
   // real-time update feed (documents/14 §1).
-  isLive       Boolean       @default(false) @map("is_live")
-  readTimeMin  Int?          @map("read_time_min")
+  isLive              Boolean         @default(false) @map("is_live")
+  readTimeMin         Int?            @map("read_time_min")
   // The editor's note when a submitted draft is returned (rejected). Shown to
   // the author so they know what to fix; cleared when they resubmit.
-  reviewNote   String?       @map("review_note")
+  reviewNote          String?         @map("review_note")
   // Featured image (documents/06 §6: images always carry alt + credit). A full
   // media-asset/DAM table + signed S3 upload lands later; this denormalised
   // featured image is the first media increment.
-  featuredImageUrl    String? @map("featured_image_url")
-  featuredImageAlt    String? @map("featured_image_alt")
-  featuredImageCredit String? @map("featured_image_credit")
-  viewCount    BigInt        @default(0) @map("view_count")
-  likeCount    Int           @default(0) @map("like_count")
-  shareCount   Int           @default(0) @map("share_count")
-  seo          Json          @default("{}")
-  publishedAt  DateTime?     @map("published_at")
-  scheduledAt  DateTime?     @map("scheduled_at")
-  embargoUntil DateTime?     @map("embargo_until")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
-  deletedAt    DateTime?     @map("deleted_at")
+  featuredImageUrl    String?         @map("featured_image_url")
+  featuredImageAlt    String?         @map("featured_image_alt")
+  featuredImageCredit String?         @map("featured_image_credit")
+  viewCount           BigInt          @default(0) @map("view_count")
+  likeCount           Int             @default(0) @map("like_count")
+  shareCount          Int             @default(0) @map("share_count")
+  seo                 Json            @default("{}")
+  publishedAt         DateTime?       @map("published_at")
+  scheduledAt         DateTime?       @map("scheduled_at")
+  embargoUntil        DateTime?       @map("embargo_until")
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+  deletedAt           DateTime?       @map("deleted_at")
 
-  author      User                @relation(fields: [authorId], references: [id])
-  category    Category            @relation(fields: [categoryId], references: [id])
-  revisions   ArticleRevision[]
-  comments    Comment[]
-  topics      ArticleTopic[]
-  corrections ArticleCorrection[]
-  likes       ArticleLike[]
-  liveUpdates LiveUpdate[]
-  bookmarks   Bookmark[]
+  author         User                @relation(fields: [authorId], references: [id])
+  category       Category            @relation(fields: [categoryId], references: [id])
+  revisions      ArticleRevision[]
+  comments       Comment[]
+  topics         ArticleTopic[]
+  corrections    ArticleCorrection[]
+  likes          ArticleLike[]
+  liveUpdates    LiveUpdate[]
+  bookmarks      Bookmark[]
+  readingHistory ReadingHistory[]
 
   @@index([status, publishedAt])
   @@index([categoryId, publishedAt])
@@ -323,14 +364,15 @@ model Article {
 /// with — orthogonal to the section taxonomy (documents/14 §5.2). Topics have
 /// their own pages and can be followed.
 model Topic {
-  id          String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  slug        String  @unique
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  slug        String   @unique
   name        String
   description String?
-  isActive    Boolean @default(true) @map("is_active")
+  isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at")
 
-  articles ArticleTopic[]
+  articles  ArticleTopic[]
+  followers Follow[]
 
   @@map("topic")
 }
