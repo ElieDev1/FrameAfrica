@@ -1,4 +1,5 @@
 import { UnauthorizedException } from '@nestjs/common';
+import type { AuditService } from '../audit/audit.service';
 import type { PasswordService } from '../auth/password.service';
 import type { TokenService } from '../auth/token.service';
 import type { PrismaService } from '../prisma/prisma.service';
@@ -20,12 +21,14 @@ function build() {
   };
   const passwords = { verify: jest.fn() };
   const tokens = { revokeAllForUser: jest.fn().mockResolvedValue(undefined) };
+  const audit = { record: jest.fn().mockResolvedValue(undefined) };
   const service = new PrivacyService(
     prisma as unknown as PrismaService,
     passwords as unknown as PasswordService,
     tokens as unknown as TokenService,
+    audit as unknown as AuditService,
   );
-  return { service, prisma, passwords, tokens };
+  return { service, prisma, passwords, tokens, audit };
 }
 
 describe('PrivacyService', () => {

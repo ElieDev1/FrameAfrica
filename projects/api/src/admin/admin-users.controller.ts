@@ -10,6 +10,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { RoleName, UserStatus } from '@prisma/client';
+import { AuditService } from '../audit/audit.service';
+import type { AuthenticatedUser } from '../common/auth/authenticated-user';
+import { CurrentUser } from '../common/auth/current-user.decorator';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { Roles } from '../common/auth/roles.decorator';
 import { RolesGuard } from '../common/auth/roles.guard';
@@ -24,7 +27,10 @@ import { SetStatusDto } from './dto/set-status.dto';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(RoleName.admin)
 export class AdminUsersController {
-  constructor(private readonly users: AdminUsersService) {}
+  constructor(
+    private readonly users: AdminUsersService,
+    private readonly audit: AuditService,
+  ) {}
 
   @Get()
   async list(
@@ -47,13 +53,37 @@ export class AdminUsersController {
   }
 
   @Patch(':id/roles')
-  async setRoles(@Param('id', ParseUUIDPipe) id: string, @Body() dto: SetRolesDto) {
-    return apiResponse(await this.users.setRoles(id, dto.roles));
+  async setRoles(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SetRolesDto,
+  ) {
+    const result = await this.users.setRoles(id, dto.roles);
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'user.roles_changed',
+      targetType: 'user',
+      targetId: id,
+      meta: { roles: dto.roles },
+    });
+    return apiResponse(result);
   }
 
   @Patch(':id/status')
-  async setStatus(@Param('id', ParseUUIDPipe) id: string, @Body() dto: SetStatusDto) {
-    return apiResponse(await this.users.setStatus(id, dto.status));
+  async setStatus(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SetStatusDto,
+  ) {
+    const result = await this.users.setStatus(id, dto.status);
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'user.status_changed',
+      targetType: 'user',
+      targetId: id,
+      meta: { status: dto.status },
+    });
+    return apiResponse(result);
   }
 
   @Post(':id/reset-password')

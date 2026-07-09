@@ -106,6 +106,7 @@ model User {
   follows        Follow[]
   readingHistory ReadingHistory[]
   notifications  Notification[]
+  auditLogs      AuditLog[]          @relation("UserAuditLogs")
 
   @@map("user")
 }
@@ -164,6 +165,25 @@ model Notification {
   @@index([userId, createdAt])
   @@index([userId, readAt])
   @@map("notification")
+}
+
+/// An audit-trail entry for a privileged action (documents/05 §11): who did
+/// what, to which target, when. `actorId` is nullable for system actions and is
+/// set null if the actor is later erased. Append-only.
+model AuditLog {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  actorId    String?  @map("actor_id") @db.Uuid
+  action     String
+  targetType String?  @map("target_type")
+  targetId   String?  @map("target_id")
+  meta       Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  actor User? @relation("UserAuditLogs", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+  @@map("audit_log")
 }
 
 /// A reader's reading history: one row per user per article, `viewedAt` bumped
