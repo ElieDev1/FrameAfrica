@@ -3,16 +3,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import {
-  BellIcon,
-  CloseIcon,
-  LogOutIcon,
-  MenuIcon,
-  PlusIcon,
-  SearchIcon,
-} from '@/components/icons';
+import { CloseIcon, LogOutIcon, MenuIcon, PlusIcon, SearchIcon } from '@/components/icons';
 import { logout } from '@/lib/auth-actions';
 import { DashboardNav } from './DashboardNav';
+import { NotificationsBell } from './NotificationsBell';
 import { ThemeToggle } from '../ThemeToggle';
 import { Wordmark } from '../Wordmark';
 
@@ -33,33 +27,26 @@ export function DashboardTopbar({
   const pathname = usePathname();
   const [drawer, setDrawer] = useState(false);
   const [menu, setMenu] = useState(false);
-  const [notif, setNotif] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const notifRef = useRef<HTMLDivElement>(null);
   const isAdmin = roles.includes('admin');
 
-  // Close the mobile drawer + menus whenever the route changes.
+  // Close the mobile drawer + menu whenever the route changes.
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setDrawer(false);
     setMenu(false);
-    setNotif(false);
   }, [pathname]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  // Close the open dropdowns on outside click / Escape.
+  // Close the profile menu on outside click / Escape.
   useEffect(() => {
-    if (!menu && !notif) return;
+    if (!menu) return;
     const onClick = (e: MouseEvent) => {
       const t = e.target as Node;
       if (menuRef.current && !menuRef.current.contains(t)) setMenu(false);
-      if (notifRef.current && !notifRef.current.contains(t)) setNotif(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMenu(false);
-        setNotif(false);
-      }
+      if (e.key === 'Escape') setMenu(false);
     };
     document.addEventListener('mousedown', onClick);
     window.addEventListener('keydown', onKey);
@@ -67,7 +54,7 @@ export function DashboardTopbar({
       document.removeEventListener('mousedown', onClick);
       window.removeEventListener('keydown', onKey);
     };
-  }, [menu, notif]);
+  }, [menu]);
 
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-border bg-surface/90 px-4 backdrop-blur">
@@ -109,33 +96,7 @@ export function DashboardTopbar({
         <ThemeToggle />
 
         {/* Notifications */}
-        <div ref={notifRef} className="relative">
-          <button
-            type="button"
-            onClick={() => setNotif((n) => !n)}
-            aria-expanded={notif}
-            aria-label="Notifications"
-            className="grid h-9 w-9 place-items-center rounded-lg border border-border text-muted transition-colors hover:text-text"
-          >
-            <BellIcon size={17} />
-          </button>
-          {notif && (
-            <div
-              role="menu"
-              className="absolute right-0 top-full z-30 mt-2 w-72 overflow-hidden rounded-xl border border-border bg-surface shadow-xl"
-            >
-              <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
-                <span className="font-heading text-sm font-bold text-text">Notifications</span>
-              </div>
-              <div className="px-3 py-8 text-center">
-                <p className="font-body text-sm text-muted">You&apos;re all caught up.</p>
-                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-                  New activity will appear here
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
+        <NotificationsBell />
 
         {/* Profile menu */}
         <div ref={menuRef} className="relative">
