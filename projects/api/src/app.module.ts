@@ -19,6 +19,7 @@ import { FeedModule } from './feed/feed.module';
 import { SearchModule } from './search/search.module';
 import { PrivacyModule } from './privacy/privacy.module';
 import { AuditModule } from './audit/audit.module';
+import { TipsModule } from './tips/tips.module';
 import { CommentsModule } from './comments/comments.module';
 import { BillingModule } from './billing/billing.module';
 import { AdsModule } from './ads/ads.module';
@@ -49,6 +50,7 @@ import { AdminModule } from './admin/admin.module';
     SearchModule,
     PrivacyModule,
     AuditModule,
+    TipsModule,
     CommentsModule,
     BillingModule,
     AdsModule,

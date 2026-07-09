@@ -166,9 +166,12 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Installable PWA, offline saved-article reading, low-data mode
 - **DoD:** works on low-bandwidth African connections and installs like an app.
 
-### WS17 — Trust & safety `[ ]`
-- [ ] Corrections page, fact-check labels, right-of-reply logging, **secure tips** channel, editorial standards
-- **DoD:** the paper's credibility surfaces are real and reachable.
+### WS17 — Trust & safety `[x]`
+- [x] **Secure tips** channel — public `/tips` form + rate-limited `POST /v1/tips` (anonymous, markup-stripped); editor/moderator **tips inbox** at `/dashboard/tips` with a status workflow. Verified e2e.
+- [x] Public **corrections & clarifications** log — `/corrections` + `GET /v1/corrections` (dated notes on published stories).
+- [x] **Editorial standards** page (`/standards`) — accuracy, independence, right of reply, source protection, corrections; cross-linked to the log + tips.
+- _Deferred:_ per-claim fact-check labels; structured right-of-reply request logging.
+- **DoD met:** the paper's credibility surfaces are real and reachable.
 
 ### WS18 — Analytics `[ ]`
 - [ ] Event ingestion + **real-time editor analytics** (who's-reading-now, referrers, scroll/completion) + admin dashboards

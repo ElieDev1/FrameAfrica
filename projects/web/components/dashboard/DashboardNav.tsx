@@ -16,6 +16,7 @@ import {
   PenIcon,
   PlusIcon,
   SettingsIcon,
+  ShieldIcon,
   SparklesIcon,
   TagIcon,
   UsersIcon,
@@ -48,6 +49,7 @@ function groupsFor(roles: string[]): NavGroup[] {
   }
   if (has('moderator', 'editor', 'admin')) {
     desk.push({ href: '/dashboard/moderation', label: 'Moderation', Icon: FlagIcon });
+    desk.push({ href: '/dashboard/tips', label: 'Tips inbox', Icon: ShieldIcon });
   }
 
   const groups: NavGroup[] = [

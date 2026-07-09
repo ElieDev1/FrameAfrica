@@ -187,6 +187,23 @@ export async function fetchArticles(
   return { articles: envelope.data, pagination: envelope.meta.pagination };
 }
 
+export interface PublicCorrection {
+  id: string;
+  note: string;
+  createdAt: string;
+  article: { slug: string; title: string };
+}
+
+/** The public corrections & clarifications log (newest first). */
+export async function fetchCorrections(): Promise<PublicCorrection[]> {
+  try {
+    const envelope = await apiGet<PublicCorrection[]>('/corrections');
+    return envelope.data;
+  } catch {
+    return [];
+  }
+}
+
 export interface SearchResult {
   id: string;
   slug: string;

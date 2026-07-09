@@ -33,6 +33,12 @@ export class ContentController {
     return apiResponse(await this.content.getRelated(slug));
   }
 
+  /** Public corrections & clarifications log across all published stories. */
+  @Get('corrections')
+  async getCorrections() {
+    return apiResponse(await this.content.listCorrections());
+  }
+
   @Get('categories')
   async getCategories() {
     return apiResponse(await this.content.getCategoryTree());
