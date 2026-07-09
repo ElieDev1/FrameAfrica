@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 import { ArticleCard } from '@/components/ArticleCard';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { CommentsSection } from '@/components/CommentsSection';
+import { ChevronRightIcon, ClockIcon } from '@/components/icons';
+import { SectionHeading } from '@/components/SectionHeading';
 import { LikeButton } from '@/components/LikeButton';
 import { LiveFeed } from '@/components/LiveFeed';
 import { ReadingProgress } from '@/components/ReadingProgress';
@@ -117,11 +119,14 @@ export default async function ArticlePage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: newsArticleJsonLd(article) }}
       />
-      <nav aria-label="Breadcrumb" className="mb-6 font-mono text-xs text-muted">
+      <nav
+        aria-label="Breadcrumb"
+        className="mb-6 flex items-center gap-1 font-mono text-xs text-muted"
+      >
         <Link href="/" className="hover:text-primary">
           Home
         </Link>
-        <span aria-hidden> › </span>
+        <ChevronRightIcon size={12} className="text-faint" />
         <Link href={`/section/${article.category.slug}`} className="text-primary hover:underline">
           {article.category.name}
         </Link>
@@ -163,7 +168,11 @@ export default async function ArticlePage({ params }: PageProps) {
       <div className="mt-5 flex flex-wrap items-center gap-x-2 font-mono text-xs text-muted">
         <span className="text-text">{article.author.displayName}</span>
         {article.publishedAt && <span>· {formatDate(article.publishedAt)}</span>}
-        {article.readTimeMin && <span>· {article.readTimeMin} min read</span>}
+        {article.readTimeMin && (
+          <span className="inline-flex items-center gap-1">
+            · <ClockIcon size={12} /> {article.readTimeMin} min read
+          </span>
+        )}
         {updated && <span className="text-primary">· Updated {formatDate(article.updatedAt)}</span>}
       </div>
 
@@ -269,13 +278,8 @@ export default async function ArticlePage({ params }: PageProps) {
       )}
 
       {related.length > 0 && (
-        <section aria-labelledby="related" className="mt-12 border-t border-border pt-8">
-          <h2
-            id="related"
-            className="mb-6 font-mono text-xs uppercase tracking-[0.18em] text-muted"
-          >
-            Related stories
-          </h2>
+        <section aria-label="Related stories" className="mt-12 border-t border-border pt-8">
+          <SectionHeading title="Related stories" />
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
             {related.map((item) => (
               <ArticleCard key={item.id} article={item} />

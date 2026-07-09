@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { ClockIcon } from '@/components/icons';
 import type { ArticleSummary, FeaturedImage } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 
@@ -28,10 +29,14 @@ function Badges({ article }: { article: ArticleSummary }) {
 
 function Meta({ article }: { article: ArticleSummary }) {
   return (
-    <p className="font-mono text-xs text-muted">
-      {article.author.displayName}
-      {article.publishedAt && <> · {formatDate(article.publishedAt)}</>}
-      {article.readTimeMin && <> · {article.readTimeMin} min read</>}
+    <p className="flex flex-wrap items-center gap-x-1.5 font-mono text-xs text-muted">
+      <span className="text-text/80">{article.author.displayName}</span>
+      {article.publishedAt && <span>· {formatDate(article.publishedAt)}</span>}
+      {article.readTimeMin && (
+        <span className="inline-flex items-center gap-1">
+          · <ClockIcon size={12} /> {article.readTimeMin} min
+        </span>
+      )}
     </p>
   );
 }

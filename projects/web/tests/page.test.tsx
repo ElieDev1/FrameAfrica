@@ -7,6 +7,11 @@ jest.mock('@/lib/api', () => ({
   fetchCategories: jest.fn(),
 }));
 
+// The Weather/Markets widgets are async server components that fetch live APIs;
+// stub them so the homepage renders synchronously in the test.
+jest.mock('@/components/WeatherWidget', () => ({ WeatherWidget: () => <h2>Weather</h2> }));
+jest.mock('@/components/MarketsWidget', () => ({ MarketsWidget: () => <h2>Markets</h2> }));
+
 const mockFetchArticles = fetchArticles as jest.MockedFunction<typeof fetchArticles>;
 const mockFetchCategories = fetchCategories as jest.MockedFunction<typeof fetchCategories>;
 
