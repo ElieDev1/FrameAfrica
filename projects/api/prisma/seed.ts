@@ -64,6 +64,446 @@ const flagshipBlocks: Record<string, Block[]> = {
       text: 'Analysts cautioned that weather and global price swings will test the gains, but said the season marks a durable step up the value chain. More reporting to follow as the story develops.',
     },
   ],
+  'rwanda-economy-grows-eight-percent': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'Rwanda’s economy expanded by about 8% over the quarter, one of the faster rates in the region, as services, construction and agriculture all pulled in the same direction.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — The headline figure was lifted by a rebound in tourism and hospitality, sustained public investment in roads and housing, and a solid farming season that kept food supply steady.',
+    },
+    { type: 'heading', level: 2, text: 'Where the growth came from' },
+    {
+      type: 'paragraph',
+      text: 'Services remained the largest contributor, but construction posted the sharpest acceleration, reflecting a pipeline of public and private projects across the capital and secondary cities.',
+    },
+    {
+      type: 'pullquote',
+      text: 'The task now is to turn a good quarter into a durable decade.',
+      attribution: 'Kigali-based economist',
+    },
+    {
+      type: 'factbox',
+      title: 'By the numbers',
+      body: 'Services led the expansion, followed by construction and agriculture. Economists say sustaining the pace will depend on private investment and skills.',
+    },
+  ],
+  'bk-group-posts-record-annual-profit': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'BK Group reported a record annual profit, powered by a growing loan book, disciplined cost control and a decisive shift of customers onto digital channels.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — Management said the bulk of transactions now run through mobile and online platforms, trimming branch costs while extending services to customers outside the main cities.',
+    },
+    { type: 'heading', level: 2, text: 'Quality of the book' },
+    {
+      type: 'paragraph',
+      text: 'Executives pointed to a contained non-performing-loan ratio as evidence that lending growth had not come at the expense of asset quality.',
+    },
+    {
+      type: 'factbox',
+      title: 'Why it matters',
+      body: 'As the country’s largest lender, the group’s results are a useful barometer of business confidence and household borrowing.',
+    },
+  ],
+  'kigali-fintech-raises-series-a': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'A Kigali-based fintech has closed one of the largest Series A rounds yet for an early-stage Rwandan startup, capital it will use to scale cross-border payments across East Africa.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — The company plans to grow its merchant network and hire across engineering and compliance, betting that simpler regional payments can unlock trade for small businesses.',
+    },
+    { type: 'heading', level: 2, text: 'The regional bet' },
+    {
+      type: 'paragraph',
+      text: 'Founders framed the raise as a vote of confidence in Kigali’s deepening talent pool and in a regulatory environment that has courted financial-technology firms.',
+    },
+    {
+      type: 'pullquote',
+      text: 'The opportunity is regional; the base is Kigali.',
+      attribution: 'Company co-founder',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'Rwanda has positioned itself as a proving ground for fintech, with a supportive regulator and a fast-modernising payments system.',
+    },
+  ],
+  'mobile-money-interoperability-goes-live': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'Mobile-money customers can now send funds directly between wallets on different networks, removing a friction point that has long forced awkward workarounds.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — The interoperability switch means a payment from one operator’s wallet lands in another’s in seconds, a change expected to boost everyday digital transactions.',
+    },
+    { type: 'heading', level: 2, text: 'What changes for users' },
+    {
+      type: 'list',
+      style: 'bullet',
+      items: [
+        'Direct wallet-to-wallet transfers across networks',
+        'Fewer cash-out and re-deposit steps',
+        'Lower friction for small merchants',
+      ],
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'Mobile money is the backbone of everyday finance for millions; interoperability is a long-sought upgrade for the ecosystem.',
+    },
+  ],
+  'kigali-bus-rapid-transit-breaks-ground': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'Kigali has broken ground on a bus rapid transit network, with dedicated lanes designed to move commuters faster along the city’s most congested corridors.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — The first phase links the central business district with fast-growing residential districts, and pairs the lanes with upgraded stops and cleaner buses.',
+    },
+    { type: 'heading', level: 2, text: 'A mobility reset' },
+    {
+      type: 'paragraph',
+      text: 'Planners say reliable, high-capacity transit is essential as the population grows, and that priority lanes are the quickest way to cut journey times.',
+    },
+    {
+      type: 'factbox',
+      title: 'The plan',
+      body: 'The BRT complements the city’s wider green-mobility push, including electric buses and expanded cycle lanes.',
+    },
+  ],
+  'eac-lays-out-single-currency-roadmap': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'East African Community member states have agreed a roadmap toward a single currency, setting convergence targets that must be met before any monetary union.',
+    },
+    {
+      type: 'paragraph',
+      text: 'ARUSHA — Negotiators said harmonising inflation, deficits and debt across economies of very different sizes remains the central challenge.',
+    },
+    { type: 'heading', level: 2, text: 'The road ahead' },
+    {
+      type: 'paragraph',
+      text: 'Officials cautioned that timelines have slipped before, and that credibility now rests on hitting the agreed benchmarks rather than on new declarations.',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'A single currency is a long-standing EAC ambition intended to deepen trade and cut transaction costs across the bloc.',
+    },
+  ],
+  'afcfta-lifts-rwandan-manufactured-exports': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'Rwandan manufacturers are reaching new buyers deeper into the continent under the African Continental Free Trade Area, with fresh orders from West and Southern Africa.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — Firms in processed foods, building materials and light manufacturing say preferential access is making their goods competitive in markets once out of reach.',
+    },
+    { type: 'heading', level: 2, text: 'From access to advantage' },
+    {
+      type: 'paragraph',
+      text: 'Exporters said the next test is logistics — getting goods to distant markets quickly and affordably — as much as tariffs.',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'AfCFTA aims to create a single continental market; Rwanda has been an early and vocal backer of the pact.',
+    },
+  ],
+  'amavubi-hold-rivals-in-tense-draw': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'Amavubi ground out a disciplined draw against their rivals, a resilient defensive display that keeps Rwanda’s qualifying campaign alive.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — Backed by a lively crowd at Amahoro Stadium, the national side soaked up pressure and threatened on the break before holding on for a share of the points.',
+    },
+    { type: 'heading', level: 2, text: 'Still to play for' },
+    {
+      type: 'paragraph',
+      text: 'The result leaves the group finely poised, with qualification set to be decided on the final matchday.',
+    },
+    {
+      type: 'factbox',
+      title: 'What’s next',
+      body: 'Rwanda travel for their concluding fixture knowing a win could be enough to progress.',
+    },
+  ],
+  'kigali-hosts-basketball-africa-league': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'Kigali Arena will host the Basketball Africa League playoffs, bringing the continent’s top clubs back to the capital for the showpiece weekend.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — Organisers expect sell-out crowds, building on the city’s growing reputation as a host of major continental sporting events.',
+    },
+    { type: 'heading', level: 2, text: 'A stage for the game' },
+    {
+      type: 'paragraph',
+      text: 'The BAL has leaned on Kigali’s modern arena and hospitality since the league’s early seasons, and the finals are its biggest draw yet.',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'The league, backed by continental and international basketball bodies, showcases Africa’s best club sides.',
+    },
+  ],
+  'tour-du-rwanda-unveils-mountain-route': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'Organisers of the Tour du Rwanda have unveiled a demanding new route, with a queen stage over the Congo Nile Divide that will reward the strongest climbers.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — The parcours builds on the momentum of Kigali’s staging of the road cycling world championships, which put the country’s climbs on the global map.',
+    },
+    { type: 'heading', level: 2, text: 'Made for climbers' },
+    {
+      type: 'paragraph',
+      text: 'Teams said the relentless gradients and altitude will make the race one of the toughest on the African calendar.',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'The Tour du Rwanda is one of Africa’s premier stage races, drawing continental and international teams each season.',
+    },
+  ],
+  'rwandan-runner-sets-national-record': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'A Rwandan runner has set a national record on the road, a breakthrough that signals a bright future for the country’s distance running.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — The athlete credited a new high-altitude training base and a more structured racing calendar for the leap in form.',
+    },
+    { type: 'heading', level: 2, text: 'Building a programme' },
+    {
+      type: 'paragraph',
+      text: 'Coaches said the performance reflects growing investment in grassroots athletics and better access to competition abroad.',
+    },
+    {
+      type: 'factbox',
+      title: 'What’s next',
+      body: 'Selectors will watch upcoming races as the athlete targets continental championships.',
+    },
+  ],
+  'lake-kivu-methane-powers-the-grid': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'A project extracting methane dissolved deep in Lake Kivu is feeding steady power into the national grid, turning a natural hazard into a reliable resource.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KARONGI — The plant draws gas-rich water from the depths, separates the methane and burns it to generate electricity, then returns the water safely.',
+    },
+    { type: 'heading', level: 2, text: 'Hazard into resource' },
+    {
+      type: 'paragraph',
+      text: 'Engineers said controlled extraction also reduces the lake’s dangerous long-term gas build-up, a rare case of energy and safety pulling together.',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'Lake Kivu holds vast quantities of dissolved gas; managed extraction offers baseload power for a growing economy.',
+    },
+  ],
+  'akagera-lion-population-rebounds': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'Lions are thriving again in Akagera National Park, a decade after the predator was reintroduced to a landscape it had vanished from.',
+    },
+    {
+      type: 'paragraph',
+      text: 'AKAGERA — Rangers report a healthy, breeding population, the result of tighter security, community partnership and careful wildlife management.',
+    },
+    { type: 'heading', level: 2, text: 'A model that holds' },
+    {
+      type: 'paragraph',
+      text: 'Conservationists say the recovery has helped make the park financially self-sustaining, with tourism revenue flowing back to nearby communities.',
+    },
+    {
+      type: 'pullquote',
+      text: 'When communities benefit, wildlife recovers.',
+      attribution: 'Park conservation lead',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'Akagera’s turnaround is often cited as a template for community-backed conservation in the region.',
+    },
+  ],
+  'gishwati-reforestation-hits-milestone': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'A long-running effort to restore the Gishwati forest has hit a milestone, with native tree cover returning to hillsides once stripped bare.',
+    },
+    {
+      type: 'paragraph',
+      text: 'RUTSIRO — The restored canopy is drawing back birds and small mammals and helping to stabilise watersheds that feed farms downstream.',
+    },
+    { type: 'heading', level: 2, text: 'Roots and water' },
+    {
+      type: 'paragraph',
+      text: 'Ecologists said reforestation is also reducing landslides and erosion on the steep terrain, protecting both people and soil.',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'The Gishwati-Mukura landscape is a recognised biosphere reserve and a focus of national restoration goals.',
+    },
+  ],
+  'community-health-insurance-widens-cover': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'Enrolment in community health insurance is climbing, with digital payments making it easier for rural families to keep their cover current.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — Officials say wider coverage is cutting out-of-pocket costs and helping the most vulnerable households reach care sooner.',
+    },
+    { type: 'heading', level: 2, text: 'Cover that reaches further' },
+    {
+      type: 'paragraph',
+      text: 'Health workers report that predictable insurance is encouraging earlier visits, easing pressure on hospitals down the line.',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'Community-based health insurance has been central to expanding access to care across the country.',
+    },
+  ],
+  'university-enrollment-climbs-in-stem': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'University enrolment is rising, led by strong demand for science, technology, engineering and mathematics programmes.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — Scholarships, new campuses and closer ties with industry are widening access and steering students toward high-demand fields.',
+    },
+    { type: 'heading', level: 2, text: 'Matching skills to jobs' },
+    {
+      type: 'paragraph',
+      text: 'Employers welcomed the shift but urged more hands-on training so graduates arrive job-ready.',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'A larger STEM pipeline is seen as essential to the country’s ambitions in technology and services.',
+    },
+  ],
+  'strong-maize-harvest-eases-food-prices': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'A strong maize harvest is easing food prices in local markets, as favourable rains and improved seed lifted yields this season.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — Traders report steadier supply as the main-season crop reaches storage, giving households some relief at the market.',
+    },
+    { type: 'heading', level: 2, text: 'From field to market' },
+    {
+      type: 'paragraph',
+      text: 'Agronomists said better post-harvest storage will be key to locking in the gains and reducing waste.',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'Maize is a staple across the region; harvest swings feed directly into food-price inflation.',
+    },
+  ],
+  'rwanda-tourism-revenue-hits-record': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'Tourism revenue has hit a record, driven by a surge in business events and premium wildlife experiences led by gorilla trekking.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — The meetings-and-conferences segment filled hotels midweek, while high-value trekking permits sustained earnings from the parks.',
+    },
+    { type: 'heading', level: 2, text: 'A high-value strategy' },
+    {
+      type: 'paragraph',
+      text: 'Officials said the country’s bet on quality over volume is paying off, spreading benefits to communities near the parks.',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'Rwanda markets itself as a premium destination, pairing conservation-funded wildlife tourism with a growing MICE sector.',
+    },
+  ],
+  'kigali-music-festival-returns': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'A flagship Kigali music festival returns with a pan-African line-up, putting home-grown talent alongside continental headliners.',
+    },
+    {
+      type: 'paragraph',
+      text: 'KIGALI — The weekend caps a busy season for a local creative economy that is drawing new audiences and investment.',
+    },
+    { type: 'heading', level: 2, text: 'A scene on the rise' },
+    {
+      type: 'paragraph',
+      text: 'Artists said bigger stages at home are helping them build careers without having to leave the country.',
+    },
+    {
+      type: 'factbox',
+      title: 'The context',
+      body: 'Live events are a growing pillar of the creative economy, supporting musicians, venues and hospitality.',
+    },
+  ],
+  'editorial-invest-in-skills-now': [
+    {
+      type: 'paragraph',
+      lede: true,
+      text: 'The economy’s momentum is real — but it will stall unless it is matched by a serious, sustained investment in skills.',
+    },
+    {
+      type: 'paragraph',
+      text: 'Growth in services, construction and technology is generating jobs faster than the workforce can fill them with the right training. That gap is the single biggest risk to the next decade.',
+    },
+    { type: 'heading', level: 2, text: 'Turn classrooms into careers' },
+    {
+      type: 'paragraph',
+      text: 'That means practical, industry-linked training; more places in STEM and the trades; and support so students can finish. The payoff — a workforce ready for higher-value work — is worth the price.',
+    },
+    {
+      type: 'factbox',
+      title: 'Our view',
+      body: 'Skills, not slogans, will decide whether today’s growth becomes tomorrow’s prosperity.',
+    },
+  ],
 };
 
 /** A solid generic block document derived from an article's own summary fields. */
@@ -153,6 +593,23 @@ async function main(): Promise<void> {
     where: { userId_roleId: { userId: admin.id, roleId: adminRole.id } },
     update: {},
     create: { userId: admin.id, roleId: adminRole.id },
+  });
+
+  // A second admin account (so one can be kept free for testing/handover).
+  const adminTwo = await prisma.user.upsert({
+    where: { email: 'newsroom.admin@frameafrica.rw' },
+    update: { passwordHash },
+    create: {
+      email: 'newsroom.admin@frameafrica.rw',
+      displayName: 'Newsroom Admin',
+      emailVerifiedAt: new Date(),
+      passwordHash,
+    },
+  });
+  await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: adminTwo.id, roleId: adminRole.id } },
+    update: {},
+    create: { userId: adminTwo.id, roleId: adminRole.id },
   });
 
   // The full agreed nested taxonomy (documents/14 §5.1): top-level sections, each
@@ -279,6 +736,9 @@ async function main(): Promise<void> {
     category: string;
     isBreaking?: boolean;
     isPremium?: boolean;
+    isFeatured?: boolean;
+    /** True when no cover art is bundled — renders the branded placeholder. */
+    noCover?: boolean;
     readTimeMin: number;
     daysAgo: number;
   }[] = [
@@ -341,6 +801,228 @@ async function main(): Promise<void> {
       readTimeMin: 4,
       daysAgo: 4,
     },
+
+    // ── Additional newsroom stories ──────────────────────────────────────────
+    {
+      slug: 'rwanda-economy-grows-eight-percent',
+      title: 'Rwanda’s economy grows 8% as services and construction lead',
+      subtitle: 'Strong tourism receipts and public investment underpinned the expansion.',
+      excerpt:
+        'Growth was broad-based, with services, construction and agriculture all contributing to the quarter’s gains.',
+      category: 'economy',
+      isFeatured: true,
+      noCover: true,
+      readTimeMin: 5,
+      daysAgo: 0,
+    },
+    {
+      slug: 'bk-group-posts-record-annual-profit',
+      title: 'BK Group posts record annual profit on lending growth',
+      subtitle: 'The lender expanded its loan book while keeping non-performing loans in check.',
+      excerpt:
+        'Digital channels now handle the vast majority of transactions, trimming costs and widening reach.',
+      category: 'banking-finance',
+      isPremium: true,
+      noCover: true,
+      readTimeMin: 4,
+      daysAgo: 1,
+    },
+    {
+      slug: 'kigali-fintech-raises-series-a',
+      title: 'Kigali fintech raises Series A to scale cross-border payments',
+      subtitle: 'The round is one of the largest for an early-stage Rwandan startup.',
+      excerpt:
+        'The company plans to expand its merchant network across the East African Community with the new funding.',
+      category: 'startups',
+      isBreaking: true,
+      isFeatured: true,
+      noCover: true,
+      readTimeMin: 4,
+      daysAgo: 1,
+    },
+    {
+      slug: 'mobile-money-interoperability-goes-live',
+      title: 'Mobile-money interoperability goes live across networks',
+      subtitle: 'Customers can now send money directly between different wallets.',
+      excerpt:
+        'The switch removes a long-standing friction point for millions of mobile-money users nationwide.',
+      category: 'fintech',
+      noCover: true,
+      readTimeMin: 3,
+      daysAgo: 2,
+    },
+    {
+      slug: 'kigali-bus-rapid-transit-breaks-ground',
+      title: 'Kigali breaks ground on bus rapid transit network',
+      subtitle: 'Dedicated lanes aim to cut commutes on the city’s busiest corridors.',
+      excerpt:
+        'The first phase links the central business district with fast-growing residential districts.',
+      category: 'kigali',
+      isFeatured: true,
+      noCover: true,
+      readTimeMin: 4,
+      daysAgo: 2,
+    },
+    {
+      slug: 'eac-lays-out-single-currency-roadmap',
+      title: 'East African Community lays out single-currency roadmap',
+      subtitle: 'Member states agree on convergence targets ahead of a monetary union.',
+      excerpt:
+        'Officials say harmonised inflation and fiscal rules are the next hurdle for the bloc.',
+      category: 'east-africa',
+      noCover: true,
+      readTimeMin: 6,
+      daysAgo: 3,
+    },
+    {
+      slug: 'afcfta-lifts-rwandan-manufactured-exports',
+      title: 'AfCFTA lifts Rwandan manufactured exports to new markets',
+      subtitle: 'Locally made goods are reaching buyers deeper into the continent.',
+      excerpt:
+        'Manufacturers report new orders from West and Southern Africa under the free-trade area.',
+      category: 'africa',
+      noCover: true,
+      readTimeMin: 5,
+      daysAgo: 3,
+    },
+    {
+      slug: 'amavubi-hold-rivals-in-tense-draw',
+      title: 'Amavubi hold rivals in tense qualifier draw',
+      subtitle: 'A resilient defensive display keeps Rwanda’s campaign alive.',
+      excerpt: 'The point leaves the group finely balanced ahead of the final round of fixtures.',
+      category: 'football',
+      isBreaking: true,
+      noCover: true,
+      readTimeMin: 3,
+      daysAgo: 1,
+    },
+    {
+      slug: 'kigali-hosts-basketball-africa-league',
+      title: 'Kigali Arena to host Basketball Africa League playoffs',
+      subtitle: 'The continent’s top clubs return to the capital for the finals.',
+      excerpt: 'Organisers expect sell-out crowds as the BAL’s showpiece weekend comes to Kigali.',
+      category: 'basketball',
+      noCover: true,
+      readTimeMin: 3,
+      daysAgo: 4,
+    },
+    {
+      slug: 'tour-du-rwanda-unveils-mountain-route',
+      title: 'Tour du Rwanda unveils demanding new mountain route',
+      subtitle: 'Climbers will relish a queen stage through the Congo Nile Divide.',
+      excerpt:
+        'The race builds on the momentum of Kigali’s staging of the road cycling world championships.',
+      category: 'cycling',
+      noCover: true,
+      readTimeMin: 4,
+      daysAgo: 5,
+    },
+    {
+      slug: 'rwandan-runner-sets-national-record',
+      title: 'Rwandan runner sets national record on the road',
+      subtitle: 'A breakthrough performance signals a bright distance-running future.',
+      excerpt: 'The athlete credited a new high-altitude training base for the leap in form.',
+      category: 'athletics',
+      noCover: true,
+      readTimeMin: 3,
+      daysAgo: 6,
+    },
+    {
+      slug: 'lake-kivu-methane-powers-the-grid',
+      title: 'Lake Kivu methane project adds steady power to the grid',
+      subtitle: 'Extracting dissolved gas turns a natural hazard into electricity.',
+      excerpt:
+        'The plant provides reliable baseload while reducing the lake’s dangerous gas build-up.',
+      category: 'energy',
+      isPremium: true,
+      noCover: true,
+      readTimeMin: 6,
+      daysAgo: 5,
+    },
+    {
+      slug: 'akagera-lion-population-rebounds',
+      title: 'Akagera lion population rebounds a decade after reintroduction',
+      subtitle: 'Careful management has restored a predator once lost to the park.',
+      excerpt: 'Conservationists say the recovery is a milestone for community-backed tourism.',
+      category: 'conservation',
+      isFeatured: true,
+      noCover: true,
+      readTimeMin: 5,
+      daysAgo: 6,
+    },
+    {
+      slug: 'gishwati-reforestation-hits-milestone',
+      title: 'Gishwati reforestation drive hits a green milestone',
+      subtitle: 'Native tree cover returns to once-degraded hillsides.',
+      excerpt: 'The restored landscape is drawing back wildlife and stabilising vital watersheds.',
+      category: 'climate',
+      noCover: true,
+      readTimeMin: 4,
+      daysAgo: 7,
+    },
+    {
+      slug: 'community-health-insurance-widens-cover',
+      title: 'Community health insurance widens cover for rural families',
+      subtitle: 'Enrolment climbs as digital payments simplify contributions.',
+      excerpt:
+        'Officials say wider cover is easing out-of-pocket costs for the most vulnerable households.',
+      category: 'public-health',
+      noCover: true,
+      readTimeMin: 4,
+      daysAgo: 8,
+    },
+    {
+      slug: 'university-enrollment-climbs-in-stem',
+      title: 'University enrolment climbs, led by STEM programmes',
+      subtitle: 'Scholarships and new campuses widen access to higher education.',
+      excerpt: 'Demand for engineering, data and health sciences is reshaping campus intakes.',
+      category: 'higher-education',
+      noCover: true,
+      readTimeMin: 4,
+      daysAgo: 9,
+    },
+    {
+      slug: 'strong-maize-harvest-eases-food-prices',
+      title: 'Strong maize harvest eases food prices in local markets',
+      subtitle: 'Favourable rains and better seed lifted yields this season.',
+      excerpt: 'Traders report steadier supply as the main-season harvest reaches storage.',
+      category: 'crops',
+      noCover: true,
+      readTimeMin: 3,
+      daysAgo: 10,
+    },
+    {
+      slug: 'rwanda-tourism-revenue-hits-record',
+      title: 'Rwanda tourism revenue hits record on conferences and gorillas',
+      subtitle: 'Business events and premium wildlife visits drove the rebound.',
+      excerpt:
+        'The MICE segment and high-value gorilla trekking led a record year for tourism receipts.',
+      category: 'travel',
+      isFeatured: true,
+      noCover: true,
+      readTimeMin: 5,
+      daysAgo: 11,
+    },
+    {
+      slug: 'kigali-music-festival-returns',
+      title: 'Kigali music festival returns with a pan-African line-up',
+      subtitle: 'Home-grown talent shares the stage with continental headliners.',
+      excerpt: 'The festival caps a busy season for a fast-growing local creative economy.',
+      category: 'music',
+      noCover: true,
+      readTimeMin: 3,
+      daysAgo: 12,
+    },
+    {
+      slug: 'editorial-invest-in-skills-now',
+      title: 'Editorial: invest in skills now to secure the next decade',
+      subtitle: 'The economy’s momentum must be matched by a serious skills push.',
+      excerpt: 'Sustained growth depends on turning today’s classrooms into tomorrow’s workforce.',
+      category: 'editorials',
+      noCover: true,
+      readTimeMin: 4,
+      daysAgo: 13,
+    },
   ];
 
   // Seeded view counts so "Most read" (sort=popular) has meaningful ordering.
@@ -351,6 +1033,26 @@ async function main(): Promise<void> {
     'amavubi-name-squad-for-qualifier': 5600,
     'central-bank-holds-key-rate': 900,
     'kigali-green-transport-plan': 2500,
+    'rwanda-economy-grows-eight-percent': 6100,
+    'bk-group-posts-record-annual-profit': 2200,
+    'kigali-fintech-raises-series-a': 4800,
+    'mobile-money-interoperability-goes-live': 3900,
+    'kigali-bus-rapid-transit-breaks-ground': 5200,
+    'eac-lays-out-single-currency-roadmap': 1600,
+    'afcfta-lifts-rwandan-manufactured-exports': 1400,
+    'amavubi-hold-rivals-in-tense-draw': 7300,
+    'kigali-hosts-basketball-africa-league': 4100,
+    'tour-du-rwanda-unveils-mountain-route': 3300,
+    'rwandan-runner-sets-national-record': 2900,
+    'lake-kivu-methane-powers-the-grid': 2000,
+    'akagera-lion-population-rebounds': 5900,
+    'gishwati-reforestation-hits-milestone': 1500,
+    'community-health-insurance-widens-cover': 1700,
+    'university-enrollment-climbs-in-stem': 1300,
+    'strong-maize-harvest-eases-food-prices': 1200,
+    'rwanda-tourism-revenue-hits-record': 4600,
+    'kigali-music-festival-returns': 3400,
+    'editorial-invest-in-skills-now': 1100,
   };
 
   const now = Date.now();
@@ -372,14 +1074,16 @@ async function main(): Promise<void> {
       language: ArticleLanguage.en,
       isPremium: a.isPremium ?? false,
       isBreaking: a.isBreaking ?? false,
+      isFeatured: a.isFeatured ?? false,
+      featuredAt: a.isFeatured ? publishedAt : null,
       readTimeMin: a.readTimeMin,
       viewCount: BigInt(views[a.slug] ?? 0),
       // Bundled cover art under /public/seed (see documents/06 §6 — alt + credit
-      // are required). Real photography drops into the same field via the CMS
-      // image URL or the S3 upload pipeline once available.
-      featuredImageUrl: `/seed/${a.slug}.jpg`,
-      featuredImageAlt: a.title,
-      featuredImageCredit: 'Frame Africa',
+      // are required). Articles without bundled art render the branded
+      // placeholder panel instead of a broken image.
+      featuredImageUrl: a.noCover ? null : `/seed/${a.slug}.jpg`,
+      featuredImageAlt: a.noCover ? null : a.title,
+      featuredImageCredit: a.noCover ? null : 'Frame Africa',
       publishedAt,
       seo: {
         seoTitle: a.title,
