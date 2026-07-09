@@ -76,6 +76,12 @@ export async function SiteHeader() {
 
           {user ? (
             <>
+              <Link
+                href="/for-you"
+                className="hidden text-sm font-medium text-muted transition-colors hover:text-primary md:inline"
+              >
+                For You
+              </Link>
               {isStaff && <StaffMenu isEditor={isEditor} isAdmin={isAdmin} />}
               <Link
                 href="/account"
