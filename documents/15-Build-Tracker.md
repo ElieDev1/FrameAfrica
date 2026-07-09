@@ -182,9 +182,10 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Privacy centre page; pre-launch security checklist (`05 §16`), backups + restore drill
 - **DoD (mostly met):** privacy rights (export/erasure), staff 2FA, audit log, and cookie consent done; the pre-launch checklist + backups remain (ops).
 
-### WS20 — Quality gate (continuous) `[ ]`
-- [ ] E2E coverage of critical journeys; accessibility audit; performance budgets (Core Web Vitals)
-- **DoD:** green quality gate on every release.
+### WS20 — Quality gate (continuous) `[~]`
+- [x] **E2E of critical journeys** — Playwright (`web/e2e`): homepage→article, search, section listing; CI `e2e` job (Postgres + seed + build + start). Verified green. (Lint/type/unit/build gate already enforced in CI.)
+- [ ] Accessibility audit (axe) + performance budgets (Core Web Vitals / Lighthouse CI)
+- **DoD (core met):** critical journeys are covered end-to-end in CI; a11y + perf budgets remain.
 
 ---
 
