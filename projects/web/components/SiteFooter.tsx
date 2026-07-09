@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import { fetchCategories, type CategoryNode } from '@/lib/api';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { Wordmark } from './Wordmark';
 
 // Placeholder columns — pages land in later slices, so these read as plain labels
@@ -19,6 +22,7 @@ function ColumnHeading({ children }: { children: string }) {
 }
 
 export async function SiteFooter() {
+  const locale = await getLocale();
   let sections: CategoryNode[] = [];
   try {
     sections = (await fetchCategories()).slice(0, 5);
@@ -30,9 +34,7 @@ export async function SiteFooter() {
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto max-w-[1440px] px-6 py-12">
         <Wordmark />
-        <p className="mt-3 max-w-sm font-body text-sm text-muted">
-          Independent journalism from Kigali for the continent and its diaspora.
-        </p>
+        <p className="mt-3 max-w-sm font-body text-sm text-muted">{t(locale, 'footer.tagline')}</p>
 
         <div className="mt-10 grid grid-cols-2 gap-8 sm:grid-cols-4">
           <div>
@@ -67,7 +69,10 @@ export async function SiteFooter() {
 
         <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 font-mono text-xs text-faint sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Frame Africa Media Ltd · Kigali, Rwanda</p>
-          <p>EN · Kinyarwanda · Français</p>
+          <div className="flex items-center gap-2">
+            <span className="uppercase tracking-[0.14em]">{t(locale, 'footer.language')}</span>
+            <LanguageSwitcher current={locale} />
+          </div>
         </div>
       </div>
     </footer>

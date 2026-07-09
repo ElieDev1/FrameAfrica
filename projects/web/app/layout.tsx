@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Fraunces, IBM_Plex_Mono, Inter, Source_Serif_4 } from 'next/font/google';
+import { getLocale } from '@/lib/i18n-server';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site';
 import './globals.css';
 
@@ -71,14 +72,15 @@ const scrollbarCss = `
 .no-scrollbar::-webkit-scrollbar{display:none;width:0;height:0}
 `;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
   return (
     <html
-      lang="en"
+      lang={locale}
       data-theme="dark"
       suppressHydrationWarning
       className={`${heading.variable} ${sans.variable} ${sourceSerif.variable} ${ibmPlexMono.variable} h-full antialiased`}
