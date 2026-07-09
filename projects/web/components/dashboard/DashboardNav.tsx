@@ -69,6 +69,7 @@ function groupsFor(roles: string[]): NavGroup[] {
       section: 'Administration',
       items: [
         { href: '/dashboard/monitor', label: 'Monitor', Icon: ActivityIcon },
+        { href: '/dashboard/audit', label: 'Audit log', Icon: ClipboardCheckIcon },
         { href: '/dashboard/articles', label: 'All articles', Icon: LayersIcon },
         { href: '/dashboard/taxonomy', label: 'Taxonomy', Icon: TagIcon },
         { href: '/dashboard/users', label: 'Users & roles', Icon: UsersIcon },

@@ -251,6 +251,28 @@ export async function fetchOverview(): Promise<AdminOverview> {
   return json.data;
 }
 
+export interface AuditEntry {
+  id: string;
+  action: string;
+  targetType: string | null;
+  targetId: string | null;
+  meta: Record<string, unknown> | null;
+  createdAt: string;
+  actor: { id: string; displayName: string } | null;
+}
+
+/** The privileged-action audit trail (admin only). */
+export async function fetchAuditLog(): Promise<AuditEntry[]> {
+  const res = await fetch(`${API_URL}/admin/audit`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load the audit log (${res.status})`);
+  const json = (await res.json()) as { data: AuditEntry[] };
+  return json.data;
+}
+
 export interface CategoryOption {
   id: string;
   name: string;
