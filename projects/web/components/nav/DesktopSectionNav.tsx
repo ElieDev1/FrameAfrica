@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { CategoryNode } from '@/lib/api';
+import { ChevronDownIcon, ChevronRightIcon } from '../icons';
 
 /** Short nav label: drop the "& …" tail so the bar stays on one line. */
 function shortLabel(name: string): string {
@@ -23,9 +24,11 @@ export function DesktopSectionNav({ sections }: { sections: CategoryNode[] }) {
             >
               {shortLabel(section.name)}
               {section.children.length > 0 && (
-                <span aria-hidden className="text-[8px] opacity-50">
-                  ▾
-                </span>
+                <ChevronDownIcon
+                  size={12}
+                  aria-hidden
+                  className="opacity-60 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
+                />
               )}
             </Link>
 
@@ -35,9 +38,10 @@ export function DesktopSectionNav({ sections }: { sections: CategoryNode[] }) {
                   <span className="font-heading text-sm font-bold text-text">{section.name}</span>
                   <Link
                     href={`/section/${section.slug}`}
-                    className="shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-primary hover:underline"
+                    className="inline-flex shrink-0 items-center gap-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-primary hover:underline"
                   >
-                    View all →
+                    View all
+                    <ChevronRightIcon size={12} aria-hidden />
                   </Link>
                 </div>
                 <div
@@ -51,7 +55,7 @@ export function DesktopSectionNav({ sections }: { sections: CategoryNode[] }) {
                     <Link
                       key={child.id}
                       href={`/section/${child.slug}`}
-                      className="rounded-lg px-2.5 py-1.5 font-body text-sm text-muted transition-colors hover:bg-surface-2 hover:text-primary"
+                      className="rounded-lg px-2.5 py-1.5 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-primary"
                     >
                       {child.name}
                     </Link>

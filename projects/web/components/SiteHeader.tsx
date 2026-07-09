@@ -1,23 +1,32 @@
 import Link from 'next/link';
 import { fetchCategories, type CategoryNode } from '@/lib/api';
 import { getSession } from '@/lib/session';
+import { SearchIcon } from './icons';
 import { DesktopSectionNav } from './nav/DesktopSectionNav';
 import { MobileMenu } from './nav/MobileMenu';
 import { StaffMenu } from './nav/StaffMenu';
 import { ThemeToggle } from './ThemeToggle';
 import { Wordmark } from './Wordmark';
 
-const MAX_SECTIONS = 10;
+const MAX_SECTIONS = 9;
 const STAFF_ROLES = ['journalist', 'editor', 'admin'];
 const EDITOR_ROLES = ['editor', 'admin'];
 
-/** Top bar: brand + section nav + auth-aware actions (public site only). */
+const today = () =>
+  new Intl.DateTimeFormat('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date());
+
+/** Public masthead: brand + search + account, then one centered section nav. */
 export async function SiteHeader() {
   let allSections: CategoryNode[] = [];
   try {
     allSections = await fetchCategories();
   } catch {
-    allSections = []; // header still renders if the API is unreachable
+    allSections = [];
   }
   const navSections = allSections.slice(0, MAX_SECTIONS);
   const user = await getSession();
@@ -26,69 +35,78 @@ export async function SiteHeader() {
   const isAdmin = user?.roles.includes('admin') ?? false;
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-surface/80 backdrop-blur-xl">
-      {/* Utility row: brand + search + account. */}
-      <div className="mx-auto flex max-w-[1440px] items-center gap-4 px-6 py-3">
-        <Link href="/" aria-label="Frame Africa — home" className="shrink-0">
-          <Wordmark />
-        </Link>
+    <header className="sticky top-0 z-20 border-b border-border bg-surface/85 backdrop-blur-xl">
+      {/* Masthead: brand (left) · date (center) · search + account (right). */}
+      <div className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-4">
+        <div className="flex items-center gap-2 justify-self-start">
+          <div className="flex items-center md:hidden">
+            <MobileMenu
+              sections={allSections}
+              signedIn={Boolean(user)}
+              isStaff={isStaff}
+              isEditor={isEditor}
+              isAdmin={isAdmin}
+              firstName={user?.displayName.split(' ')[0] ?? null}
+            />
+          </div>
+          <Link href="/" aria-label="Frame Africa — home" className="shrink-0">
+            <Wordmark />
+          </Link>
+        </div>
 
-        <div className="ml-auto flex items-center gap-3">
-          <form action="/search" className="hidden md:block">
+        <span className="hidden justify-self-center font-mono text-[10px] uppercase tracking-[0.16em] text-faint md:block">
+          {today()} · Kigali
+        </span>
+
+        <div className="flex items-center gap-3 justify-self-end">
+          <form action="/search" className="relative hidden md:block">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint">
+              <SearchIcon size={15} />
+            </span>
             <input
               name="q"
               type="search"
               placeholder="Search…"
               aria-label="Search articles"
-              className="w-40 rounded-full border border-border bg-surface-2 px-4 py-1.5 font-body text-sm text-text outline-none transition-[width,border-color] focus:w-56 focus:border-primary"
+              className="w-44 rounded-full border border-border bg-surface-2 py-1.5 pl-9 pr-4 font-body text-sm text-text outline-none transition-[width,border-color] focus:w-64 focus:border-primary"
             />
           </form>
+
           <ThemeToggle />
 
-          <div className="hidden items-center gap-4 md:flex">
-            {user ? (
-              <>
-                {isStaff && <StaffMenu isEditor={isEditor} isAdmin={isAdmin} />}
-                <Link
-                  href="/account"
-                  className="rounded-full border border-border-2 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-text transition-colors hover:border-primary hover:text-primary"
-                >
-                  {user.displayName.split(' ')[0]}
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted hover:text-primary"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/signup"
-                  className="whitespace-nowrap rounded-full bg-primary px-4 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-black shadow-[0_2px_16px_-4px_var(--color-primary)] transition-transform hover:-translate-y-px"
-                >
-                  Subscribe
-                </Link>
-              </>
-            )}
-          </div>
-
-          <MobileMenu
-            sections={allSections}
-            signedIn={Boolean(user)}
-            isStaff={isStaff}
-            isEditor={isEditor}
-            isAdmin={isAdmin}
-            firstName={user?.displayName.split(' ')[0] ?? null}
-          />
+          {user ? (
+            <>
+              {isStaff && <StaffMenu isEditor={isEditor} isAdmin={isAdmin} />}
+              <Link
+                href="/account"
+                className="hidden text-sm font-medium text-text transition-colors hover:text-primary md:inline"
+              >
+                {user.displayName.split(' ')[0]}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="hidden text-sm font-medium text-muted transition-colors hover:text-primary md:inline"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                className="hidden rounded-full bg-primary px-3.5 py-1.5 text-sm font-semibold text-black transition-transform hover:-translate-y-px md:inline"
+              >
+                Subscribe
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Section bar (desktop): the primary sections with sub-section dropdowns. */}
+      {/* Section nav: a single centered row of sections with mega-menus. */}
       {navSections.length > 0 && (
         <div className="hidden border-t border-border/60 md:block">
-          <div className="mx-auto max-w-[1440px] px-4">
+          <div className="mx-auto flex max-w-[1440px] justify-center px-6">
             <DesktopSectionNav sections={navSections} />
           </div>
         </div>
