@@ -22,6 +22,9 @@ jest.mock('@/lib/bookmarks-actions', () => ({
   getBookmarkStatus: jest.fn().mockResolvedValue(null),
   toggleBookmark: jest.fn(),
 }));
+jest.mock('@/lib/history-actions', () => ({
+  recordView: jest.fn().mockResolvedValue(undefined),
+}));
 
 const mockFetchArticle = fetchArticle as jest.MockedFunction<typeof fetchArticle>;
 const mockFetchRelated = fetchRelated as jest.MockedFunction<typeof fetchRelated>;

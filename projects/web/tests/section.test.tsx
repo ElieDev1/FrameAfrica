@@ -6,6 +6,11 @@ jest.mock('@/lib/api', () => ({
   fetchArticles: jest.fn(),
   fetchCategory: jest.fn(),
 }));
+jest.mock('@/lib/session', () => ({ getSession: jest.fn().mockResolvedValue(null) }));
+jest.mock('@/lib/follows-actions', () => ({
+  getFollowStatus: jest.fn().mockResolvedValue(null),
+  toggleFollow: jest.fn(),
+}));
 
 const mockFetchArticles = fetchArticles as jest.MockedFunction<typeof fetchArticles>;
 const mockFetchCategory = fetchCategory as jest.MockedFunction<typeof fetchCategory>;

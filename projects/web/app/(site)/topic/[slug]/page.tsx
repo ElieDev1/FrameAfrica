@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { FollowButton } from '@/components/FollowButton';
 import { LoadMore } from '@/components/LoadMore';
 import { fetchArticles, fetchTopic } from '@/lib/api';
+import { getFollowStatus } from '@/lib/follows-actions';
+import { getSession } from '@/lib/session';
 import { absoluteUrl } from '@/lib/site';
 
 export const revalidate = 60;
@@ -31,15 +34,27 @@ export default async function TopicPage({ params }: PageProps) {
     notFound();
   }
 
-  const { articles, pagination } = await fetchArticles({ topic: slug, limit: 12 });
+  const [{ articles, pagination }, user, follow] = await Promise.all([
+    fetchArticles({ topic: slug, limit: 12 }),
+    getSession(),
+    getFollowStatus('topic', topic.id),
+  ]);
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-8">
       <header className="border-b border-border pb-6">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Topic</p>
-        <h1 className="mt-1 font-heading text-4xl font-black tracking-tight text-text">
-          {topic.name}
-        </h1>
+        <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="font-heading text-4xl font-black tracking-tight text-text">
+            {topic.name}
+          </h1>
+          <FollowButton
+            target="topic"
+            id={topic.id}
+            initialFollowing={follow?.following ?? false}
+            signedIn={Boolean(user)}
+          />
+        </div>
         {topic.description && (
           <p className="mt-2 max-w-2xl font-body text-muted">{topic.description}</p>
         )}
