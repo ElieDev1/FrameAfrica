@@ -42,7 +42,8 @@
   --color-accent-red: var(--color-accent-red);
   --color-accent-yellow: var(--color-accent-yellow);
   --color-accent-green: var(--color-accent-green);
-  --font-heading: var(--font-archivo);
+  --font-heading: var(--font-fraunces);
+  --font-sans: var(--font-inter);
   --font-body: var(--font-source-serif);
   --font-mono: var(--font-ibm-plex-mono);
   --radius-brand: 12px;
@@ -51,7 +52,7 @@
 body {
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: var(--font-heading), system-ui, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
   /* A faint warm glow anchors the page to the brand's pan-African warmth
      without competing with the reading surface. */
   background-image: radial-gradient(

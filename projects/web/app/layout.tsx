@@ -1,15 +1,23 @@
 import type { Metadata } from 'next';
-import { Libre_Franklin, Source_Serif_4, IBM_Plex_Mono } from 'next/font/google';
+import { Fraunces, IBM_Plex_Mono, Inter, Source_Serif_4 } from 'next/font/google';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site';
 import './globals.css';
 
-// Heading / UI face — a clean, news-appropriate grotesk (keeps the same CSS var).
-const heading = Libre_Franklin({
-  variable: '--font-archivo',
+// Headlines — an elegant editorial serif display.
+const heading = Fraunces({
+  variable: '--font-fraunces',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '900'],
+});
+
+// UI / base — a clean, highly legible sans for nav, buttons, chrome.
+const sans = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800', '900'],
 });
 
+// Article body — a comfortable reading serif.
 const sourceSerif = Source_Serif_4({
   variable: '--font-source-serif',
   subsets: ['latin'],
@@ -73,7 +81,7 @@ export default function RootLayout({
       lang="en"
       data-theme="dark"
       suppressHydrationWarning
-      className={`${heading.variable} ${sourceSerif.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${heading.variable} ${sans.variable} ${sourceSerif.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

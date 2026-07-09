@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **New type system.** Headlines now use **Fraunces** (an elegant editorial serif) for a premium newspaper feel, the UI/chrome uses **Inter** (clean, legible sans), and article body keeps **Source Serif** for reading. The heading font is decoupled from the base UI font (distinct `--font-*` tokens).
+
 ### Added
 - **Redesigned dashboard shell.** A proper newsroom app shell: a richer top bar with a brand, admin **search**, a **"New story"** quick-create, **notifications** bell, theme toggle, and a **profile menu** (account / view site / sign out); a **collapsible** sidebar (full ↔ icons-only, remembered) whose logo + toggle sit in a fixed header aligned with the top bar (they read as one strip) while only the nav scrolls; **real SVG icons** on every nav item; **collapsible nav groups**; and a working **mobile drawer** (the dashboard previously had no navigation on mobile). Content sits in a centered max-width column.
 
