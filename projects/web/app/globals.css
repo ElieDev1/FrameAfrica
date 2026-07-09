@@ -69,33 +69,9 @@ body {
   background: color-mix(in srgb, var(--color-primary) 32%, transparent);
 }
 
-/* Slim, unobtrusive scrollbars across the whole app (Firefox + WebKit). */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-2) transparent;
-}
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-border-2);
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-faint);
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* Opt-out: scrolls if needed but shows no scrollbar (e.g. the dashboard nav). */
-.no-scrollbar {
-  scrollbar-width: none;
-}
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
+/* NOTE: scrollbar styling (thin bars + the .no-scrollbar opt-out) is injected as
+   a raw <style> in the root layout, because Tailwind v4 / Lightning CSS strips
+   the ::-webkit-scrollbar pseudo-element rules from this file. */
 
 /* Brand logo + theme-toggle icon swap with the theme (set before paint). */
 .brand-logo-light,
