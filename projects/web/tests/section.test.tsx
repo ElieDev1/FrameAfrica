@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import SectionPage from '../app/section/[slug]/page';
+import SectionPage from '../app/(site)/section/[slug]/page';
 import { fetchArticles, fetchCategory, type ArticleSummary, type CategoryDetail } from '@/lib/api';
 
 jest.mock('@/lib/api', () => ({

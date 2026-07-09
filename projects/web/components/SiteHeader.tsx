@@ -1,4 +1,3 @@
-import { headers } from 'next/headers';
 import Link from 'next/link';
 import { fetchCategories, type CategoryNode } from '@/lib/api';
 import { getSession } from '@/lib/session';
@@ -12,11 +11,8 @@ const MAX_SECTIONS = 10;
 const STAFF_ROLES = ['journalist', 'editor', 'admin'];
 const EDITOR_ROLES = ['editor', 'admin'];
 
-/** Top bar: brand + section nav + auth-aware actions. Hidden on the dashboard. */
+/** Top bar: brand + section nav + auth-aware actions (public site only). */
 export async function SiteHeader() {
-  const pathname = (await headers()).get('x-pathname') ?? '';
-  if (pathname.startsWith('/dashboard')) return null;
-
   let allSections: CategoryNode[] = [];
   try {
     allSections = await fetchCategories();

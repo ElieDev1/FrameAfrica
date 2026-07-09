@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Public navbar/footer no longer leak onto the dashboard (and no longer flicker).** Public pages now live in an `app/(site)/` route group whose layout owns the `SiteHeader`/`SiteFooter`; the dashboard sits outside the group with its own shell. Previously the chrome was rendered in the shared root layout and gated by a request-header check, which persisted across client-side navigation — so whether it showed depended on which page you hard-loaded first. Crossing the group boundary now mounts/unmounts the chrome correctly.
+
 ### Changed
 - **Staff 2FA is now opt-in, not forced.** The dashboard no longer forces staff to enrol in two-factor before entering the newsroom. The full 2FA feature stays in place — users can enable it at `/account/security` and login still requires a code when it's on — and mandatory enrolment can be switched back on any time by setting `ENFORCE_STAFF_2FA=true`.
 
