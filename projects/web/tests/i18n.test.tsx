@@ -12,8 +12,12 @@ describe('i18n', () => {
     expect(t('en', 'nav.signIn')).toBe('Sign in');
   });
 
-  it('defaults to English and lists both locales', () => {
+  it('translates a key to French', () => {
+    expect(t('fr', 'nav.signIn')).toBe('Se connecter');
+  });
+
+  it('defaults to English and lists all locales', () => {
     expect(DEFAULT_LOCALE).toBe('en');
-    expect([...LOCALES]).toEqual(['en', 'rw']);
+    expect([...LOCALES]).toEqual(['en', 'rw', 'fr']);
   });
 });

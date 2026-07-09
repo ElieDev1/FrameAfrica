@@ -1,4 +1,4 @@
-export const LOCALES = ['en', 'rw'] as const;
+export const LOCALES = ['en', 'rw', 'fr'] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'en';
 export const LOCALE_COOKIE = 'fa-locale';
@@ -6,9 +6,10 @@ export const LOCALE_COOKIE = 'fa-locale';
 export const LOCALE_LABELS: Record<Locale, string> = {
   en: 'English',
   rw: 'Kinyarwanda',
+  fr: 'Français',
 };
 
-/** UI strings. `en` is the source of truth; `rw` (Kinyarwanda) mirrors its keys. */
+/** UI strings. `en` is the source of truth; `rw`/`fr` mirror its keys. */
 const messages = {
   en: {
     'nav.forYou': 'For You',
@@ -32,6 +33,17 @@ const messages = {
     'footer.language': 'Ururimi',
     'account.forYou': 'Ibyawe',
   },
+  fr: {
+    'nav.forYou': 'Pour vous',
+    'nav.signIn': 'Se connecter',
+    'nav.subscribe': "S'abonner",
+    'nav.searchPlaceholder': 'Rechercher…',
+    'nav.searchAria': 'Rechercher des articles',
+    'nav.sections': 'Rubriques',
+    'footer.tagline': 'Journalisme indépendant depuis Kigali pour le continent et sa diaspora.',
+    'footer.language': 'Langue',
+    'account.forYou': 'Pour vous',
+  },
 } satisfies Record<Locale, Record<string, string>>;
 
 export type MessageKey = keyof (typeof messages)['en'];
@@ -42,5 +54,5 @@ export function t(locale: Locale, key: MessageKey): string {
 }
 
 export function isLocale(value: string | undefined): value is Locale {
-  return value === 'en' || value === 'rw';
+  return value === 'en' || value === 'rw' || value === 'fr';
 }
