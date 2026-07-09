@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { fetchMoreArticles } from '@/lib/articles-actions';
 import type { ArticleSummary } from '@/lib/api';
+import { fetchMoreArticles } from '@/lib/articles-actions';
+import { fetchFeed } from '@/lib/feed-actions';
 import { ArticleCard } from './ArticleCard';
 
 /**
@@ -15,12 +16,15 @@ export function LoadMore({
   initialCursor,
   category,
   topic,
+  feed = false,
   pageSize = 12,
 }: {
   initialArticles: ArticleSummary[];
   initialCursor: string | null;
   category?: string;
   topic?: string;
+  /** When true, paginate the signed-in reader's personalised feed instead. */
+  feed?: boolean;
   pageSize?: number;
 }) {
   const [articles, setArticles] = useState(initialArticles);
@@ -33,7 +37,9 @@ export function LoadMore({
     setLoading(true);
     setError(false);
     try {
-      const res = await fetchMoreArticles({ category, topic, cursor, limit: pageSize });
+      const res = feed
+        ? await fetchFeed({ cursor, limit: pageSize })
+        : await fetchMoreArticles({ category, topic, cursor, limit: pageSize });
       setArticles((prev) => [...prev, ...res.articles]);
       setCursor(res.nextCursor);
     } catch {

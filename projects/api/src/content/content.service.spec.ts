@@ -6,6 +6,8 @@ import { ContentService, buildCategoryTree } from './content.service';
 type PrismaMock = {
   article: { findMany: jest.Mock; findFirst: jest.Mock };
   category: { findMany: jest.Mock; findFirst: jest.Mock };
+  follow: { findMany: jest.Mock };
+  readingHistory: { findMany: jest.Mock };
 };
 
 const articleRow = (over: Record<string, unknown> = {}) => ({
@@ -42,6 +44,8 @@ describe('ContentService', () => {
     prisma = {
       article: { findMany: jest.fn(), findFirst: jest.fn() },
       category: { findMany: jest.fn(), findFirst: jest.fn() },
+      follow: { findMany: jest.fn() },
+      readingHistory: { findMany: jest.fn() },
     };
 
     const moduleRef = await Test.createTestingModule({
@@ -149,6 +153,50 @@ describe('ContentService', () => {
       const calls = prisma.article.findMany.mock.calls as unknown[][];
       const arg = calls[0]?.[0] as { orderBy: unknown };
       expect(arg.orderBy).toEqual([{ viewCount: 'desc' }, { id: 'desc' }]);
+    });
+  });
+
+  describe('personalizedFeed', () => {
+    it('filters to followed sections/topics + read categories and flags personalized', async () => {
+      prisma.follow.findMany.mockResolvedValue([
+        { categoryId: 'c1', topicId: null },
+        { categoryId: null, topicId: 't1' },
+      ]);
+      prisma.readingHistory.findMany.mockResolvedValue([{ article: { categoryId: 'c2' } }]);
+      prisma.category.findMany.mockResolvedValue([
+        { id: 'c1', parentId: null },
+        { id: 'c2', parentId: null },
+      ]);
+      prisma.article.findMany.mockResolvedValue([articleRow()]);
+
+      const res = await service.personalizedFeed('u1', {});
+
+      expect(res.personalized).toBe(true);
+      expect(res.items).toHaveLength(1);
+      const call = (prisma.article.findMany.mock.calls as unknown[][])[0][0] as {
+        where: { status: string; deletedAt: null; OR: unknown[] };
+      };
+      expect(call.where.status).toBe('published');
+      expect(call.where.deletedAt).toBeNull();
+      expect(call.where.OR).toEqual([
+        { categoryId: { in: ['c1', 'c2'] } },
+        { topics: { some: { topicId: { in: ['t1'] } } } },
+      ]);
+    });
+
+    it('falls back to latest news (no OR filter, not personalized) with no signal', async () => {
+      prisma.follow.findMany.mockResolvedValue([]);
+      prisma.readingHistory.findMany.mockResolvedValue([]);
+      prisma.article.findMany.mockResolvedValue([articleRow()]);
+
+      const res = await service.personalizedFeed('u1', {});
+
+      expect(res.personalized).toBe(false);
+      const call = (prisma.article.findMany.mock.calls as unknown[][])[0][0] as {
+        where: Record<string, unknown>;
+      };
+      expect(call.where).not.toHaveProperty('OR');
+      expect(call.where).toMatchObject({ status: 'published', deletedAt: null });
     });
   });
 

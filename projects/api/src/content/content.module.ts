@@ -20,5 +20,6 @@ import { ContentService } from './content.service';
     CmsCopydeskController,
   ],
   providers: [ContentService, CmsDraftService, CmsEditorService, SchedulerService],
+  exports: [ContentService],
 })
 export class ContentModule {}
