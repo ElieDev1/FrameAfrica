@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserStatus } from '@prisma/client';
+import { AuditService } from '../audit/audit.service';
 import { PasswordService } from '../auth/password.service';
 import { TokenService } from '../auth/token.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -18,6 +19,7 @@ export class PrivacyService {
     private readonly prisma: PrismaService,
     private readonly passwords: PasswordService,
     private readonly tokens: TokenService,
+    private readonly audit: AuditService,
   ) {}
 
   async exportData(userId: string): Promise<DataExport> {
@@ -147,5 +149,11 @@ export class PrivacyService {
 
     // Outside the tx: invalidate all refresh sessions.
     await this.tokens.revokeAllForUser(userId);
+    await this.audit.record({
+      actorId: userId,
+      action: 'account.erased',
+      targetType: 'user',
+      targetId: userId,
+    });
   }
 }

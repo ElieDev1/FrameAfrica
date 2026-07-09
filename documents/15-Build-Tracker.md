@@ -177,10 +177,10 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 ### WS19 — Security & compliance hardening `[~]`
 - [x] **2FA (TOTP) for staff** (`FR-AUTH-6`) — enrol/verify + login step (opt-in; enforce via `ENFORCE_STAFF_2FA`)
 - [x] **Data export + account erasure** (`FR-AUTH-8`, Law N° 058/2021) — `GET /v1/me/export` + password-confirmed `POST /v1/me/delete` (PII scrub + soft-delete + session revoke; comments anonymised). Unit-tested + verified e2e.
-- [ ] Central **audit log** for privileged actions; rate limits on all mutations
-- [ ] **Cookie consent** + privacy centre
-- [ ] Pre-launch security checklist (`05 §16`), backups + restore drill
-- **DoD (partial):** privacy rights (export/erasure) + staff 2FA done; audit log, cookie consent, and the checklist remain.
+- [x] Central **audit log** for privileged actions (`audit_log` + `GET /v1/admin/audit` + `/dashboard/audit`; records erasure + admin role/status changes). _(Rate limits already global via ThrottlerModule.)_
+- [x] **Cookie consent** banner (server-persisted choice)
+- [ ] Privacy centre page; pre-launch security checklist (`05 §16`), backups + restore drill
+- **DoD (mostly met):** privacy rights (export/erasure), staff 2FA, audit log, and cookie consent done; the pre-launch checklist + backups remain (ops).
 
 ### WS20 — Quality gate (continuous) `[ ]`
 - [ ] E2E coverage of critical journeys; accessibility audit; performance budgets (Core Web Vitals)
