@@ -524,6 +524,452 @@ function genericBlocks(a: { title: string; subtitle: string; excerpt: string }):
   ];
 }
 
+interface SeedArticle {
+  slug: string;
+  title: string;
+  subtitle: string;
+  excerpt: string;
+  category: string;
+  isBreaking?: boolean;
+  isPremium?: boolean;
+  isFeatured?: boolean;
+  /** True when no cover art is bundled — renders the branded placeholder. */
+  noCover?: boolean;
+  readTimeMin: number;
+  daysAgo: number;
+  /** Pre-built block document (generated articles); else derived below. */
+  blocks?: Block[];
+  /** Pre-set view count (generated articles); else from the `views` map. */
+  views?: number;
+}
+
+/**
+ * Bulk generator for a large, realistic corpus across every category — useful
+ * for exercising pagination, section pages, "load more", and Most-read. Content
+ * is deterministic (stable slugs → idempotent re-seed) but varied: each article
+ * gets its own multi-block document from rotating subjects, angles and places.
+ */
+function buildGeneratedArticles(): SeedArticle[] {
+  const beats: { category: string; noun: string; subjects: string[] }[] = [
+    {
+      category: 'rwanda',
+      noun: 'the country',
+      subjects: [
+        'national service delivery',
+        'the new district plans',
+        'civil registration',
+        'rural electrification',
+        'the housing programme',
+      ],
+    },
+    {
+      category: 'kigali',
+      noun: 'the capital',
+      subjects: [
+        'city traffic',
+        'affordable housing',
+        'the night economy',
+        'waste recycling',
+        'street lighting',
+      ],
+    },
+    {
+      category: 'east-africa',
+      noun: 'the region',
+      subjects: [
+        'cross-border trade',
+        'the shared power pool',
+        'regional roaming',
+        'a joint tourist visa',
+        'the customs union',
+      ],
+    },
+    {
+      category: 'africa',
+      noun: 'the continent',
+      subjects: [
+        'continental free trade',
+        'a pan-African payments link',
+        'youth employment',
+        'regional airlines',
+      ],
+    },
+    {
+      category: 'world',
+      noun: 'global markets',
+      subjects: [
+        'commodity prices',
+        'shipping costs',
+        'a diplomatic summit',
+        'global interest rates',
+      ],
+    },
+    {
+      category: 'politics',
+      noun: 'the sector',
+      subjects: [
+        'local governance',
+        'public accountability',
+        'a policy review',
+        'service charters',
+      ],
+    },
+    {
+      category: 'diplomacy',
+      noun: 'relations',
+      subjects: ['a bilateral deal', 'a trade mission', 'a new embassy', 'a cooperation pact'],
+    },
+    {
+      category: 'economy',
+      noun: 'the economy',
+      subjects: [
+        'GDP growth',
+        'inflation',
+        'the franc',
+        'public debt',
+        'private investment',
+        'the trade balance',
+      ],
+    },
+    {
+      category: 'markets',
+      noun: 'markets',
+      subjects: ['the stock exchange', 'treasury bonds', 'bank shares', 'commodity prices'],
+    },
+    {
+      category: 'companies',
+      noun: 'the firm',
+      subjects: [
+        'a factory expansion',
+        'quarterly earnings',
+        'a new product line',
+        'a regional merger',
+      ],
+    },
+    {
+      category: 'banking-finance',
+      noun: 'the lender',
+      subjects: [
+        'digital banking',
+        'lending to SMEs',
+        'the interest-rate outlook',
+        'financial inclusion',
+      ],
+    },
+    {
+      category: 'agribusiness',
+      noun: 'the sector',
+      subjects: ['tea exports', 'cold-chain logistics', 'contract farming', 'food processing'],
+    },
+    {
+      category: 'startups',
+      noun: 'the startup scene',
+      subjects: ['a seed round', 'a health startup', 'an agritech pilot', 'an accelerator cohort'],
+    },
+    {
+      category: 'real-estate',
+      noun: 'the market',
+      subjects: ['office demand', 'affordable homes', 'mixed-use projects', 'construction costs'],
+    },
+    {
+      category: 'personal-finance',
+      noun: 'households',
+      subjects: ['saving habits', 'digital wallets', 'micro-insurance', 'household budgets'],
+    },
+    {
+      category: 'mobile',
+      noun: 'mobile users',
+      subjects: ['4G coverage', 'device prices', 'a data bundle war', 'handset financing'],
+    },
+    {
+      category: 'internet',
+      noun: 'connectivity',
+      subjects: ['fibre rollout', 'broadband prices', 'rural access', 'a new data centre'],
+    },
+    {
+      category: 'ai',
+      noun: 'the field',
+      subjects: [
+        'a national AI strategy',
+        'AI in health',
+        'local language models',
+        'AI skills training',
+      ],
+    },
+    {
+      category: 'fintech',
+      noun: 'digital finance',
+      subjects: ['mobile payments', 'a lending app', 'QR payments', 'cross-border transfers'],
+    },
+    {
+      category: 'gadgets',
+      noun: 'consumers',
+      subjects: ['a phone launch', 'affordable laptops', 'wearables', 'e-readers'],
+    },
+    {
+      category: 'football',
+      noun: 'the game',
+      subjects: [
+        'the league title race',
+        'a transfer swoop',
+        'the national team',
+        'a youth academy',
+      ],
+    },
+    {
+      category: 'athletics',
+      noun: 'the sport',
+      subjects: ['a road race', 'a national record', 'a training camp', 'a medal hope'],
+    },
+    {
+      category: 'basketball',
+      noun: 'the court',
+      subjects: ['the playoffs', 'a marquee signing', 'the national side', 'a new arena fixture'],
+    },
+    {
+      category: 'cycling',
+      noun: 'the peloton',
+      subjects: ['a mountain stage', 'a sprint finish', 'a new team', 'the race calendar'],
+    },
+    {
+      category: 'volleyball',
+      noun: 'the sport',
+      subjects: ['a continental tie', 'a league final', 'a rising talent'],
+    },
+    {
+      category: 'editorials',
+      noun: 'the country',
+      subjects: [
+        'investing in skills',
+        'protecting the franc',
+        'greening the cities',
+        'backing small business',
+      ],
+    },
+    {
+      category: 'op-eds',
+      noun: 'the debate',
+      subjects: [
+        'the future of work',
+        'regional integration',
+        'climate adaptation',
+        'the digital economy',
+      ],
+    },
+    {
+      category: 'columns',
+      noun: 'the week',
+      subjects: ['a view from Kigali', 'notes on the markets', 'the sporting weekend'],
+    },
+    {
+      category: 'arts',
+      noun: 'the scene',
+      subjects: ['a new exhibition', 'a public mural', 'an artist residency'],
+    },
+    {
+      category: 'music',
+      noun: 'the industry',
+      subjects: ['a festival line-up', 'a breakout artist', 'a live-music revival'],
+    },
+    {
+      category: 'film-tv',
+      noun: 'the screen',
+      subjects: ['a local feature', 'a streaming deal', 'a film festival'],
+    },
+    {
+      category: 'books',
+      noun: 'readers',
+      subjects: ['a debut novel', 'a book fair', 'a translation project'],
+    },
+    {
+      category: 'food-drink',
+      noun: 'the table',
+      subjects: ['a new restaurant', 'coffee culture', 'farm-to-table dining'],
+    },
+    {
+      category: 'fashion',
+      noun: 'the runway',
+      subjects: ['a design showcase', 'local textiles', 'a sustainable label'],
+    },
+    {
+      category: 'travel',
+      noun: 'tourism',
+      subjects: ['gorilla trekking', 'lakeside resorts', 'conference tourism', 'a new trail'],
+    },
+    {
+      category: 'lifestyle',
+      noun: 'daily life',
+      subjects: ['urban wellness', 'weekend escapes', 'home design'],
+    },
+    {
+      category: 'public-health',
+      noun: 'public health',
+      subjects: ['a vaccination drive', 'malaria control', 'health insurance', 'maternal care'],
+    },
+    {
+      category: 'wellness',
+      noun: 'wellbeing',
+      subjects: ['mental health', 'nutrition', 'active living'],
+    },
+    {
+      category: 'medicine',
+      noun: 'medicine',
+      subjects: ['a new clinic', 'telemedicine', 'a research study'],
+    },
+    {
+      category: 'climate',
+      noun: 'the climate',
+      subjects: [
+        'flood defences',
+        'a reforestation drive',
+        'climate finance',
+        'drought resilience',
+      ],
+    },
+    {
+      category: 'conservation',
+      noun: 'conservation',
+      subjects: ['a wildlife census', 'anti-poaching work', 'a protected wetland'],
+    },
+    {
+      category: 'energy',
+      noun: 'the grid',
+      subjects: ['solar mini-grids', 'a hydro plant', 'clean cooking', 'grid expansion'],
+    },
+    {
+      category: 'schools',
+      noun: 'schools',
+      subjects: ['a new curriculum', 'school feeding', 'digital classrooms'],
+    },
+    {
+      category: 'higher-education',
+      noun: 'campuses',
+      subjects: ['research funding', 'STEM enrolment', 'a new campus', 'industry links'],
+    },
+    {
+      category: 'skills',
+      noun: 'the workforce',
+      subjects: ['vocational training', 'a coding bootcamp', 'apprenticeships'],
+    },
+    {
+      category: 'crops',
+      noun: 'farmers',
+      subjects: ['the maize harvest', 'improved seed', 'irrigation', 'post-harvest storage'],
+    },
+    {
+      category: 'livestock',
+      noun: 'herders',
+      subjects: ['dairy output', 'animal health', 'a breeding programme'],
+    },
+    {
+      category: 'agri-tech',
+      noun: 'the field',
+      subjects: ['farm sensors', 'a market app', 'drone spraying'],
+    },
+    {
+      category: 'science',
+      noun: 'researchers',
+      subjects: ['a research grant', 'a lab opening', 'a space partnership'],
+    },
+  ];
+
+  const angles = [
+    'climbs as demand firms',
+    'steadies after a volatile stretch',
+    'draws fresh investment',
+    'enters a decisive phase',
+    'tops earlier forecasts',
+    'gets a policy boost',
+    'sparks debate among experts',
+    'shows signs of a turnaround',
+  ];
+  const places = [
+    'KIGALI',
+    'MUSANZE',
+    'HUYE',
+    'RUBAVU',
+    'NYAGATARE',
+    'KARONGI',
+    'MUHANGA',
+    'NAIROBI',
+    'KAMPALA',
+    'ADDIS ABABA',
+  ];
+  const headings = [
+    'Why it matters',
+    'What happens next',
+    'The bigger picture',
+    'Behind the numbers',
+    'Reaction',
+    'On the ground',
+  ];
+  const bodyBank = [
+    'Officials and industry figures said the shift had been building for months, and that its effects were now visible across {noun}.',
+    'Analysts were cautiously optimistic, noting that follow-through over the coming quarters would determine how durable the change proves.',
+    'For many, the practical question is simpler: whether the gains reach households and small businesses, not just headline figures.',
+    'Partners across the region are watching closely, with several signalling interest in deeper cooperation if momentum holds.',
+    'Supporters framed it as a step in the right direction; sceptics urged patience and better data before drawing conclusions.',
+  ];
+
+  const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  // Small deterministic hash for stable pseudo-random values from a slug.
+  const hash = (s: string) => {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) & 0x7fffffff;
+    return h;
+  };
+
+  const PER_CATEGORY = 6;
+  const out: SeedArticle[] = [];
+  for (const beat of beats) {
+    for (let i = 0; i < PER_CATEGORY; i++) {
+      const subject = beat.subjects[i % beat.subjects.length];
+      const angle = angles[(i + hash(beat.category)) % angles.length];
+      const place = places[(i + hash(subject)) % places.length];
+      const heading = headings[i % headings.length];
+      const slug = `${beat.category}-${subject.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-${i + 1}`;
+      const title = `${cap(subject)} ${angle}`;
+      const subtitle = `A closer look at what is driving ${subject} and who stands to gain.`;
+      const excerpt = `${cap(subject)} ${angle}, as officials and analysts weigh the implications for ${beat.noun} and the wider region.`;
+      const h = hash(slug);
+      const b1 = bodyBank[h % bodyBank.length].replace('{noun}', beat.noun);
+      const b2 = bodyBank[(h + 2) % bodyBank.length].replace('{noun}', beat.noun);
+      const blocks: Block[] = [
+        { type: 'paragraph', lede: true, text: excerpt },
+        {
+          type: 'paragraph',
+          text: `${place} — The developments came into focus this week, drawing reaction from officials, businesses and residents with a stake in ${subject}.`,
+        },
+        { type: 'heading', level: 2, text: heading },
+        { type: 'paragraph', text: b1 },
+        { type: 'paragraph', text: b2 },
+        {
+          type: 'factbox',
+          title: 'The context',
+          body: `${cap(subject)} sits within ${beat.noun}, a space policymakers and the private sector have flagged as central to the next phase of growth.`,
+        },
+        { type: 'paragraph', text: 'More reporting to follow as the story develops.' },
+      ];
+      out.push({
+        slug,
+        title,
+        subtitle,
+        excerpt,
+        category: beat.category,
+        isBreaking: h % 23 === 0,
+        isPremium: h % 11 === 0,
+        isFeatured: h % 37 === 0,
+        noCover: true,
+        readTimeMin: 3 + (h % 4),
+        daysAgo: 1 + (h % 60),
+        blocks,
+        views: 200 + (h % 5000),
+      });
+    }
+  }
+  return out;
+}
+
 async function main(): Promise<void> {
   const journalist = await prisma.role.upsert({
     where: { name: RoleName.journalist },
@@ -728,20 +1174,7 @@ async function main(): Promise<void> {
     });
   }
 
-  const articles: {
-    slug: string;
-    title: string;
-    subtitle: string;
-    excerpt: string;
-    category: string;
-    isBreaking?: boolean;
-    isPremium?: boolean;
-    isFeatured?: boolean;
-    /** True when no cover art is bundled — renders the branded placeholder. */
-    noCover?: boolean;
-    readTimeMin: number;
-    daysAgo: number;
-  }[] = [
+  const articles: SeedArticle[] = [
     {
       slug: 'rwanda-coffee-exports-hit-record-high',
       title: 'Rwanda coffee exports hit record high on specialty demand',
@@ -1055,10 +1488,13 @@ async function main(): Promise<void> {
     'editorial-invest-in-skills-now': 1100,
   };
 
+  // Bulk corpus across every category (for pagination / section / most-read).
+  articles.push(...buildGeneratedArticles());
+
   const now = Date.now();
   for (const a of articles) {
     const publishedAt = new Date(now - a.daysAgo * 24 * 60 * 60 * 1000);
-    const blocks = flagshipBlocks[a.slug] ?? genericBlocks(a);
+    const blocks = a.blocks ?? flagshipBlocks[a.slug] ?? genericBlocks(a);
     const data = {
       slug: a.slug,
       title: a.title,
@@ -1077,7 +1513,7 @@ async function main(): Promise<void> {
       isFeatured: a.isFeatured ?? false,
       featuredAt: a.isFeatured ? publishedAt : null,
       readTimeMin: a.readTimeMin,
-      viewCount: BigInt(views[a.slug] ?? 0),
+      viewCount: BigInt(a.views ?? views[a.slug] ?? 0),
       // Bundled cover art under /public/seed (see documents/06 §6 — alt + credit
       // are required). Articles without bundled art render the branded
       // placeholder panel instead of a broken image.
