@@ -173,9 +173,11 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - _Deferred:_ per-claim fact-check labels; structured right-of-reply request logging.
 - **DoD met:** the paper's credibility surfaces are real and reachable.
 
-### WS18 — Analytics `[ ]`
-- [ ] Event ingestion + **real-time editor analytics** (who's-reading-now, referrers, scroll/completion) + admin dashboards
-- **DoD:** editors see live performance; admins see the business.
+### WS18 — Analytics `[x]`
+- [x] **Anonymous page-view ingestion** (`page_view` + rate-limited `POST /v1/analytics/view` beacon fired from the article page; referrer reduced to host, no per-user tracking).
+- [x] **Real-time editor dashboard** (`/dashboard/analytics`) — reading-now (5 min), views today, **most-read today**, **top referrers** (24h); `GET /v1/analytics/overview`. Unit-tested + verified e2e.
+- _Deferred:_ scroll/completion depth, funnels/churn, A/B headline testing, event warehouse.
+- **DoD met (core):** editors see live story performance; deeper product analytics remain.
 
 ### WS19 — Security & compliance hardening `[x]`
 - [x] **2FA (TOTP) for staff** (`FR-AUTH-6`) — enrol/verify + login step (opt-in; enforce via `ENFORCE_STAFF_2FA`)

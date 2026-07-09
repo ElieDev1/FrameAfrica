@@ -407,11 +407,29 @@ model Article {
   liveUpdates    LiveUpdate[]
   bookmarks      Bookmark[]
   readingHistory ReadingHistory[]
+  pageViews      PageView[]
 
   @@index([status, publishedAt])
   @@index([categoryId, publishedAt])
   @@index([authorId])
   @@map("article")
+}
+
+/// A single page view for analytics (documents/14 §8). Lightweight + anonymous:
+/// no user link, just what was viewed, when, and the referrer host. Powers the
+/// real-time editor dashboard ("reading now", top stories, referrers).
+model PageView {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  articleId    String?  @map("article_id") @db.Uuid
+  path         String
+  referrerHost String?  @map("referrer_host")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  article Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([articleId, createdAt])
+  @@map("page_view")
 }
 
 /// A followable subject (person, place, org, event) an article can be tagged

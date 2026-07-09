@@ -11,6 +11,7 @@ import { LikeButton } from '@/components/LikeButton';
 import { LiveFeed } from '@/components/LiveFeed';
 import { ReadingProgress } from '@/components/ReadingProgress';
 import { RecordView } from '@/components/RecordView';
+import { TrackView } from '@/components/TrackView';
 import { SaveButton } from '@/components/SaveButton';
 import { ShareBar } from '@/components/ShareBar';
 import { StickyShare } from '@/components/StickyShare';
@@ -116,6 +117,7 @@ export default async function ArticlePage({ params }: PageProps) {
     <article className="mx-auto max-w-2xl px-6 py-10">
       <ReadingProgress />
       <RecordView articleId={article.id} signedIn={Boolean(user)} />
+      <TrackView articleId={article.id} />
       <StickyShare title={article.title} />
       <script
         type="application/ld+json"

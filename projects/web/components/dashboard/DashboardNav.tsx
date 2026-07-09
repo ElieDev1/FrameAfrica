@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import {
   ActivityIcon,
+  BarChartIcon,
   ChevronDownIcon,
   ClipboardCheckIcon,
   FileTextIcon,
@@ -61,6 +62,7 @@ function groupsFor(roles: string[]): NavGroup[] {
         { href: '/dashboard/stories/new', label: 'New story', Icon: PlusIcon, exact: true },
         { href: '/dashboard/media', label: 'Media library', Icon: ImageIcon },
         { href: '/dashboard/studio', label: 'Studio', Icon: SparklesIcon },
+        { href: '/dashboard/analytics', label: 'Analytics', Icon: BarChartIcon },
         ...desk,
       ],
     },

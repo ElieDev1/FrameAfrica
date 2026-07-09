@@ -251,6 +251,25 @@ export async function fetchOverview(): Promise<AdminOverview> {
   return json.data;
 }
 
+export interface AnalyticsOverview {
+  readingNow: number;
+  totalToday: number;
+  topToday: { views: number; article: { id: string; slug: string; title: string } }[];
+  topReferrers: { host: string; views: number }[];
+}
+
+/** Real-time editor analytics overview (staff). */
+export async function fetchAnalytics(): Promise<AnalyticsOverview> {
+  const res = await fetch(`${API_URL}/analytics/overview`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load analytics (${res.status})`);
+  const json = (await res.json()) as { data: AnalyticsOverview };
+  return json.data;
+}
+
 export type TipStatus = 'new' | 'reviewing' | 'actioned' | 'dismissed';
 
 export interface TipItem {
