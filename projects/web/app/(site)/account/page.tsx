@@ -1,9 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { ClearHistoryButton } from '@/components/account/ClearHistoryButton';
+import { FollowedList } from '@/components/account/FollowedList';
 import { logout } from '@/lib/auth-actions';
 import { fetchSaved } from '@/lib/bookmarks-actions';
+import { fetchFollows } from '@/lib/follows-actions';
 import { formatDate } from '@/lib/format';
+import { fetchHistory } from '@/lib/history-actions';
 import { getSession } from '@/lib/session';
 
 export const metadata: Metadata = { title: 'Your account — Frame Africa' };
@@ -17,7 +21,11 @@ export default async function AccountPage() {
   }
 
   const isStaff = user.roles.some((role) => STAFF_ROLES.includes(role));
-  const saved = await fetchSaved();
+  const [saved, follows, history] = await Promise.all([
+    fetchSaved(),
+    fetchFollows(),
+    fetchHistory(),
+  ]);
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">
@@ -37,6 +45,13 @@ export default async function AccountPage() {
           Go to the newsroom →
         </Link>
       )}
+
+      <section className="mt-10">
+        <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
+          Following ({follows.sections.length + follows.topics.length})
+        </h2>
+        <FollowedList sections={follows.sections} topics={follows.topics} />
+      </section>
 
       <section className="mt-10">
         <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
@@ -63,6 +78,38 @@ export default async function AccountPage() {
                       {formatDate(article.publishedAt)}
                     </span>
                   )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mt-10">
+        <div className="flex items-center justify-between">
+          <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
+            Recently read ({history.length})
+          </h2>
+          {history.length > 0 && <ClearHistoryButton />}
+        </div>
+        {history.length === 0 ? (
+          <p className="mt-3 font-body text-sm text-muted">
+            Stories you read while signed in show up here.
+          </p>
+        ) : (
+          <ul className="mt-3 divide-y divide-border rounded-xl border border-border">
+            {history.map((article) => (
+              <li key={article.id} className="px-4 py-3">
+                <Link href={`/article/${article.slug}`} className="group block">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
+                    {article.category.name}
+                  </span>
+                  <p className="font-heading font-bold text-text group-hover:text-primary">
+                    {article.title}
+                  </p>
+                  <span className="font-mono text-[11px] text-faint">
+                    Read {formatDate(article.viewedAt)}
+                  </span>
                 </Link>
               </li>
             ))}
