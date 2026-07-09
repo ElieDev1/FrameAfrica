@@ -149,9 +149,10 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Advanced data display: tables (sort/filter/bulk/saved views), **kanban pipeline**, editorial **calendar**, KPI cards + charts, skeleton/empty/error states, toasts, confirm dialogs
 - **DoD:** the back office is a polished, role-aware app per `14 §6`.
 
-### WS14 — Personalization ("For You") `[ ]`
-- [ ] Recommendation feed from follows + reading history; "Because you follow…" rails
-- **DoD:** a signed-in reader gets a genuinely personalised home.
+### WS14 — Personalization ("For You") `[~]`
+- [x] Recommendation feed from follows + reading history — `/for-you` page + `GET /v1/me/feed` (parent-section follows expand to sub-sections; latest-news fallback when no signal). Unit-tested + verified e2e.
+- [ ] "Because you follow…" rails on the homepage for signed-in readers (grouped by subject)
+- **DoD (core met):** a signed-in reader gets a personalised feed; per-subject rails are the enhancement.
 
 ### WS15 — Internationalisation (EN / RW / FR) `[ ]`
 - [ ] Locale routing + UI strings + per-article language variants + `hreflang` + language switcher
