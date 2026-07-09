@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- **Redesigned public masthead.** A cleaner two-row header: the top row carries the brand, an expanding **search** field, theme toggle and account/subscribe (or staff menu); a single centered **section nav** sits below with the live **date · Kigali** on the left. Dropdown indicators and "View all" links now use **real SVG chevron icons** (no glyphs), and mega-menu sub-links use the UI sans for a crisper read.
+- **Redesigned public masthead.** A cleaner two-row header: the top row carries the brand (left), the live **date · Kigali** (centered) and an expanding **search** field, theme toggle and account/subscribe or staff menu (right); a single centered **section nav** sits below. Dropdown indicators and "View all" links now use **real SVG chevron icons** (no glyphs), and mega-menu sub-links use the UI sans for a crisper read.
+- **Live breaking-news ticker.** The breaking strip is now a notched, broadcast-style **Breaking** flag with a pulsing live dot plus a seamless auto-scrolling **marquee** of headlines that pauses on hover, fades at the edge, and honours `prefers-reduced-motion` (was a static horizontal-scroll list).
 - **New type system.** Headlines now use **Fraunces** (an elegant editorial serif) for a premium newspaper feel, the UI/chrome uses **Inter** (clean, legible sans), and article body keeps **Source Serif** for reading. The heading font is decoupled from the base UI font (distinct `--font-*` tokens).
 
 ### Added

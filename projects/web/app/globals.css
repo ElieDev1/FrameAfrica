@@ -74,6 +74,44 @@ body {
    a raw <style> in the root layout, because Tailwind v4 / Lightning CSS strips
    the ::-webkit-scrollbar pseudo-element rules from this file. */
 
+/* Breaking-news ticker: a seamless marquee. The track holds two copies of the
+   headlines and slides left by half its width, so the loop is invisible. Pauses
+   on hover; stops entirely for readers who prefer reduced motion. */
+@keyframes fa-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.fa-marquee {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  animation: fa-marquee 45s linear infinite;
+  will-change: transform;
+}
+.fa-marquee-wrap:hover .fa-marquee {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fa-marquee {
+    animation: none;
+  }
+}
+
+/* Headlines dissolve at the right edge instead of hard-clipping. */
+.fa-marquee-wrap {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 4rem), transparent 100%);
+  mask-image: linear-gradient(to right, #000 calc(100% - 4rem), transparent 100%);
+}
+
+/* The "Breaking" flag: a right-pointing notch, like a broadcast lower-third. */
+.fa-breaking-badge {
+  clip-path: polygon(0 0, 100% 0, calc(100% - 11px) 50%, 100% 100%, 0 100%);
+}
+
 /* Brand logo + theme-toggle icon swap with the theme (set before paint). */
 .brand-logo-light,
 .theme-icon-light {
