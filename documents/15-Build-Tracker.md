@@ -73,7 +73,7 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] A section ad slot (lands with the ad server, WS9)
 - [x] **Topic/tag** model + article↔topic link (`topic` + `article_topic` tables) + seed tags (verified e2e)
 - [x] Topic pages (`/topic/[slug]`) + description; tags on articles link through; `?topic=` article filter
-- [ ] **Follow** on topic/section/author pages (needs the follow model — WS7)
+- [x] **Follow** on topic/section pages (follow model shipped in WS7) — _author follow pends author pages_
 - [x] Topic authoring in the CMS (tag a draft with topics; `GET /v1/topics`, chip picker) — verified e2e
 - [ ] Admin taxonomy manager (create/edit/reorder/activate sections & topics)
 - **DoD:** the site's navigation reflects a real newsroom taxonomy end-to-end.
@@ -111,7 +111,7 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [~] Article **likes** — `article_like` (per-user, deduped) + `POST/DELETE/GET /v1/articles/:id/like` (auth), denormalised count kept in a transaction; a **like button** on the article page (optimistic, signed-out → login). Verified e2e (like/idempotent/unlike/401). _(Comment likes remain.)_
 - [ ] Comment **report/flag** → moderation queue; **moderation UI** (hide/remove/ban) + audit log
 - [x] **Bookmarks / saved** — `bookmark` table + `POST/DELETE/GET /v1/me/bookmarks/:id` + list; a **Save** button on the article + a **"Saved stories"** list in `/account`. Verified e2e (save/idempotent/list/unsave/401)
-- [ ] **Reading history** + **follow** sections/topics/authors (in Account)
+- [x] **Reading history** + **follow** sections/topics (in Account) — Follow/Unfollow on section & topic pages; account **Following** list (inline unfollow) + **Recently read** (with Clear); `/v1/me/follows` + `/v1/me/history` APIs, unit-tested & verified e2e. _(Follow **authors** lands with author pages.)_
 - [ ] AI/heuristic spam pre-screen hook on comment create
 - **DoD:** every interaction in `14 §2` works, with moderation and abuse controls.
 
