@@ -1,4 +1,5 @@
 import { TrendingDownIcon, TrendingUpIcon } from '@/components/icons';
+import { LiveBadge } from '@/components/LiveBadge';
 import { fetchMarkets } from '@/lib/widgets';
 
 /**
@@ -14,9 +15,7 @@ export async function MarketsWidget() {
         <h2 id="markets" className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
           Markets
         </h2>
-        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-          {rows.length > 0 ? 'Live' : 'Unavailable'}
-        </span>
+        <LiveBadge live={rows.length > 0} />
       </div>
       {rows.length > 0 ? (
         <ul className="flex flex-col gap-2.5">

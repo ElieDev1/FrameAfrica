@@ -1,4 +1,5 @@
 import { WeatherIcon, weatherFromCode } from '@/components/icons';
+import { LiveBadge } from '@/components/LiveBadge';
 import { fetchWeather } from '@/lib/widgets';
 
 /** Live weather for a few African capitals (Open-Meteo, refreshed every 15 min). */
@@ -11,9 +12,7 @@ export async function WeatherWidget() {
         <h2 id="weather" className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
           Weather
         </h2>
-        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-          {cities.length > 0 ? 'Live' : 'Unavailable'}
-        </span>
+        <LiveBadge live={cities.length > 0} />
       </div>
       {cities.length > 0 ? (
         <ul className="flex flex-col gap-2.5">
