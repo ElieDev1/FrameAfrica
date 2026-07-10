@@ -48,6 +48,9 @@ export async function SiteHeader() {
   const navUser: NavUser | null = user
     ? {
         firstName: user.displayName.split(' ')[0],
+        name: user.displayName,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
         isStaff: user.roles.some((r) => STAFF_ROLES.includes(r)),
         isEditor: user.roles.some((r) => EDITOR_ROLES.includes(r)),
         isAdmin: user.roles.includes('admin'),

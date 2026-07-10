@@ -9,10 +9,13 @@ import { ChevronDownIcon, ChevronRightIcon, SearchIcon } from '../icons';
 import { ThemeToggle } from '../ThemeToggle';
 import { Wordmark } from '../Wordmark';
 import { MobileMenu } from './MobileMenu';
-import { StaffMenu } from './StaffMenu';
+import { ProfileMenu } from './ProfileMenu';
 
 export interface NavUser {
   firstName: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
   isStaff: boolean;
   isEditor: boolean;
   isAdmin: boolean;
@@ -139,21 +142,7 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
           </Link>
           <ThemeToggle />
           {user ? (
-            <>
-              <Link
-                href="/for-you"
-                className="hidden text-sm font-medium text-muted transition-colors hover:text-primary lg:inline"
-              >
-                {t(locale, 'nav.forYou')}
-              </Link>
-              {user.isStaff && <StaffMenu isEditor={user.isEditor} isAdmin={user.isAdmin} />}
-              <Link
-                href="/account"
-                className="hidden text-sm font-medium text-text transition-colors hover:text-primary md:inline"
-              >
-                {user.firstName}
-              </Link>
-            </>
+            <ProfileMenu user={user} locale={locale} />
           ) : (
             <>
               <Link
