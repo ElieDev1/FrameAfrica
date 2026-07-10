@@ -121,12 +121,11 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] In-article video/embed block via oEmbed (allow-listed)
 - **DoD:** channel uploads appear on-site automatically and embed safely.
 
-### WS9 — Advanced advertising `[ ]`
-- [ ] Ad server: advertiser → campaign → creative → flight; IAB unit slots; house-ad fallback
-- [ ] Targeting (section/geo/device/day-part) + frequency capping + A/B; labels + `ads.txt`
-- [ ] Notices / tenders / obituaries as sold, scheduled placements
-- [ ] Impression/click/viewability tracking + sales reporting
-- **DoD:** ads are sold, targeted, labelled, measured — per `14 §4`.
+### WS9 — Advertising `[~]`
+- [x] **Managed house ads** — `house_ad` model + admin CRUD (`/dashboard/ads`); public `GET /v1/ads?placement=` serves an active creative into the labelled IAB slots (leaderboard/billboard/rectangle/halfpage/native) with a **house-ad fallback**; click-through `GET /v1/ads/:id/go` (302) with **impression + click counting**. Unit-tested + verified e2e.
+- [ ] Full ad **sales server**: advertiser → campaign → flight; targeting (section/geo/device/day-part), frequency capping, A/B; `ads.txt`
+- [ ] Notices / tenders / obituaries as sold, scheduled placements; viewability + sales reporting
+- **DoD (core met):** ads are served, labelled and measured; the sales/targeting server remains.
 
 ### WS10 — Monetization & paywall `[ ]`
 - [ ] Metered paywall (N free/period) → preview over meter; subscriber unlock + gift article

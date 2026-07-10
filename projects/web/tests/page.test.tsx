@@ -11,6 +11,8 @@ jest.mock('@/lib/api', () => ({
 // stub them so the homepage renders synchronously in the test.
 jest.mock('@/components/WeatherWidget', () => ({ WeatherWidget: () => <h2>Weather</h2> }));
 jest.mock('@/components/MarketsWidget', () => ({ MarketsWidget: () => <h2>Markets</h2> }));
+// AdSlot is also async (serves a house ad from the API) — stub it too.
+jest.mock('@/components/AdSlot', () => ({ AdSlot: () => <aside aria-label="Advertisement" /> }));
 
 const mockFetchArticles = fetchArticles as jest.MockedFunction<typeof fetchArticles>;
 const mockFetchCategories = fetchCategories as jest.MockedFunction<typeof fetchCategories>;

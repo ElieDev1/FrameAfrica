@@ -1,16 +1,12 @@
+import { type AdPlacement, fetchHouseAd, PUBLIC_API_URL } from '@/lib/ads';
+
 /**
  * Advertisement slot. Always labelled "Advertisement" and visually distinct from
- * editorial cards (documents/06 §4.1). Shows a house ad until a real ad server
- * (Slice 8) is wired; `variant` picks the standard IAB shape.
- * - leaderboard  728×90 / 970×90   (top of page, between sections)
- * - billboard    970×250           (before footer)
- * - rectangle    300×250           (in rail / in-content)
- * - halfpage     300×600 sticky    (rail, high viewability)
- * - native       fluid             (in-feed, styled as content but labelled)
+ * editorial cards (documents/06 §4.1). Serves an admin-managed **house ad** for
+ * the placement, falling back to a house creative when none is booked. A real
+ * ad-sales server is the later swap behind `fetchHouseAd`.
  */
-type Variant = 'leaderboard' | 'billboard' | 'rectangle' | 'halfpage' | 'native';
-
-const SHAPE: Record<Variant, string> = {
+const SHAPE: Record<AdPlacement, string> = {
   leaderboard: 'h-24 md:h-28',
   billboard: 'h-28 md:h-[250px]',
   rectangle: 'aspect-[6/5]',
@@ -18,15 +14,17 @@ const SHAPE: Record<Variant, string> = {
   native: 'aspect-[16/9]',
 };
 
-export function AdSlot({
+export async function AdSlot({
   variant = 'leaderboard',
   className = '',
   sticky = false,
 }: {
-  variant?: Variant;
+  variant?: AdPlacement;
   className?: string;
   sticky?: boolean;
 }) {
+  const ad = await fetchHouseAd(variant);
+
   return (
     <aside
       aria-label="Advertisement"
@@ -35,16 +33,36 @@ export function AdSlot({
       <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-faint">
         Advertisement
       </span>
-      <div
-        className={`media-fill flex items-center justify-center rounded-xl ring-1 ring-border ${SHAPE[variant]}`}
-      >
-        <div className="px-6 text-center">
-          <p className="font-heading text-lg font-bold text-text">Advertise with Frame Africa</p>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Reach readers across Rwanda &amp; Africa
-          </p>
+      {ad ? (
+        <a
+          href={`${PUBLIC_API_URL}/ads/${ad.id}/go`}
+          target="_blank"
+          rel="noopener sponsored"
+          className={`block overflow-hidden rounded-xl ring-1 ring-border ${SHAPE[variant]}`}
+        >
+          {ad.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- ad creatives are arbitrary external hosts
+            <img src={ad.imageUrl} alt={ad.title} className="h-full w-full object-cover" />
+          ) : (
+            <div className="media-fill flex h-full items-center justify-center">
+              <p className="px-6 text-center font-heading text-lg font-bold text-text">
+                {ad.title}
+              </p>
+            </div>
+          )}
+        </a>
+      ) : (
+        <div
+          className={`media-fill flex items-center justify-center rounded-xl ring-1 ring-border ${SHAPE[variant]}`}
+        >
+          <div className="px-6 text-center">
+            <p className="font-heading text-lg font-bold text-text">Advertise with Frame Africa</p>
+            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+              Reach readers across Rwanda &amp; Africa
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 }

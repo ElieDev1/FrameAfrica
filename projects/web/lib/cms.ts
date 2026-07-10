@@ -251,6 +251,30 @@ export async function fetchOverview(): Promise<AdminOverview> {
   return json.data;
 }
 
+export interface HouseAdAdmin {
+  id: string;
+  title: string;
+  imageUrl: string | null;
+  linkUrl: string;
+  placement: 'leaderboard' | 'billboard' | 'rectangle' | 'halfpage' | 'native';
+  isActive: boolean;
+  impressions: number;
+  clicks: number;
+  createdAt: string;
+}
+
+/** All house ads (admin). */
+export async function fetchHouseAds(): Promise<HouseAdAdmin[]> {
+  const res = await fetch(`${API_URL}/admin/ads`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load ads (${res.status})`);
+  const json = (await res.json()) as { data: HouseAdAdmin[] };
+  return json.data;
+}
+
 export interface AnalyticsOverview {
   readingNow: number;
   totalToday: number;
