@@ -1,14 +1,7 @@
-import Link from 'next/link';
-import { fetchCategories, type CategoryNode } from '@/lib/api';
-import { t } from '@/lib/i18n';
+import { fetchArticles, fetchCategories, type CategoryNode } from '@/lib/api';
 import { getLocale } from '@/lib/i18n-server';
 import { getSession } from '@/lib/session';
-import { SearchIcon } from './icons';
-import { DesktopSectionNav } from './nav/DesktopSectionNav';
-import { MobileMenu } from './nav/MobileMenu';
-import { StaffMenu } from './nav/StaffMenu';
-import { ThemeToggle } from './ThemeToggle';
-import { Wordmark } from './Wordmark';
+import { type FeaturedMap, HeaderClient, type NavUser } from './nav/HeaderClient';
 
 const MAX_SECTIONS = 9;
 const STAFF_ROLES = ['journalist', 'editor', 'admin'];
@@ -22,7 +15,11 @@ const today = () =>
     year: 'numeric',
   }).format(new Date());
 
-/** Public masthead: brand + search + account, then one centered section nav. */
+/**
+ * Public masthead. Fetches the section tree, the reader's session, and the
+ * newest story per top section (for the mega-menu previews), then hands off to
+ * the client header which owns scroll-condensing + active-section state.
+ */
 export async function SiteHeader() {
   let allSections: CategoryNode[] = [];
   try {
@@ -33,93 +30,46 @@ export async function SiteHeader() {
   const navSections = allSections.slice(0, MAX_SECTIONS);
   const locale = await getLocale();
   const user = await getSession();
-  const isStaff = user?.roles.some((role) => STAFF_ROLES.includes(role)) ?? false;
-  const isEditor = user?.roles.some((role) => EDITOR_ROLES.includes(role)) ?? false;
-  const isAdmin = user?.roles.includes('admin') ?? false;
+
+  // Map every (sub)section slug to its top-level section, so a recent article in
+  // any sub-section can headline its parent's mega-menu.
+  const childToTop: Record<string, string> = {};
+  const walk = (node: CategoryNode, top: string) => {
+    childToTop[node.slug] = top;
+    node.children.forEach((c) => walk(c, top));
+  };
+  allSections.forEach((s) => walk(s, s.slug));
+
+  const featured: FeaturedMap = {};
+  try {
+    const { articles } = await fetchArticles({ limit: 40 });
+    for (const a of articles) {
+      const top = childToTop[a.category.slug] ?? a.category.slug;
+      if (!featured[top]) {
+        featured[top] = { title: a.title, slug: a.slug, imageUrl: a.featuredImage?.url ?? null };
+      }
+    }
+  } catch {
+    // mega-menu previews are optional
+  }
+
+  const navUser: NavUser | null = user
+    ? {
+        firstName: user.displayName.split(' ')[0],
+        isStaff: user.roles.some((r) => STAFF_ROLES.includes(r)),
+        isEditor: user.roles.some((r) => EDITOR_ROLES.includes(r)),
+        isAdmin: user.roles.includes('admin'),
+      }
+    : null;
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-surface/85 backdrop-blur-xl">
-      {/* Masthead: brand (left) · date (center) · search + account (right). */}
-      <div className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-4">
-        <div className="flex items-center gap-2 justify-self-start">
-          <div className="flex items-center md:hidden">
-            <MobileMenu
-              sections={allSections}
-              signedIn={Boolean(user)}
-              isStaff={isStaff}
-              isEditor={isEditor}
-              isAdmin={isAdmin}
-              firstName={user?.displayName.split(' ')[0] ?? null}
-            />
-          </div>
-          <Link href="/" aria-label="Frame Africa — home" className="shrink-0">
-            <Wordmark />
-          </Link>
-        </div>
-
-        <span className="hidden justify-self-center font-mono text-[10px] uppercase tracking-[0.16em] text-faint md:block">
-          {today()} · Kigali
-        </span>
-
-        <div className="flex items-center gap-3 justify-self-end">
-          <form action="/search" className="relative hidden md:block">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint">
-              <SearchIcon size={15} />
-            </span>
-            <input
-              name="q"
-              type="search"
-              placeholder={t(locale, 'nav.searchPlaceholder')}
-              aria-label={t(locale, 'nav.searchAria')}
-              className="w-44 rounded-full border border-border bg-surface-2 py-1.5 pl-9 pr-4 font-body text-sm text-text outline-none transition-[width,border-color] focus:w-64 focus:border-primary"
-            />
-          </form>
-
-          <ThemeToggle />
-
-          {user ? (
-            <>
-              <Link
-                href="/for-you"
-                className="hidden text-sm font-medium text-muted transition-colors hover:text-primary md:inline"
-              >
-                {t(locale, 'nav.forYou')}
-              </Link>
-              {isStaff && <StaffMenu isEditor={isEditor} isAdmin={isAdmin} />}
-              <Link
-                href="/account"
-                className="hidden text-sm font-medium text-text transition-colors hover:text-primary md:inline"
-              >
-                {user.displayName.split(' ')[0]}
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="hidden text-sm font-medium text-muted transition-colors hover:text-primary md:inline"
-              >
-                {t(locale, 'nav.signIn')}
-              </Link>
-              <Link
-                href="/signup"
-                className="hidden rounded-full bg-primary px-3.5 py-1.5 text-sm font-semibold text-black transition-transform hover:-translate-y-px md:inline"
-              >
-                {t(locale, 'nav.subscribe')}
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Section nav: a single centered row of sections with mega-menus. */}
-      {navSections.length > 0 && (
-        <div className="hidden border-t border-border/60 md:block">
-          <div className="mx-auto flex max-w-[1440px] justify-center px-6">
-            <DesktopSectionNav sections={navSections} />
-          </div>
-        </div>
-      )}
-    </header>
+    <HeaderClient
+      sections={navSections}
+      allSections={allSections}
+      featured={featured}
+      user={navUser}
+      locale={locale}
+      today={today()}
+    />
   );
 }
