@@ -65,40 +65,70 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans), system-ui, sans-serif;
-  /* A soft, barely-visible mesh (a few faint warm blobs + a whisper-fine dot
-     grid) gives the page quiet depth in the spirit of Fluent/Mica — enough to
-     avoid a flat empty canvas, never enough to compete with the reading
-     surface. Uses only existing brand/neutral tokens. */
-  background-image:
-    radial-gradient(
-      900px 520px at 8% -6%,
-      color-mix(in srgb, var(--color-primary) 7%, transparent),
-      transparent 60%
-    ),
-    radial-gradient(
-      820px 520px at 100% 4%,
-      color-mix(in srgb, var(--color-primary) 5%, transparent),
-      transparent 55%
-    ),
-    radial-gradient(
-      1100px 700px at 50% 108%,
-      color-mix(in srgb, var(--color-primary) 4%, transparent),
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 1px 1px,
-      color-mix(in srgb, var(--color-text) 3.5%, transparent) 1px,
-      transparent 0
-    );
-  background-size:
-    100% 100%,
-    100% 100%,
-    100% 100%,
-    26px 26px;
-  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+  /* The canvas stays almost flat — just a whisper-fine dot grid for texture.
+     The real "design" lives in the top-right corner accent (body::before). */
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in srgb, var(--color-text) 2%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 26px 26px;
+  background-repeat: repeat;
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Top-right corner accent — a Fluent/Mica-style flourish: a soft brand bloom
+   with fine concentric arcs radiating from the corner, masked so it melts into
+   the page well before the content. Fixed, behind everything, non-interactive. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      560px 480px at 100% -6%,
+      color-mix(in srgb, var(--color-primary) 11%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      440px 420px at 82% 6%,
+      color-mix(in srgb, var(--color-accent-red) 6%, transparent),
+      transparent 58%
+    ),
+    repeating-radial-gradient(
+      circle at 100% 0%,
+      transparent 0 50px,
+      color-mix(in srgb, var(--color-text) 6%, transparent) 50px 51px,
+      transparent 51px 102px
+    );
+  -webkit-mask-image: radial-gradient(80% 64% at 100% 0%, #000 0%, transparent 72%);
+  mask-image: radial-gradient(80% 64% at 100% 0%, #000 0%, transparent 72%);
+}
+
+/* Keep the light page pure white: soften the corner bloom (the arcs stay as a
+   crisp, neutral geometric flourish that reads as design, not a colour cast). */
+:root[data-theme='light'] body::before {
+  background:
+    radial-gradient(
+      520px 460px at 100% -6%,
+      color-mix(in srgb, var(--color-primary) 6%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      420px 400px at 82% 6%,
+      color-mix(in srgb, var(--color-accent-red) 3%, transparent),
+      transparent 56%
+    ),
+    repeating-radial-gradient(
+      circle at 100% 0%,
+      transparent 0 50px,
+      color-mix(in srgb, var(--color-text) 5%, transparent) 50px 51px,
+      transparent 51px 102px
+    );
 }
 
 /* In light mode keep the page pure white: drop the warm mesh blobs (they read
@@ -243,24 +273,18 @@ body {
   background-color: var(--color-bg);
   background-image:
     radial-gradient(
-      760px 460px at 100% 0%,
-      color-mix(in srgb, var(--color-primary) 7%, transparent),
+      720px 460px at 100% 0%,
+      color-mix(in srgb, var(--color-primary) 5%, transparent),
       transparent 56%
     ),
     radial-gradient(
-      640px 460px at 0% 100%,
-      color-mix(in srgb, var(--color-primary) 5%, transparent),
-      transparent 55%
-    ),
-    radial-gradient(
       circle at 1px 1px,
-      color-mix(in srgb, var(--color-text) 4%, transparent) 1px,
+      color-mix(in srgb, var(--color-text) 2.5%, transparent) 1px,
       transparent 0
     );
   background-size:
     100% 100%,
-    100% 100%,
     24px 24px;
-  background-repeat: no-repeat, no-repeat, repeat;
+  background-repeat: no-repeat, repeat;
   background-attachment: fixed;
 }
