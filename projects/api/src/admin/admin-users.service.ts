@@ -105,6 +105,20 @@ export class AdminUsersService {
     return toView(updated);
   }
 
+  /**
+   * Grant or revoke paid access. Until self-serve payments (MoMo/Airtel) land,
+   * an admin comps a subscription by setting `subscribedUntil`; `null` revokes.
+   */
+  async setSubscription(id: string, until: Date | null): Promise<AdminUserView> {
+    await this.assertUser(id);
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: { subscribedUntil: until },
+      include: withRoles,
+    });
+    return toView(updated);
+  }
+
   /** Activate / suspend a user (soft-delete uses `deleted`). */
   async setStatus(id: string, status: UserStatus): Promise<AdminUserView> {
     await this.assertUser(id);

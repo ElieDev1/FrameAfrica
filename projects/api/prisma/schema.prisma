@@ -99,6 +99,9 @@ model User {
   twoFactorSecret    String?    @map("two_factor_secret")
   mustChangePassword Boolean    @default(false) @map("must_change_password")
   commentsBannedAt   DateTime?  @map("comments_banned_at")
+  /// Paid access through this instant; null/past = not a subscriber. Granted by
+  /// an admin today; self-serve payments (MoMo/Airtel) land with billing.
+  subscribedUntil    DateTime?  @map("subscribed_until")
   preferences        Json       @default("{}")
   lastLoginAt        DateTime?  @map("last_login_at")
   createdAt          DateTime   @default(now()) @map("created_at")
@@ -542,6 +545,20 @@ model ArticleCorrection {
 
   @@index([articleId, createdAt])
   @@map("article_correction")
+}
+
+/// One metered article read, per reader per calendar month (documents/04 §7).
+/// `readerKey` is an opaque per-device id (or `user:<id>` when signed in) — no
+/// PII. Only written when the paywall meter is enabled.
+model MeterRead {
+  readerKey String   @map("reader_key")
+  articleId String   @map("article_id") @db.Uuid
+  period    String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@id([readerKey, articleId, period])
+  @@index([readerKey, period])
+  @@map("meter_read")
 }
 
 /// A cached YouTube upload (documents/14 §3.1). Synced from the configured

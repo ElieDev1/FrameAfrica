@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ArticleStatus, Prisma } from '@prisma/client';
+import { AdminSettingsService } from '../admin/admin-settings.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListArticlesQueryDto } from './dto/list-articles-query.dto';
 import { blocksFromPlainBody, previewBlocks, type Block } from './blocks';
@@ -35,9 +36,18 @@ type ArticleWithRelations = Prisma.ArticleGetPayload<{
   include: typeof articleInclude;
 }>;
 
+/** Who is reading: an opaque per-device key, and the signed-in user (if any). */
+export interface ReaderContext {
+  readerKey?: string;
+  userId?: string;
+}
+
 @Injectable()
 export class ContentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly settings: AdminSettingsService,
+  ) {}
 
   /** Published articles only, newest first, cursor-paginated. */
   async listArticles(query: ListArticlesQueryDto): Promise<{
@@ -91,8 +101,15 @@ export class ContentService {
     return { items: page.map(toArticleSummary), nextCursor, hasMore };
   }
 
-  /** A single published article by slug, or 404. */
-  async getArticleBySlug(slug: string): Promise<ArticleDetail> {
+  /**
+   * A single published article by slug, or 404.
+   *
+   * Locking (documents/04 §7): premium stories are locked for non-subscribers.
+   * Beyond that, an optional **metered paywall** locks free stories once a
+   * reader is over their monthly allowance. The meter is off unless an admin
+   * sets `PAYWALL_FREE_ARTICLES` > 0, so the default behaviour is unchanged.
+   */
+  async getArticleBySlug(slug: string, ctx: ReaderContext = {}): Promise<ArticleDetail> {
     const article = await this.prisma.article.findFirst({
       where: { slug, status: ArticleStatus.published, deletedAt: null },
       include: articleInclude,
@@ -102,7 +119,49 @@ export class ContentService {
       throw new NotFoundException(`Article "${slug}" was not found`);
     }
 
-    return toArticleDetail(article);
+    const subscriber = await this.isSubscriber(ctx.userId);
+    let locked = article.isPremium && !subscriber;
+
+    if (!locked && !subscriber) {
+      locked = await this.overMeter(article.id, ctx.readerKey);
+    }
+
+    return toArticleDetail(article, locked);
+  }
+
+  private async isSubscriber(userId?: string): Promise<boolean> {
+    if (!userId) return false;
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { subscribedUntil: true },
+    });
+    return Boolean(user?.subscribedUntil && user.subscribedUntil > new Date());
+  }
+
+  /**
+   * Count this read against the reader's monthly allowance. Returns true when
+   * they're over it (so the article should be locked). A no-op — always false —
+   * when the meter is disabled or we have no reader key (e.g. crawlers).
+   */
+  private async overMeter(articleId: string, readerKey?: string): Promise<boolean> {
+    if (!readerKey) return false;
+    const limit = Number((await this.settings.getValue('PAYWALL_FREE_ARTICLES')) ?? 0);
+    if (!Number.isFinite(limit) || limit <= 0) return false;
+
+    const period = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const already = await this.prisma.meterRead.findUnique({
+      where: { readerKey_articleId_period: { readerKey, articleId, period } },
+      select: { articleId: true },
+    });
+    if (already) return false; // re-reading a story never costs twice
+
+    const used = await this.prisma.meterRead.count({ where: { readerKey, period } });
+    if (used >= limit) return true;
+
+    await this.prisma.meterRead
+      .create({ data: { readerKey, articleId, period } })
+      .catch(() => undefined); // a race just means one uncounted read
+    return false;
   }
 
   /** Active categories as a nested tree (parents → children). */
@@ -388,11 +447,10 @@ function toArticleSummary(article: ArticleWithRelations): ArticleSummary {
   };
 }
 
-function toArticleDetail(article: ArticleWithRelations): ArticleDetail {
-  // No auth/subscription context exists in this public-read slice yet, so every
-  // caller is treated as unsubscribed — premium bodies stay behind a preview
-  // until billing (documents/04-API-Design.md §7) lands.
-  const isLocked = article.isPremium;
+function toArticleDetail(article: ArticleWithRelations, locked = article.isPremium): ArticleDetail {
+  // `locked` is decided by the caller: premium-without-subscription, or a reader
+  // over the metered allowance (documents/04-API-Design.md §7).
+  const isLocked = locked;
 
   // Prefer the structured block document; older articles are converted from
   // their plain body so the renderer always receives blocks. Premium stories

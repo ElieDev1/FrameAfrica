@@ -9,7 +9,14 @@ jest.mock('@/lib/api', () => ({
   fetchComments: jest.fn(),
   fetchLiveUpdates: jest.fn().mockResolvedValue([]),
 }));
-jest.mock('@/lib/session', () => ({ getSession: jest.fn() }));
+jest.mock('@/lib/session', () => ({
+  getSession: jest.fn(),
+  getAccessToken: jest.fn().mockResolvedValue(null),
+}));
+// The article page reads the `fa_reader` cookie for the paywall meter.
+jest.mock('next/headers', () => ({
+  cookies: jest.fn().mockResolvedValue({ get: () => undefined }),
+}));
 jest.mock('@/lib/comments-actions', () => ({ postComment: jest.fn() }));
 jest.mock('@/lib/likes-actions', () => ({
   getLikeStatus: jest.fn().mockResolvedValue(null),

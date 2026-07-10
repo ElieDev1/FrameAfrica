@@ -1,5 +1,6 @@
 import { Test } from '@nestjs/testing';
 import type { Response } from 'express';
+import { TokenService } from '../auth/token.service';
 import { ContentController } from './content.controller';
 import { ContentService } from './content.service';
 
@@ -30,7 +31,11 @@ describe('ContentController', () => {
 
     const ref = await Test.createTestingModule({
       controllers: [ContentController],
-      providers: [{ provide: ContentService, useValue: service }],
+      providers: [
+        { provide: ContentService, useValue: service },
+        // Optional reader auth: an absent/invalid token just means "anonymous".
+        { provide: TokenService, useValue: { verifyAccessToken: jest.fn() } },
+      ],
     }).compile();
 
     controller = ref.get(ContentController);
@@ -57,7 +62,8 @@ describe('ContentController', () => {
     const res = await controller.getArticle('s1', httpRes as Response);
 
     expect(res.data).toMatchObject({ slug: 's1' });
-    expect(service.getArticleBySlug).toHaveBeenCalledWith('s1');
+    // No reader key and no bearer token → an anonymous, unmetered read.
+    expect(service.getArticleBySlug).toHaveBeenCalledWith('s1', { readerKey: undefined });
     expect(httpRes.status).not.toHaveBeenCalled();
   });
 

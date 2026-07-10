@@ -18,6 +18,9 @@ const API_URL =
 
 const ACCESS_COOKIE = 'fa_access';
 const REFRESH_COOKIE = 'fa_refresh';
+/** Opaque per-device id, used only to count metered article reads. No PII. */
+const READER_COOKIE = 'fa_reader';
+const READER_MAX_AGE = 31_536_000; // 1 year
 
 const cookieOptions = {
   httpOnly: true,
@@ -48,7 +51,27 @@ function withCookies(base: string, updates: Record<string, string>): string {
 export async function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-pathname', request.nextUrl.pathname);
-  const pass = () => NextResponse.next({ request: { headers: requestHeaders } });
+
+  // Mint a reader id on first visit so the paywall meter can count reads.
+  const existingReader = request.cookies.get(READER_COOKIE)?.value;
+  const readerKey = existingReader ?? crypto.randomUUID();
+  const mintedReader = !existingReader;
+  if (mintedReader) {
+    // Make it visible to *this* render, not just the next one.
+    requestHeaders.set(
+      'cookie',
+      withCookies(request.headers.get('cookie') ?? '', { [READER_COOKIE]: readerKey }),
+    );
+  }
+  /** Attach the freshly minted reader cookie to whatever response we return. */
+  const finish = (res: NextResponse) => {
+    if (mintedReader) {
+      res.cookies.set(READER_COOKIE, readerKey, { ...cookieOptions, maxAge: READER_MAX_AGE });
+    }
+    return res;
+  };
+
+  const pass = () => finish(NextResponse.next({ request: { headers: requestHeaders } }));
 
   const access = request.cookies.get(ACCESS_COOKIE)?.value;
   const refresh = request.cookies.get(REFRESH_COOKIE)?.value;
@@ -84,12 +107,13 @@ export async function proxy(request: NextRequest) {
     withCookies(request.headers.get('cookie') ?? '', {
       [ACCESS_COOKIE]: newAccess,
       [REFRESH_COOKIE]: newRefresh,
+      [READER_COOKIE]: readerKey,
     }),
   );
   const res = NextResponse.next({ request: { headers: requestHeaders } });
   res.cookies.set(ACCESS_COOKIE, newAccess, cookieOptions);
   res.cookies.set(REFRESH_COOKIE, newRefresh, cookieOptions);
-  return res;
+  return finish(res);
 }
 
 export const config = {

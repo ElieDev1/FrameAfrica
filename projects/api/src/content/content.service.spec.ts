@@ -1,5 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { AdminSettingsService } from '../admin/admin-settings.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ContentService, buildCategoryTree } from './content.service';
 
@@ -8,7 +9,11 @@ type PrismaMock = {
   category: { findMany: jest.Mock; findFirst: jest.Mock };
   follow: { findMany: jest.Mock };
   readingHistory: { findMany: jest.Mock };
+  user: { findUnique: jest.Mock };
+  meterRead: { findUnique: jest.Mock; count: jest.Mock; create: jest.Mock };
 };
+
+type SettingsMock = { getValue: jest.Mock };
 
 const articleRow = (over: Record<string, unknown> = {}) => ({
   id: 'a1',
@@ -39,6 +44,7 @@ const articleRow = (over: Record<string, unknown> = {}) => ({
 describe('ContentService', () => {
   let service: ContentService;
   let prisma: PrismaMock;
+  let settings: SettingsMock;
 
   beforeEach(async () => {
     prisma = {
@@ -46,10 +52,18 @@ describe('ContentService', () => {
       category: { findMany: jest.fn(), findFirst: jest.fn() },
       follow: { findMany: jest.fn() },
       readingHistory: { findMany: jest.fn() },
+      user: { findUnique: jest.fn() },
+      meterRead: { findUnique: jest.fn(), count: jest.fn(), create: jest.fn() },
     };
+    // Paywall meter is off unless PAYWALL_FREE_ARTICLES is set.
+    settings = { getValue: jest.fn().mockResolvedValue(null) };
 
     const moduleRef = await Test.createTestingModule({
-      providers: [ContentService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        ContentService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: AdminSettingsService, useValue: settings },
+      ],
     }).compile();
 
     service = moduleRef.get(ContentService);
@@ -226,6 +240,63 @@ describe('ContentService', () => {
       prisma.article.findFirst.mockResolvedValue(null);
 
       await expect(service.getArticleBySlug('nope')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('does not meter when PAYWALL_FREE_ARTICLES is unset (default off)', async () => {
+      prisma.article.findFirst.mockResolvedValue(articleRow());
+
+      const res = await service.getArticleBySlug('s1', { readerKey: 'device-1' });
+
+      expect(res.isLocked).toBe(false);
+      expect(prisma.meterRead.count).not.toHaveBeenCalled();
+    });
+
+    it('locks a free article once the reader is over the monthly allowance', async () => {
+      settings.getValue.mockResolvedValue('2');
+      prisma.article.findFirst.mockResolvedValue(articleRow());
+      prisma.meterRead.findUnique.mockResolvedValue(null); // not read before
+      prisma.meterRead.count.mockResolvedValue(2); // already used the allowance
+
+      const res = await service.getArticleBySlug('s1', { readerKey: 'device-1' });
+
+      expect(res.isLocked).toBe(true);
+      expect(prisma.meterRead.create).not.toHaveBeenCalled();
+    });
+
+    it('counts a read and serves the article while under the allowance', async () => {
+      settings.getValue.mockResolvedValue('5');
+      prisma.article.findFirst.mockResolvedValue(articleRow());
+      prisma.meterRead.findUnique.mockResolvedValue(null);
+      prisma.meterRead.count.mockResolvedValue(1);
+      prisma.meterRead.create.mockResolvedValue({});
+
+      const res = await service.getArticleBySlug('s1', { readerKey: 'device-1' });
+
+      expect(res.isLocked).toBe(false);
+      expect(prisma.meterRead.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('never charges twice for re-reading the same story', async () => {
+      settings.getValue.mockResolvedValue('1');
+      prisma.article.findFirst.mockResolvedValue(articleRow());
+      prisma.meterRead.findUnique.mockResolvedValue({ articleId: 'a1' }); // already counted
+
+      const res = await service.getArticleBySlug('s1', { readerKey: 'device-1' });
+
+      expect(res.isLocked).toBe(false);
+      expect(prisma.meterRead.count).not.toHaveBeenCalled();
+    });
+
+    it('a subscriber bypasses the meter and premium locks', async () => {
+      settings.getValue.mockResolvedValue('1');
+      prisma.article.findFirst.mockResolvedValue(articleRow({ isPremium: true }));
+      const future = new Date(Date.now() + 86_400_000);
+      prisma.user.findUnique.mockResolvedValue({ subscribedUntil: future });
+
+      const res = await service.getArticleBySlug('s1', { readerKey: 'd1', userId: 'u1' });
+
+      expect(res.isLocked).toBe(false);
+      expect(prisma.meterRead.count).not.toHaveBeenCalled();
     });
   });
 
