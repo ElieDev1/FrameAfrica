@@ -1,13 +1,18 @@
 import Link from 'next/link';
 import type { ArticleSummary } from '@/lib/api';
+import { RailHeading } from './SectionHeading';
 
-/** A compact, imageless headline (for secondary stories and the Most-read list). */
+/** A compact, imageless headline (for secondary stories and curated lists). */
 export function HeadlineItem({ article, rank }: { article: ArticleSummary; rank?: number }) {
   return (
-    <article className="flex gap-3 py-3">
+    <article className="group flex gap-3 py-3">
       {rank !== undefined && (
-        <span className="font-heading text-2xl font-black leading-none text-primary/60">
-          {rank}
+        <span
+          className={`font-heading text-2xl font-black leading-none tabular-nums ${
+            rank <= 3 ? 'text-primary' : 'text-faint/50'
+          }`}
+        >
+          {String(rank).padStart(2, '0')}
         </span>
       )}
       <div className="min-w-0">
@@ -17,8 +22,11 @@ export function HeadlineItem({ article, rank }: { article: ArticleSummary; rank?
         >
           {article.category.name}
         </Link>
-        <h3 className="mt-0.5 font-heading font-bold leading-tight text-text">
-          <Link href={`/article/${article.slug}`} className="hover:text-primary">
+        <h3 className="mt-0.5 font-heading text-[15px] font-bold leading-snug text-text">
+          <Link
+            href={`/article/${article.slug}`}
+            className="line-clamp-2 transition-colors group-hover:text-primary"
+          >
             {article.title}
           </Link>
         </h3>
@@ -27,16 +35,12 @@ export function HeadlineItem({ article, rank }: { article: ArticleSummary; rank?
   );
 }
 
+/** The sidebar "Most read" ranked list — shares the section connector heading. */
 export function MostRead({ articles }: { articles: ArticleSummary[] }) {
   if (articles.length === 0) return null;
   return (
     <section aria-labelledby="most-read">
-      <h2
-        id="most-read"
-        className="border-b border-border pb-2 font-mono text-xs uppercase tracking-[0.18em] text-muted"
-      >
-        Most read
-      </h2>
+      <RailHeading title="Most read" id="most-read" />
       <div className="divide-y divide-border">
         {articles.map((article, index) => (
           <HeadlineItem key={article.id} article={article} rank={index + 1} />
