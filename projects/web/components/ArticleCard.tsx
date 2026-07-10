@@ -51,7 +51,7 @@ function Thumb({
   kicker: string;
   image: FeaturedImage | null;
 }) {
-  const aspect = featured ? 'aspect-[16/9]' : 'aspect-[16/10]';
+  const aspect = featured ? 'aspect-[2/1]' : 'aspect-[16/10]';
   if (image) {
     return (
       <div className={`relative w-full overflow-hidden rounded-xl ${aspect}`}>
@@ -96,8 +96,8 @@ export function ArticleCard({
       <div className="flex flex-col gap-2">
         <Badges article={article} />
         <h3
-          className={`font-heading font-bold leading-[1.12] tracking-tight text-text ${
-            featured ? 'text-3xl md:text-[2.6rem]' : 'text-lg'
+          className={`font-heading font-bold leading-[1.14] tracking-tight text-text ${
+            featured ? 'text-2xl md:text-3xl' : 'text-lg'
           }`}
         >
           <Link href={href} className="transition-colors group-hover:text-primary">
@@ -105,7 +105,7 @@ export function ArticleCard({
           </Link>
         </h3>
         {article.excerpt && (
-          <p className={`font-body text-muted ${featured ? 'text-lg' : 'text-[0.95rem]'}`}>
+          <p className={`font-body text-muted ${featured ? 'text-base' : 'text-[0.95rem]'}`}>
             {article.excerpt}
           </p>
         )}
