@@ -27,11 +27,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-screen bg-bg">
       <DashboardSidebar roles={user.roles} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="dash-surface flex min-w-0 flex-1 flex-col">
         <DashboardTopbar name={user.displayName} role={role} roles={user.roles} />
-        <main className="mx-auto w-full max-w-[1560px] flex-1 px-4 py-8 sm:px-6 lg:px-8">
-          {children}
-        </main>
+        {/* Fluid width: when the sidebar collapses, the content reclaims the
+            space instead of staying pinned to a centered column. */}
+        <main className="w-full flex-1 px-4 py-8 sm:px-6 lg:px-8 2xl:px-10">{children}</main>
       </div>
     </div>
   );

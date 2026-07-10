@@ -221,3 +221,33 @@ body {
     transparent 42%
   );
 }
+
+/* Dashboard workspace canvas — the same quiet mesh as the public page, dialled a
+   touch richer for the tool: soft warm corners + a whisper-fine dot grid, fixed
+   so it stays put while the content scrolls. Panels (bg-surface) sit on top of
+   this and read clearly as "the content". Existing tokens only. */
+.dash-surface {
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(
+      760px 460px at 100% 0%,
+      color-mix(in srgb, var(--color-primary) 7%, transparent),
+      transparent 56%
+    ),
+    radial-gradient(
+      640px 460px at 0% 100%,
+      color-mix(in srgb, var(--color-primary) 5%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 1px 1px,
+      color-mix(in srgb, var(--color-text) 4%, transparent) 1px,
+      transparent 0
+    );
+  background-size:
+    100% 100%,
+    100% 100%,
+    24px 24px;
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-attachment: fixed;
+}
