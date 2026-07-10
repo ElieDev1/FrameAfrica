@@ -1,6 +1,8 @@
 import { BadRequestException, ValidationError, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import type { ErrorDetail } from './common/http/api-error';
@@ -22,7 +24,19 @@ function toValidationDetails(errors: ValidationError[]): ErrorDetail[] {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Security headers (documents/05 §7). The API serves JSON to the BFF, so the
+  // strict defaults are safe; CSP is disabled here because content security is
+  // enforced on the web (Next.js) origin, not the JSON API. `crossOriginResourcePolicy`
+  // is relaxed so same-origin uploaded media can be embedded by the web app.
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
+  app.disable('x-powered-by'); // don't advertise Express
 
   app.use(cookieParser());
   app.setGlobalPrefix('v1', { exclude: ['health'] });

@@ -126,8 +126,8 @@ const SWATCHES = [
 ];
 
 const FONTS: Record<FontChoice, string> = {
-  sans: 'Inter, system-ui, "Segoe UI", Roboto, sans-serif',
-  serif: 'Georgia, "Source Serif 4", "Times New Roman", serif',
+  sans: 'Roboto, system-ui, "Segoe UI", sans-serif',
+  serif: 'Georgia, "Times New Roman", serif',
 };
 
 export function AdStudio({ media }: { media: MediaItem[] }) {

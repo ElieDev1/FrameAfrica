@@ -45,24 +45,25 @@ export default async function PipelinePage() {
   const columns = await Promise.all(COLUMNS.map((c) => listAllArticles({ status: c.status })));
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div>
       <h1 className="font-heading text-2xl font-black tracking-tight text-text">Pipeline</h1>
       <p className="mt-1 font-body text-sm text-muted">
         The whole newsroom at a glance — every story by stage.
       </p>
 
-      <div className="mt-6 flex gap-4 overflow-x-auto pb-4">
+      <div className="-mx-4 mt-6 flex gap-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         {COLUMNS.map((col, i) => (
-          <section key={col.status} className="w-64 shrink-0">
-            <div className="flex items-center justify-between border-b border-border pb-2">
-              <span className="flex items-center gap-2">
-                <StatusBadge status={col.status} />
-                <span className="font-mono text-xs text-muted">{columns[i].length}</span>
-              </span>
+          <section
+            key={col.status}
+            className="flex max-h-[calc(100vh-13rem)] w-72 shrink-0 flex-col rounded-xl border border-border bg-surface-2/40"
+          >
+            <div className="flex items-center gap-2 border-b border-border px-3 py-2.5">
+              <StatusBadge status={col.status} />
+              <span className="font-mono text-xs text-muted">{columns[i].length}</span>
             </div>
-            <div className="mt-3 flex flex-col gap-2">
+            <div className="flex flex-col gap-2 overflow-y-auto p-3">
               {columns[i].length === 0 ? (
-                <p className="px-1 font-body text-xs text-faint">Nothing here.</p>
+                <p className="px-1 py-2 font-body text-xs text-faint">Nothing here.</p>
               ) : (
                 columns[i].map((article) => <Card key={article.id} article={article} />)
               )}

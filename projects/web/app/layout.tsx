@@ -1,24 +1,16 @@
 import type { Metadata, Viewport } from 'next';
-import { IBM_Plex_Mono, Inter, Source_Serif_4 } from 'next/font/google';
+import { IBM_Plex_Mono, Roboto } from 'next/font/google';
 import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
 import { getLocale } from '@/lib/i18n-server';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site';
 import './globals.css';
 
-// UI / base — a clean, highly legible sans for nav, buttons, chrome.
-const sans = Inter({
-  variable: '--font-inter',
+// One family across the whole system — Roboto — for headlines, body, and UI
+// chrome. Heavier weights carry the headlines; regular carries reading text.
+const roboto = Roboto({
+  variable: '--font-roboto',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
-});
-
-// Headlines *and* article body share one conventional reading serif — the
-// classic newspaper pairing (serif editorial + sans chrome). Heavier weights
-// carry the headlines.
-const sourceSerif = Source_Serif_4({
-  variable: '--font-source-serif',
-  subsets: ['latin'],
-  weight: ['400', '600', '700', '900'],
+  weight: ['400', '500', '700', '900'],
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -88,7 +80,7 @@ export default async function RootLayout({
       lang={locale}
       data-theme="dark"
       suppressHydrationWarning
-      className={`${sans.variable} ${sourceSerif.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${roboto.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
       {/* These live at the top of <body>, not in a hand-rolled <head>. Browser
           extensions (ad blockers) inject their own <script>/<style> into <head>

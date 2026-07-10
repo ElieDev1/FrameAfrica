@@ -44,9 +44,10 @@
   --color-accent-green: var(--color-accent-green);
   /* Headlines and body share one conventional editorial serif; chrome uses the
      sans. (Fraunces was too idiosyncratic for a daily paper.) */
-  --font-heading: var(--font-source-serif);
-  --font-sans: var(--font-inter);
-  --font-body: var(--font-source-serif);
+  /* One family everywhere — Roboto (headlines, body, and chrome). */
+  --font-heading: var(--font-roboto);
+  --font-sans: var(--font-roboto);
+  --font-body: var(--font-roboto);
   --font-mono: var(--font-ibm-plex-mono);
   --radius-brand: 12px;
 }
