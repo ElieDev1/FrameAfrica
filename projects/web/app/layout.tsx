@@ -1,16 +1,9 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, IBM_Plex_Mono, Inter, Source_Serif_4 } from 'next/font/google';
+import { IBM_Plex_Mono, Inter, Source_Serif_4 } from 'next/font/google';
 import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
 import { getLocale } from '@/lib/i18n-server';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site';
 import './globals.css';
-
-// Headlines — an elegant editorial serif display.
-const heading = Fraunces({
-  variable: '--font-fraunces',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '900'],
-});
 
 // UI / base — a clean, highly legible sans for nav, buttons, chrome.
 const sans = Inter({
@@ -19,11 +12,13 @@ const sans = Inter({
   weight: ['400', '500', '600', '700', '800', '900'],
 });
 
-// Article body — a comfortable reading serif.
+// Headlines *and* article body share one conventional reading serif — the
+// classic newspaper pairing (serif editorial + sans chrome). Heavier weights
+// carry the headlines.
 const sourceSerif = Source_Serif_4({
   variable: '--font-source-serif',
   subsets: ['latin'],
-  weight: ['400', '600'],
+  weight: ['400', '600', '700', '900'],
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -93,7 +88,7 @@ export default async function RootLayout({
       lang={locale}
       data-theme="dark"
       suppressHydrationWarning
-      className={`${heading.variable} ${sans.variable} ${sourceSerif.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${sans.variable} ${sourceSerif.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
       {/* These live at the top of <body>, not in a hand-rolled <head>. Browser
           extensions (ad blockers) inject their own <script>/<style> into <head>
