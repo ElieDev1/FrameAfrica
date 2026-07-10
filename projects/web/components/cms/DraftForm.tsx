@@ -42,8 +42,18 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
+/** A titled settings card for the editor sidebar. */
+function Panel({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="rounded-xl border border-border bg-surface p-4">
+      <h2 className="mb-3 font-mono text-[11px] uppercase tracking-[0.16em] text-muted">{title}</h2>
+      <div className="flex flex-col gap-3">{children}</div>
+    </section>
+  );
+}
+
 const inputClass =
-  'rounded-lg border border-border bg-surface-2 px-3 py-2 font-body text-text outline-none focus:border-primary';
+  'w-full rounded-lg border border-border bg-surface-2 px-3 py-2 font-body text-text outline-none focus:border-primary';
 
 function SaveButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
@@ -80,166 +90,172 @@ export function DraftForm({
   });
 
   return (
-    <form action={formAction} className="flex flex-col gap-5">
-      <Field label="Headline">
-        <input
-          name="title"
-          defaultValue={initial?.title}
-          required
-          minLength={3}
-          maxLength={200}
-          className={inputClass}
-        />
-      </Field>
-
-      <Field label="Section">
-        <select
-          name="categoryId"
-          defaultValue={initial?.categoryId ?? ''}
-          required
-          className={inputClass}
-        >
-          <option value="" disabled>
-            Choose a section…
-          </option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-      </Field>
-
-      <Field label="Standfirst (subtitle)">
-        <input
-          name="subtitle"
-          defaultValue={initial?.subtitle}
-          maxLength={300}
-          className={inputClass}
-        />
-      </Field>
-
-      <Field label="Excerpt">
-        <textarea
-          name="excerpt"
-          defaultValue={initial?.excerpt}
-          maxLength={500}
-          rows={2}
-          className={inputClass}
-        />
-      </Field>
-
-      <div className="flex flex-wrap items-end gap-6">
-        <Field label="Language">
-          <select name="language" defaultValue={initial?.language ?? 'en'} className={inputClass}>
-            {LANGUAGES.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <label className="flex items-center gap-2 pb-2 font-body text-sm text-muted">
-          <input type="checkbox" name="isPremium" defaultChecked={initial?.isPremium} />
-          Premium (subscribers only)
-        </label>
-      </div>
-
-      <fieldset className="flex flex-col gap-4 rounded-xl border border-border p-4">
-        <legend className="px-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-          Featured image
-        </legend>
-        <div className="flex flex-wrap items-end gap-2">
-          <div className="min-w-[14rem] flex-1">
-            <Field label="Image URL">
-              <input
-                name="featuredImageUrl"
-                value={featured.url}
-                onChange={(e) => setFeatured((f) => ({ ...f, url: e.target.value }))}
-                maxLength={500}
-                placeholder="/uploads/…  or  https://…"
-                className={inputClass}
-              />
-            </Field>
-          </div>
-          <MediaPicker
-            onSelect={(a) => setFeatured({ url: a.url, alt: a.alt ?? '', credit: a.credit ?? '' })}
+    <form
+      action={formAction}
+      className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start"
+    >
+      {/* ── Writing column ─────────────────────────────────────────── */}
+      <div className="flex min-w-0 flex-col gap-5">
+        <label className="flex flex-col gap-1">
+          <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">Headline</span>
+          <input
+            name="title"
+            defaultValue={initial?.title}
+            required
+            minLength={3}
+            maxLength={200}
+            placeholder="Write the headline…"
+            className="rounded-lg border border-border bg-surface-2 px-4 py-3 font-heading text-2xl font-black tracking-tight text-text outline-none placeholder:font-normal placeholder:text-faint focus:border-primary"
           />
-        </div>
-        <div className="flex flex-wrap gap-4">
-          <div className="min-w-[16rem] flex-1">
-            <Field label="Alt text (for accessibility)">
-              <input
-                name="featuredImageAlt"
-                value={featured.alt}
-                onChange={(e) => setFeatured((f) => ({ ...f, alt: e.target.value }))}
-                maxLength={300}
-                className={inputClass}
-              />
-            </Field>
-          </div>
-          <div className="min-w-[10rem] flex-1">
-            <Field label="Credit">
-              <input
-                name="featuredImageCredit"
-                value={featured.credit}
-                onChange={(e) => setFeatured((f) => ({ ...f, credit: e.target.value }))}
-                maxLength={200}
-                className={inputClass}
-              />
-            </Field>
-          </div>
-        </div>
-      </fieldset>
+        </label>
 
-      {topics.length > 0 && (
-        <fieldset className="flex flex-col gap-2 rounded-xl border border-border p-4">
-          <legend className="px-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Topics
-          </legend>
-          <div className="flex flex-wrap gap-2">
-            {topics.map((topic) => (
-              <label
-                key={topic.slug}
-                className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border px-3 py-1 font-mono text-[11px] text-muted has-[:checked]:border-primary has-[:checked]:text-primary"
-              >
-                <input
-                  type="checkbox"
-                  name="topics"
-                  value={topic.slug}
-                  defaultChecked={selected.has(topic.slug)}
-                  className="accent-primary"
-                />
-                {topic.name}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-      )}
-
-      <div className="flex flex-col gap-2">
-        <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">
-          Article body
-        </span>
-        <BlockEditor initialBlocks={initial?.blocks} initialBody={initial?.body ?? ''} />
-      </div>
-
-      {mode === 'edit' && (
-        <Field label="Change note (optional)">
-          <input name="changeNote" maxLength={300} className={inputClass} />
+        <Field label="Standfirst (subtitle)">
+          <input
+            name="subtitle"
+            defaultValue={initial?.subtitle}
+            maxLength={300}
+            className={inputClass}
+          />
         </Field>
-      )}
 
-      {state.error && (
-        <p role="alert" className="font-mono text-xs text-accent-red">
-          {state.error}
-        </p>
-      )}
-      {state.savedAt && <p className="font-mono text-xs text-accent-green">Saved ✓</p>}
+        <div className="flex flex-col gap-2">
+          <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">
+            Article body
+          </span>
+          <BlockEditor initialBlocks={initial?.blocks} initialBody={initial?.body ?? ''} />
+        </div>
 
-      <div>
-        <SaveButton label={mode === 'create' ? 'Create draft' : 'Save changes'} />
+        {mode === 'edit' && (
+          <Field label="Change note (optional)">
+            <input name="changeNote" maxLength={300} className={inputClass} />
+          </Field>
+        )}
       </div>
+
+      {/* ── Settings sidebar ───────────────────────────────────────── */}
+      <aside className="flex flex-col gap-5 lg:sticky lg:top-20">
+        <Panel title="Publish">
+          {state.error && (
+            <p role="alert" className="font-mono text-xs text-accent-red">
+              {state.error}
+            </p>
+          )}
+          {state.savedAt && <p className="font-mono text-xs text-accent-green">Saved ✓</p>}
+          <SaveButton label={mode === 'create' ? 'Create draft' : 'Save changes'} />
+        </Panel>
+
+        <Panel title="Details">
+          <Field label="Section">
+            <select
+              name="categoryId"
+              defaultValue={initial?.categoryId ?? ''}
+              required
+              className={inputClass}
+            >
+              <option value="" disabled>
+                Choose a section…
+              </option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Language">
+            <select name="language" defaultValue={initial?.language ?? 'en'} className={inputClass}>
+              {LANGUAGES.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <label className="flex items-center gap-2 font-body text-sm text-muted">
+            <input type="checkbox" name="isPremium" defaultChecked={initial?.isPremium} />
+            Premium (subscribers only)
+          </label>
+          <Field label="Excerpt">
+            <textarea
+              name="excerpt"
+              defaultValue={initial?.excerpt}
+              maxLength={500}
+              rows={3}
+              className={inputClass}
+            />
+          </Field>
+        </Panel>
+
+        <Panel title="Featured image">
+          {featured.url && (
+            // eslint-disable-next-line @next/next/no-img-element -- preview, arbitrary host
+            <img
+              src={featured.url}
+              alt=""
+              className="aspect-[16/9] w-full rounded-lg object-cover ring-1 ring-border"
+            />
+          )}
+          <div className="flex items-end gap-2">
+            <div className="min-w-0 flex-1">
+              <Field label="Image URL">
+                <input
+                  name="featuredImageUrl"
+                  value={featured.url}
+                  onChange={(e) => setFeatured((f) => ({ ...f, url: e.target.value }))}
+                  maxLength={500}
+                  placeholder="/uploads/…  or  https://…"
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+            <MediaPicker
+              onSelect={(a) =>
+                setFeatured({ url: a.url, alt: a.alt ?? '', credit: a.credit ?? '' })
+              }
+            />
+          </div>
+          <Field label="Alt text (for accessibility)">
+            <input
+              name="featuredImageAlt"
+              value={featured.alt}
+              onChange={(e) => setFeatured((f) => ({ ...f, alt: e.target.value }))}
+              maxLength={300}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Credit">
+            <input
+              name="featuredImageCredit"
+              value={featured.credit}
+              onChange={(e) => setFeatured((f) => ({ ...f, credit: e.target.value }))}
+              maxLength={200}
+              className={inputClass}
+            />
+          </Field>
+        </Panel>
+
+        {topics.length > 0 && (
+          <Panel title="Topics">
+            <div className="flex flex-wrap gap-2">
+              {topics.map((topic) => (
+                <label
+                  key={topic.slug}
+                  className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border px-3 py-1 font-mono text-[11px] text-muted has-[:checked]:border-primary has-[:checked]:text-primary"
+                >
+                  <input
+                    type="checkbox"
+                    name="topics"
+                    value={topic.slug}
+                    defaultChecked={selected.has(topic.slug)}
+                    className="accent-primary"
+                  />
+                  {topic.name}
+                </label>
+              ))}
+            </div>
+          </Panel>
+        )}
+      </aside>
     </form>
   );
 }
