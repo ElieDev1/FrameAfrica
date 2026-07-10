@@ -11,11 +11,14 @@ export default async function NewDraftPage() {
   const [categories, topics] = await Promise.all([categoryOptions(), topicOptions()]);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <div className="w-full">
       <Link href="/dashboard/stories" className="font-mono text-xs text-primary hover:underline">
         ← Newsroom
       </Link>
-      <h1 className="mt-3 font-heading text-2xl font-black tracking-tight text-text">New draft</h1>
+      <h1 className="mt-3 font-heading text-3xl font-black tracking-tight text-text">New story</h1>
+      <p className="mt-1 font-body text-sm text-muted">
+        Write on the left; set the section, image and topics on the right, then publish.
+      </p>
       <div className="mt-6">
         <DraftForm
           action={createDraftAction}

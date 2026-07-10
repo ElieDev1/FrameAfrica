@@ -37,17 +37,17 @@ export default async function EditDraftPage({ params }: PageProps) {
   const submitAction = submitDraftAction.bind(null, id);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <div className="w-full">
       <Link href="/dashboard/stories" className="font-mono text-xs text-primary hover:underline">
         ← Newsroom
       </Link>
       <div className="mt-3 flex items-center gap-3">
-        <h1 className="font-heading text-2xl font-black tracking-tight text-text">Edit draft</h1>
+        <h1 className="font-heading text-3xl font-black tracking-tight text-text">Edit story</h1>
         <StatusBadge status={draft.status} />
       </div>
 
       {draft.reviewNote && (
-        <div className="mt-4 rounded-xl border-l-4 border-accent-red bg-surface px-4 py-3">
+        <div className="mt-4 max-w-3xl rounded-xl border-l-4 border-accent-red bg-surface px-4 py-3">
           <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-red">
             Returned by an editor
           </p>
@@ -93,7 +93,7 @@ export default async function EditDraftPage({ params }: PageProps) {
           </form>
         </>
       ) : (
-        <div className="mt-6 rounded-xl border border-border p-6">
+        <div className="mt-6 max-w-2xl rounded-xl border border-border p-6">
           <p className="font-body text-muted">
             This article is <strong className="text-text">{draft.status.replace('_', ' ')}</strong>{' '}
             and can&apos;t be edited here.
