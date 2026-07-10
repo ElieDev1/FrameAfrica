@@ -124,6 +124,7 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 
 ### WS9 — Advertising `[~]`
 - [x] **Managed house ads** — `house_ad` model + admin CRUD (`/dashboard/ads`); public `GET /v1/ads?placement=` serves an active creative into the labelled IAB slots (leaderboard/billboard/rectangle/halfpage/native) with a **house-ad fallback**; click-through `GET /v1/ads/:id/go` (302) with **impression + click counting**. Unit-tested + verified e2e.
+- [x] **Ad Studio** (`/dashboard/ads/studio`) — in-app canvas designer at exact IAB sizes (headline/subline/CTA, brand colours, background photo + darkening, brand mark); export PNG or **publish directly into a live slot** (uploads to the media library → creates the house ad).
 - [ ] Full ad **sales server**: advertiser → campaign → flight; targeting (section/geo/device/day-part), frequency capping, A/B; `ads.txt`
 - [ ] Notices / tenders / obituaries as sold, scheduled placements; viewability + sales reporting
 - **DoD (core met):** ads are served, labelled and measured; the sales/targeting server remains.
