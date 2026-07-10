@@ -97,6 +97,12 @@ export const BarChartIcon = (p: IconProps) => (
     <line x1="6" y1="20" x2="6" y2="14" />
   </Stroke>
 );
+export const ColumnsIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <rect x="3" y="4" width="7" height="16" rx="1" />
+    <rect x="14" y="4" width="7" height="10" rx="1" />
+  </Stroke>
+);
 export const ChevronRightIcon = (p: IconProps) => (
   <Stroke {...p}>
     <path d="m9 18 6-6-6-6" />

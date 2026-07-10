@@ -149,8 +149,10 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 ### WS13 — Staff dashboard UX (advanced) `[~]`
 - [x] **Collapsible sidebar** (full ↔ icons-only, persisted, real SVG icons, collapsible groups, mobile drawer)
 - [x] **Topbar**: admin search, quick-create (＋), **notifications bell** (live), **profile menu**, theme toggle; skeleton loaders
-- [ ] Advanced data display: **kanban pipeline**, editorial **calendar**, saved table views, KPI charts (still list/table + badges today)
-- **DoD (core met):** the back office is a polished, role-aware app shell; the kanban/calendar/analytics views remain.
+- [x] **Kanban pipeline** board (`/dashboard/pipeline`) — every story by stage (draft → copy desk → review → scheduled → published → returned) with per-column counts; editor-gated.
+- [x] **KPI cards + charts** — the analytics dashboard (WS18): reading-now, views today, most-read, referrers.
+- [ ] Editorial **calendar** view + saved table views / bulk actions + ⌘K palette
+- **DoD (core met):** polished role-aware shell + pipeline board + analytics; calendar / bulk-table / ⌘K remain.
 
 ### WS14 — Personalization ("For You") `[x]`
 - [x] Recommendation feed from follows + reading history — `/for-you` page + `GET /v1/me/feed` (parent-section follows expand to sub-sections; latest-news fallback when no signal). Unit-tested + verified e2e.

@@ -7,6 +7,7 @@ import {
   ActivityIcon,
   BarChartIcon,
   ChevronDownIcon,
+  ColumnsIcon,
   ClipboardCheckIcon,
   FileTextIcon,
   FlagIcon,
@@ -47,6 +48,7 @@ function groupsFor(roles: string[]): NavGroup[] {
   }
   if (has('editor', 'admin')) {
     desk.push({ href: '/dashboard/review', label: 'Review queue', Icon: ClipboardCheckIcon });
+    desk.push({ href: '/dashboard/pipeline', label: 'Pipeline', Icon: ColumnsIcon });
   }
   if (has('moderator', 'editor', 'admin')) {
     desk.push({ href: '/dashboard/moderation', label: 'Moderation', Icon: FlagIcon });
