@@ -95,11 +95,14 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={`${heading.variable} ${sans.variable} ${sourceSerif.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      <head>
+      {/* These live at the top of <body>, not in a hand-rolled <head>. Browser
+          extensions (ad blockers) inject their own <script>/<style> into <head>
+          before React hydrates, and React then reconciles ours against theirs —
+          producing a spurious hydration mismatch. The theme script still runs
+          before any body content paints, so there's no flash. */}
+      <body className="flex min-h-full flex-col" suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <style dangerouslySetInnerHTML={{ __html: scrollbarCss }} />
-      </head>
-      <body className="flex min-h-full flex-col">
         {children}
         <ServiceWorkerRegister />
       </body>
