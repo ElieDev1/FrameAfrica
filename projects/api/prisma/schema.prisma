@@ -536,6 +536,20 @@ model ArticleCorrection {
   @@map("article_correction")
 }
 
+/// A newsletter subscriber (documents/14 §6). Single opt-in for now
+/// (`confirmedAt` set on subscribe); `unsubscribeToken` powers one-click
+/// unsubscribe. Resubscribing clears `unsubscribedAt`.
+model NewsletterSubscriber {
+  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email            String    @unique @db.Citext
+  confirmedAt      DateTime? @map("confirmed_at")
+  unsubscribedAt   DateTime? @map("unsubscribed_at")
+  unsubscribeToken String    @unique @map("unsubscribe_token")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  @@map("newsletter_subscriber")
+}
+
 /// A confidential news tip from the public (documents/14 §7 secure tips). No
 /// author link — tips are anonymous unless the tipster volunteers `contact`.
 /// Message + contact are stripped of markup on write.

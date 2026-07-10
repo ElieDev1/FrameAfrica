@@ -136,9 +136,10 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 
 ### WS11 — Newsletters & notifications `[~]`
 - [x] **In-app notifications** (`14 §6.3`) — real dashboard bell (unread badge, list, mark read/all, deep links); newsroom emits on **publish** (→ author: live) and **return/reject** (→ author: changes requested). `/v1/me/notifications` API, unit-tested + verified e2e. _(SSE push is the enhancement over the 60s poll.)_
-- [ ] Newsletter subscribe + digests (delivery/open/click analytics), SMTP transport wired
-- [ ] Breaking-news alerts + web push; reader comment-reply notifications (needs a reader bell / WS16)
-- **DoD (core met):** staff get real, role-relevant notifications; newsletters + reader push remain.
+- [x] **Newsletter subscribe + unsubscribe** — `newsletter_subscriber` + rate-limited `POST /v1/newsletter/subscribe` (single opt-in, dedup/resubscribe) + one-click `POST /v1/newsletter/unsubscribe` (token) + editor subscriber count; the homepage signup box now persists; `/unsubscribe` page. Unit-tested + verified e2e.
+- [ ] Digest **send** pipeline (SMTP/queue) + open/click analytics
+- [ ] Breaking-news alerts + web push; reader comment-reply notifications (needs a reader bell / VAPID)
+- **DoD (core met):** staff notifications + newsletter capture work; digest delivery + reader push remain.
 
 ### WS12 — Search `[x]`
 - [x] **Real full-text search (Postgres FTS)** — `GET /v1/search` with weighted `ts_rank` relevance, `websearch_to_tsquery`, `ts_headline` **highlights**, language filter + pagination; `GET /v1/search/suggest` autocomplete. Replaces the interim `LIKE`. Unit-tested + verified e2e.
