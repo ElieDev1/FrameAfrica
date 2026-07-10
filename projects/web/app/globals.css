@@ -20,17 +20,17 @@
   --color-accent-green: #3f9142;
 }
 
-/* Light theme — warm cream paper. Ink is a warm near-black (not pure #000),
-   greys are warm, and --color-primary is deepened to a burnt amber so orange
-   text/kickers clear ~4.3:1 on the cream (the vivid #f39200 was ~2.4:1). Black
-   text on the deepened amber buttons still reads well. */
+/* Light theme — a clean, pure-white page (no warm cream cast). Cards sit on
+   white and separate by their borders/shadows; secondary fills use a light
+   neutral grey. Ink is a warm near-black and --color-primary stays a deepened
+   burnt amber so orange text/kickers clear ~4.3:1 contrast. */
 :root[data-theme='light'] {
-  --color-bg: #faf7f2;
+  --color-bg: #ffffff;
   --color-surface: #ffffff;
-  --color-surface-2: #f1ede4;
+  --color-surface-2: #f3f2f4;
   --color-elev: #ffffff;
-  --color-border: rgba(30, 24, 14, 0.12);
-  --color-border-2: rgba(30, 24, 14, 0.2);
+  --color-border: rgba(24, 22, 20, 0.12);
+  --color-border-2: rgba(24, 22, 20, 0.2);
   --color-text: #16130d;
   --color-muted: #574f45;
   --color-faint: #857c6f;
@@ -99,6 +99,19 @@ body {
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* In light mode keep the page pure white: drop the warm mesh blobs (they read
+   as a yellow cast on white) and keep only the whisper-fine neutral dot grid. */
+:root[data-theme='light'] body,
+:root[data-theme='light'] .dash-surface {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in srgb, var(--color-text) 3.5%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 24px 24px;
+  background-repeat: repeat;
 }
 
 ::selection {
@@ -220,4 +233,34 @@ body {
     color-mix(in srgb, var(--color-text) 3%, transparent),
     transparent 42%
   );
+}
+
+/* Dashboard workspace canvas — the same quiet mesh as the public page, dialled a
+   touch richer for the tool: soft warm corners + a whisper-fine dot grid, fixed
+   so it stays put while the content scrolls. Panels (bg-surface) sit on top of
+   this and read clearly as "the content". Existing tokens only. */
+.dash-surface {
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(
+      760px 460px at 100% 0%,
+      color-mix(in srgb, var(--color-primary) 7%, transparent),
+      transparent 56%
+    ),
+    radial-gradient(
+      640px 460px at 0% 100%,
+      color-mix(in srgb, var(--color-primary) 5%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 1px 1px,
+      color-mix(in srgb, var(--color-text) 4%, transparent) 1px,
+      transparent 0
+    );
+  background-size:
+    100% 100%,
+    100% 100%,
+    24px 24px;
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-attachment: fixed;
 }
