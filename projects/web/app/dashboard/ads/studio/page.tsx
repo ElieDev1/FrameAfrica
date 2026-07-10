@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AdStudio } from '@/components/ads/AdStudio';
-import { requireAdmin } from '@/lib/cms';
+import { listMedia, requireAdmin } from '@/lib/cms';
 
 export const metadata: Metadata = { title: 'Ad Studio — Frame Africa' };
 
 export default async function AdStudioPage() {
   await requireAdmin();
+  const media = await listMedia().catch(() => []);
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto w-full max-w-[1400px]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-heading text-2xl font-black tracking-tight text-text">Ad Studio</h1>
@@ -25,7 +26,7 @@ export default async function AdStudioPage() {
         </Link>
       </div>
 
-      <AdStudio />
+      <AdStudio media={media.map((m) => ({ id: m.id, url: m.url, alt: m.alt }))} />
     </div>
   );
 }

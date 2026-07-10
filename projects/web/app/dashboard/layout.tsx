@@ -29,7 +29,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <DashboardSidebar roles={user.roles} />
       <div className="flex min-w-0 flex-1 flex-col">
         <DashboardTopbar name={user.displayName} role={role} roles={user.roles} />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">{children}</main>
+        <main className="mx-auto w-full max-w-[1560px] flex-1 px-4 py-8 sm:px-6 lg:px-8">
+          {children}
+        </main>
       </div>
     </div>
   );
