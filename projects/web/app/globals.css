@@ -1,31 +1,40 @@
 @import 'tailwindcss';
 
+/* Dark theme — a subtly warm neutral ramp (not pure grey) so the surfaces sit
+   in the same warm family as the brand orange and the light theme. Text is a
+   soft off-white rather than #fff to cut glare, and the greys are warm-tinted.
+   Contrast on --color-bg: text ~17:1, muted ~8.5:1, faint ~4.3:1 (AA+). */
 :root {
-  --color-bg: #0a0a0a;
-  --color-surface: #161616;
-  --color-surface-2: #1e1e1e;
-  --color-elev: #232323;
-  --color-border: rgba(255, 255, 255, 0.09);
-  --color-border-2: rgba(255, 255, 255, 0.14);
-  --color-text: #ffffff;
-  --color-muted: #b0b0b0;
-  --color-faint: #7a7a7a;
+  --color-bg: #0b0a09;
+  --color-surface: #161512;
+  --color-surface-2: #1f1d19;
+  --color-elev: #262420;
+  --color-border: rgba(250, 244, 235, 0.1);
+  --color-border-2: rgba(250, 244, 235, 0.16);
+  --color-text: #f5f3ef;
+  --color-muted: #b4aa9d;
+  --color-faint: #7f766a;
   --color-primary: #f39200;
   --color-accent-red: #e2231a;
   --color-accent-yellow: #ffc20e;
-  --color-accent-green: #2e7d32;
+  --color-accent-green: #3f9142;
 }
 
+/* Light theme — warm cream paper. Ink is a warm near-black (not pure #000),
+   greys are warm, and --color-primary is deepened to a burnt amber so orange
+   text/kickers clear ~4.3:1 on the cream (the vivid #f39200 was ~2.4:1). Black
+   text on the deepened amber buttons still reads well. */
 :root[data-theme='light'] {
-  --color-bg: #faf8f4;
+  --color-bg: #faf7f2;
   --color-surface: #ffffff;
-  --color-surface-2: #f1eee8;
+  --color-surface-2: #f1ede4;
   --color-elev: #ffffff;
-  --color-border: rgba(15, 15, 15, 0.11);
-  --color-border-2: rgba(15, 15, 15, 0.18);
-  --color-text: #0c0c0c;
-  --color-muted: #5a554e;
-  --color-faint: #8a857c;
+  --color-border: rgba(30, 24, 14, 0.12);
+  --color-border-2: rgba(30, 24, 14, 0.2);
+  --color-text: #16130d;
+  --color-muted: #574f45;
+  --color-faint: #857c6f;
+  --color-primary: #bf6a0a;
 }
 
 @theme inline {
