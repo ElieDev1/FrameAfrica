@@ -164,27 +164,37 @@ body {
 }
 
 /* Placeholder media: a deliberate branded panel, not a "missing image" gap. */
+/* Placeholder for stories without a photo. A quiet, modern surface (in the
+   spirit of Fluent's subtle fills): the card tone, a barely-there dot grid, and
+   the faintest whisper of the brand accent in one corner — no hard motif, no new
+   colours. It should read as "intentional texture", not an empty box. */
 .media-fill {
-  background:
+  background-color: var(--color-surface-2);
+  background-image:
     radial-gradient(
-      120% 120% at 0% 0%,
-      color-mix(in srgb, var(--color-primary) 22%, transparent),
-      transparent 55%
+      130% 110% at 100% 0%,
+      color-mix(in srgb, var(--color-primary) 7%, transparent),
+      transparent 58%
     ),
-    linear-gradient(135deg, var(--color-surface-2), var(--color-elev));
+    radial-gradient(
+      circle at 1px 1px,
+      color-mix(in srgb, var(--color-text) 5%, transparent) 1px,
+      transparent 0
+    );
+  background-size:
+    100% 100%,
+    22px 22px;
   position: relative;
   overflow: hidden;
 }
 .media-fill::after {
-  /* subtle aperture motif */
+  /* a soft diagonal sheen for a little depth, kept almost invisible */
   content: '';
   position: absolute;
-  right: -12%;
-  bottom: -18%;
-  width: 46%;
-  aspect-ratio: 1;
-  border-radius: 9999px;
-  border: 2px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
-  box-shadow: inset 0 0 0 8px color-mix(in srgb, var(--color-primary) 10%, transparent);
-  opacity: 0.5;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-text) 3%, transparent),
+    transparent 42%
+  );
 }
