@@ -8,7 +8,10 @@ jest.mock('@/lib/api', () => ({
   fetchRelated: jest.fn(),
   fetchComments: jest.fn(),
   fetchLiveUpdates: jest.fn().mockResolvedValue([]),
+  fetchArticles: jest.fn().mockResolvedValue({ articles: [] }),
 }));
+// Sidebar ad is an async server component that fetches; stub it out here.
+jest.mock('@/components/AdSlot', () => ({ AdSlot: () => null }));
 jest.mock('@/lib/session', () => ({
   getSession: jest.fn(),
   getAccessToken: jest.fn().mockResolvedValue(null),
