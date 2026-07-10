@@ -103,6 +103,12 @@ export const ColumnsIcon = (p: IconProps) => (
     <rect x="14" y="4" width="7" height="10" rx="1" />
   </Stroke>
 );
+export const MegaphoneIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M3 11l15-5v12L3 13z" />
+    <path d="M11.6 16.8a3 3 0 0 1-5.8-1.6" />
+  </Stroke>
+);
 export const ChevronRightIcon = (p: IconProps) => (
   <Stroke {...p}>
     <path d="m9 18 6-6-6-6" />
