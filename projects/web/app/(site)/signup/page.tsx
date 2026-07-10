@@ -17,6 +17,7 @@ export default async function SignupPage() {
       eyebrow="Join Frame Africa"
       title="Create your account"
       subtitle="Read, bookmark, and follow the stories that matter."
+      showSocial
       footer={
         <p className="font-body text-sm text-muted">
           Already have an account?{' '}
