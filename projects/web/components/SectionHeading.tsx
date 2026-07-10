@@ -37,3 +37,31 @@ export function SectionHeading({
     </div>
   );
 }
+
+/**
+ * Compact sibling of {@link SectionHeading} for the sidebar rail — the same
+ * accent-tick connector at a smaller scale, so rail widgets (Most read,
+ * Editor's picks) read as part of the same section system as the main columns.
+ */
+export function RailHeading({ title, href, id }: { title: string; href?: string; id?: string }) {
+  return (
+    <div className="mb-3 flex items-end justify-between gap-3 border-b border-border pb-2">
+      <h2
+        id={id}
+        className="flex items-center gap-2 font-heading text-sm font-black uppercase tracking-tight text-text"
+      >
+        <span aria-hidden className="h-3.5 w-1 rounded-full bg-primary" />
+        {title}
+      </h2>
+      {href && (
+        <Link
+          href={href}
+          className="inline-flex items-center gap-0.5 whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-primary"
+        >
+          View all
+          <ChevronRightIcon size={12} />
+        </Link>
+      )}
+    </div>
+  );
+}
