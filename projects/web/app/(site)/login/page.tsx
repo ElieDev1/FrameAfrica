@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { AuthShell } from '@/components/auth/AuthShell';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { getSession } from '@/lib/session';
 
@@ -12,23 +13,27 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="mx-auto max-w-sm px-6 py-16">
-      <h1 className="font-heading text-2xl font-black tracking-tight text-text">Sign in</h1>
-      <p className="mt-1 font-body text-sm text-muted">Welcome back to Frame Africa.</p>
-      <div className="mt-6">
-        <LoginForm />
-      </div>
-      <p className="mt-4 font-body text-sm text-muted">
-        <Link href="/forgot-password" className="text-primary hover:underline">
-          Forgot your password?
-        </Link>
-      </p>
-      <p className="mt-2 font-body text-sm text-muted">
-        New here?{' '}
-        <Link href="/signup" className="text-primary hover:underline">
-          Create an account
-        </Link>
-      </p>
-    </div>
+    <AuthShell
+      eyebrow="Welcome back"
+      title="Sign in"
+      subtitle="Pick up where you left off across Frame Africa."
+      footer={
+        <>
+          <p className="font-body text-sm text-muted">
+            <Link href="/forgot-password" className="text-primary hover:underline">
+              Forgot your password?
+            </Link>
+          </p>
+          <p className="font-body text-sm text-muted">
+            New here?{' '}
+            <Link href="/signup" className="font-semibold text-primary hover:underline">
+              Create an account
+            </Link>
+          </p>
+        </>
+      }
+    >
+      <LoginForm />
+    </AuthShell>
   );
 }

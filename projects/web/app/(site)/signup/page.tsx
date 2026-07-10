@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { AuthShell } from '@/components/auth/AuthShell';
 import { RegisterForm } from '@/components/auth/RegisterForm';
 import { getSession } from '@/lib/session';
 
@@ -12,22 +13,20 @@ export default async function SignupPage() {
   }
 
   return (
-    <div className="mx-auto max-w-sm px-6 py-16">
-      <h1 className="font-heading text-2xl font-black tracking-tight text-text">
-        Create your account
-      </h1>
-      <p className="mt-1 font-body text-sm text-muted">
-        Read, bookmark, and follow the stories that matter.
-      </p>
-      <div className="mt-6">
-        <RegisterForm />
-      </div>
-      <p className="mt-6 font-body text-sm text-muted">
-        Already have an account?{' '}
-        <Link href="/login" className="text-primary hover:underline">
-          Sign in
-        </Link>
-      </p>
-    </div>
+    <AuthShell
+      eyebrow="Join Frame Africa"
+      title="Create your account"
+      subtitle="Read, bookmark, and follow the stories that matter."
+      footer={
+        <p className="font-body text-sm text-muted">
+          Already have an account?{' '}
+          <Link href="/login" className="font-semibold text-primary hover:underline">
+            Sign in
+          </Link>
+        </p>
+      }
+    >
+      <RegisterForm />
+    </AuthShell>
   );
 }
