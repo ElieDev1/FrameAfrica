@@ -24,8 +24,8 @@ function BlockView({ block }: { block: Block }) {
         <p
           className={
             block.lede
-              ? 'mt-2 font-body text-[1.35rem] leading-[1.6] text-text/95'
-              : 'mt-5 font-body text-lg leading-[1.8] text-text'
+              ? 'mt-2 font-body text-lg leading-[1.6] text-text/95'
+              : 'mt-4 font-body text-[0.95rem] leading-[1.7] text-text'
           }
         >
           {block.text}
@@ -58,9 +58,9 @@ function BlockView({ block }: { block: Block }) {
       return (
         <FigureImage
           image={block}
-          className="mt-8"
-          aspect="aspect-[16/9]"
-          sizes="(max-width: 768px) 100vw, 680px"
+          className="mt-6"
+          aspect="aspect-[2/1]"
+          sizes="(max-width: 768px) 100vw, 832px"
         />
       );
 
@@ -114,13 +114,13 @@ function BlockView({ block }: { block: Block }) {
 
     case 'list':
       return block.style === 'number' ? (
-        <ol className="mt-5 list-decimal space-y-2 pl-6 font-body text-lg leading-relaxed text-text marker:font-mono marker:text-primary">
+        <ol className="mt-4 list-decimal space-y-2 pl-6 font-body text-base leading-relaxed text-text marker:font-mono marker:text-primary">
           {block.items.map((item, i) => (
             <li key={i}>{item}</li>
           ))}
         </ol>
       ) : (
-        <ul className="mt-5 list-disc space-y-2 pl-6 font-body text-lg leading-relaxed text-text marker:text-primary">
+        <ul className="mt-4 list-disc space-y-2 pl-6 font-body text-base leading-relaxed text-text marker:text-primary">
           {block.items.map((item, i) => (
             <li key={i}>{item}</li>
           ))}
