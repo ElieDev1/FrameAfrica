@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AdminModule } from '../admin/admin.module';
 import { AuthModule } from '../auth/auth.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { CmsAdminController } from './cms/cms-admin.controller';
@@ -12,7 +13,9 @@ import { ContentController } from './content.controller';
 import { ContentService } from './content.service';
 
 @Module({
-  imports: [AuthModule, NotificationsModule], // TokenService for JwtAuthGuard; NotificationsService for emits
+  // TokenService for JwtAuthGuard + optional reader auth; NotificationsService
+  // for emits; AdminSettingsService for the paywall meter setting.
+  imports: [AuthModule, NotificationsModule, AdminModule],
   controllers: [
     ContentController,
     CmsController,

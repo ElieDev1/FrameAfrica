@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -25,7 +26,7 @@ import {
   type ArticleDetail,
 } from '@/lib/api';
 import { formatDate } from '@/lib/format';
-import { getSession } from '@/lib/session';
+import { getAccessToken, getSession } from '@/lib/session';
 import { absoluteUrl, SITE_NAME } from '@/lib/site';
 
 export const revalidate = 60;
@@ -97,7 +98,14 @@ function newsArticleJsonLd(article: ArticleDetail): string {
 
 export default async function ArticlePage({ params }: PageProps) {
   const { slug } = await params;
-  const article = await fetchArticle(slug);
+
+  // Reader identity for the paywall: an opaque device key + the signed-in
+  // reader's token (so a subscription unlocks the story).
+  const [jar, accessToken] = await Promise.all([cookies(), getAccessToken()]);
+  const article = await fetchArticle(slug, {
+    readerKey: jar.get('fa_reader')?.value,
+    accessToken: accessToken ?? undefined,
+  });
   if (!article) {
     notFound();
   }

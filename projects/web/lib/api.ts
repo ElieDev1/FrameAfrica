@@ -240,20 +240,48 @@ export async function searchArticles(params: {
   return { results: envelope.data, hasMore: Boolean(envelope.meta.pagination?.hasMore) };
 }
 
+/** Who is reading — drives the premium/metered paywall (documents/04 §7). */
+export interface ReaderContext {
+  /** Opaque per-device id from the `fa_reader` cookie. */
+  readerKey?: string;
+  /** The signed-in reader's access token, so the API can see a subscription. */
+  accessToken?: string;
+}
+
 /**
  * Returns the article, or `null` if the API responds 404. A 402 response still
  * carries a valid (locked/preview) payload — see `ArticleDetail.isLocked`.
+ *
+ * When a reader context is supplied the response is **per-reader** (the paywall
+ * may lock it), so it is never cached. Without one it uses the shared cache.
  */
-export async function fetchArticle(slug: string): Promise<ArticleDetail | null> {
-  try {
-    const envelope = await apiGet<ArticleDetail>(`/articles/${encodeURIComponent(slug)}`, [402]);
-    return envelope.data;
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 404) {
-      return null;
+export async function fetchArticle(
+  slug: string,
+  ctx: ReaderContext = {},
+): Promise<ArticleDetail | null> {
+  const path = `/articles/${encodeURIComponent(slug)}`;
+
+  if (!ctx.readerKey && !ctx.accessToken) {
+    try {
+      const envelope = await apiGet<ArticleDetail>(path, [402]);
+      return envelope.data;
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) return null;
+      throw error;
     }
-    throw error;
   }
+
+  const headers: Record<string, string> = { accept: 'application/json' };
+  if (ctx.readerKey) headers['x-reader-key'] = ctx.readerKey;
+  if (ctx.accessToken) headers.authorization = `Bearer ${ctx.accessToken}`;
+
+  const res = await fetch(`${API_URL}${path}`, { headers, cache: 'no-store' });
+  if (res.status === 404) return null;
+  if (!res.ok && res.status !== 402) {
+    throw new ApiError(res.status, `GET ${path} failed with ${res.status}`);
+  }
+  const envelope = (await res.json()) as ApiEnvelope<ArticleDetail>;
+  return envelope.data;
 }
 
 /** Up to 4 related articles (same category). Returns `[]` on any error. */

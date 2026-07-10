@@ -129,11 +129,12 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Notices / tenders / obituaries as sold, scheduled placements; viewability + sales reporting
 - **DoD (core met):** ads are served, labelled and measured; the sales/targeting server remains.
 
-### WS10 — Monetization & paywall `[ ]`
-- [ ] Metered paywall (N free/period) → preview over meter; subscriber unlock + gift article
-- [ ] Plans, subscriptions, invoices
-- [ ] **MoMo & Airtel** + card payments with signed, idempotent webhooks (`05` §8)
-- **DoD:** a reader subscribes with mobile money and reads premium content.
+### WS10 — Monetization & paywall `[~]`
+- [x] **Metered paywall** — N free articles per calendar month per device (`meter_read`, opaque `fa_reader` cookie set by the BFF); over the meter → the existing `402` preview. Re-reading a counted story is free; crawlers (no reader key) are never metered. **Off by default** (`PAYWALL_FREE_ARTICLES` unset/0) so nothing locks before payments exist. Unit-tested (5 cases) + verified e2e (200/200/402, subscriber bypass).
+- [x] **Subscriber unlock** — `user.subscribedUntil` bypasses the meter *and* premium locks; admin grants/revokes via `PATCH /v1/admin/users/:id/subscription` (audited) until self-serve payments land.
+- [ ] Plans, invoices, gift article
+- [ ] **MoMo & Airtel** + card payments with signed, idempotent webhooks (`05` §8) — _needs merchant credentials_
+- **DoD (core met):** metering + subscriber unlock work end-to-end; self-serve payment collection is the remaining piece.
 
 ### WS11 — Newsletters & notifications `[~]`
 - [x] **In-app notifications** (`14 §6.3`) — real dashboard bell (unread badge, list, mark read/all, deep links); newsroom emits on **publish** (→ author: live) and **return/reject** (→ author: changes requested). `/v1/me/notifications` API, unit-tested + verified e2e. _(SSE push is the enhancement over the 60s poll.)_

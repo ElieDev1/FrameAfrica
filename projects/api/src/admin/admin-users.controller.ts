@@ -21,6 +21,7 @@ import { AdminUsersService } from './admin-users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SetRolesDto } from './dto/set-roles.dto';
 import { SetStatusDto } from './dto/set-status.dto';
+import { SetSubscriptionDto } from './dto/set-subscription.dto';
 
 /** Admin-only user management (documents/07 UC-ADMIN). */
 @Controller('admin/users')
@@ -82,6 +83,25 @@ export class AdminUsersController {
       targetType: 'user',
       targetId: id,
       meta: { status: dto.status },
+    });
+    return apiResponse(result);
+  }
+
+  /** Comp or revoke a subscription until self-serve payments land. */
+  @Patch(':id/subscription')
+  async setSubscription(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SetSubscriptionDto,
+  ) {
+    const until = dto.until ? new Date(dto.until) : null;
+    const result = await this.users.setSubscription(id, until);
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'user.subscription_changed',
+      targetType: 'user',
+      targetId: id,
+      meta: { until: dto.until ?? null },
     });
     return apiResponse(result);
   }
