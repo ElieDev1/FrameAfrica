@@ -7,14 +7,6 @@ const MAX_SECTIONS = 9;
 const STAFF_ROLES = ['journalist', 'editor', 'admin'];
 const EDITOR_ROLES = ['editor', 'admin'];
 
-const today = () =>
-  new Intl.DateTimeFormat('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date());
-
 /**
  * Public masthead. Fetches the section tree, the reader's session, and the
  * newest story per top section (for the mega-menu previews), then hands off to
@@ -69,7 +61,6 @@ export async function SiteHeader() {
       featured={featured}
       user={navUser}
       locale={locale}
-      today={today()}
     />
   );
 }
