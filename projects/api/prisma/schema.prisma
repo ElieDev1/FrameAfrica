@@ -544,6 +544,21 @@ model ArticleCorrection {
   @@map("article_correction")
 }
 
+/// A cached YouTube upload (documents/14 §3.1). Synced from the configured
+/// channel's uploads playlist so the site never calls YouTube on a page render.
+model Video {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  youtubeId    String   @unique @map("youtube_id")
+  title        String
+  description  String?
+  thumbnailUrl String?  @map("thumbnail_url")
+  publishedAt  DateTime @map("published_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([publishedAt])
+  @@map("video")
+}
+
 /// A house advertisement (documents/14 §4). Managed by admins and served into
 /// labelled ad slots until a full ad-sales server lands. Impressions/clicks are
 /// counted for basic reporting.

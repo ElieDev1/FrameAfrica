@@ -1,48 +1,62 @@
-import { PlayIcon } from '@/components/icons';
+import Link from 'next/link';
+import { ChevronRightIcon, PlayIcon } from '@/components/icons';
+import { fetchVideos } from '@/lib/videos';
 
 /**
- * Horizontal "Watch & Listen" strip (documents/06 §4.1). Placeholder items until
- * the media/video slice lands — the cards are clearly teasers (a Soon tag), not
- * live editorial links.
+ * Homepage "Watch" strip (documents/06 §4.1). Renders the newsroom's latest
+ * YouTube uploads from the local cache; until an editor connects the channel it
+ * shows a single invitation card rather than fake teasers.
  */
-const ITEMS = [
-  { kind: 'Video', title: 'Inside Kigali’s green transport push', meta: '4:12' },
-  { kind: 'Podcast', title: 'The Frame: this week in African markets', meta: '28 min' },
-  { kind: 'Video', title: 'Coffee country: a season on the hills', meta: '6:40' },
-  { kind: 'Podcast', title: 'Newsroom notebook — the corridor upgrade', meta: '19 min' },
-  { kind: 'Video', title: 'Amavubi: the road to the qualifier', meta: '3:55' },
-] as const;
+export async function VideoStrip() {
+  const videos = await fetchVideos(6);
 
-export function VideoStrip() {
   return (
     <section aria-labelledby="watch-listen" className="mt-12 border-t border-border pt-8">
-      <h2
-        id="watch-listen"
-        className="mb-6 font-mono text-xs uppercase tracking-[0.18em] text-muted"
-      >
-        Watch &amp; Listen
-      </h2>
-      <div className="-mx-6 flex gap-5 overflow-x-auto px-6 pb-2 [scrollbar-width:thin]">
-        {ITEMS.map((item) => (
-          <article key={item.title} className="w-64 shrink-0">
-            <div className="media-fill relative flex aspect-video items-center justify-center rounded-xl ring-1 ring-border">
-              <span className="grid h-11 w-11 place-items-center rounded-full bg-black/40 pl-0.5 text-white ring-1 ring-white/30 backdrop-blur">
-                <PlayIcon size={18} />
-              </span>
-              <span className="absolute left-3 top-3 rounded bg-black/50 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-white">
-                {item.kind}
-              </span>
-              <span className="absolute right-3 top-3 rounded bg-primary/90 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-black">
-                Soon
-              </span>
-            </div>
-            <h3 className="mt-2 font-heading text-sm font-bold leading-snug text-text">
-              {item.title}
-            </h3>
-            <p className="mt-0.5 font-mono text-[11px] text-muted">{item.meta}</p>
-          </article>
-        ))}
+      <div className="mb-6 flex items-center justify-between">
+        <h2 id="watch-listen" className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
+          Watch
+        </h2>
+        <Link
+          href="/videos"
+          className="inline-flex items-center gap-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-primary hover:underline"
+        >
+          All video
+          <ChevronRightIcon size={12} aria-hidden />
+        </Link>
       </div>
+
+      {videos.length === 0 ? (
+        <Link
+          href="/videos"
+          className="media-fill flex aspect-[16/5] items-center justify-center rounded-xl ring-1 ring-border"
+        >
+          <p className="px-6 text-center font-heading text-lg font-bold text-text">
+            Video is coming to Frame Africa
+          </p>
+        </Link>
+      ) : (
+        <div className="-mx-6 flex gap-5 overflow-x-auto px-6 pb-2 [scrollbar-width:thin]">
+          {videos.map((video) => (
+            <article key={video.id} className="w-64 shrink-0">
+              <Link
+                href="/videos"
+                className="media-fill relative flex aspect-video items-center justify-center overflow-hidden rounded-xl ring-1 ring-border"
+              >
+                {video.thumbnailUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element -- YouTube thumbnail host
+                  <img src={video.thumbnailUrl} alt="" className="h-full w-full object-cover" />
+                )}
+                <span className="absolute grid h-11 w-11 place-items-center rounded-full bg-black/40 pl-0.5 text-white ring-1 ring-white/30 backdrop-blur">
+                  <PlayIcon size={18} />
+                </span>
+              </Link>
+              <h3 className="mt-2 line-clamp-2 font-heading text-sm font-bold leading-snug text-text">
+                {video.title}
+              </h3>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
