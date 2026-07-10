@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AuthShell } from '@/components/auth/AuthShell';
 import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm';
 
 export const metadata: Metadata = { title: 'Choose a new password — Frame Africa' };
@@ -11,32 +12,40 @@ export default async function ResetPasswordPage({ searchParams }: PageProps) {
 
   if (!token) {
     return (
-      <div className="mx-auto max-w-sm px-6 py-16">
-        <h1 className="font-heading text-2xl font-black tracking-tight text-text">
-          Invalid reset link
-        </h1>
-        <p className="mt-2 font-body text-sm text-muted">
-          This link is missing its token. Request a new one from{' '}
-          <Link href="/forgot-password" className="text-primary hover:underline">
-            reset your password
-          </Link>
-          .
+      <AuthShell
+        eyebrow="Account recovery"
+        title="Invalid reset link"
+        subtitle="This link is missing its token — request a fresh one to continue."
+        footer={
+          <p className="font-body text-sm text-muted">
+            <Link href="/forgot-password" className="font-semibold text-primary hover:underline">
+              Reset your password
+            </Link>
+          </p>
+        }
+      >
+        <p className="font-body text-sm text-muted">
+          For your security, reset links expire after a short time. Start again and we&apos;ll email
+          you a new one.
         </p>
-      </div>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="mx-auto max-w-sm px-6 py-16">
-      <h1 className="font-heading text-2xl font-black tracking-tight text-text">
-        Choose a new password
-      </h1>
-      <p className="mt-1 font-body text-sm text-muted">
-        Pick something at least 8 characters long. You&apos;ll be signed out everywhere else.
-      </p>
-      <div className="mt-6">
-        <ResetPasswordForm token={token} />
-      </div>
-    </div>
+    <AuthShell
+      eyebrow="Account recovery"
+      title="Choose a new password"
+      subtitle="Pick something at least 8 characters long. You'll be signed out everywhere else."
+      footer={
+        <p className="font-body text-sm text-muted">
+          <Link href="/login" className="font-semibold text-primary hover:underline">
+            Back to sign in
+          </Link>
+        </p>
+      }
+    >
+      <ResetPasswordForm token={token} />
+    </AuthShell>
   );
 }

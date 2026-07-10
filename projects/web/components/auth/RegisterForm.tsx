@@ -8,7 +8,7 @@ export function RegisterForm() {
   const [state, action] = useActionState(register, {});
 
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form action={action} className="flex flex-col gap-3">
       <AuthField label="Name" name="displayName" autoComplete="name" required minLength={2} />
       <AuthField label="Email" name="email" type="email" autoComplete="email" required />
       <AuthField

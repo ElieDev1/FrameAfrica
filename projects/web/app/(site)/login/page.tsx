@@ -17,6 +17,7 @@ export default async function LoginPage() {
       eyebrow="Welcome back"
       title="Sign in"
       subtitle="Pick up where you left off across Frame Africa."
+      showSocial
       footer={
         <>
           <p className="font-body text-sm text-muted">

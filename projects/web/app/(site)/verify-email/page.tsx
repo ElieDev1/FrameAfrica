@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AuthShell } from '@/components/auth/AuthShell';
 
 export const metadata: Metadata = { title: 'Verify your email — Frame Africa' };
 
@@ -30,39 +31,35 @@ export default async function VerifyEmailPage({ searchParams }: PageProps) {
   const { token } = await searchParams;
   const ok = token ? await verify(token) : false;
 
+  if (ok) {
+    return (
+      <AuthShell
+        eyebrow="All set"
+        title="Email verified"
+        subtitle="Thanks — your email is confirmed and your account is ready."
+      >
+        <Link
+          href="/account"
+          className="block w-full rounded-lg bg-primary px-4 py-2.5 text-center font-heading font-bold text-black"
+        >
+          Go to your account
+        </Link>
+      </AuthShell>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-sm px-6 py-16 text-center">
-      {ok ? (
-        <>
-          <h1 className="font-heading text-2xl font-black tracking-tight text-text">
-            Email verified
-          </h1>
-          <p className="mt-2 font-body text-sm text-muted">
-            Thanks — your email is confirmed. You&apos;re all set.
-          </p>
-          <Link
-            href="/account"
-            className="mt-6 inline-block rounded-lg bg-primary px-4 py-2 font-heading font-bold text-black"
-          >
-            Go to your account
-          </Link>
-        </>
-      ) : (
-        <>
-          <h1 className="font-heading text-2xl font-black tracking-tight text-text">
-            Verification link expired
-          </h1>
-          <p className="mt-2 font-body text-sm text-muted">
-            This link is invalid or has already been used. Sign in and we can send you a fresh one.
-          </p>
-          <Link
-            href="/login"
-            className="mt-6 inline-block rounded-lg border border-border-2 px-4 py-2 font-heading font-bold text-text"
-          >
-            Go to sign in
-          </Link>
-        </>
-      )}
-    </div>
+    <AuthShell
+      eyebrow="Account"
+      title="Verification link expired"
+      subtitle="This link is invalid or has already been used. Sign in and we can send you a fresh one."
+    >
+      <Link
+        href="/login"
+        className="block w-full rounded-lg border border-border-2 px-4 py-2.5 text-center font-heading font-bold text-text hover:border-primary"
+      >
+        Go to sign in
+      </Link>
+    </AuthShell>
   );
 }

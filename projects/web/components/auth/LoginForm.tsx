@@ -9,7 +9,7 @@ export function LoginForm() {
   const twoFactor = state.twoFactorRequired ?? false;
 
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form action={action} className="flex flex-col gap-3">
       <AuthField label="Email" name="email" type="email" autoComplete="email" required />
       <AuthField
         label="Password"
