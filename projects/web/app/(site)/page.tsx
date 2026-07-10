@@ -2,7 +2,8 @@ import { AdSlot } from '@/components/AdSlot';
 import { ArticleCard } from '@/components/ArticleCard';
 import { BreakingTicker } from '@/components/BreakingTicker';
 import { EditorsPicks } from '@/components/EditorsPicks';
-import { HeadlineItem, MostRead } from '@/components/HeadlineList';
+import { MostRead } from '@/components/HeadlineList';
+import { HeroSidebar } from '@/components/HeroSidebar';
 import { MarketsWidget } from '@/components/MarketsWidget';
 import { NewsletterBox } from '@/components/NewsletterBox';
 import { SectionBlock } from '@/components/SectionBlock';
@@ -92,13 +93,7 @@ export default async function Home() {
           <div className="lg:col-span-2">
             <ArticleCard article={lead} featured />
           </div>
-          {secondary.length > 0 && (
-            <div className="divide-y divide-border lg:border-l lg:border-border lg:pl-8">
-              {secondary.map((article) => (
-                <HeadlineItem key={article.id} article={article} />
-              ))}
-            </div>
-          )}
+          <HeroSidebar articles={secondary} />
         </section>
 
         <AdSlot variant="leaderboard" className="mt-10" />
