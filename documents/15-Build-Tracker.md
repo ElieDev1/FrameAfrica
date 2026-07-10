@@ -162,9 +162,11 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - [ ] Per-article **language variants** (translation-group linking) + `hreflang` (needs per-locale URLs / route-based i18n)
 - **DoD (core met):** the chrome is usable in English + Kinyarwanda; full string coverage, FR, and per-article translations remain.
 
-### WS16 — PWA / offline / data-saver `[ ]`
-- [ ] Installable PWA, offline saved-article reading, low-data mode
-- **DoD:** works on low-bandwidth African connections and installs like an app.
+### WS16 — PWA / offline / data-saver `[x]`
+- [x] **Installable PWA** — web manifest (`app/manifest.ts`, 512² icon, standalone, theme-color) + apple-web-app meta.
+- [x] **Service worker** (`public/sw.js`) — network-first navigations (news stays fresh) with a cached fallback + an **/offline** page; cache-first static assets; visited pages cached for **offline reading**. Registered in production only. Verified (manifest/sw/offline serve 200).
+- _Deferred:_ explicit low-data/data-saver toggle (reduced images).
+- **DoD met (core):** installs like an app and re-reads visited stories offline; a data-saver mode remains.
 
 ### WS17 — Trust & safety `[x]`
 - [x] **Secure tips** channel — public `/tips` form + rate-limited `POST /v1/tips` (anonymous, markup-stripped); editor/moderator **tips inbox** at `/dashboard/tips` with a status workflow. Verified e2e.

@@ -1,5 +1,6 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Fraunces, IBM_Plex_Mono, Inter, Source_Serif_4 } from 'next/font/google';
+import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
 import { getLocale } from '@/lib/i18n-server';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site';
 import './globals.css';
@@ -53,6 +54,15 @@ export const metadata: Metadata = {
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
   },
+  manifest: '/manifest.webmanifest',
+  appleWebApp: { capable: true, title: SITE_NAME, statusBarStyle: 'black-translucent' },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+    { media: '(prefers-color-scheme: light)', color: '#faf8f4' },
+  ],
 };
 
 // Resolves the theme before first paint (stored choice → system preference →
@@ -89,7 +99,10 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <style dangerouslySetInnerHTML={{ __html: scrollbarCss }} />
       </head>
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        <ServiceWorkerRegister />
+      </body>
     </html>
   );
 }
