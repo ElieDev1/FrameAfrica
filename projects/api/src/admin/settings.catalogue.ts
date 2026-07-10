@@ -19,6 +19,12 @@ export const INTEGRATION_CATALOGUE: IntegrationDef[] = [
     secret: true,
   },
   {
+    key: 'YOUTUBE_CHANNEL_ID',
+    label: 'YouTube channel ID',
+    description: 'The channel whose uploads sync into the video hub (e.g. UCxxxxxxxxxxxx).',
+    secret: false,
+  },
+  {
     key: 'ANTHROPIC_API_KEY',
     label: 'Anthropic (Claude)',
     description: 'AI assist for summaries, tagging, and the writing tools.',

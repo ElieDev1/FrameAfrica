@@ -115,11 +115,12 @@ These earlier pieces are done and stay done; they are the base the workstreams b
 - _Deferred:_ AI/heuristic spam pre-screen hook on comment create
 - **DoD met:** every interaction in `14 §2` works, with moderation and abuse controls.
 
-### WS8 — YouTube auto-video `[ ]`
-- [ ] Sync job: channel uploads playlist → `playlistItems.list` cache (no manual entry) (`14 §3.1`)
-- [ ] Video hub + homepage "Watch" strip render from cache; `youtube-nocookie` embeds
-- [ ] In-article video/embed block via oEmbed (allow-listed)
-- **DoD:** channel uploads appear on-site automatically and embed safely.
+### WS8 — YouTube auto-video `[x]`
+- [x] **Sync job**: channel uploads playlist → `playlistItems.list` → local `video` cache, hourly in-process (`VideoSyncService`) + admin `POST /v1/admin/videos/sync`. Key + channel id come from **admin settings** (`YOUTUBE_API_KEY`, `YOUTUBE_CHANNEL_ID`); a no-op until configured.
+- [x] **Video hub** (`/videos`) + homepage **Watch** strip render from the cache; **click-to-play `youtube-nocookie`** embeds (no third-party frame on page view).
+- [x] Public `GET /v1/videos`; graceful empty state until a channel is connected. Unit-tested + verified e2e.
+- [ ] In-article video/embed block via oEmbed (the block editor already allow-lists YouTube→nocookie embeds)
+- **DoD met:** channel uploads appear on-site automatically and embed safely.
 
 ### WS9 — Advertising `[~]`
 - [x] **Managed house ads** — `house_ad` model + admin CRUD (`/dashboard/ads`); public `GET /v1/ads?placement=` serves an active creative into the labelled IAB slots (leaderboard/billboard/rectangle/halfpage/native) with a **house-ad fallback**; click-through `GET /v1/ads/:id/go` (302) with **impression + click counting**. Unit-tested + verified e2e.

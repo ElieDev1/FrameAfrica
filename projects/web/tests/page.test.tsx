@@ -13,6 +13,8 @@ jest.mock('@/components/WeatherWidget', () => ({ WeatherWidget: () => <h2>Weathe
 jest.mock('@/components/MarketsWidget', () => ({ MarketsWidget: () => <h2>Markets</h2> }));
 // AdSlot is also async (serves a house ad from the API) — stub it too.
 jest.mock('@/components/AdSlot', () => ({ AdSlot: () => <aside aria-label="Advertisement" /> }));
+// VideoStrip is async (reads the cached YouTube uploads).
+jest.mock('@/components/VideoStrip', () => ({ VideoStrip: () => <h2>Watch</h2> }));
 
 const mockFetchArticles = fetchArticles as jest.MockedFunction<typeof fetchArticles>;
 const mockFetchCategories = fetchCategories as jest.MockedFunction<typeof fetchCategories>;
@@ -63,7 +65,7 @@ describe('Home', () => {
     expect(screen.getByRole('heading', { name: "Editor's picks" })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Weather' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Markets' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /Watch & Listen/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Watch/i })).toBeInTheDocument();
     expect(screen.getAllByLabelText('Advertisement').length).toBeGreaterThan(0);
   });
 
