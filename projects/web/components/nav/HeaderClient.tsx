@@ -31,14 +31,13 @@ interface Props {
   featured: FeaturedMap;
   user: NavUser | null;
   locale: Locale;
-  today: string;
 }
 
 function shortLabel(name: string): string {
   return name.split(' & ')[0];
 }
 
-export function HeaderClient({ sections, allSections, featured, user, locale, today }: Props) {
+export function HeaderClient({ sections, allSections, featured, user, locale }: Props) {
   const pathname = usePathname();
   const [condensed, setCondensed] = useState(false);
 
@@ -65,136 +64,114 @@ export function HeaderClient({ sections, allSections, featured, user, locale, to
     isActive(section.slug) || section.children.some((c) => isActive(c.slug));
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-surface/90 backdrop-blur-xl">
-      {/* ---- Masthead (collapses on scroll) ---- */}
+    <header
+      className={`sticky top-0 z-30 border-b border-border bg-surface/90 backdrop-blur-xl transition-shadow ${
+        condensed ? 'shadow-sm' : ''
+      }`}
+    >
       <div
-        className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-out ${
-          condensed ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'
+        className={`mx-auto flex max-w-[1440px] items-center gap-4 px-6 transition-[padding] duration-300 ${
+          condensed ? 'py-2' : 'py-3'
         }`}
       >
-        <div className="min-h-0">
-          <div className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-4">
-            <div className="flex items-center gap-2 justify-self-start">
-              <div className="flex items-center md:hidden">
-                <MobileMenu
-                  sections={allSections}
-                  signedIn={Boolean(user)}
-                  isStaff={user?.isStaff ?? false}
-                  isEditor={user?.isEditor ?? false}
-                  isAdmin={user?.isAdmin ?? false}
-                  firstName={user?.firstName ?? null}
-                />
-              </div>
-              <Link href="/" aria-label="Frame Africa — home" className="shrink-0">
-                <Wordmark />
-              </Link>
-            </div>
-
-            <span className="hidden justify-self-center text-[11px] font-medium uppercase tracking-[0.16em] text-faint md:block">
-              {today} · Kigali
-            </span>
-
-            <div className="flex items-center gap-3 justify-self-end">
-              <SearchForm locale={locale} />
-              <ThemeToggle />
-              {user ? (
-                <>
-                  <Link
-                    href="/for-you"
-                    className="hidden text-sm font-medium text-muted transition-colors hover:text-primary md:inline"
-                  >
-                    {t(locale, 'nav.forYou')}
-                  </Link>
-                  {user.isStaff && <StaffMenu isEditor={user.isEditor} isAdmin={user.isAdmin} />}
-                  <Link
-                    href="/account"
-                    className="hidden text-sm font-medium text-text transition-colors hover:text-primary md:inline"
-                  >
-                    {user.firstName}
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="hidden text-sm font-medium text-muted transition-colors hover:text-primary md:inline"
-                  >
-                    {t(locale, 'nav.signIn')}
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="hidden rounded-full bg-primary px-3.5 py-1.5 text-sm font-semibold text-black transition-transform hover:-translate-y-px md:inline"
-                  >
-                    {t(locale, 'nav.subscribe')}
-                  </Link>
-                </>
-              )}
-            </div>
+        {/* Brand */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center md:hidden">
+            <MobileMenu
+              sections={allSections}
+              signedIn={Boolean(user)}
+              isStaff={user?.isStaff ?? false}
+              isEditor={user?.isEditor ?? false}
+              isAdmin={user?.isAdmin ?? false}
+              firstName={user?.firstName ?? null}
+            />
           </div>
+          <Link href="/" aria-label="Frame Africa — home" className="shrink-0">
+            <Wordmark />
+          </Link>
+        </div>
+
+        {/* Section nav (single, centered) */}
+        {sections.length > 0 && (
+          <nav aria-label="Sections" className="mx-auto hidden md:block">
+            <ul className="flex items-center">
+              {sections.map((section) => {
+                const active = sectionActive(section);
+                const feat = featured[section.slug];
+                return (
+                  <li key={section.id} className="group relative">
+                    <Link
+                      href={`/section/${section.slug}`}
+                      aria-current={active ? 'page' : undefined}
+                      className={`relative inline-flex items-center gap-0.5 px-2.5 py-2.5 text-[13px] font-semibold transition-colors after:absolute after:inset-x-2.5 after:bottom-0 after:h-0.5 after:origin-left after:rounded-full after:bg-primary after:transition-transform after:duration-200 group-hover:text-text group-focus-within:text-text group-hover:after:scale-x-100 group-focus-within:after:scale-x-100 ${
+                        active ? 'text-text after:scale-x-100' : 'text-muted after:scale-x-0'
+                      }`}
+                    >
+                      {shortLabel(section.name)}
+                      {section.children.length > 0 && (
+                        <ChevronDownIcon
+                          size={12}
+                          aria-hidden
+                          className="opacity-60 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
+                        />
+                      )}
+                    </Link>
+
+                    {section.children.length > 0 && (
+                      <MegaMenu section={section} featured={feat} activeSlug={pathname} />
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-2 md:gap-3">
+          <SearchForm locale={locale} />
+          <Link
+            href="/search"
+            aria-label={t(locale, 'nav.searchAria')}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-primary lg:hidden"
+          >
+            <SearchIcon size={16} />
+          </Link>
+          <ThemeToggle />
+          {user ? (
+            <>
+              <Link
+                href="/for-you"
+                className="hidden text-sm font-medium text-muted transition-colors hover:text-primary lg:inline"
+              >
+                {t(locale, 'nav.forYou')}
+              </Link>
+              {user.isStaff && <StaffMenu isEditor={user.isEditor} isAdmin={user.isAdmin} />}
+              <Link
+                href="/account"
+                className="hidden text-sm font-medium text-text transition-colors hover:text-primary md:inline"
+              >
+                {user.firstName}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="hidden text-sm font-medium text-muted transition-colors hover:text-primary md:inline"
+              >
+                {t(locale, 'nav.signIn')}
+              </Link>
+              <Link
+                href="/signup"
+                className="hidden rounded-full bg-primary px-3.5 py-1.5 text-sm font-semibold text-black transition-transform hover:-translate-y-px md:inline"
+              >
+                {t(locale, 'nav.subscribe')}
+              </Link>
+            </>
+          )}
         </div>
       </div>
-
-      {/* ---- Section bar (always visible; gains a mini-logo + search once condensed) ---- */}
-      {sections.length > 0 && (
-        <div className="hidden border-t border-border/60 md:block">
-          <div className="mx-auto flex max-w-[1440px] items-center gap-3 px-6">
-            {/* Mini brand appears only when the masthead is collapsed. */}
-            <Link
-              href="/"
-              aria-label="Frame Africa — home"
-              className={`shrink-0 overflow-hidden transition-all duration-300 ${
-                condensed ? 'w-8 opacity-100' : 'w-0 opacity-0'
-              }`}
-            >
-              <BrandMark />
-            </Link>
-
-            <nav aria-label="Sections" className="mx-auto">
-              <ul className="flex items-center">
-                {sections.map((section) => {
-                  const active = sectionActive(section);
-                  const feat = featured[section.slug];
-                  return (
-                    <li key={section.id} className="group relative">
-                      <Link
-                        href={`/section/${section.slug}`}
-                        aria-current={active ? 'page' : undefined}
-                        className={`relative inline-flex items-center gap-1 px-3.5 py-3.5 text-[15px] font-semibold transition-colors after:absolute after:inset-x-3.5 after:bottom-0 after:h-0.5 after:origin-left after:rounded-full after:bg-primary after:transition-transform after:duration-200 group-hover:text-text group-focus-within:text-text group-hover:after:scale-x-100 group-focus-within:after:scale-x-100 ${
-                          active ? 'text-text after:scale-x-100' : 'text-muted after:scale-x-0'
-                        }`}
-                      >
-                        {shortLabel(section.name)}
-                        {section.children.length > 0 && (
-                          <ChevronDownIcon
-                            size={12}
-                            aria-hidden
-                            className="opacity-60 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
-                          />
-                        )}
-                      </Link>
-
-                      {section.children.length > 0 && (
-                        <MegaMenu section={section} featured={feat} activeSlug={pathname} />
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-
-            {/* Search icon appears when condensed (the full field lives in the masthead). */}
-            <Link
-              href="/search"
-              aria-label={t(locale, 'nav.searchAria')}
-              className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-all duration-300 hover:text-primary ${
-                condensed ? 'scale-100 opacity-100' : 'pointer-events-none scale-90 opacity-0'
-              }`}
-            >
-              <SearchIcon size={16} />
-            </Link>
-          </div>
-        </div>
-      )}
     </header>
   );
 }
@@ -287,14 +264,5 @@ function MegaMenu({
         )}
       </div>
     </div>
-  );
-}
-
-/** Compact aperture mark for the condensed bar (echoes the Frame Africa logo). */
-function BrandMark() {
-  return (
-    <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/15">
-      <span className="block h-3.5 w-3.5 rounded-full border-2 border-primary" />
-    </span>
   );
 }
