@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ClearHistoryButton } from '@/components/account/ClearHistoryButton';
 import { DeleteAccountForm } from '@/components/account/DeleteAccountForm';
+import { EditProfileForm } from '@/components/account/EditProfileForm';
 import { FollowedList } from '@/components/account/FollowedList';
 import { CheckIcon } from '@/components/icons';
 import type { SavedArticle } from '@/lib/api';
@@ -77,6 +78,7 @@ export default async function AccountPage() {
         </div>
 
         <div className="flex flex-wrap gap-2 sm:ml-auto">
+          <EditProfileForm displayName={user.displayName} avatarUrl={user.avatarUrl} />
           <Link
             href="/for-you"
             className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-text transition hover:border-primary hover:text-primary"

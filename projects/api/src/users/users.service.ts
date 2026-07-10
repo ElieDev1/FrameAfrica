@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import type { UpdateProfileDto } from './dto/update-profile.dto';
 
 export interface UserProfile {
   id: string;
@@ -32,6 +33,41 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
+    return this.toProfile(user);
+  }
+
+  /** Update the caller's own display name and/or avatar. */
+  async updateProfile(userId: string, input: UpdateProfileDto): Promise<UserProfile> {
+    const data: Prisma.UserUpdateInput = {};
+
+    if (input.displayName !== undefined) {
+      const name = input.displayName.trim();
+      if (name.length < 2) {
+        throw new BadRequestException('Display name must be at least 2 characters');
+      }
+      data.displayName = name;
+    }
+
+    if (input.avatarUrl !== undefined) {
+      const url = input.avatarUrl.trim();
+      if (url === '') {
+        data.avatarUrl = null;
+      } else if (/^https?:\/\/.+/i.test(url)) {
+        data.avatarUrl = url;
+      } else {
+        throw new BadRequestException('Avatar must be a valid http(s) URL');
+      }
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data,
+      include: withRoles,
+    });
+    return this.toProfile(user);
+  }
+
+  private toProfile(user: Prisma.UserGetPayload<{ include: typeof withRoles }>): UserProfile {
     return {
       id: user.id,
       email: user.email,
