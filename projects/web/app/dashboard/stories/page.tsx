@@ -1,48 +1,47 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { StatusBadge } from '@/components/cms/StatusBadge';
+import { StoriesTable } from '@/components/cms/StoriesTable';
+import { PlusIcon } from '@/components/icons';
 import { listMyDrafts, requireStaff } from '@/lib/cms';
-import { formatDate } from '@/lib/format';
 
-export const metadata: Metadata = { title: 'Newsroom — Frame Africa' };
+export const metadata: Metadata = { title: 'My stories — Frame Africa' };
 
 export default async function NewsroomPage() {
   await requireStaff();
   const drafts = await listMyDrafts();
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="font-heading text-3xl font-black tracking-tight text-text">Newsroom</h1>
+    <div className="w-full">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-3xl font-black tracking-tight text-text">My stories</h1>
+          <p className="mt-1 font-body text-sm text-muted">
+            {drafts.length} {drafts.length === 1 ? 'story' : 'stories'} in your newsroom.
+          </p>
+        </div>
         <Link
           href="/dashboard/stories/new"
-          className="rounded-lg bg-primary px-4 py-2 font-heading font-bold text-black hover:opacity-90"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 font-heading font-bold text-black transition hover:opacity-90"
         >
-          New draft
+          <PlusIcon size={16} /> New story
         </Link>
       </div>
 
       {drafts.length === 0 ? (
-        <p className="mt-12 font-body text-muted">No drafts yet — start your first story.</p>
+        <div className="mt-10 rounded-xl border border-dashed border-border px-6 py-16 text-center">
+          <p className="font-heading text-lg font-bold text-text">No stories yet</p>
+          <p className="mt-1 font-body text-sm text-muted">
+            Start your first story to see it here.
+          </p>
+          <Link
+            href="/dashboard/stories/new"
+            className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 font-heading font-bold text-black transition hover:opacity-90"
+          >
+            <PlusIcon size={16} /> New story
+          </Link>
+        </div>
       ) : (
-        <ul className="mt-8 divide-y divide-border rounded-xl border border-border">
-          {drafts.map((draft) => (
-            <li key={draft.id} className="flex items-center justify-between gap-4 px-4 py-3">
-              <div className="min-w-0">
-                <Link
-                  href={`/dashboard/stories/${draft.id}`}
-                  className="block truncate font-heading font-bold text-text hover:text-primary"
-                >
-                  {draft.title}
-                </Link>
-                <p className="font-mono text-xs text-muted">
-                  {draft.category.name} · updated {formatDate(draft.updatedAt)}
-                </p>
-              </div>
-              <StatusBadge status={draft.status} />
-            </li>
-          ))}
-        </ul>
+        <StoriesTable drafts={drafts} />
       )}
     </div>
   );
