@@ -65,14 +65,37 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans), system-ui, sans-serif;
-  /* A faint warm glow anchors the page to the brand's pan-African warmth
-     without competing with the reading surface. */
-  background-image: radial-gradient(
-    1200px 600px at 50% -200px,
-    color-mix(in srgb, var(--color-primary) 8%, transparent),
-    transparent 70%
-  );
-  background-repeat: no-repeat;
+  /* A soft, barely-visible mesh (a few faint warm blobs + a whisper-fine dot
+     grid) gives the page quiet depth in the spirit of Fluent/Mica — enough to
+     avoid a flat empty canvas, never enough to compete with the reading
+     surface. Uses only existing brand/neutral tokens. */
+  background-image:
+    radial-gradient(
+      900px 520px at 8% -6%,
+      color-mix(in srgb, var(--color-primary) 7%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      820px 520px at 100% 4%,
+      color-mix(in srgb, var(--color-primary) 5%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      1100px 700px at 50% 108%,
+      color-mix(in srgb, var(--color-primary) 4%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 1px 1px,
+      color-mix(in srgb, var(--color-text) 3.5%, transparent) 1px,
+      transparent 0
+    );
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    26px 26px;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
