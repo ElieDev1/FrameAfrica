@@ -19,6 +19,7 @@ import {
   MailIcon,
   MegaphoneIcon,
   PenIcon,
+  PlayIcon,
   PlusIcon,
   SettingsIcon,
   ShieldIcon,
@@ -72,6 +73,15 @@ function groupsFor(roles: string[]): NavGroup[] {
       ],
     },
   ];
+
+  // Multimedia desks — role-gated content types (documents/13 §4.3).
+  const multimedia: NavItem[] = [];
+  if (has('editor', 'admin')) {
+    multimedia.push({ href: '/dashboard/videos', label: 'Videos', Icon: PlayIcon });
+  }
+  if (multimedia.length > 0) {
+    groups.push({ section: 'Multimedia', items: multimedia });
+  }
 
   if (has('admin')) {
     groups.push({

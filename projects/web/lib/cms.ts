@@ -373,6 +373,29 @@ export async function fetchNewsletterData(): Promise<{
   return { count, campaigns };
 }
 
+export interface AdminVideoItem {
+  id: string;
+  youtubeId: string;
+  title: string;
+  description: string | null;
+  thumbnailUrl: string | null;
+  publishedAt: string;
+  isFeatured: boolean;
+  isHidden: boolean;
+}
+
+/** Every cached clip (incl. hidden) for the Videos management dashboard. */
+export async function fetchAdminVideos(): Promise<AdminVideoItem[]> {
+  const res = await fetch(`${API_URL}/admin/videos`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load videos (${res.status})`);
+  const json = (await res.json()) as { data: AdminVideoItem[] };
+  return json.data;
+}
+
 export interface AuditEntry {
   id: string;
   action: string;
