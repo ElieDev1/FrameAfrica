@@ -1,17 +1,39 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import {
+  ActivityIcon,
+  BarChartIcon,
+  EyeIcon,
+  type IconProps,
+  TrendingUpIcon,
+} from '@/components/icons';
 import { fetchAnalytics, requireStaff } from '@/lib/cms';
 
 export const metadata: Metadata = { title: 'Analytics — Frame Africa' };
 
-function Stat({ label, value, hint }: { label: string; value: number; hint?: string }) {
+function Stat({
+  label,
+  value,
+  hint,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  hint?: string;
+  icon: (p: IconProps) => React.ReactNode;
+}) {
   return (
     <div className="rounded-xl border border-border bg-surface p-5">
-      <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">{label}</div>
-      <div className="mt-1 font-heading text-4xl font-black text-text">
+      <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/12 text-primary ring-1 ring-primary/15">
+        <Icon size={17} />
+      </span>
+      <div className="mt-3 font-heading text-3xl font-black text-text">
         {value.toLocaleString()}
       </div>
-      {hint && <div className="mt-0.5 font-mono text-[11px] text-muted">{hint}</div>}
+      <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
+        {label}
+      </div>
+      {hint && <div className="mt-1 font-mono text-[11px] text-muted">{hint}</div>}
     </div>
   );
 }
@@ -22,17 +44,23 @@ export default async function AnalyticsPage() {
   const max = Math.max(1, ...a.topToday.map((r) => r.views));
 
   return (
-    <div>
-      <h1 className="font-heading text-2xl font-black tracking-tight text-text">Analytics</h1>
-      <p className="mt-1 font-body text-sm text-muted">
+    <div className="w-full">
+      <h1 className="font-heading text-3xl font-black tracking-tight text-text">Analytics</h1>
+      <p className="mt-1 max-w-2xl font-body text-sm text-muted">
         Live story performance — anonymous page views, refreshed on load.
       </p>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Stat label="Reading now" value={a.readingNow} hint="last 5 min" />
-        <Stat label="Views today" value={a.totalToday} hint="since midnight" />
-        <Stat label="Top stories" value={a.topToday.length} hint="ranked today" />
+        <Stat icon={ActivityIcon} label="Reading now" value={a.readingNow} hint="last 5 min" />
+        <Stat icon={EyeIcon} label="Views today" value={a.totalToday} hint="since midnight" />
         <Stat
+          icon={TrendingUpIcon}
+          label="Top stories"
+          value={a.topToday.length}
+          hint="ranked today"
+        />
+        <Stat
+          icon={BarChartIcon}
           label="Referrers"
           value={a.topReferrers.reduce((s, r) => s + r.views, 0)}
           hint="from sources · 24h"

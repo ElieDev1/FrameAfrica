@@ -76,3 +76,23 @@ export async function uploadMediaAction(
   revalidatePath('/dashboard/media');
   return { uploadedUrl: json.data.url };
 }
+
+/** Delete a media asset from the library (editor/admin). */
+export async function deleteMediaAction(id: string): Promise<{ error?: string }> {
+  const token = await getAccessToken();
+  if (!token) redirect('/login');
+  try {
+    const res = await fetch(`${API_URL}/cms/media/${id}`, {
+      method: 'DELETE',
+      headers: { authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (res.status === 401) redirect('/login');
+    if (res.status === 403) return { error: 'Only editors and admins can delete media.' };
+    if (!res.ok) return { error: 'Could not delete this image.' };
+  } catch {
+    return { error: 'Could not reach the server.' };
+  }
+  revalidatePath('/dashboard/media');
+  return {};
+}

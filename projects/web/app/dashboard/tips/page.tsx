@@ -11,18 +11,21 @@ export default async function TipsInboxPage() {
   const open = tips.filter((t) => t.status === 'new').length;
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <h1 className="font-heading text-2xl font-black tracking-tight text-text">Tips inbox</h1>
-      <p className="mt-1 font-body text-sm text-muted">
-        Confidential tips from the public. {open} new.
+    <div className="w-full">
+      <h1 className="font-heading text-3xl font-black tracking-tight text-text">Tips inbox</h1>
+      <p className="mt-1 max-w-2xl font-body text-sm text-muted">
+        Confidential tips from the public — {tips.length} total, {open} new.
       </p>
 
       {tips.length === 0 ? (
-        <p className="mt-10 font-body text-muted">No tips yet.</p>
+        <div className="mt-10 rounded-xl border border-dashed border-border px-6 py-16 text-center">
+          <p className="font-heading text-lg font-bold text-text">No tips yet</p>
+          <p className="mt-1 font-body text-sm text-muted">Public tips will land here.</p>
+        </div>
       ) : (
-        <ul className="mt-6 space-y-4">
+        <ul className="mt-6 grid gap-4 lg:max-w-4xl">
           {tips.map((tip) => (
-            <li key={tip.id} className="rounded-xl border border-border p-4">
+            <li key={tip.id} className="rounded-xl border border-border bg-surface p-4">
               <div className="flex items-start justify-between gap-4">
                 <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-faint">
                   {formatDate(tip.createdAt)}
@@ -31,7 +34,7 @@ export default async function TipsInboxPage() {
               </div>
               <p className="mt-2 whitespace-pre-wrap font-body text-text">{tip.message}</p>
               {tip.contact && (
-                <p className="mt-2 font-mono text-[11px] text-muted">
+                <p className="mt-3 border-t border-border pt-2 font-mono text-[11px] text-muted">
                   Contact: <span className="text-text">{tip.contact}</span>
                 </p>
               )}

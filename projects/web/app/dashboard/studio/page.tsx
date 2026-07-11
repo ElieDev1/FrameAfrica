@@ -18,9 +18,9 @@ export default async function StudioPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <h1 className="font-heading text-2xl font-black tracking-tight text-text">Studio</h1>
-      <p className="mt-1 font-body text-sm text-muted">
+    <div className="w-full">
+      <h1 className="font-heading text-3xl font-black tracking-tight text-text">Studio</h1>
+      <p className="mt-1 max-w-2xl font-body text-sm text-muted">
         Make branded social cards and flyers — start from a story or a template, customise
         everything, and download a PNG. No external software needed.
       </p>
