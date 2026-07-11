@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
+import { LayersIcon, PenIcon, PlusIcon, SearchIcon, TagIcon, TrashIcon } from '@/components/icons';
 import {
   createCategory,
   createTopic,
@@ -11,9 +12,9 @@ import {
 } from '@/lib/taxonomy-actions';
 import type { AdminCategory, AdminTopic } from '@/lib/taxonomy-types';
 
-function Count({ n, label }: { n: number; label: string }) {
+function CountPill({ n, label }: { n: number; label: string }) {
   return (
-    <span className="font-mono text-[10px] text-faint">
+    <span className="rounded-full bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-muted">
       {n} {label}
       {n === 1 ? '' : 's'}
     </span>
@@ -55,37 +56,50 @@ function CategoryRow({
   }
 
   return (
-    <div className="border-t border-border px-4 py-2" style={{ paddingLeft: 16 + depth * 20 }}>
+    <div
+      className="group border-t border-border px-4 py-2.5 transition-colors hover:bg-surface-2/40"
+      style={{ paddingLeft: 16 + depth * 26 }}
+    >
       <div className="flex flex-wrap items-center gap-2">
+        {depth > 0 && (
+          <span aria-hidden className="font-mono text-faint">
+            ↳
+          </span>
+        )}
         {editing ? (
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="rounded border border-border bg-bg px-2 py-1 font-body text-sm text-text outline-none focus:border-primary"
+            className="rounded-lg border border-border bg-surface-2 px-2 py-1 font-body text-sm text-text outline-none focus:border-primary"
           />
         ) : (
-          <span className="font-body text-sm text-text">{cat.name}</span>
+          <span
+            className={`text-text ${depth === 0 ? 'font-heading font-bold' : 'font-body text-sm'}`}
+          >
+            {cat.name}
+          </span>
         )}
-        <span className="font-mono text-[10px] text-muted">/{cat.slug}</span>
-        <Count n={cat.articleCount} label="article" />
-        {cat.childCount > 0 && <Count n={cat.childCount} label="sub" />}
-        <span className="ml-auto flex gap-3">
+        <span className="font-mono text-[10px] text-faint">/{cat.slug}</span>
+        <CountPill n={cat.articleCount} label="article" />
+        {cat.childCount > 0 && <CountPill n={cat.childCount} label="sub" />}
+
+        <span className="ml-auto flex items-center gap-1">
           {editing ? (
             <>
               <button
                 type="button"
                 onClick={save}
                 disabled={pending}
-                className="font-mono text-[11px] text-primary hover:underline"
+                className="rounded-lg border border-border px-2.5 py-1 text-xs font-semibold text-primary transition hover:border-primary disabled:opacity-50"
               >
-                save
+                Save
               </button>
               <button
                 type="button"
                 onClick={() => setEditing(false)}
-                className="font-mono text-[11px] text-muted hover:underline"
+                className="rounded-lg border border-border px-2.5 py-1 text-xs font-semibold text-muted transition hover:text-text"
               >
-                cancel
+                Cancel
               </button>
             </>
           ) : (
@@ -96,17 +110,19 @@ function CategoryRow({
                   setName(cat.name);
                   setEditing(true);
                 }}
-                className="font-mono text-[11px] text-primary hover:underline"
+                aria-label={`Rename ${cat.name}`}
+                className="grid h-7 w-7 place-items-center rounded-lg text-muted opacity-0 transition hover:bg-surface-2 hover:text-primary group-hover:opacity-100"
               >
-                rename
+                <PenIcon size={13} />
               </button>
               <button
                 type="button"
                 onClick={remove}
                 disabled={pending}
-                className="font-mono text-[11px] text-muted hover:text-accent-red"
+                aria-label={`Delete ${cat.name}`}
+                className="grid h-7 w-7 place-items-center rounded-lg text-muted opacity-0 transition hover:bg-accent-red/10 hover:text-accent-red group-hover:opacity-100 disabled:opacity-40"
               >
-                delete
+                <TrashIcon size={13} />
               </button>
             </>
           )}
@@ -129,7 +145,6 @@ function Sections({
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
-  // Order as a parent→children tree.
   const ordered = useMemo(() => {
     const roots = categories.filter((c) => !c.parentId);
     const rows: { cat: AdminCategory; depth: number }[] = [];
@@ -156,20 +171,24 @@ function Sections({
   }
 
   return (
-    <section className="overflow-hidden rounded-xl border border-border">
-      <div className="bg-surface px-4 py-3">
-        <h2 className="font-heading text-lg font-bold text-text">Sections</h2>
+    <section className="overflow-hidden rounded-xl border border-border bg-surface">
+      <div className="border-b border-border px-4 py-3">
+        <div className="flex items-center gap-2">
+          <LayersIcon size={15} className="text-primary" />
+          <h2 className="font-heading text-sm font-bold text-text">Sections</h2>
+          <CountPill n={categories.length} label="section" />
+        </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="New section name"
-            className="w-48 rounded-lg border border-border bg-bg px-3 py-1.5 font-body text-sm text-text outline-none focus:border-primary"
+            className="w-48 rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-body text-sm text-text outline-none focus:border-primary"
           />
           <select
             value={parentId}
             onChange={(e) => setParentId(e.target.value)}
-            className="rounded-lg border border-border bg-bg px-3 py-1.5 font-body text-sm text-text outline-none focus:border-primary"
+            className="rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-body text-sm text-text outline-none focus:border-primary"
           >
             <option value="">— top level —</option>
             {categories
@@ -184,9 +203,9 @@ function Sections({
             type="button"
             onClick={add}
             disabled={pending || !name.trim()}
-            className="rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black hover:opacity-90 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black transition hover:opacity-90 disabled:opacity-50"
           >
-            Add
+            <PlusIcon size={14} /> Add
           </button>
           {error && <span className="font-mono text-[11px] text-accent-red">{error}</span>}
         </div>
@@ -194,14 +213,23 @@ function Sections({
       {ordered.map(({ cat, depth }) => (
         <CategoryRow key={cat.id} cat={cat} depth={depth} onChanged={onChanged} />
       ))}
+      {ordered.length === 0 && (
+        <p className="px-4 py-8 text-center font-body text-sm text-muted">No sections yet.</p>
+      )}
     </section>
   );
 }
 
 function Topics({ topics, onChanged }: { topics: AdminTopic[]; onChanged: () => void }) {
   const [name, setName] = useState('');
+  const [query, setQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+
+  const shown = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return q ? topics.filter((t) => t.name.toLowerCase().includes(q)) : topics;
+  }, [topics, query]);
 
   function add() {
     setError(null);
@@ -224,32 +252,50 @@ function Topics({ topics, onChanged }: { topics: AdminTopic[]; onChanged: () => 
   }
 
   return (
-    <section className="overflow-hidden rounded-xl border border-border">
-      <div className="bg-surface px-4 py-3">
-        <h2 className="font-heading text-lg font-bold text-text">Topics</h2>
+    <section className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface">
+      <div className="border-b border-border px-4 py-3">
+        <div className="flex items-center gap-2">
+          <TagIcon size={15} className="text-primary" />
+          <h2 className="font-heading text-sm font-bold text-text">Topics</h2>
+          <CountPill n={topics.length} label="topic" />
+        </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="New topic name"
-            className="w-56 rounded-lg border border-border bg-bg px-3 py-1.5 font-body text-sm text-text outline-none focus:border-primary"
+            className="min-w-0 flex-1 rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-body text-sm text-text outline-none focus:border-primary"
           />
           <button
             type="button"
             onClick={add}
             disabled={pending || !name.trim()}
-            className="rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black hover:opacity-90 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black transition hover:opacity-90 disabled:opacity-50"
           >
-            Add
+            <PlusIcon size={14} /> Add
           </button>
-          {error && <span className="font-mono text-[11px] text-accent-red">{error}</span>}
+          {error && <span className="w-full font-mono text-[11px] text-accent-red">{error}</span>}
         </div>
+        {topics.length > 8 && (
+          <label className="relative mt-2 block">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint">
+              <SearchIcon size={14} />
+            </span>
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Filter topics…"
+              className="w-full rounded-lg border border-border bg-surface-2 py-1.5 pl-9 pr-3 text-sm text-text outline-none focus:border-primary"
+            />
+          </label>
+        )}
       </div>
       <div className="flex flex-wrap gap-2 p-4">
-        {topics.map((t) => (
+        {shown.map((t) => (
           <span
             key={t.id}
-            className="flex items-center gap-2 rounded-full border border-border px-3 py-1 font-mono text-[11px] text-muted"
+            className="flex items-center gap-1.5 rounded-full border border-border bg-surface-2 px-3 py-1 font-mono text-[11px] text-text"
           >
             {t.name}
             <span className="text-faint">({t.articleCount})</span>
@@ -257,14 +303,18 @@ function Topics({ topics, onChanged }: { topics: AdminTopic[]; onChanged: () => 
               type="button"
               onClick={() => remove(t.id)}
               disabled={pending}
-              className="text-muted hover:text-accent-red"
+              className="text-faint transition hover:text-accent-red"
               aria-label={`Delete ${t.name}`}
             >
               ✕
             </button>
           </span>
         ))}
-        {topics.length === 0 && <p className="font-body text-sm text-muted">No topics yet.</p>}
+        {shown.length === 0 && (
+          <p className="font-body text-sm text-muted">
+            {query ? 'No topics match.' : 'No topics yet.'}
+          </p>
+        )}
       </div>
     </section>
   );
@@ -279,10 +329,21 @@ export function TaxonomyAdmin({
 }) {
   const router = useRouter();
   const refresh = () => router.refresh();
+
   return (
-    <div className="flex flex-col gap-6">
-      <Sections categories={categories} onChanged={refresh} />
-      <Topics topics={topics} onChanged={refresh} />
+    <div className="flex flex-col gap-5">
+      <div>
+        <h1 className="font-heading text-3xl font-black tracking-tight text-text">Taxonomy</h1>
+        <p className="mt-1 max-w-2xl font-body text-sm text-muted">
+          Manage the sections, sub-sections, and topics that organise the whole site. A section with
+          sub-sections or articles can&apos;t be deleted until it&apos;s emptied.
+        </p>
+      </div>
+
+      <div className="grid items-start gap-5 lg:grid-cols-[1fr_22rem]">
+        <Sections categories={categories} onChanged={refresh} />
+        <Topics topics={topics} onChanged={refresh} />
+      </div>
     </div>
   );
 }
