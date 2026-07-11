@@ -455,6 +455,66 @@ export async function fetchAdminGallery(id: string): Promise<GalleryDetail> {
   return json.data;
 }
 
+export interface PodcastEpisodeItem {
+  id: string;
+  showId: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  mediaKind: 'audio' | 'video';
+  mediaUrl: string;
+  coverUrl: string | null;
+  durationSec: number | null;
+  episodeNo: number | null;
+  status: 'draft' | 'published';
+  publishedAt: string | null;
+  createdAt: string;
+}
+
+export interface PodcastShowItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  coverUrl: string | null;
+  spotifyUrl: string | null;
+  appleUrl: string | null;
+  rssUrl: string | null;
+  status: 'draft' | 'published';
+  episodeCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PodcastShowDetail extends PodcastShowItem {
+  episodes: PodcastEpisodeItem[];
+}
+
+/** Staff: every podcast show (any status). */
+export async function fetchAdminPodcasts(): Promise<PodcastShowItem[]> {
+  const res = await fetch(`${API_URL}/admin/podcasts`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load podcasts (${res.status})`);
+  const json = (await res.json()) as { data: PodcastShowItem[] };
+  return json.data;
+}
+
+/** Staff: a show with its episodes for editing. */
+export async function fetchAdminPodcast(id: string): Promise<PodcastShowDetail> {
+  const res = await fetch(`${API_URL}/admin/podcasts/${id}`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (res.status === 404) notFound();
+  if (!res.ok) throw new Error(`Failed to load podcast (${res.status})`);
+  const json = (await res.json()) as { data: PodcastShowDetail };
+  return json.data;
+}
+
 export interface AuditEntry {
   id: string;
   action: string;

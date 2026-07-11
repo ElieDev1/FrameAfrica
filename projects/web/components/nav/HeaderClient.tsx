@@ -40,6 +40,21 @@ function shortLabel(name: string): string {
   return name.split(' & ')[0];
 }
 
+/** Standalone multimedia hub pages, surfaced under the Multimedia nav dropdown. */
+const MULTIMEDIA_HUBS: { name: string; href: string }[] = [
+  { name: 'Videos', href: '/videos' },
+  { name: 'Photo galleries', href: '/galleries' },
+  { name: 'Podcasts', href: '/podcasts' },
+];
+
+/** The taxonomy "Multimedia" section also links to the hub pages above. */
+function isMultimedia(slug: string): boolean {
+  return slug === 'multimedia';
+}
+function hasMenu(section: CategoryNode): boolean {
+  return section.children.length > 0 || isMultimedia(section.slug);
+}
+
 export function HeaderClient({ sections, allSections, featured, user, locale }: Props) {
   const pathname = usePathname();
   const [condensed, setCondensed] = useState(false);
@@ -111,7 +126,7 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
                       }`}
                     >
                       {shortLabel(section.name)}
-                      {section.children.length > 0 && (
+                      {hasMenu(section) && (
                         <ChevronDownIcon
                           size={12}
                           aria-hidden
@@ -120,7 +135,7 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
                       )}
                     </Link>
 
-                    {section.children.length > 0 && (
+                    {hasMenu(section) && (
                       <MegaMenu section={section} featured={feat} activeSlug={pathname} />
                     )}
                   </li>
@@ -217,20 +232,33 @@ function MegaMenu({
               : 'grid grid-cols-1 gap-y-0.5'
           }
         >
-          {section.children.map((child) => {
-            const active = activeSlug === `/section/${child.slug}`;
-            return (
+          {isMultimedia(section.slug) &&
+            MULTIMEDIA_HUBS.map((hub) => (
               <Link
-                key={child.id}
-                href={`/section/${child.slug}`}
-                className={`rounded-lg px-2.5 py-1.5 text-sm transition-colors hover:bg-surface-2 hover:text-primary ${
-                  active ? 'text-primary' : 'text-muted'
+                key={hub.href}
+                href={hub.href}
+                className={`rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors hover:bg-surface-2 hover:text-primary ${
+                  activeSlug === hub.href ? 'text-primary' : 'text-text'
                 }`}
               >
-                {child.name}
+                {hub.name}
               </Link>
-            );
-          })}
+            ))}
+          {!isMultimedia(section.slug) &&
+            section.children.map((child) => {
+              const active = activeSlug === `/section/${child.slug}`;
+              return (
+                <Link
+                  key={child.id}
+                  href={`/section/${child.slug}`}
+                  className={`rounded-lg px-2.5 py-1.5 text-sm transition-colors hover:bg-surface-2 hover:text-primary ${
+                    active ? 'text-primary' : 'text-muted'
+                  }`}
+                >
+                  {child.name}
+                </Link>
+              );
+            })}
         </div>
 
         {featured && (

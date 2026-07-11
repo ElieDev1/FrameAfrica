@@ -13,6 +13,41 @@ export interface UploadState {
   uploadedUrl?: string;
 }
 
+/** Upload an audio/video file (podcasts, self-hosted clips) → its public URL. */
+export async function uploadAVAction(
+  formData: FormData,
+): Promise<{ url?: string; error?: string }> {
+  const file = formData.get('file');
+  if (!(file instanceof File) || file.size === 0) return { error: 'Choose a file to upload.' };
+
+  const token = await getAccessToken();
+  if (!token) return { error: 'Session expired — sign in again.' };
+
+  try {
+    const res = await fetch(`${API_URL}/cms/media/av`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}` },
+      body: formData,
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      let message = 'Upload failed.';
+      try {
+        const json = (await res.json()) as { message?: string | string[] };
+        if (Array.isArray(json.message)) message = json.message[0] ?? message;
+        else if (json.message) message = json.message;
+      } catch {
+        // keep default
+      }
+      return { error: message };
+    }
+    const json = (await res.json()) as { data: { url: string } };
+    return { url: json.data.url };
+  } catch {
+    return { error: 'Could not reach the server.' };
+  }
+}
+
 /** Fetch the media library for the client-side picker (empty on any error). */
 export async function listMediaAction(): Promise<MediaAsset[]> {
   const token = await getAccessToken();
