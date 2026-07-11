@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  Param,
   Post,
   UploadedFile,
   UseGuards,
@@ -45,5 +48,12 @@ export class MediaController {
   @Get()
   async list() {
     return apiResponse(await this.media.list());
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  @Roles(RoleName.editor, RoleName.admin)
+  async remove(@Param('id') id: string) {
+    await this.media.remove(id);
   }
 }

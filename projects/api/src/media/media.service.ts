@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type { MediaAsset } from '@prisma/client';
 import { StorageService } from '../common/storage/storage.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -69,6 +69,15 @@ export class MediaService {
       take: limit,
     });
     return rows.map(toDto);
+  }
+
+  /** Remove an asset from the library. Articles keep their stored URL string. */
+  async remove(id: string): Promise<void> {
+    const asset = await this.prisma.mediaAsset.findUnique({ where: { id } });
+    if (!asset) {
+      throw new NotFoundException('Media not found');
+    }
+    await this.prisma.mediaAsset.delete({ where: { id } });
   }
 }
 
