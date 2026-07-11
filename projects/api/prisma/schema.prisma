@@ -584,6 +584,11 @@ model Video {
   title        String
   description  String?
   thumbnailUrl String?  @map("thumbnail_url")
+  // Editor curation: `isFeatured` pins a clip to the top of the hub / homepage
+  // strip; `isHidden` keeps a synced clip out of the public hub without deleting
+  // it (it can otherwise re-appear on the next sync).
+  isFeatured   Boolean  @default(false) @map("is_featured")
+  isHidden     Boolean  @default(false) @map("is_hidden")
   publishedAt  DateTime @map("published_at")
   createdAt    DateTime @default(now()) @map("created_at")
 

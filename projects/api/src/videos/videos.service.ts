@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { AdminSettingsService } from '../admin/admin-settings.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -9,6 +9,11 @@ export interface VideoView {
   description: string | null;
   thumbnailUrl: string | null;
   publishedAt: string;
+}
+
+export interface AdminVideoView extends VideoView {
+  isFeatured: boolean;
+  isHidden: boolean;
 }
 
 export interface SyncResult {
@@ -23,7 +28,9 @@ const MAX_ITEMS = 24;
  * YouTube video hub (documents/14 §3.1). Uploads are synced from the configured
  * channel into a local cache, so page renders never call YouTube. The API key
  * and channel id come from admin settings (DB first, then env), which means the
- * hub degrades to an empty state until an admin configures them.
+ * hub degrades to an empty state until an admin configures them. Editors can
+ * also curate the cache by hand: add a clip by URL, feature it, hide it, or
+ * delete it.
  */
 @Injectable()
 export class VideosService {
@@ -34,20 +41,91 @@ export class VideosService {
     private readonly settings: AdminSettingsService,
   ) {}
 
-  /** Cached uploads, newest first. */
+  /** Cached, visible uploads for the public hub — featured first, then newest. */
   async list(limit = 12): Promise<VideoView[]> {
     const rows = await this.prisma.video.findMany({
-      orderBy: { publishedAt: 'desc' },
+      where: { isHidden: false },
+      orderBy: [{ isFeatured: 'desc' }, { publishedAt: 'desc' }],
       take: Math.min(Math.max(limit, 1), MAX_ITEMS),
     });
-    return rows.map((v) => ({
-      id: v.id,
-      youtubeId: v.youtubeId,
-      title: v.title,
-      description: v.description,
-      thumbnailUrl: v.thumbnailUrl,
-      publishedAt: v.publishedAt.toISOString(),
-    }));
+    return rows.map(toView);
+  }
+
+  /** Every cached clip (including hidden) for the management dashboard. */
+  async listAll(): Promise<AdminVideoView[]> {
+    const rows = await this.prisma.video.findMany({
+      orderBy: [{ isFeatured: 'desc' }, { publishedAt: 'desc' }],
+      take: 200,
+    });
+    return rows.map((v) => ({ ...toView(v), isFeatured: v.isFeatured, isHidden: v.isHidden }));
+  }
+
+  /**
+   * Curate a single clip by pasting a YouTube URL (or bare id). Fetches the
+   * title/thumbnail via the API when a key is configured; otherwise falls back
+   * to a caller-supplied title. Upserts so re-adding just refreshes it.
+   */
+  async addByUrl(url: string, title?: string): Promise<AdminVideoView> {
+    const youtubeId = parseYoutubeId(url);
+    if (!youtubeId) {
+      throw new BadRequestException('Not a recognisable YouTube URL or video id');
+    }
+
+    let resolvedTitle = title?.trim() || '';
+    let description: string | null = null;
+    let thumbnailUrl: string | null = null;
+    let publishedAt = new Date();
+
+    const apiKey = await this.settings.getValue('YOUTUBE_API_KEY');
+    if (apiKey) {
+      const meta = await this.fetchVideoMeta(youtubeId, apiKey);
+      if (meta) {
+        resolvedTitle = resolvedTitle || meta.title;
+        description = meta.description;
+        thumbnailUrl = meta.thumbnailUrl;
+        publishedAt = meta.publishedAt;
+      }
+    }
+    if (!resolvedTitle) {
+      throw new BadRequestException('Add a title (no YouTube API key is configured to fetch one)');
+    }
+    if (!thumbnailUrl) {
+      // Deterministic public thumbnail — no API key needed.
+      thumbnailUrl = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
+    }
+
+    const row = await this.prisma.video.upsert({
+      where: { youtubeId },
+      update: { title: resolvedTitle, description, thumbnailUrl },
+      create: { youtubeId, title: resolvedTitle, description, thumbnailUrl, publishedAt },
+    });
+    return { ...toView(row), isFeatured: row.isFeatured, isHidden: row.isHidden };
+  }
+
+  /** Feature/unfeature or hide/unhide a clip. */
+  async setFlags(
+    id: string,
+    flags: { isFeatured?: boolean; isHidden?: boolean },
+  ): Promise<AdminVideoView> {
+    await this.ensureExists(id);
+    const row = await this.prisma.video.update({
+      where: { id },
+      data: {
+        ...(flags.isFeatured !== undefined ? { isFeatured: flags.isFeatured } : {}),
+        ...(flags.isHidden !== undefined ? { isHidden: flags.isHidden } : {}),
+      },
+    });
+    return { ...toView(row), isFeatured: row.isFeatured, isHidden: row.isHidden };
+  }
+
+  async remove(id: string): Promise<void> {
+    await this.ensureExists(id);
+    await this.prisma.video.delete({ where: { id } });
+  }
+
+  private async ensureExists(id: string): Promise<void> {
+    const found = await this.prisma.video.findUnique({ where: { id }, select: { id: true } });
+    if (!found) throw new NotFoundException('Video not found');
   }
 
   /** Pull the channel's uploads playlist into the cache. Never throws. */
@@ -99,6 +177,32 @@ export class VideosService {
     }
   }
 
+  private async fetchVideoMeta(
+    videoId: string,
+    apiKey: string,
+  ): Promise<{
+    title: string;
+    description: string | null;
+    thumbnailUrl: string | null;
+    publishedAt: Date;
+  } | null> {
+    try {
+      const res = await fetch(`${YT}/videos?part=snippet&id=${videoId}&key=${apiKey}`);
+      if (!res.ok) return null;
+      const json = (await res.json()) as { items?: PlaylistItem[] };
+      const snippet = json.items?.[0]?.snippet;
+      if (!snippet?.title) return null;
+      return {
+        title: snippet.title,
+        description: snippet.description ?? null,
+        thumbnailUrl: pickThumbnail({ snippet }),
+        publishedAt: new Date(snippet.publishedAt ?? Date.now()),
+      };
+    } catch {
+      return null;
+    }
+  }
+
   private async uploadsPlaylistId(channelId: string, apiKey: string): Promise<string | null> {
     const res = await fetch(`${YT}/channels?part=contentDetails&id=${channelId}&key=${apiKey}`);
     if (!res.ok) return null;
@@ -122,4 +226,50 @@ interface PlaylistItem {
 function pickThumbnail(item: PlaylistItem): string | null {
   const t = item.snippet?.thumbnails;
   return t?.maxres?.url ?? t?.high?.url ?? t?.medium?.url ?? t?.default?.url ?? null;
+}
+
+function toView(v: {
+  id: string;
+  youtubeId: string;
+  title: string;
+  description: string | null;
+  thumbnailUrl: string | null;
+  publishedAt: Date;
+}): VideoView {
+  return {
+    id: v.id,
+    youtubeId: v.youtubeId,
+    title: v.title,
+    description: v.description,
+    thumbnailUrl: v.thumbnailUrl,
+    publishedAt: v.publishedAt.toISOString(),
+  };
+}
+
+/**
+ * Extract an 11-char YouTube video id from a watch/short/embed/youtu.be URL or a
+ * bare id. Returns null for anything else.
+ */
+export function parseYoutubeId(value: string): string | null {
+  const raw = value.trim();
+  if (/^[\w-]{11}$/.test(raw)) return raw;
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  const host = url.hostname.replace(/^www\./, '').replace(/^m\./, '');
+  let id: string | null = null;
+  if (host === 'youtu.be') {
+    id = url.pathname.slice(1);
+  } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+    if (url.pathname === '/watch') id = url.searchParams.get('v');
+    else if (url.pathname.startsWith('/embed/')) id = url.pathname.slice('/embed/'.length);
+    else if (url.pathname.startsWith('/shorts/')) id = url.pathname.slice('/shorts/'.length);
+    else if (url.pathname.startsWith('/v/')) id = url.pathname.slice('/v/'.length);
+  }
+  if (!id) return null;
+  id = id.split('/')[0];
+  return /^[\w-]{11}$/.test(id) ? id : null;
 }
