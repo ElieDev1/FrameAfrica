@@ -29,6 +29,7 @@ import { NewsletterModule } from './newsletter/newsletter.module';
 import { InquiriesModule } from './inquiries/inquiries.module';
 import { GalleriesModule } from './galleries/galleries.module';
 import { PodcastsModule } from './podcasts/podcasts.module';
+import { InteractivesModule } from './interactives/interactives.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AiModule } from './ai/ai.module';
 import { AdminModule } from './admin/admin.module';
@@ -64,6 +65,7 @@ import { AdminModule } from './admin/admin.module';
     InquiriesModule,
     GalleriesModule,
     PodcastsModule,
+    InteractivesModule,
     AnalyticsModule,
     AiModule,
     AdminModule,
