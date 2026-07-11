@@ -8,7 +8,8 @@ import { staffNav } from '@/lib/staff-nav';
 /**
  * Mobile navigation: a hamburger button that opens a full-height drawer with
  * search, the section tree (sub-sections expandable), and auth actions. Shown
- * only below the desktop breakpoint (`md:hidden`).
+ * below the desktop nav breakpoint (`lg:hidden`), where the full section bar
+ * takes over.
  */
 export function MobileMenu({
   sections,
@@ -43,7 +44,7 @@ export function MobileMenu({
   const close = () => setOpen(false);
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         type="button"
         onClick={() => setOpen(true)}
