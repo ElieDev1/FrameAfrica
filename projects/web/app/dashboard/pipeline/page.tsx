@@ -45,9 +45,9 @@ export default async function PipelinePage() {
   const columns = await Promise.all(COLUMNS.map((c) => listAllArticles({ status: c.status })));
 
   return (
-    <div>
-      <h1 className="font-heading text-2xl font-black tracking-tight text-text">Pipeline</h1>
-      <p className="mt-1 font-body text-sm text-muted">
+    <div className="w-full">
+      <h1 className="font-heading text-3xl font-black tracking-tight text-text">Pipeline</h1>
+      <p className="mt-1 max-w-2xl font-body text-sm text-muted">
         The whole newsroom at a glance — every story by stage.
       </p>
 

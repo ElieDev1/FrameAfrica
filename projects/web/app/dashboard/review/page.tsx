@@ -12,18 +12,28 @@ export default async function ReviewPage() {
   const queue = await listReviewQueue();
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="font-heading text-3xl font-black tracking-tight text-text">Review queue</h1>
+    <div className="w-full">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-3xl font-black tracking-tight text-text">
+            Review queue
+          </h1>
+          <p className="mt-1 font-body text-sm text-muted">
+            {queue.length} {queue.length === 1 ? 'story' : 'stories'} awaiting your decision.
+          </p>
+        </div>
         <Link href="/dashboard/stories" className="font-mono text-xs text-primary hover:underline">
           ← Newsroom
         </Link>
       </div>
 
       {queue.length === 0 ? (
-        <p className="mt-12 font-body text-muted">Nothing is awaiting review right now.</p>
+        <div className="mt-10 rounded-xl border border-dashed border-border px-6 py-16 text-center">
+          <p className="font-heading text-lg font-bold text-text">All clear</p>
+          <p className="mt-1 font-body text-sm text-muted">Nothing is awaiting review right now.</p>
+        </div>
       ) : (
-        <ul className="mt-8 flex flex-col gap-4">
+        <ul className="mt-6 flex flex-col gap-4 lg:max-w-4xl">
           {queue.map((item) => (
             <li key={item.id} className="rounded-xl border border-border p-4">
               <div className="flex items-start justify-between gap-4">
