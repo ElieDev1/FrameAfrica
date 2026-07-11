@@ -21,6 +21,7 @@ const COLUMNS: { title: string; items: { label: string; href: string }[] }[] = [
       { label: 'Latest', href: '/' },
       { label: 'For you', href: '/for-you' },
       { label: 'Videos', href: '/videos' },
+      { label: 'Galleries', href: '/galleries' },
       { label: 'Search', href: '/search' },
     ],
   },

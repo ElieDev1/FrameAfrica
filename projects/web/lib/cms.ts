@@ -19,6 +19,7 @@ const STAFF_ROLES = [
 const EDITOR_ROLES = ['editor', 'admin'];
 const COPYDESK_ROLES = ['sub_editor', 'editor', 'admin'];
 const MODERATOR_ROLES = ['moderator', 'editor', 'admin'];
+const GALLERY_ROLES = ['photographer', 'editor', 'admin'];
 
 export type DraftStatus = 'draft' | 'in_progress' | 'rejected' | 'ready' | 'published' | string;
 
@@ -104,6 +105,14 @@ export async function requireModerator(): Promise<SessionUser> {
   const user = await getSession();
   if (!user) redirect('/login');
   if (!user.roles.some((role) => MODERATOR_ROLES.includes(role))) redirect('/dashboard');
+  return user;
+}
+
+/** Require a photographer/editor/admin (gallery desk), else redirect. */
+export async function requirePhotographer(): Promise<SessionUser> {
+  const user = await getSession();
+  if (!user) redirect('/login');
+  if (!user.roles.some((role) => GALLERY_ROLES.includes(role))) redirect('/dashboard');
   return user;
 }
 
@@ -393,6 +402,56 @@ export async function fetchAdminVideos(): Promise<AdminVideoItem[]> {
   if (res.status === 401) redirect('/login');
   if (!res.ok) throw new Error(`Failed to load videos (${res.status})`);
   const json = (await res.json()) as { data: AdminVideoItem[] };
+  return json.data;
+}
+
+export interface GalleryImage {
+  url: string;
+  alt: string;
+  caption?: string;
+  credit?: string;
+}
+
+export interface GalleryListItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  coverUrl: string | null;
+  coverAlt: string | null;
+  imageCount: number;
+  status: 'draft' | 'published';
+  publishedAt: string | null;
+  updatedAt: string;
+}
+
+export interface GalleryDetail extends GalleryListItem {
+  images: GalleryImage[];
+  author: { id: string; displayName: string } | null;
+}
+
+/** Staff: every gallery (any status) for the management list. */
+export async function fetchAdminGalleries(): Promise<GalleryListItem[]> {
+  const res = await fetch(`${API_URL}/admin/galleries`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load galleries (${res.status})`);
+  const json = (await res.json()) as { data: GalleryListItem[] };
+  return json.data;
+}
+
+/** Staff: a single gallery for editing. */
+export async function fetchAdminGallery(id: string): Promise<GalleryDetail> {
+  const res = await fetch(`${API_URL}/admin/galleries/${id}`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (res.status === 404) notFound();
+  if (!res.ok) throw new Error(`Failed to load gallery (${res.status})`);
+  const json = (await res.json()) as { data: GalleryDetail };
   return json.data;
 }
 
