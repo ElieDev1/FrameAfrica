@@ -2,20 +2,22 @@
 
 import { useMemo, useState } from 'react';
 import { ChevronRightIcon, SearchIcon } from '@/components/icons';
+import { useT } from '@/components/LocaleProvider';
 import type { AuditEntry } from '@/lib/cms';
 import { formatDate } from '@/lib/format';
+import type { MessageKey } from '@/lib/i18n';
 
 const PAGE_SIZE = 15;
 
-const ACTION_LABELS: Record<string, string> = {
-  'account.erased': 'Account erased',
-  'user.roles_changed': 'Roles changed',
-  'user.status_changed': 'Status changed',
+const ACTION_LABELS: Record<string, MessageKey> = {
+  'account.erased': 'daud.accountErased',
+  'user.roles_changed': 'daud.rolesChanged',
+  'user.status_changed': 'daud.statusChanged',
 };
 
 /** Humanise an action key like `user.roles_changed` → `Roles changed`. */
-function actionLabel(action: string): string {
-  if (ACTION_LABELS[action]) return ACTION_LABELS[action];
+function actionLabel(action: string, t: (k: MessageKey) => string): string {
+  if (ACTION_LABELS[action]) return t(ACTION_LABELS[action]);
   const tail = action.includes('.') ? action.slice(action.indexOf('.') + 1) : action;
   const s = tail.replace(/_/g, ' ');
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -36,6 +38,7 @@ function initials(name: string): string {
 }
 
 export function AuditTable({ entries }: { entries: AuditEntry[] }) {
+  const t = useT();
   const [query, setQuery] = useState('');
   const [action, setAction] = useState('all');
   const [page, setPage] = useState(1);
@@ -75,10 +78,10 @@ export function AuditTable({ entries }: { entries: AuditEntry[] }) {
           }}
           className="rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-text outline-none focus:border-primary"
         >
-          <option value="all">All actions</option>
+          <option value="all">{t('daud.allActions')}</option>
           {actions.map((a) => (
             <option key={a} value={a}>
-              {actionLabel(a)}
+              {actionLabel(a, t)}
             </option>
           ))}
         </select>
@@ -93,7 +96,7 @@ export function AuditTable({ entries }: { entries: AuditEntry[] }) {
               setQuery(e.target.value);
               setPage(1);
             }}
-            placeholder="Search actor, action, target…"
+            placeholder={t('daud.searchPlaceholder')}
             className="w-full rounded-lg border border-border bg-surface-2 py-2 pl-9 pr-3 text-sm text-text outline-none focus:border-primary"
           />
         </label>
@@ -105,10 +108,10 @@ export function AuditTable({ entries }: { entries: AuditEntry[] }) {
           <table className="w-full min-w-[720px] text-left">
             <thead>
               <tr className="border-b border-border font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-                <th className="px-4 py-3 font-medium">When</th>
-                <th className="px-4 py-3 font-medium">Actor</th>
-                <th className="px-4 py-3 font-medium">Action</th>
-                <th className="px-4 py-3 font-medium">Target</th>
+                <th className="px-4 py-3 font-medium">{t('daud.when')}</th>
+                <th className="px-4 py-3 font-medium">{t('daud.actor')}</th>
+                <th className="px-4 py-3 font-medium">{t('daud.action')}</th>
+                <th className="px-4 py-3 font-medium">{t('daud.target')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -128,7 +131,9 @@ export function AuditTable({ entries }: { entries: AuditEntry[] }) {
                       >
                         {e.actor ? initials(e.actor.displayName) : 'SYS'}
                       </span>
-                      <span className="text-sm text-text">{e.actor?.displayName ?? 'System'}</span>
+                      <span className="text-sm text-text">
+                        {e.actor?.displayName ?? t('daud.system')}
+                      </span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -137,7 +142,7 @@ export function AuditTable({ entries }: { entries: AuditEntry[] }) {
                         e.action,
                       )}`}
                     >
-                      {actionLabel(e.action)}
+                      {actionLabel(e.action, t)}
                     </span>
                   </td>
                   <td className="px-4 py-3 font-mono text-[11px] text-faint">
@@ -150,7 +155,7 @@ export function AuditTable({ entries }: { entries: AuditEntry[] }) {
         </div>
         {rows.length === 0 && (
           <p className="px-4 py-12 text-center font-body text-sm text-muted">
-            No matching audit entries.
+            {t('daud.noEntries')}
           </p>
         )}
       </div>
@@ -159,7 +164,7 @@ export function AuditTable({ entries }: { entries: AuditEntry[] }) {
       {rows.length > 0 && (
         <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
           <p className="font-mono text-xs text-muted">
-            {firstRow}–{lastRow} of {rows.length}
+            {firstRow}–{lastRow} {t('dpg.of')} {rows.length}
           </p>
           {totalPages > 1 && (
             <div className="flex items-center gap-1">
@@ -169,10 +174,10 @@ export function AuditTable({ entries }: { entries: AuditEntry[] }) {
                 disabled={current === 1}
                 className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary disabled:pointer-events-none disabled:opacity-40"
               >
-                <ChevronRightIcon size={13} className="rotate-180" /> Prev
+                <ChevronRightIcon size={13} className="rotate-180" /> {t('dpg.prev')}
               </button>
               <span className="px-2 font-mono text-xs text-muted">
-                Page {current} / {totalPages}
+                {t('dpg.page')} {current} / {totalPages}
               </span>
               <button
                 type="button"
@@ -180,7 +185,7 @@ export function AuditTable({ entries }: { entries: AuditEntry[] }) {
                 disabled={current === totalPages}
                 className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary disabled:pointer-events-none disabled:opacity-40"
               >
-                Next <ChevronRightIcon size={13} />
+                {t('dpg.next')} <ChevronRightIcon size={13} />
               </button>
             </div>
           )}

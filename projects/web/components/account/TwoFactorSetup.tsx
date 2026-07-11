@@ -9,6 +9,7 @@ import {
   setupTwoFactor,
   type TwoFactorSetupData,
 } from '@/lib/twofactor-actions';
+import { useT } from '@/components/LocaleProvider';
 
 export function TwoFactorSetup({ enabled: initialEnabled }: { enabled: boolean }) {
   const [enabled, setEnabled] = useState(initialEnabled);
@@ -16,6 +17,7 @@ export function TwoFactorSetup({ enabled: initialEnabled }: { enabled: boolean }
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const t = useT();
 
   function begin() {
     setError(null);
@@ -70,15 +72,13 @@ export function TwoFactorSetup({ enabled: initialEnabled }: { enabled: boolean }
       <div className="rounded-xl border border-border p-5">
         <div className="flex items-center gap-2">
           <span className="font-heading text-lg font-bold text-text">
-            Two-factor authentication
+            {t('account.twoFactorAuth')}
           </span>
           <span className="rounded-full bg-primary/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
-            On
+            {t('account.twoFactorOn')}
           </span>
         </div>
-        <p className="mt-1 font-body text-sm text-muted">
-          Your account is protected by an authenticator app. To turn it off, enter a current code.
-        </p>
+        <p className="mt-1 font-body text-sm text-muted">{t('account.twoFactorActiveNotice')}</p>
         <div className="mt-3 flex items-center gap-2">
           {codeInput}
           <button
@@ -87,7 +87,7 @@ export function TwoFactorSetup({ enabled: initialEnabled }: { enabled: boolean }
             disabled={pending || code.length < 6}
             className="rounded-lg border border-accent-red/40 px-3 py-2 font-mono text-xs uppercase tracking-[0.12em] text-accent-red hover:bg-accent-red/10 disabled:opacity-50"
           >
-            Turn off
+            {t('account.turnOff')}
           </button>
         </div>
         {error && <p className="mt-2 font-mono text-xs text-accent-red">{error}</p>}
@@ -97,11 +97,8 @@ export function TwoFactorSetup({ enabled: initialEnabled }: { enabled: boolean }
 
   return (
     <div className="rounded-xl border border-border p-5">
-      <span className="font-heading text-lg font-bold text-text">Two-factor authentication</span>
-      <p className="mt-1 font-body text-sm text-muted">
-        Add a second step at sign-in using an authenticator app (Google Authenticator, Authy,
-        1Password…).
-      </p>
+      <span className="font-heading text-lg font-bold text-text">{t('account.twoFactorAuth')}</span>
+      <p className="mt-1 font-body text-sm text-muted">{t('account.twoFactorSubtitle')}</p>
 
       {!setup ? (
         <button
@@ -110,13 +107,11 @@ export function TwoFactorSetup({ enabled: initialEnabled }: { enabled: boolean }
           disabled={pending}
           className="mt-3 rounded-lg bg-primary px-4 py-2 font-heading text-sm font-bold text-black hover:opacity-90 disabled:opacity-60"
         >
-          {pending ? 'Starting…' : 'Set up 2FA'}
+          {pending ? t('common.pleaseWait') : `${t('account.twoFactorSetUp')} 2FA`}
         </button>
       ) : (
         <div className="mt-4 flex flex-col gap-3">
-          <p className="font-body text-sm text-text">
-            1. Scan this QR code with your authenticator app:
-          </p>
+          <p className="font-body text-sm text-text">{t('account.scanQR')}</p>
           <img
             src={setup.qrDataUrl}
             alt="2FA QR code"
@@ -125,12 +120,12 @@ export function TwoFactorSetup({ enabled: initialEnabled }: { enabled: boolean }
             className="rounded-lg border border-border bg-white p-2"
           />
           <p className="font-body text-sm text-muted">
-            Or enter this key manually:{' '}
+            {t('account.enterManualKey')}{' '}
             <code className="select-all rounded bg-surface-2 px-2 py-0.5 font-mono text-text">
               {setup.secret}
             </code>
           </p>
-          <p className="font-body text-sm text-text">2. Enter the 6-digit code it shows:</p>
+          <p className="font-body text-sm text-text">{t('account.enter6Digit')}</p>
           <div className="flex items-center gap-2">
             {codeInput}
             <button
@@ -139,7 +134,7 @@ export function TwoFactorSetup({ enabled: initialEnabled }: { enabled: boolean }
               disabled={pending || code.length < 6}
               className="rounded-lg bg-primary px-4 py-2 font-heading text-sm font-bold text-black hover:opacity-90 disabled:opacity-50"
             >
-              {pending ? 'Verifying…' : 'Enable'}
+              {pending ? t('account.verifying') : t('account.enable')}
             </button>
           </div>
         </div>

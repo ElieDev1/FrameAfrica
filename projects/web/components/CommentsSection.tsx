@@ -4,6 +4,7 @@ import { formatDate } from '@/lib/format';
 import { CommentActions } from './CommentActions';
 import { CommentForm } from './CommentForm';
 import { CommentIcon } from './icons';
+import { type Locale, t } from '@/lib/i18n';
 
 /** First initial of a display name, for the avatar monogram. */
 function initial(name: string): string {
@@ -51,11 +52,13 @@ export function CommentsSection({
   slug,
   comments,
   signedIn,
+  locale,
 }: {
   articleId: string;
   slug: string;
   comments: Comment[];
   signedIn: boolean;
+  locale: Locale;
 }) {
   const total = countComments(comments);
 
@@ -70,7 +73,8 @@ export function CommentsSection({
         className="mb-6 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] text-muted"
       >
         <CommentIcon size={14} />
-        Comments{total > 0 ? ` (${total})` : ''}
+        {t(locale, 'comments.title')}
+        {total > 0 ? ` (${total})` : ''}
       </h2>
 
       {signedIn ? (
@@ -80,9 +84,9 @@ export function CommentsSection({
       ) : (
         <p className="mb-8 font-body text-sm text-muted">
           <Link href="/login" className="text-primary hover:underline">
-            Sign in
-          </Link>{' '}
-          to join the conversation.
+            {t(locale, 'comments.signIn')}
+          </Link>
+          {t(locale, 'comments.toJoin')}
         </p>
       )}
 
@@ -93,7 +97,7 @@ export function CommentsSection({
           ))}
         </ul>
       ) : (
-        <p className="font-body text-sm text-muted">No comments yet — be the first to weigh in.</p>
+        <p className="font-body text-sm text-muted">{t(locale, 'comments.empty')}</p>
       )}
     </section>
   );

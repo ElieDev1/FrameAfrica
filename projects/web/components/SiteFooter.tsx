@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { fetchCategories, type CategoryNode } from '@/lib/api';
-import { type MessageKey, t } from '@/lib/i18n';
+import { type MessageKey, t, translateCategory } from '@/lib/i18n';
 import { getLocale } from '@/lib/i18n-server';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { Wordmark } from './Wordmark';
@@ -71,7 +71,7 @@ export async function SiteFooter() {
                     href={`/section/${section.slug}`}
                     className="font-body text-sm text-muted hover:text-primary"
                   >
-                    {section.name}
+                    {translateCategory(locale, section.slug, section.name)}
                   </Link>
                 </li>
               ))}

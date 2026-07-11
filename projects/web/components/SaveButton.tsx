@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { toggleBookmark } from '@/lib/bookmarks-actions';
+import { useLocale } from '@/components/LocaleProvider';
+import { t } from '@/lib/i18n';
 
 /**
  * "Save" (bookmark) control on an article. Optimistic toggle; signed-out readers
@@ -19,6 +21,7 @@ export function SaveButton({
 }) {
   const [saved, setSaved] = useState(initialSaved);
   const [pending, startTransition] = useTransition();
+  const locale = useLocale();
 
   if (!signedIn) {
     return (
@@ -26,7 +29,7 @@ export function SaveButton({
         href="/login"
         className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-1.5 font-mono text-xs text-muted transition hover:border-primary hover:text-primary"
       >
-        <span aria-hidden>🔖</span> Save
+        <span aria-hidden>🔖</span> {t(locale, 'common.save')}
       </Link>
     );
   }
@@ -57,7 +60,7 @@ export function SaveButton({
       }`}
     >
       <span aria-hidden>{saved ? '🔖' : '🔖'}</span>
-      {saved ? 'Saved' : 'Save'}
+      {saved ? t(locale, 'common.saved') : t(locale, 'common.save')}
     </button>
   );
 }

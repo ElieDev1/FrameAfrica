@@ -7,6 +7,8 @@ import { fetchArticles, fetchCategory } from '@/lib/api';
 import { getFollowStatus } from '@/lib/follows-actions';
 import { getSession } from '@/lib/session';
 import { absoluteUrl } from '@/lib/site';
+import { getLocale } from '@/lib/i18n-server';
+import { t, translateCategory } from '@/lib/i18n';
 
 export const revalidate = 60;
 
@@ -18,13 +20,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!category) {
     return { title: 'Section not found' };
   }
-  const description = category.description ?? `The latest ${category.name} news from Frame Africa.`;
+  const locale = await getLocale();
+  const name = translateCategory(locale, category.slug, category.name);
+  const description = category.description ?? `The latest ${name} news from Frame Africa.`;
   const path = `/section/${category.slug}`;
   return {
-    title: category.name,
+    title: name,
     description,
     alternates: { canonical: path },
-    openGraph: { type: 'website', title: category.name, description, url: absoluteUrl(path) },
+    openGraph: { type: 'website', title: name, description, url: absoluteUrl(path) },
   };
 }
 
@@ -35,11 +39,14 @@ export default async function SectionPage({ params }: PageProps) {
     notFound();
   }
 
+  const locale = await getLocale();
   const [{ articles, pagination }, user, follow] = await Promise.all([
     fetchArticles({ category: slug, limit: 12 }),
     getSession(),
     getFollowStatus('section', category.id),
   ]);
+
+  const categoryName = translateCategory(locale, category.slug, category.name);
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-8">
@@ -50,17 +57,19 @@ export default async function SectionPage({ params }: PageProps) {
               href={`/section/${category.parent.slug}`}
               className="text-primary hover:underline"
             >
-              {category.parent.name}
+              {translateCategory(locale, category.parent.slug, category.parent.name)}
             </Link>
             <span aria-hidden> › </span>
-            <span>{category.name}</span>
+            <span>{categoryName}</span>
           </nav>
         ) : (
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Section</p>
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
+            {t(locale, 'common.section')}
+          </p>
         )}
         <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-heading text-4xl font-black tracking-tight text-text">
-            {category.name}
+            {categoryName}
           </h1>
           <FollowButton
             target="section"
@@ -81,7 +90,7 @@ export default async function SectionPage({ params }: PageProps) {
                 href={`/section/${child.slug}`}
                 className="rounded-full border border-border px-3 py-1 font-mono text-[11px] uppercase tracking-wide text-muted transition hover:border-primary hover:text-primary"
               >
-                {child.name}
+                {translateCategory(locale, child.slug, child.name)}
               </Link>
             ))}
           </nav>
@@ -89,7 +98,7 @@ export default async function SectionPage({ params }: PageProps) {
       </header>
 
       {articles.length === 0 ? (
-        <p className="py-16 text-center font-body text-muted">No stories in this section yet.</p>
+        <p className="py-16 text-center font-body text-muted">{t(locale, 'section.empty')}</p>
       ) : (
         <LoadMore
           initialArticles={articles}

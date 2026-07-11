@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { BrandIcon, CheckIcon, LinkIcon } from '@/components/icons';
+import { useLocale } from '@/components/LocaleProvider';
+import { t } from '@/lib/i18n';
 
 /**
  * A compact share bar pinned to the bottom of the screen on mobile only, shown
@@ -11,6 +13,7 @@ import { BrandIcon, CheckIcon, LinkIcon } from '@/components/icons';
 export function StickyShare({ title }: { title: string }) {
   const [visible, setVisible] = useState(false);
   const [copied, setCopied] = useState(false);
+  const locale = useLocale();
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 600);
@@ -42,7 +45,9 @@ export function StickyShare({ title }: { title: string }) {
       }`}
     >
       <div className="mx-auto flex max-w-2xl items-center justify-between gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">Share</span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
+          {t(locale, 'share.label')}
+        </span>
         <div className="flex items-center gap-2">
           {openers.map(({ kind, url }) => (
             <a
@@ -50,7 +55,7 @@ export function StickyShare({ title }: { title: string }) {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`Share on ${kind}`}
+              aria-label={`${t(locale, 'share.on')} ${kind === 'x' ? 'X' : kind.charAt(0).toUpperCase() + kind.slice(1)}`}
               className="grid h-9 w-9 place-items-center rounded-lg border border-border text-muted hover:border-primary hover:text-primary"
             >
               <BrandIcon name={kind} size={16} />
@@ -59,7 +64,7 @@ export function StickyShare({ title }: { title: string }) {
           <button
             type="button"
             onClick={copy}
-            aria-label="Copy link"
+            aria-label={t(locale, 'share.copyLink')}
             className="grid h-9 w-9 place-items-center rounded-lg border border-border text-muted hover:border-primary hover:text-primary"
           >
             {copied ? <CheckIcon size={16} /> : <LinkIcon size={16} />}

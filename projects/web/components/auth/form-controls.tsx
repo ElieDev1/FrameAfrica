@@ -3,6 +3,8 @@
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { useT } from '@/components/LocaleProvider';
+
 type FieldProps = InputHTMLAttributes<HTMLInputElement> & { label: string; name: string };
 
 export function AuthField({ label, name, ...rest }: FieldProps) {
@@ -20,13 +22,14 @@ export function AuthField({ label, name, ...rest }: FieldProps) {
 
 export function SubmitButton({ children }: { children: ReactNode }) {
   const { pending } = useFormStatus();
+  const t = useT();
   return (
     <button
       type="submit"
       disabled={pending}
       className="rounded-lg bg-primary px-4 py-2 font-heading font-bold text-black transition disabled:opacity-60"
     >
-      {pending ? 'Please wait…' : children}
+      {pending ? t('common.pleaseWait') : children}
     </button>
   );
 }

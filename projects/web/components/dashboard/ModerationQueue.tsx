@@ -2,26 +2,36 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
+import { useT } from '@/components/LocaleProvider';
 import {
   deleteComment,
   type FlaggedComment,
   moderateComment,
   setUserCommentBan,
 } from '@/lib/comments-actions';
+import type { MessageKey } from '@/lib/i18n';
 
 type Action = 'keep' | 'hide' | 'remove';
 
-const ACTIONS: { action: Action; label: string; className: string }[] = [
-  { action: 'keep', label: 'Keep', className: 'border-border text-muted hover:text-text' },
-  { action: 'hide', label: 'Hide', className: 'border-border text-muted hover:text-text' },
+const ACTIONS: { action: Action; labelKey: MessageKey; className: string }[] = [
+  { action: 'keep', labelKey: 'dmod.keep', className: 'border-border text-muted hover:text-text' },
+  { action: 'hide', labelKey: 'dmod.hide', className: 'border-border text-muted hover:text-text' },
   {
     action: 'remove',
-    label: 'Remove',
+    labelKey: 'dmod.remove',
     className: 'border-accent-red/40 text-accent-red hover:bg-accent-red/10',
   },
 ];
 
+const CSTAT: Record<string, MessageKey> = {
+  visible: 'cstat.visible',
+  pending: 'cstat.pending',
+  hidden: 'cstat.hidden',
+  removed: 'cstat.removed',
+};
+
 export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
+  const t = useT();
   const [queue, setQueue] = useState(initial);
   const [busy, setBusy] = useState<string | null>(null);
   const [, startTransition] = useTransition();
@@ -39,7 +49,7 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
   }
 
   function removeComment(id: string) {
-    if (!confirm('Delete this comment permanently?')) return;
+    if (!confirm(t('dmod.deleteConfirm'))) return;
     setBusy(id);
     startTransition(async () => {
       try {
@@ -68,7 +78,7 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
   if (queue.length === 0) {
     return (
       <p className="rounded-lg border border-border bg-surface px-4 py-8 text-center font-body text-sm text-muted">
-        Nothing to moderate — the queue is clear.
+        {t('dmod.empty')}
       </p>
     );
   }
@@ -81,18 +91,20 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
             <span className="text-text">{c.author.displayName}</span>
             {c.author.banned && (
               <span className="rounded bg-accent-red/15 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em] text-accent-red">
-                banned
+                {t('dmod.banned')}
               </span>
             )}
-            <span>on</span>
+            <span>{t('dmod.on')}</span>
             <Link href={`/article/${c.article.slug}`} className="text-primary hover:underline">
               {c.article.title}
             </Link>
             <span className="ml-auto flex items-center gap-3">
-              <span className="uppercase tracking-[0.14em]">{c.status}</span>
+              <span className="uppercase tracking-[0.14em]">
+                {CSTAT[c.status] ? t(CSTAT[c.status]) : c.status}
+              </span>
               {c.reportCount > 0 && (
                 <span className="text-accent-red">
-                  ⚑ {c.reportCount} report{c.reportCount === 1 ? '' : 's'}
+                  ⚑ {c.reportCount} {t('dmod.reports')}
                 </span>
               )}
             </span>
@@ -109,7 +121,7 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
                 onClick={() => act(c.id, a.action)}
                 className={`rounded-md border px-3 py-1 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors disabled:opacity-50 ${a.className}`}
               >
-                {a.label}
+                {t(a.labelKey)}
               </button>
             ))}
             <button
@@ -118,7 +130,7 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
               onClick={() => removeComment(c.id)}
               className="rounded-md border border-accent-red/40 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-accent-red transition-colors hover:bg-accent-red/10 disabled:opacity-50"
             >
-              Delete
+              {t('dmod.delete')}
             </button>
             <button
               type="button"
@@ -126,7 +138,7 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
               onClick={() => toggleBan(c.id, c.author.id, !c.author.banned)}
               className="ml-auto rounded-md border border-border px-3 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted transition-colors hover:text-accent-red disabled:opacity-50"
             >
-              {c.author.banned ? 'Unban author' : 'Ban author'}
+              {c.author.banned ? t('dmod.unbanAuthor') : t('dmod.banAuthor')}
             </button>
           </div>
         </li>

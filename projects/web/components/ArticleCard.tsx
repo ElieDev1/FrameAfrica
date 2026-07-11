@@ -3,38 +3,41 @@ import Link from 'next/link';
 import { ClockIcon } from '@/components/icons';
 import type { ArticleSummary, FeaturedImage } from '@/lib/api';
 import { formatDate } from '@/lib/format';
+import { type Locale, t, translateCategory } from '@/lib/i18n';
 
-function Badges({ article }: { article: ArticleSummary }) {
+function Badges({ article, locale }: { article: ArticleSummary; locale?: Locale }) {
   return (
     <span className="flex items-center gap-2">
       <Link
         href={`/section/${article.category.slug}`}
         className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary hover:underline"
       >
-        {article.category.name}
+        {locale
+          ? translateCategory(locale, article.category.slug, article.category.name)
+          : article.category.name}
       </Link>
       {article.isBreaking && (
         <span className="rounded bg-accent-red px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-white">
-          Breaking
+          {locale ? t(locale, 'home.breaking') : 'Breaking'}
         </span>
       )}
       {article.isPremium && (
         <span className="rounded bg-accent-yellow px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-black">
-          Premium
+          {locale ? t(locale, 'article.premium') : 'Premium'}
         </span>
       )}
     </span>
   );
 }
 
-function Meta({ article }: { article: ArticleSummary }) {
+function Meta({ article, locale }: { article: ArticleSummary; locale?: Locale }) {
   return (
     <p className="flex flex-wrap items-center gap-x-1.5 font-mono text-xs text-muted">
       <span className="text-text/80">{article.author.displayName}</span>
       {article.publishedAt && <span>· {formatDate(article.publishedAt)}</span>}
       {article.readTimeMin && (
         <span className="inline-flex items-center gap-1">
-          · <ClockIcon size={12} /> {article.readTimeMin} min
+          · <ClockIcon size={12} /> {article.readTimeMin} {locale ? t(locale, 'common.min') : 'min'}
         </span>
       )}
     </p>
@@ -77,11 +80,16 @@ function Thumb({
 export function ArticleCard({
   article,
   featured = false,
+  locale,
 }: {
   article: ArticleSummary;
   featured?: boolean;
+  locale?: Locale;
 }) {
   const href = `/article/${article.slug}`;
+  const kicker = locale
+    ? translateCategory(locale, article.category.slug, article.category.name)
+    : article.category.name;
 
   return (
     <article className="group flex flex-col gap-3">
@@ -90,11 +98,11 @@ export function ArticleCard({
         className="block overflow-hidden rounded-xl ring-1 ring-border transition-all duration-300 group-hover:ring-border-2"
       >
         <div className="transition-transform duration-500 group-hover:scale-[1.03]">
-          <Thumb featured={featured} kicker={article.category.name} image={article.featuredImage} />
+          <Thumb featured={featured} kicker={kicker} image={article.featuredImage} />
         </div>
       </Link>
       <div className="flex flex-col gap-2">
-        <Badges article={article} />
+        <Badges article={article} locale={locale} />
         <h3
           className={`font-heading font-bold leading-[1.14] tracking-tight text-text ${
             featured ? 'text-2xl md:text-3xl' : 'text-lg'
@@ -109,7 +117,7 @@ export function ArticleCard({
             {article.excerpt}
           </p>
         )}
-        <Meta article={article} />
+        <Meta article={article} locale={locale} />
       </div>
     </article>
   );

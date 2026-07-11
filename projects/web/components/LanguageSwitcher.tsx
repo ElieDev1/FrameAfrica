@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import { LOCALES, type Locale } from '@/lib/i18n';
+import { LOCALES, type Locale, t } from '@/lib/i18n';
 import { setLocalePreference } from '@/lib/i18n-actions';
 
 const LABELS: Record<Locale, string> = { en: 'EN', rw: 'RW', fr: 'FR' };
@@ -25,7 +25,11 @@ export function LanguageSwitcher({ current }: { current: Locale }) {
   }
 
   return (
-    <div className="inline-flex items-center gap-1" role="group" aria-label="Language">
+    <div
+      className="inline-flex items-center gap-1"
+      role="group"
+      aria-label={t(current, 'footer.language')}
+    >
       {LOCALES.map((locale, i) => (
         <span key={locale} className="flex items-center gap-1">
           {i > 0 && <span className="text-border-2">·</span>}

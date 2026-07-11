@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { CloseIcon, PenIcon } from '@/components/icons';
 import { type ProfileFormState, updateProfile } from '@/lib/profile-actions';
+import { useT } from '@/components/LocaleProvider';
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -12,13 +13,14 @@ function initials(name: string): string {
 
 function SaveButton() {
   const { pending } = useFormStatus();
+  const t = useT();
   return (
     <button
       type="submit"
       disabled={pending}
       className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-black transition hover:opacity-90 disabled:opacity-60"
     >
-      {pending ? 'Saving…' : 'Save changes'}
+      {pending ? t('common.saving') : t('common.save')}
     </button>
   );
 }
@@ -40,6 +42,7 @@ export function EditProfileForm({
   const [name, setName] = useState(displayName);
   const [avatar, setAvatar] = useState(avatarUrl ?? '');
   const closedOnSuccess = useRef(false);
+  const t = useT();
 
   const openModal = () => {
     setName(displayName);
@@ -71,7 +74,7 @@ export function EditProfileForm({
         className="inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-semibold text-text transition hover:border-primary hover:text-primary"
       >
         <PenIcon size={15} aria-hidden />
-        Edit profile
+        {t('account.editProfile')}
       </button>
 
       {open && (
@@ -80,17 +83,17 @@ export function EditProfileForm({
           onClick={(e) => e.target === e.currentTarget && setOpen(false)}
           role="dialog"
           aria-modal="true"
-          aria-label="Edit profile"
+          aria-label={t('account.editProfile')}
         >
           <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
             <div className="flex items-center justify-between">
               <h2 className="font-heading text-xl font-black tracking-tight text-text">
-                Edit profile
+                {t('account.editProfile')}
               </h2>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Close"
+                aria-label={t('common.close')}
                 className="grid h-8 w-8 place-items-center rounded-full text-muted transition hover:bg-surface-2 hover:text-text"
               >
                 <CloseIcon size={18} />
@@ -112,15 +115,12 @@ export function EditProfileForm({
                     {initials(name)}
                   </span>
                 )}
-                <p className="text-xs text-muted">
-                  Your photo shows on comments and your account. Paste an image URL, or leave it
-                  blank to use your initials.
-                </p>
+                <p className="text-xs text-muted">{t('account.avatarDesc')}</p>
               </div>
 
               <label className="block">
                 <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
-                  Display name
+                  {t('account.displayName')}
                 </span>
                 <input
                   name="displayName"
@@ -135,7 +135,7 @@ export function EditProfileForm({
 
               <label className="block">
                 <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
-                  Avatar URL
+                  {t('account.avatarUrl')}
                 </span>
                 <input
                   name="avatarUrl"
@@ -160,7 +160,7 @@ export function EditProfileForm({
                   onClick={() => setOpen(false)}
                   className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted transition hover:text-text"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <SaveButton />
               </div>

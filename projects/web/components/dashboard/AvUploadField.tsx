@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { useT } from '@/components/LocaleProvider';
 import { uploadAVAction } from '@/lib/media-actions';
 
 const field =
@@ -15,13 +16,14 @@ export function AvUploadField({
   value,
   onChange,
   accept = 'audio/*,video/*',
-  placeholder = 'Media URL, or upload a file →',
+  placeholder,
 }: {
   value: string;
   onChange: (url: string) => void;
   accept?: string;
   placeholder?: string;
 }) {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +48,7 @@ export function AvUploadField({
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t('dpod.mediaPlaceholder')}
           className={field}
         />
         <button
@@ -55,7 +57,7 @@ export function AvUploadField({
           disabled={busy}
           className="shrink-0 rounded-lg border border-border px-3 py-2 font-heading text-xs font-bold text-text transition hover:bg-surface-2 disabled:opacity-60"
         >
-          {busy ? 'Uploading…' : 'Upload'}
+          {busy ? t('d.common.uploading') : t('d.common.upload')}
         </button>
         <input ref={inputRef} type="file" accept={accept} onChange={onFile} className="hidden" />
       </div>

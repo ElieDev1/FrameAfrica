@@ -331,22 +331,24 @@ const ThunderIcon = (p: IconProps) => (
   </Stroke>
 );
 
+import type { MessageKey } from '@/lib/i18n';
+
 /** Map a WMO weather code (Open-Meteo) to an icon + short label. */
 export function weatherFromCode(code: number): {
   Icon: (p: IconProps) => React.ReactElement;
-  label: string;
+  labelKey: MessageKey;
 } {
-  if (code === 0) return { Icon: SunIcon, label: 'Clear' };
-  if (code === 1 || code === 2) return { Icon: CloudSunIcon, label: 'Partly cloudy' };
-  if (code === 3) return { Icon: CloudIcon, label: 'Overcast' };
-  if (code === 45 || code === 48) return { Icon: FogIcon, label: 'Fog' };
-  if (code >= 51 && code <= 57) return { Icon: DrizzleIcon, label: 'Drizzle' };
+  if (code === 0) return { Icon: SunIcon, labelKey: 'weather.clear' };
+  if (code === 1 || code === 2) return { Icon: CloudSunIcon, labelKey: 'weather.partlyCloudy' };
+  if (code === 3) return { Icon: CloudIcon, labelKey: 'weather.overcast' };
+  if (code === 45 || code === 48) return { Icon: FogIcon, labelKey: 'weather.fog' };
+  if (code >= 51 && code <= 57) return { Icon: DrizzleIcon, labelKey: 'weather.drizzle' };
   if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82))
-    return { Icon: RainIcon, label: 'Rain' };
+    return { Icon: RainIcon, labelKey: 'weather.rain' };
   if ((code >= 71 && code <= 77) || code === 85 || code === 86)
-    return { Icon: SnowIcon, label: 'Snow' };
-  if (code >= 95) return { Icon: ThunderIcon, label: 'Thunderstorm' };
-  return { Icon: CloudIcon, label: 'Cloudy' };
+    return { Icon: SnowIcon, labelKey: 'weather.snow' };
+  if (code >= 95) return { Icon: ThunderIcon, labelKey: 'weather.thunderstorm' };
+  return { Icon: CloudIcon, labelKey: 'weather.cloudy' };
 }
 
 export function WeatherIcon({ code, ...p }: IconProps & { code: number }) {

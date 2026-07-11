@@ -4,6 +4,11 @@ import { searchArticles, type SearchResult } from '@/lib/api';
 
 jest.mock('@/lib/api', () => ({ searchArticles: jest.fn() }));
 
+jest.mock('next/headers', () => ({
+  cookies: jest.fn().mockResolvedValue({ get: () => undefined }),
+  headers: jest.fn().mockResolvedValue({ get: () => undefined }),
+}));
+
 const mockSearch = searchArticles as jest.MockedFunction<typeof searchArticles>;
 
 function result(id: string, title: string): SearchResult {
@@ -44,6 +49,6 @@ describe('SearchPage', () => {
 
     render(await SearchPage({ searchParams: Promise.resolve({ q: 'zzzz' }) }));
 
-    expect(screen.getByText(/no results for/i)).toBeInTheDocument();
+    expect(screen.getByText(/no results found/i)).toBeInTheDocument();
   });
 });

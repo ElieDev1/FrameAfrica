@@ -11,6 +11,8 @@ import {
 } from '@/components/icons';
 import { fetchOverview, isEditor, listMyDrafts, listReviewQueue, requireStaff } from '@/lib/cms';
 import { formatDate } from '@/lib/format';
+import { type Locale, t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
 function StatCard({
   label,
@@ -47,6 +49,7 @@ function StatCard({
 
 function StoryList({
   items,
+  locale,
 }: {
   items: {
     id: string;
@@ -55,6 +58,7 @@ function StoryList({
     status: string;
     updatedAt: string;
   }[];
+  locale: Locale;
 }) {
   return (
     <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
@@ -68,7 +72,7 @@ function StoryList({
               {d.title}
             </Link>
             <p className="font-mono text-xs text-muted">
-              {d.category.name} · updated {formatDate(d.updatedAt)}
+              {d.category.name} · {t(locale, 'dov.updated')} {formatDate(d.updatedAt)}
             </p>
           </div>
           <StatusBadge status={d.status} />
@@ -80,6 +84,7 @@ function StoryList({
 
 export default async function DashboardHome() {
   const user = await requireStaff();
+  const locale = await getLocale();
   const editor = isEditor(user);
   const admin = user.roles.includes('admin');
 
@@ -100,17 +105,17 @@ export default async function DashboardHome() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-heading text-3xl font-black tracking-tight text-text">
-            Welcome back, {user.displayName.split(' ')[0]}
+            {t(locale, 'dash.welcome')}, {user.displayName.split(' ')[0]}
           </h1>
           <p className="mt-1 font-body text-sm text-muted">
-            {admin ? 'Frame Africa at a glance — the whole system.' : 'Your newsroom at a glance.'}
+            {admin ? t(locale, 'dov.subtitleAdmin') : t(locale, 'dov.subtitleStaff')}
           </p>
         </div>
         <Link
           href="/dashboard/stories/new"
           className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 font-heading font-bold text-black transition hover:opacity-90"
         >
-          <PenIcon size={16} /> New story
+          <PenIcon size={16} /> {t(locale, 'dash.newStory')}
         </Link>
       </div>
 
@@ -119,42 +124,42 @@ export default async function DashboardHome() {
         <section className="mt-6">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted">
-              System overview
+              {t(locale, 'dov.systemOverview')}
             </h2>
             <Link
               href="/dashboard/monitor"
               className="font-mono text-xs text-primary hover:underline"
             >
-              Open monitor →
+              {t(locale, 'dov.openMonitor')}
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <StatCard
               icon={UsersIcon}
-              label="Users"
+              label={t(locale, 'dov.users')}
               value={overview.users.total}
-              hint={`${overview.users.newLast7Days} new this week`}
+              hint={`${overview.users.newLast7Days} ${t(locale, 'dov.newThisWeek')}`}
               accent
             />
             <StatCard
               icon={FileTextIcon}
-              label="Published"
+              label={t(locale, 'dov.published')}
               value={overview.articles.published}
-              hint={`${overview.articles.inPipeline} in pipeline`}
+              hint={`${overview.articles.inPipeline} ${t(locale, 'dov.inPipelineHint')}`}
               accent
             />
             <StatCard
               icon={LayersIcon}
-              label="In pipeline"
+              label={t(locale, 'dov.inPipeline')}
               value={overview.articles.inPipeline}
-              hint="drafts → ready"
+              hint={t(locale, 'dov.draftsReady')}
               accent
             />
             <StatCard
               icon={CommentIcon}
-              label="Flagged comments"
+              label={t(locale, 'dov.flaggedComments')}
               value={overview.comments.flagged}
-              hint={`${overview.comments.visible} visible`}
+              hint={`${overview.comments.visible} ${t(locale, 'dov.visible')}`}
               accent
             />
           </div>
@@ -164,13 +169,13 @@ export default async function DashboardHome() {
       {/* Your work */}
       <section className="mt-8">
         <h2 className="mb-3 font-mono text-[11px] uppercase tracking-[0.16em] text-muted">
-          Your work
+          {t(locale, 'dov.yourWork')}
         </h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard icon={FileTextIcon} label="My stories" value={drafts.length} />
-          <StatCard icon={PenIcon} label="Drafting" value={drafting} />
-          <StatCard icon={ClipboardCheckIcon} label="In review" value={inReview} />
-          <StatCard icon={FileTextIcon} label="Published" value={published} />
+          <StatCard icon={FileTextIcon} label={t(locale, 'dov.myStories')} value={drafts.length} />
+          <StatCard icon={PenIcon} label={t(locale, 'dov.drafting')} value={drafting} />
+          <StatCard icon={ClipboardCheckIcon} label={t(locale, 'dov.inReview')} value={inReview} />
+          <StatCard icon={FileTextIcon} label={t(locale, 'dov.published')} value={published} />
         </div>
       </section>
 
@@ -179,17 +184,18 @@ export default async function DashboardHome() {
         <section className="mt-8">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-heading text-lg font-bold text-text">
-              Awaiting review{queue.length > 0 ? ` (${queue.length})` : ''}
+              {t(locale, 'dov.awaitingReview')}
+              {queue.length > 0 ? ` (${queue.length})` : ''}
             </h2>
             <Link
               href="/dashboard/review"
               className="font-mono text-xs text-primary hover:underline"
             >
-              Open queue →
+              {t(locale, 'dov.openQueue')}
             </Link>
           </div>
           {queue.length === 0 ? (
-            <p className="font-body text-sm text-muted">Nothing is waiting for review.</p>
+            <p className="font-body text-sm text-muted">{t(locale, 'dov.nothingReview')}</p>
           ) : (
             <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
               {queue.slice(0, 5).map((item) => (
@@ -209,7 +215,7 @@ export default async function DashboardHome() {
                     href="/dashboard/review"
                     className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-primary transition hover:border-primary"
                   >
-                    Review
+                    {t(locale, 'dov.review')}
                   </Link>
                 </li>
               ))}
@@ -221,23 +227,25 @@ export default async function DashboardHome() {
       {/* Recent stories */}
       <section className="mt-8">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold text-text">Recent stories</h2>
+          <h2 className="font-heading text-lg font-bold text-text">
+            {t(locale, 'dov.recentStories')}
+          </h2>
           <Link
             href="/dashboard/stories"
             className="font-mono text-xs text-primary hover:underline"
           >
-            All stories →
+            {t(locale, 'dov.allStories')}
           </Link>
         </div>
         {drafts.length === 0 ? (
           <p className="font-body text-sm text-muted">
-            You have no stories yet.{' '}
+            {t(locale, 'dov.noStoriesYet')}{' '}
             <Link href="/dashboard/stories/new" className="text-primary hover:underline">
-              Write your first one.
+              {t(locale, 'dov.writeFirst')}
             </Link>
           </p>
         ) : (
-          <StoryList items={drafts.slice(0, 6)} />
+          <StoryList items={drafts.slice(0, 6)} locale={locale} />
         )}
       </section>
     </div>

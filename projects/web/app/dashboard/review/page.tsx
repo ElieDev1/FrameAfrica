@@ -4,33 +4,37 @@ import { StatusBadge } from '@/components/cms/StatusBadge';
 import { listReviewQueue, requireEditor } from '@/lib/cms';
 import { publishAction, rejectAction, scheduleAction } from '@/lib/cms-actions';
 import { formatDate } from '@/lib/format';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
 export const metadata: Metadata = { title: 'Review queue — Frame Africa' };
 
 export default async function ReviewPage() {
   await requireEditor();
-  const queue = await listReviewQueue();
+  const [queue, locale] = await Promise.all([listReviewQueue(), getLocale()]);
 
   return (
     <div className="w-full">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="font-heading text-3xl font-black tracking-tight text-text">
-            Review queue
+            {t(locale, 'dash.reviewQueue')}
           </h1>
           <p className="mt-1 font-body text-sm text-muted">
-            {queue.length} {queue.length === 1 ? 'story' : 'stories'} awaiting your decision.
+            {queue.length} {t(locale, 'dpage.stories')} {t(locale, 'dpage.awaitingDecision')}
           </p>
         </div>
         <Link href="/dashboard/stories" className="font-mono text-xs text-primary hover:underline">
-          ← Newsroom
+          {t(locale, 'dpage.backNewsroom')}
         </Link>
       </div>
 
       {queue.length === 0 ? (
         <div className="mt-10 rounded-xl border border-dashed border-border px-6 py-16 text-center">
-          <p className="font-heading text-lg font-bold text-text">All clear</p>
-          <p className="mt-1 font-body text-sm text-muted">Nothing is awaiting review right now.</p>
+          <p className="font-heading text-lg font-bold text-text">{t(locale, 'dpage.allClear')}</p>
+          <p className="mt-1 font-body text-sm text-muted">
+            {t(locale, 'dpage.nothingAwaitingReview')}
+          </p>
         </div>
       ) : (
         <ul className="mt-6 flex flex-col gap-4 lg:max-w-4xl">

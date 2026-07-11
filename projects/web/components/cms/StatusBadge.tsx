@@ -1,3 +1,8 @@
+'use client';
+
+import { useT } from '@/components/LocaleProvider';
+import type { MessageKey } from '@/lib/i18n';
+
 const STYLES: Record<string, string> = {
   draft: 'text-muted border-border',
   in_progress: 'text-accent-yellow border-accent-yellow',
@@ -9,15 +14,11 @@ const STYLES: Record<string, string> = {
   archived: 'text-faint border-border',
 };
 
-// Friendlier labels than the raw enum value.
-const LABELS: Record<string, string> = {
-  copy_edit: 'copy desk',
-  embargoed: 'scheduled',
-};
-
 export function StatusBadge({ status }: { status: string }) {
+  const t = useT();
   const cls = STYLES[status] ?? 'text-muted border-border';
-  const label = LABELS[status] ?? status.replace('_', ' ');
+  const key = `dstat.${status}` as MessageKey;
+  const label = t(key) === key ? status.replace('_', ' ') : t(key);
   return (
     <span
       className={`rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${cls}`}

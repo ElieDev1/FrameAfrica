@@ -3,16 +3,18 @@
 import { useActionState } from 'react';
 import { login } from '@/lib/auth-actions';
 import { AuthField, SubmitButton } from './form-controls';
+import { useT } from '@/components/LocaleProvider';
 
 export function LoginForm() {
   const [state, action] = useActionState(login, {});
   const twoFactor = state.twoFactorRequired ?? false;
+  const t = useT();
 
   return (
     <form action={action} className="flex flex-col gap-3">
-      <AuthField label="Email" name="email" type="email" autoComplete="email" required />
+      <AuthField label={t('auth.email')} name="email" type="email" autoComplete="email" required />
       <AuthField
-        label="Password"
+        label={t('auth.password')}
         name="password"
         type="password"
         autoComplete="current-password"
@@ -20,11 +22,9 @@ export function LoginForm() {
       />
       {twoFactor && (
         <>
-          <p className="font-body text-sm text-muted">
-            Enter the 6-digit code from your authenticator app.
-          </p>
+          <p className="font-body text-sm text-muted">{t('auth.emailCodeSubtitle')}</p>
           <AuthField
-            label="Authentication code"
+            label={t('auth.twoFactorCode')}
             name="token"
             type="text"
             inputMode="numeric"
@@ -39,7 +39,7 @@ export function LoginForm() {
           {state.error}
         </p>
       )}
-      <SubmitButton>{twoFactor ? 'Verify & sign in' : 'Sign in'}</SubmitButton>
+      <SubmitButton>{twoFactor ? t('auth.verifySignIn') : t('auth.signIn')}</SubmitButton>
     </form>
   );
 }

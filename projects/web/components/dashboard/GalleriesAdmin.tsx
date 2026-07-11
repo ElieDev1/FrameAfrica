@@ -2,33 +2,38 @@ import Link from 'next/link';
 import { ImageIcon, PlusIcon } from '@/components/icons';
 import type { GalleryListItem } from '@/lib/cms';
 import { formatDate } from '@/lib/format';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
-export function GalleriesAdmin({ galleries }: { galleries: GalleryListItem[] }) {
+export async function GalleriesAdmin({ galleries }: { galleries: GalleryListItem[] }) {
+  const locale = await getLocale();
   return (
     <div className="w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
             <ImageIcon size={20} className="text-primary" />
-            <h1 className="font-heading text-3xl font-black tracking-tight text-text">Galleries</h1>
+            <h1 className="font-heading text-3xl font-black tracking-tight text-text">
+              {t(locale, 'mm.galleries')}
+            </h1>
           </div>
           <p className="mt-1 font-body text-sm text-muted">
-            Visual stories built from the media library. {galleries.length} total.
+            {t(locale, 'dgal.subtitle')} {galleries.length} {t(locale, 'd.common.total')}.
           </p>
         </div>
         <Link
           href="/dashboard/galleries/new"
           className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 font-heading text-sm font-bold text-black transition hover:opacity-90"
         >
-          <PlusIcon size={15} /> New gallery
+          <PlusIcon size={15} /> {t(locale, 'dgal.newGallery')}
         </Link>
       </div>
 
       {galleries.length === 0 ? (
         <div className="mt-8 rounded-xl border border-dashed border-border p-12 text-center">
-          <p className="font-body text-sm text-muted">No galleries yet.</p>
+          <p className="font-body text-sm text-muted">{t(locale, 'dgal.empty')}</p>
           <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-            Create one to get started
+            {t(locale, 'dgal.emptyHint')}
           </p>
         </div>
       ) : (
@@ -56,7 +61,7 @@ export function GalleriesAdmin({ galleries }: { galleries: GalleryListItem[] }) 
                       : 'bg-black/70 text-white'
                   }`}
                 >
-                  {g.status}
+                  {t(locale, g.status === 'published' ? 'd.common.published' : 'd.common.draft')}
                 </span>
               </div>
               <div className="p-3">
@@ -64,7 +69,7 @@ export function GalleriesAdmin({ galleries }: { galleries: GalleryListItem[] }) 
                   {g.title}
                 </h3>
                 <p className="mt-1 font-mono text-[10px] text-faint">
-                  {g.imageCount} photo{g.imageCount === 1 ? '' : 's'} · {formatDate(g.updatedAt)}
+                  {g.imageCount} {t(locale, 'dgal.photos')} · {formatDate(g.updatedAt)}
                 </p>
               </div>
             </Link>

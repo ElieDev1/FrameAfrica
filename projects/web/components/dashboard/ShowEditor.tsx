@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { MailIcon, PlayIcon, PlusIcon, TrashIcon } from '@/components/icons';
+import { useT } from '@/components/LocaleProvider';
 import type { PodcastEpisodeItem, PodcastShowDetail } from '@/lib/cms';
 import {
   createEpisode,
@@ -20,6 +21,7 @@ const label = 'mb-1 block font-mono text-[11px] uppercase tracking-[0.12em] text
 
 export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
   const router = useRouter();
+  const t = useT();
   const [pending, start] = useTransition();
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -45,13 +47,13 @@ export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
 
   function save() {
     if (title.trim().length < 2) {
-      setNotice('Add a show title first.');
+      setNotice(t('dpod.addTitleFirst'));
       return;
     }
     start(async () => {
       if (show) {
         const res = await updateShow(show.id, payload(), show.slug);
-        setNotice(res.error ?? 'Saved.');
+        setNotice(res.error ?? t('d.common.saved'));
         if (!res.error) router.refresh();
       } else {
         const res = await createShow(payload());
@@ -69,7 +71,7 @@ export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
         { status: published ? 'draft' : 'published' },
         show.slug,
       );
-      setNotice(res.error ?? (published ? 'Moved to draft.' : 'Published.'));
+      setNotice(res.error ?? (published ? t('de.movedToDraft') : t('de.publishedMsg')));
       if (!res.error) router.refresh();
     });
   }
@@ -89,7 +91,7 @@ export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
         <div className="flex items-center gap-2">
           <MailIcon size={20} className="text-primary" />
           <h1 className="font-heading text-3xl font-black tracking-tight text-text">
-            {show ? 'Edit show' : 'New show'}
+            {show ? t('dpod.editShow') : t('dpod.newShow')}
           </h1>
           {show && (
             <span
@@ -99,7 +101,7 @@ export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
                   : 'bg-surface-2 text-muted ring-1 ring-border'
               }`}
             >
-              {show.status}
+              {t(published ? 'd.common.published' : 'd.common.draft')}
             </span>
           )}
         </div>
@@ -111,7 +113,7 @@ export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
               disabled={pending}
               className="rounded-lg border border-border px-3 py-2 font-heading text-sm font-bold text-text transition hover:bg-surface-2 disabled:opacity-60"
             >
-              {published ? 'Unpublish' : 'Publish'}
+              {published ? t('d.common.unpublish') : t('d.common.publish')}
             </button>
           )}
           <button
@@ -120,7 +122,7 @@ export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
             disabled={pending}
             className="rounded-lg bg-primary px-4 py-2 font-heading text-sm font-bold text-black transition hover:opacity-90 disabled:opacity-60"
           >
-            {pending ? 'Saving…' : 'Save'}
+            {pending ? t('d.common.saving') : t('d.common.save')}
           </button>
         </div>
       </div>
@@ -134,11 +136,11 @@ export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_18rem] lg:items-start">
         <div className="rounded-xl border border-border bg-surface p-5">
           <label className="block">
-            <span className={label}>Show title</span>
+            <span className={label}>{t('dpod.showTitle')}</span>
             <input value={title} onChange={(e) => setTitle(e.target.value)} className={field} />
           </label>
           <label className="mt-3 block">
-            <span className={label}>Description</span>
+            <span className={label}>{t('d.common.description')}</span>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -172,7 +174,7 @@ export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
 
         <aside className="flex flex-col gap-4">
           <div className="rounded-xl border border-border bg-surface p-5">
-            <span className={label}>Cover</span>
+            <span className={label}>{t('d.common.cover')}</span>
             <div className="mt-1 aspect-square overflow-hidden rounded-lg bg-surface-2">
               {coverUrl.trim() && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -182,20 +184,20 @@ export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
             <input
               value={coverUrl}
               onChange={(e) => setCoverUrl(e.target.value)}
-              placeholder="Cover image URL"
+              placeholder={t('de.coverUrl')}
               className={`${field} mt-3`}
             />
           </div>
           {show && (
             <div className="rounded-xl border border-border bg-surface p-5">
-              <span className={label}>Danger</span>
+              <span className={label}>{t('d.common.danger')}</span>
               <button
                 type="button"
                 onClick={onDelete}
                 disabled={pending}
                 className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 font-heading text-sm font-bold text-accent-red transition hover:bg-accent-red/10 disabled:opacity-60"
               >
-                <TrashIcon size={14} /> Delete show
+                <TrashIcon size={14} /> {t('dpod.deleteShow')}
               </button>
             </div>
           )}
@@ -209,6 +211,7 @@ export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
 
 function EpisodesManager({ show }: { show: PodcastShowDetail }) {
   const router = useRouter();
+  const t = useT();
   const [pending, start] = useTransition();
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -219,7 +222,7 @@ function EpisodesManager({ show }: { show: PodcastShowDetail }) {
 
   function add() {
     if (title.trim().length < 2 || mediaUrl.trim().length < 3) {
-      setNotice('An episode needs a title and a media URL (or uploaded file).');
+      setNotice(t('dpod.episodeNeeds'));
       return;
     }
     start(async () => {
@@ -234,7 +237,7 @@ function EpisodesManager({ show }: { show: PodcastShowDetail }) {
         setTitle('');
         setMediaUrl('');
         setDescription('');
-        setNotice('Episode added as a draft.');
+        setNotice(t('dpod.episodeAdded'));
         router.refresh();
       }
     });
@@ -253,7 +256,7 @@ function EpisodesManager({ show }: { show: PodcastShowDetail }) {
       <div className="flex items-center gap-2">
         <PlayIcon size={16} className="text-primary" />
         <h2 className="font-heading text-lg font-black text-text">
-          Episodes ({show.episodes.length})
+          {t('dpod.episodesHeading')} ({show.episodes.length})
         </h2>
       </div>
 
@@ -261,24 +264,24 @@ function EpisodesManager({ show }: { show: PodcastShowDetail }) {
       <div className="mt-4 rounded-lg border border-border bg-surface-2 p-4">
         <div className="grid gap-3 sm:grid-cols-[1fr_8rem]">
           <label>
-            <span className={label}>Episode title</span>
+            <span className={label}>{t('dpod.episodeTitle')}</span>
             <input value={title} onChange={(e) => setTitle(e.target.value)} className={field} />
           </label>
           <label>
-            <span className={label}>Type</span>
+            <span className={label}>{t('dpod.type')}</span>
             <select
               value={kind}
               onChange={(e) => setKind(e.target.value as 'audio' | 'video')}
               className={field}
             >
-              <option value="audio">Audio</option>
-              <option value="video">Video</option>
+              <option value="audio">{t('dpod.audio')}</option>
+              <option value="video">{t('dpod.video')}</option>
             </select>
           </label>
         </div>
         <div className="mt-3">
           <span className={label}>
-            {kind === 'audio' ? 'Audio' : 'Video'} — paste a URL (Spotify/YouTube/host) or upload
+            {kind === 'audio' ? t('dpod.mediaAudio') : t('dpod.mediaVideo')}
           </span>
           <AvUploadField
             value={mediaUrl}
@@ -287,7 +290,7 @@ function EpisodesManager({ show }: { show: PodcastShowDetail }) {
           />
         </div>
         <label className="mt-3 block">
-          <span className={label}>Notes (optional)</span>
+          <span className={label}>{t('dpod.notes')}</span>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -301,7 +304,7 @@ function EpisodesManager({ show }: { show: PodcastShowDetail }) {
           disabled={pending}
           className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 font-heading text-sm font-bold text-black transition hover:opacity-90 disabled:opacity-60"
         >
-          <PlusIcon size={15} /> Add episode
+          <PlusIcon size={15} /> {t('dpod.addEpisode')}
         </button>
       </div>
 
@@ -332,6 +335,7 @@ function EpisodeRow({
   act: (fn: () => Promise<{ error?: string }>) => void;
   slug: string;
 }) {
+  const t = useT();
   const published = ep.status === 'published';
   return (
     <li className="flex flex-wrap items-center gap-3 py-3">
@@ -340,7 +344,7 @@ function EpisodeRow({
           ep.mediaKind === 'video' ? 'bg-primary/15 text-primary' : 'bg-surface-2 text-muted'
         }`}
       >
-        {ep.mediaKind}
+        {t(ep.mediaKind === 'video' ? 'dpod.video' : 'dpod.audio')}
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate font-heading text-sm font-bold text-text">{ep.title}</span>
@@ -349,7 +353,7 @@ function EpisodeRow({
       <span
         className={`font-mono text-[10px] uppercase ${published ? 'text-accent-green' : 'text-muted'}`}
       >
-        {ep.status}
+        {t(published ? 'd.common.published' : 'd.common.draft')}
       </span>
       <button
         type="button"
@@ -359,7 +363,7 @@ function EpisodeRow({
         }
         className="rounded-md border border-border px-2 py-1 font-mono text-[10px] uppercase tracking-wide text-muted transition hover:text-text disabled:opacity-50"
       >
-        {published ? 'Unpublish' : 'Publish'}
+        {published ? t('d.common.unpublish') : t('d.common.publish')}
       </button>
       <button
         type="button"
@@ -368,7 +372,7 @@ function EpisodeRow({
           if (confirm(`Delete “${ep.title}”?`)) act(() => deleteEpisode(ep.id));
         }}
         className="rounded-md border border-border p-1 text-muted transition hover:border-accent-red hover:text-accent-red disabled:opacity-50"
-        aria-label="Delete episode"
+        aria-label={t('dpod.deleteEpisode')}
       >
         <TrashIcon size={12} />
       </button>

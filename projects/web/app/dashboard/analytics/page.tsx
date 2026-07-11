@@ -8,6 +8,8 @@ import {
   TrendingUpIcon,
 } from '@/components/icons';
 import { fetchAnalytics, requireStaff } from '@/lib/cms';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
 export const metadata: Metadata = { title: 'Analytics — Frame Africa' };
 
@@ -40,30 +42,42 @@ function Stat({
 
 export default async function AnalyticsPage() {
   await requireStaff();
-  const a = await fetchAnalytics();
+  const [a, locale] = await Promise.all([fetchAnalytics(), getLocale()]);
   const max = Math.max(1, ...a.topToday.map((r) => r.views));
 
   return (
     <div className="w-full">
-      <h1 className="font-heading text-3xl font-black tracking-tight text-text">Analytics</h1>
+      <h1 className="font-heading text-3xl font-black tracking-tight text-text">
+        {t(locale, 'dash.analytics')}
+      </h1>
       <p className="mt-1 max-w-2xl font-body text-sm text-muted">
-        Live story performance — anonymous page views, refreshed on load.
+        {t(locale, 'dpage.analyticsSubtitle')}
       </p>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Stat icon={ActivityIcon} label="Reading now" value={a.readingNow} hint="last 5 min" />
-        <Stat icon={EyeIcon} label="Views today" value={a.totalToday} hint="since midnight" />
+        <Stat
+          icon={ActivityIcon}
+          label={t(locale, 'dana.readingNow')}
+          value={a.readingNow}
+          hint={t(locale, 'dana.last5min')}
+        />
+        <Stat
+          icon={EyeIcon}
+          label={t(locale, 'dana.viewsToday')}
+          value={a.totalToday}
+          hint={t(locale, 'dana.sinceMidnight')}
+        />
         <Stat
           icon={TrendingUpIcon}
-          label="Top stories"
+          label={t(locale, 'dana.topStories')}
           value={a.topToday.length}
-          hint="ranked today"
+          hint={t(locale, 'dana.rankedToday')}
         />
         <Stat
           icon={BarChartIcon}
-          label="Referrers"
+          label={t(locale, 'dana.referrers')}
           value={a.topReferrers.reduce((s, r) => s + r.views, 0)}
-          hint="from sources · 24h"
+          hint={t(locale, 'dana.fromSources')}
         />
       </div>
 
@@ -71,12 +85,10 @@ export default async function AnalyticsPage() {
         {/* Most read — a real bar chart */}
         <section className="rounded-xl border border-border bg-surface p-5">
           <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
-            Most read today
+            {t(locale, 'dana.mostReadToday')}
           </h2>
           {a.topToday.length === 0 ? (
-            <p className="mt-4 font-body text-sm text-muted">
-              No article views recorded yet today.
-            </p>
+            <p className="mt-4 font-body text-sm text-muted">{t(locale, 'dana.noViewsToday')}</p>
           ) : (
             <ol className="mt-4 space-y-3">
               {a.topToday.map((row, i) => (
@@ -108,10 +120,10 @@ export default async function AnalyticsPage() {
         {/* Referrers */}
         <section className="rounded-xl border border-border bg-surface p-5">
           <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
-            Top referrers (24h)
+            {t(locale, 'dana.topReferrers')}
           </h2>
           {a.topReferrers.length === 0 ? (
-            <p className="mt-4 font-body text-sm text-muted">No external referrers yet.</p>
+            <p className="mt-4 font-body text-sm text-muted">{t(locale, 'dpage.noReferrers')}</p>
           ) : (
             <ul className="mt-4 divide-y divide-border">
               {a.topReferrers.map((r) => (

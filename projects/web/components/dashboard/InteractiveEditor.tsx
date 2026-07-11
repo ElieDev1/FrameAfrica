@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { BarChartIcon, TrashIcon } from '@/components/icons';
 import { EmbedFrame } from '@/components/EmbedFrame';
+import { useT } from '@/components/LocaleProvider';
 import type { InteractiveItem } from '@/lib/cms';
 import { createInteractive, deleteInteractive, updateInteractive } from '@/lib/interactive-actions';
 
@@ -14,6 +15,7 @@ const RATIOS = ['16/9', '4/3', '1/1', '3/2', '2/1'];
 
 export function InteractiveEditor({ interactive }: { interactive?: InteractiveItem }) {
   const router = useRouter();
+  const t = useT();
   const [pending, start] = useTransition();
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -39,13 +41,13 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
 
   function save() {
     if (title.trim().length < 2 || embedUrl.trim().length < 8) {
-      setNotice('Add a title and a provider embed URL.');
+      setNotice(t('dint.addTitleUrl'));
       return;
     }
     start(async () => {
       if (interactive) {
         const res = await updateInteractive(interactive.id, payload(), interactive.slug);
-        setNotice(res.error ?? 'Saved.');
+        setNotice(res.error ?? t('d.common.saved'));
         if (!res.error) router.refresh();
       } else {
         const res = await createInteractive(payload());
@@ -63,7 +65,7 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
         { status: published ? 'draft' : 'published' },
         interactive.slug,
       );
-      setNotice(res.error ?? (published ? 'Moved to draft.' : 'Published.'));
+      setNotice(res.error ?? (published ? t('de.movedToDraft') : t('de.publishedMsg')));
       if (!res.error) router.refresh();
     });
   }
@@ -83,7 +85,7 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
         <div className="flex items-center gap-2">
           <BarChartIcon size={20} className="text-primary" />
           <h1 className="font-heading text-3xl font-black tracking-tight text-text">
-            {interactive ? 'Edit interactive' : 'New interactive'}
+            {interactive ? t('dint.editInteractive') : t('dint.newInteractive')}
           </h1>
           {interactive && (
             <>
@@ -97,7 +99,7 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
                     : 'bg-surface-2 text-muted ring-1 ring-border'
                 }`}
               >
-                {interactive.status}
+                {t(published ? 'd.common.published' : 'd.common.draft')}
               </span>
             </>
           )}
@@ -110,7 +112,7 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
               disabled={pending}
               className="rounded-lg border border-border px-3 py-2 font-heading text-sm font-bold text-text transition hover:bg-surface-2 disabled:opacity-60"
             >
-              {published ? 'Unpublish' : 'Publish'}
+              {published ? t('d.common.unpublish') : t('d.common.publish')}
             </button>
           )}
           <button
@@ -119,7 +121,7 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
             disabled={pending}
             className="rounded-lg bg-primary px-4 py-2 font-heading text-sm font-bold text-black transition hover:opacity-90 disabled:opacity-60"
           >
-            {pending ? 'Saving…' : 'Save'}
+            {pending ? t('d.common.saving') : t('d.common.save')}
           </button>
         </div>
       </div>
@@ -134,24 +136,23 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
         <div className="flex flex-col gap-4">
           <div className="rounded-xl border border-border bg-surface p-5">
             <label className="block">
-              <span className={label}>Title</span>
+              <span className={label}>{t('d.common.title')}</span>
               <input value={title} onChange={(e) => setTitle(e.target.value)} className={field} />
             </label>
             <label className="mt-3 block">
-              <span className={label}>Embed URL</span>
+              <span className={label}>{t('dint.embedUrl')}</span>
               <input
                 value={embedUrl}
                 onChange={(e) => setEmbedUrl(e.target.value)}
-                placeholder="https://datawrapper.dwcdn.net/…, flourish, infogram, Google, YouTube"
+                placeholder={t('dint.embedPlaceholder')}
                 className={field}
               />
               <span className="mt-1 block font-mono text-[10px] text-faint">
-                Only Datawrapper, Flourish, Infogram, Google (Data Studio/Looker/Sheets) and YouTube
-                are accepted.
+                {t('dint.embedHint')}
               </span>
             </label>
             <label className="mt-3 block">
-              <span className={label}>Description</span>
+              <span className={label}>{t('d.common.description')}</span>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -161,7 +162,7 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
             </label>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <label>
-                <span className={label}>Source / credit</span>
+                <span className={label}>{t('dint.sourceCredit')}</span>
                 <input
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
@@ -169,7 +170,7 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
                 />
               </label>
               <label>
-                <span className={label}>Aspect ratio</span>
+                <span className={label}>{t('dint.aspectRatio')}</span>
                 <select
                   value={aspectRatio}
                   onChange={(e) => setAspectRatio(e.target.value)}
@@ -187,7 +188,7 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
 
           {interactive && (
             <div className="rounded-xl border border-border bg-surface p-5">
-              <span className={label}>Preview</span>
+              <span className={label}>{t('dint.preview')}</span>
               <div className="mt-2">
                 <EmbedFrame
                   src={interactive.embedUrl}
@@ -201,7 +202,7 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
 
         <aside className="flex flex-col gap-4">
           <div className="rounded-xl border border-border bg-surface p-5">
-            <span className={label}>Cover (hub thumbnail)</span>
+            <span className={label}>{t('dint.coverHub')}</span>
             <div className="mt-1 aspect-video overflow-hidden rounded-lg bg-surface-2">
               {coverUrl.trim() && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -211,20 +212,20 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
             <input
               value={coverUrl}
               onChange={(e) => setCoverUrl(e.target.value)}
-              placeholder="Cover image URL"
+              placeholder={t('de.coverUrl')}
               className={`${field} mt-3`}
             />
           </div>
           {interactive && (
             <div className="rounded-xl border border-border bg-surface p-5">
-              <span className={label}>Danger</span>
+              <span className={label}>{t('d.common.danger')}</span>
               <button
                 type="button"
                 onClick={onDelete}
                 disabled={pending}
                 className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 font-heading text-sm font-bold text-accent-red transition hover:bg-accent-red/10 disabled:opacity-60"
               >
-                <TrashIcon size={14} /> Delete
+                <TrashIcon size={14} /> {t('d.common.delete')}
               </button>
             </div>
           )}

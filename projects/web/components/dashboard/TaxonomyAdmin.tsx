@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
 import { LayersIcon, PenIcon, PlusIcon, SearchIcon, TagIcon, TrashIcon } from '@/components/icons';
+import { useT } from '@/components/LocaleProvider';
 import {
   createCategory,
   createTopic,
@@ -16,7 +17,6 @@ function CountPill({ n, label }: { n: number; label: string }) {
   return (
     <span className="rounded-full bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-muted">
       {n} {label}
-      {n === 1 ? '' : 's'}
     </span>
   );
 }
@@ -30,6 +30,7 @@ function CategoryRow({
   depth: number;
   onChanged: () => void;
 }) {
+  const t = useT();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(cat.name);
   const [error, setError] = useState<string | null>(null);
@@ -80,8 +81,8 @@ function CategoryRow({
           </span>
         )}
         <span className="font-mono text-[10px] text-faint">/{cat.slug}</span>
-        <CountPill n={cat.articleCount} label="article" />
-        {cat.childCount > 0 && <CountPill n={cat.childCount} label="sub" />}
+        <CountPill n={cat.articleCount} label={t('dtax.article')} />
+        {cat.childCount > 0 && <CountPill n={cat.childCount} label={t('dtax.sub')} />}
 
         <span className="ml-auto flex items-center gap-1">
           {editing ? (
@@ -92,14 +93,14 @@ function CategoryRow({
                 disabled={pending}
                 className="rounded-lg border border-border px-2.5 py-1 text-xs font-semibold text-primary transition hover:border-primary disabled:opacity-50"
               >
-                Save
+                {t('d.common.save')}
               </button>
               <button
                 type="button"
                 onClick={() => setEditing(false)}
                 className="rounded-lg border border-border px-2.5 py-1 text-xs font-semibold text-muted transition hover:text-text"
               >
-                Cancel
+                {t('d.common.cancel')}
               </button>
             </>
           ) : (
@@ -110,7 +111,7 @@ function CategoryRow({
                   setName(cat.name);
                   setEditing(true);
                 }}
-                aria-label={`Rename ${cat.name}`}
+                aria-label={`${t('dtax.rename')} ${cat.name}`}
                 className="grid h-7 w-7 place-items-center rounded-lg text-muted opacity-0 transition hover:bg-surface-2 hover:text-primary group-hover:opacity-100"
               >
                 <PenIcon size={13} />
@@ -119,7 +120,7 @@ function CategoryRow({
                 type="button"
                 onClick={remove}
                 disabled={pending}
-                aria-label={`Delete ${cat.name}`}
+                aria-label={`${t('d.common.delete')} ${cat.name}`}
                 className="grid h-7 w-7 place-items-center rounded-lg text-muted opacity-0 transition hover:bg-accent-red/10 hover:text-accent-red group-hover:opacity-100 disabled:opacity-40"
               >
                 <TrashIcon size={13} />
@@ -140,6 +141,7 @@ function Sections({
   categories: AdminCategory[];
   onChanged: () => void;
 }) {
+  const t = useT();
   const [name, setName] = useState('');
   const [parentId, setParentId] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -175,14 +177,14 @@ function Sections({
       <div className="border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <LayersIcon size={15} className="text-primary" />
-          <h2 className="font-heading text-sm font-bold text-text">Sections</h2>
-          <CountPill n={categories.length} label="section" />
+          <h2 className="font-heading text-sm font-bold text-text">{t('dtax.sections')}</h2>
+          <CountPill n={categories.length} label={t('dtax.section')} />
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="New section name"
+            placeholder={t('dtax.newSectionName')}
             className="w-48 rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-body text-sm text-text outline-none focus:border-primary"
           />
           <select
@@ -190,12 +192,12 @@ function Sections({
             onChange={(e) => setParentId(e.target.value)}
             className="rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-body text-sm text-text outline-none focus:border-primary"
           >
-            <option value="">— top level —</option>
+            <option value="">{t('dtax.topLevel')}</option>
             {categories
               .filter((c) => !c.parentId)
               .map((c) => (
                 <option key={c.id} value={c.id}>
-                  under {c.name}
+                  {t('dtax.under')} {c.name}
                 </option>
               ))}
           </select>
@@ -205,7 +207,7 @@ function Sections({
             disabled={pending || !name.trim()}
             className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black transition hover:opacity-90 disabled:opacity-50"
           >
-            <PlusIcon size={14} /> Add
+            <PlusIcon size={14} /> {t('d.common.add')}
           </button>
           {error && <span className="font-mono text-[11px] text-accent-red">{error}</span>}
         </div>
@@ -214,13 +216,14 @@ function Sections({
         <CategoryRow key={cat.id} cat={cat} depth={depth} onChanged={onChanged} />
       ))}
       {ordered.length === 0 && (
-        <p className="px-4 py-8 text-center font-body text-sm text-muted">No sections yet.</p>
+        <p className="px-4 py-8 text-center font-body text-sm text-muted">{t('dtax.noSections')}</p>
       )}
     </section>
   );
 }
 
 function Topics({ topics, onChanged }: { topics: AdminTopic[]; onChanged: () => void }) {
+  const tr = useT();
   const [name, setName] = useState('');
   const [query, setQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -256,14 +259,14 @@ function Topics({ topics, onChanged }: { topics: AdminTopic[]; onChanged: () => 
       <div className="border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <TagIcon size={15} className="text-primary" />
-          <h2 className="font-heading text-sm font-bold text-text">Topics</h2>
-          <CountPill n={topics.length} label="topic" />
+          <h2 className="font-heading text-sm font-bold text-text">{tr('dtax.topics')}</h2>
+          <CountPill n={topics.length} label={tr('dtax.topic')} />
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="New topic name"
+            placeholder={tr('dtax.newTopicName')}
             className="min-w-0 flex-1 rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-body text-sm text-text outline-none focus:border-primary"
           />
           <button
@@ -272,7 +275,7 @@ function Topics({ topics, onChanged }: { topics: AdminTopic[]; onChanged: () => 
             disabled={pending || !name.trim()}
             className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black transition hover:opacity-90 disabled:opacity-50"
           >
-            <PlusIcon size={14} /> Add
+            <PlusIcon size={14} /> {tr('d.common.add')}
           </button>
           {error && <span className="w-full font-mono text-[11px] text-accent-red">{error}</span>}
         </div>
@@ -285,7 +288,7 @@ function Topics({ topics, onChanged }: { topics: AdminTopic[]; onChanged: () => 
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Filter topics…"
+              placeholder={tr('dtax.filterTopics')}
               className="w-full rounded-lg border border-border bg-surface-2 py-1.5 pl-9 pr-3 text-sm text-text outline-none focus:border-primary"
             />
           </label>
@@ -304,7 +307,7 @@ function Topics({ topics, onChanged }: { topics: AdminTopic[]; onChanged: () => 
               onClick={() => remove(t.id)}
               disabled={pending}
               className="text-faint transition hover:text-accent-red"
-              aria-label={`Delete ${t.name}`}
+              aria-label={`${tr('d.common.delete')} ${t.name}`}
             >
               ✕
             </button>
@@ -312,7 +315,7 @@ function Topics({ topics, onChanged }: { topics: AdminTopic[]; onChanged: () => 
         ))}
         {shown.length === 0 && (
           <p className="font-body text-sm text-muted">
-            {query ? 'No topics match.' : 'No topics yet.'}
+            {query ? tr('dtax.noTopicsMatch') : tr('dtax.noTopics')}
           </p>
         )}
       </div>
@@ -327,17 +330,17 @@ export function TaxonomyAdmin({
   categories: AdminCategory[];
   topics: AdminTopic[];
 }) {
+  const t = useT();
   const router = useRouter();
   const refresh = () => router.refresh();
 
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="font-heading text-3xl font-black tracking-tight text-text">Taxonomy</h1>
-        <p className="mt-1 max-w-2xl font-body text-sm text-muted">
-          Manage the sections, sub-sections, and topics that organise the whole site. A section with
-          sub-sections or articles can&apos;t be deleted until it&apos;s emptied.
-        </p>
+        <h1 className="font-heading text-3xl font-black tracking-tight text-text">
+          {t('dash.taxonomy')}
+        </h1>
+        <p className="mt-1 max-w-2xl font-body text-sm text-muted">{t('dtax.subtitle')}</p>
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-[1fr_22rem]">

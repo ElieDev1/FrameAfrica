@@ -7,6 +7,11 @@ jest.mock('@/lib/api', () => ({
   fetchCategories: jest.fn(),
 }));
 
+jest.mock('next/headers', () => ({
+  cookies: jest.fn().mockResolvedValue({ get: () => undefined }),
+  headers: jest.fn().mockResolvedValue({ get: () => undefined }),
+}));
+
 // The Weather/Markets widgets are async server components that fetch live APIs;
 // stub them so the homepage renders synchronously in the test.
 jest.mock('@/components/WeatherWidget', () => ({ WeatherWidget: () => <h2>Weather</h2> }));
