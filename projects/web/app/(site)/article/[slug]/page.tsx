@@ -343,12 +343,19 @@ export default async function ArticlePage({ params }: PageProps) {
           </div>
         </article>
 
-        {/* Right: sticky sidebar (fills the right margin on wide screens) */}
-        <aside className="hidden lg:block">
-          <div className="sticky top-24 space-y-8">
+        {/* Right sidebar — fills the margin on wide screens; on mobile it stacks
+            below the article so readers still get Most-read + newsletter. */}
+        <aside className="mt-10 border-t border-border pt-8 lg:mt-0 lg:border-0 lg:pt-0">
+          <div className="space-y-8 lg:sticky lg:top-24">
             {popular.length > 0 && <MostRead articles={popular} />}
             <NewsletterBox />
-            <AdSlot variant="halfpage" />
+            {/* The tall half-page ad is desktop-only; mobile keeps a compact slot. */}
+            <div className="hidden lg:block">
+              <AdSlot variant="halfpage" />
+            </div>
+            <div className="lg:hidden">
+              <AdSlot variant="native" />
+            </div>
           </div>
         </aside>
       </div>

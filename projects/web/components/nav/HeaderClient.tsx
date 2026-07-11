@@ -73,13 +73,13 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
       }`}
     >
       <div
-        className={`mx-auto flex max-w-[1440px] items-center gap-4 px-6 transition-[padding] duration-300 ${
+        className={`mx-auto flex max-w-[1440px] items-center gap-3 px-4 transition-[padding] duration-300 sm:px-6 ${
           condensed ? 'py-2' : 'py-3'
         }`}
       >
         {/* Brand */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center md:hidden">
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="flex items-center lg:hidden">
             <MobileMenu
               sections={allSections}
               signedIn={Boolean(user)}
@@ -94,9 +94,9 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
           </Link>
         </div>
 
-        {/* Section nav (single, centered) */}
+        {/* Section nav (single, centered) — full nav from lg; hamburger below */}
         {sections.length > 0 && (
-          <nav aria-label="Sections" className="mx-auto hidden md:block">
+          <nav aria-label="Sections" className="mx-auto hidden shrink-0 lg:block">
             <ul className="flex items-center">
               {sections.map((section) => {
                 const active = sectionActive(section);
@@ -106,7 +106,7 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
                     <Link
                       href={`/section/${section.slug}`}
                       aria-current={active ? 'page' : undefined}
-                      className={`relative inline-flex items-center gap-0.5 px-2.5 py-2.5 text-[13px] font-semibold transition-colors after:absolute after:inset-x-2.5 after:bottom-0 after:h-0.5 after:origin-left after:rounded-full after:bg-primary after:transition-transform after:duration-200 group-hover:text-text group-focus-within:text-text group-hover:after:scale-x-100 group-focus-within:after:scale-x-100 ${
+                      className={`relative inline-flex items-center gap-0.5 px-2 py-2.5 text-[13px] font-semibold transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:origin-left after:rounded-full after:bg-primary after:transition-transform after:duration-200 group-hover:text-text group-focus-within:text-text group-hover:after:scale-x-100 group-focus-within:after:scale-x-100 ${
                         active ? 'text-text after:scale-x-100' : 'text-muted after:scale-x-0'
                       }`}
                     >
@@ -131,7 +131,7 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
         )}
 
         {/* Actions */}
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <SearchForm locale={locale} />
           <Link
             href="/search"
@@ -147,13 +147,13 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
             <>
               <Link
                 href="/login"
-                className="hidden text-sm font-medium text-muted transition-colors hover:text-primary md:inline"
+                className="hidden whitespace-nowrap text-[13px] font-medium text-muted transition-colors hover:text-primary sm:inline"
               >
                 {t(locale, 'nav.signIn')}
               </Link>
               <Link
                 href="/signup"
-                className="hidden rounded-full bg-primary px-3.5 py-1.5 text-sm font-semibold text-black transition-transform hover:-translate-y-px md:inline"
+                className="whitespace-nowrap rounded-full bg-primary px-3 py-1.5 text-[13px] font-semibold text-black transition-transform hover:-translate-y-px"
               >
                 {t(locale, 'nav.subscribe')}
               </Link>
@@ -167,7 +167,7 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
 
 function SearchForm({ locale }: { locale: Locale }) {
   return (
-    <form action="/search" className="relative hidden md:block">
+    <form action="/search" className="relative hidden lg:block">
       <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint">
         <SearchIcon size={15} />
       </span>
@@ -176,7 +176,7 @@ function SearchForm({ locale }: { locale: Locale }) {
         type="search"
         placeholder={t(locale, 'nav.searchPlaceholder')}
         aria-label={t(locale, 'nav.searchAria')}
-        className="w-44 rounded-full border border-border bg-surface-2 py-1.5 pl-9 pr-4 text-sm text-text outline-none transition-[width,border-color] focus:w-64 focus:border-primary"
+        className="w-36 rounded-full border border-border bg-surface-2 py-1.5 pl-9 pr-4 text-sm text-text outline-none transition-[width,border-color] focus:w-52 focus:border-primary xl:w-44"
       />
     </form>
   );

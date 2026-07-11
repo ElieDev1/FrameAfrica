@@ -30,6 +30,60 @@ const TABS: { key: string; label: string; match: (s: string) => boolean }[] = [
 
 const EDITABLE = new Set(['draft', 'in_progress', 'rejected']);
 
+/** Per-row action buttons, shared by the desktop table and the mobile cards. */
+function RowActions({
+  d,
+  basePath,
+  deleteAction,
+}: {
+  d: DraftListItem;
+  basePath: string;
+  deleteAction?: (id: string) => Promise<void>;
+}) {
+  const btn =
+    'inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold transition hover:border-primary hover:text-primary';
+  return (
+    <div className="flex items-center gap-1">
+      {EDITABLE.has(d.status) && (
+        <Link href={`${basePath}/${d.id}`} aria-label="Edit story" className={`${btn} text-text`}>
+          <PenIcon size={13} /> Edit
+        </Link>
+      )}
+      {d.status === 'published' && (
+        <Link
+          href={`/article/${d.slug}`}
+          target="_blank"
+          aria-label="View published story"
+          className={`${btn} text-text`}
+        >
+          <ArrowUpRightIcon size={13} /> View
+        </Link>
+      )}
+      {!EDITABLE.has(d.status) && d.status !== 'published' && (
+        <Link href={`${basePath}/${d.id}`} className={`${btn} text-muted`}>
+          Open
+        </Link>
+      )}
+      {deleteAction && (
+        <form
+          action={deleteAction.bind(null, d.id)}
+          onSubmit={(e) => {
+            if (!confirm(`Delete “${d.title}”? This cannot be undone.`)) e.preventDefault();
+          }}
+        >
+          <button
+            type="submit"
+            aria-label="Delete article"
+            className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 text-xs font-semibold text-muted transition hover:border-accent-red hover:text-accent-red"
+          >
+            <TrashIcon size={13} />
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
 /**
  * Story management table with status tabs, search and per-row actions. Used for
  * both "My stories" (basePath /dashboard/stories) and the admin "All articles"
@@ -125,8 +179,40 @@ export function StoriesTable({
         </label>
       </div>
 
-      {/* Table */}
-      <div className="mt-4 overflow-hidden rounded-xl border border-border bg-surface">
+      {/* Mobile: cards */}
+      <div className="mt-4 space-y-3 md:hidden">
+        {pageRows.map((d) => (
+          <div key={d.id} className="rounded-xl border border-border bg-surface p-4">
+            <Link
+              href={`${basePath}/${d.id}`}
+              className="flex items-start gap-2 font-heading font-bold leading-snug text-text hover:text-primary"
+            >
+              <span className="min-w-0">{d.title}</span>
+              {d.isPremium && (
+                <span className="mt-0.5 shrink-0 rounded bg-accent-yellow/20 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-accent-yellow">
+                  Premium
+                </span>
+              )}
+            </Link>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted">
+              <StatusBadge status={d.status} />
+              <span>{d.category.name}</span>
+              <span className="font-mono text-faint">· {formatDate(d.updatedAt)}</span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-1">
+              <RowActions d={d} basePath={basePath} deleteAction={deleteAction} />
+            </div>
+          </div>
+        ))}
+        {rows.length === 0 && (
+          <p className="rounded-xl border border-dashed border-border px-4 py-10 text-center font-body text-sm text-muted">
+            {query ? 'No stories match your search.' : 'Nothing here yet.'}
+          </p>
+        )}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="mt-4 hidden overflow-hidden rounded-xl border border-border bg-surface md:block">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-left">
             <thead>
@@ -162,52 +248,8 @@ export function StoriesTable({
                     {formatDate(d.updatedAt)}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      {EDITABLE.has(d.status) && (
-                        <Link
-                          href={`${basePath}/${d.id}`}
-                          aria-label="Edit story"
-                          className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary"
-                        >
-                          <PenIcon size={13} /> Edit
-                        </Link>
-                      )}
-                      {d.status === 'published' && (
-                        <Link
-                          href={`/article/${d.slug}`}
-                          target="_blank"
-                          aria-label="View published story"
-                          className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary"
-                        >
-                          <ArrowUpRightIcon size={13} /> View
-                        </Link>
-                      )}
-                      {!EDITABLE.has(d.status) && d.status !== 'published' && (
-                        <Link
-                          href={`${basePath}/${d.id}`}
-                          className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-muted transition hover:border-primary hover:text-primary"
-                        >
-                          Open
-                        </Link>
-                      )}
-                      {deleteAction && (
-                        <form
-                          action={deleteAction.bind(null, d.id)}
-                          onSubmit={(e) => {
-                            if (!confirm(`Delete “${d.title}”? This cannot be undone.`)) {
-                              e.preventDefault();
-                            }
-                          }}
-                        >
-                          <button
-                            type="submit"
-                            aria-label="Delete article"
-                            className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 text-xs font-semibold text-muted transition hover:border-accent-red hover:text-accent-red"
-                          >
-                            <TrashIcon size={13} />
-                          </button>
-                        </form>
-                      )}
+                    <div className="flex justify-end">
+                      <RowActions d={d} basePath={basePath} deleteAction={deleteAction} />
                     </div>
                   </td>
                 </tr>
