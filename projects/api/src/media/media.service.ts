@@ -15,6 +15,20 @@ const ALLOWED_TYPES: Record<string, string> = {
 
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 
+/** Accepted audio/video types → extension, for podcast/video uploads. */
+const ALLOWED_AV_TYPES: Record<string, string> = {
+  'audio/mpeg': '.mp3',
+  'audio/mp4': '.m4a',
+  'audio/aac': '.aac',
+  'audio/ogg': '.ogg',
+  'audio/wav': '.wav',
+  'audio/x-wav': '.wav',
+  'video/mp4': '.mp4',
+  'video/webm': '.webm',
+};
+
+const MAX_AV_BYTES = 200 * 1024 * 1024; // 200 MB
+
 export interface UploadMeta {
   alt?: string;
   credit?: string;
@@ -55,6 +69,43 @@ export class MediaService {
         sizeBytes: file.size,
         originalName: file.originalname?.slice(0, 200) || null,
         alt: meta.alt?.trim() || null,
+        credit: meta.credit?.trim() || null,
+        licence: meta.licence?.trim() || null,
+      },
+    });
+    return toDto(asset);
+  }
+
+  /**
+   * Store an uploaded audio or video file (podcast episodes, self-hosted video
+   * clips) and catalogue it. Larger limit than images; same media library.
+   */
+  async uploadAV(
+    uploaderId: string,
+    file: UploadedImage | undefined,
+    meta: UploadMeta,
+  ): Promise<MediaAssetDto> {
+    if (!file) {
+      throw new BadRequestException('No file was uploaded (field "file")');
+    }
+    const ext = ALLOWED_AV_TYPES[file.mimetype];
+    if (!ext) {
+      throw new BadRequestException(
+        'Unsupported media type (MP3/M4A/AAC/OGG/WAV or MP4/WebM only)',
+      );
+    }
+    if (file.size > MAX_AV_BYTES) {
+      throw new BadRequestException('File too large (max 200 MB)');
+    }
+
+    const { url } = await this.storage.save(file.buffer, ext);
+    const asset = await this.prisma.mediaAsset.create({
+      data: {
+        uploaderId,
+        url,
+        mime: file.mimetype,
+        sizeBytes: file.size,
+        originalName: file.originalname?.slice(0, 200) || null,
         credit: meta.credit?.trim() || null,
         licence: meta.licence?.trim() || null,
       },

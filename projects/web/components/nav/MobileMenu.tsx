@@ -6,6 +6,21 @@ import { createPortal } from 'react-dom';
 import type { CategoryNode } from '@/lib/api';
 import { logout } from '@/lib/auth-actions';
 
+/** Hub pages shown under the taxonomy "Multimedia" section. */
+const MULTIMEDIA_HUBS = [
+  { name: 'Videos', href: '/videos' },
+  { name: 'Photo galleries', href: '/galleries' },
+  { name: 'Podcasts', href: '/podcasts' },
+];
+
+/** Sub-links for a section: the multimedia hubs, else its taxonomy children. */
+function subLinks(section: CategoryNode): { key: string; name: string; href: string }[] {
+  if (section.slug === 'multimedia') {
+    return MULTIMEDIA_HUBS.map((h) => ({ key: h.href, name: h.name, href: h.href }));
+  }
+  return section.children.map((c) => ({ key: c.id, name: c.name, href: `/section/${c.slug}` }));
+}
+
 /**
  * Mobile navigation: a hamburger button that opens a full-height drawer with
  * search, the section tree (sub-sections expandable), and auth actions. Shown
@@ -86,45 +101,48 @@ export function MobileMenu({
               </form>
 
               <nav aria-label="Sections" className="mt-5 flex flex-col">
-                {sections.map((section) => (
-                  <div key={section.id} className="border-b border-border">
-                    <div className="flex items-center justify-between">
-                      <Link
-                        href={`/section/${section.slug}`}
-                        onClick={close}
-                        className="flex-1 py-3 font-heading text-base font-semibold text-text"
-                      >
-                        {section.name}
-                      </Link>
-                      {section.children.length > 0 && (
-                        <button
-                          type="button"
-                          aria-label={`Toggle ${section.name} sub-sections`}
-                          onClick={() =>
-                            setExpanded((cur) => (cur === section.id ? null : section.id))
-                          }
-                          className="px-3 py-3 font-mono text-muted"
+                {sections.map((section) => {
+                  const subs = subLinks(section);
+                  return (
+                    <div key={section.id} className="border-b border-border">
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href={`/section/${section.slug}`}
+                          onClick={close}
+                          className="flex-1 py-3 font-heading text-base font-semibold text-text"
                         >
-                          {expanded === section.id ? '−' : '+'}
-                        </button>
+                          {section.name}
+                        </Link>
+                        {subs.length > 0 && (
+                          <button
+                            type="button"
+                            aria-label={`Toggle ${section.name} sub-sections`}
+                            onClick={() =>
+                              setExpanded((cur) => (cur === section.id ? null : section.id))
+                            }
+                            className="px-3 py-3 font-mono text-muted"
+                          >
+                            {expanded === section.id ? '−' : '+'}
+                          </button>
+                        )}
+                      </div>
+                      {expanded === section.id && subs.length > 0 && (
+                        <div className="flex flex-col pb-2">
+                          {subs.map((sub) => (
+                            <Link
+                              key={sub.key}
+                              href={sub.href}
+                              onClick={close}
+                              className="py-2 pl-3 font-body text-sm text-muted hover:text-primary"
+                            >
+                              {sub.name}
+                            </Link>
+                          ))}
+                        </div>
                       )}
                     </div>
-                    {expanded === section.id && section.children.length > 0 && (
-                      <div className="flex flex-col pb-2">
-                        {section.children.map((child) => (
-                          <Link
-                            key={child.id}
-                            href={`/section/${child.slug}`}
-                            onClick={close}
-                            className="py-2 pl-3 font-body text-sm text-muted hover:text-primary"
-                          >
-                            {child.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </nav>
 
               <div className="mt-6 flex flex-col gap-2">

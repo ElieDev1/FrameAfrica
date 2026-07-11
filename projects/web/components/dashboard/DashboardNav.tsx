@@ -79,6 +79,12 @@ function groupsFor(roles: string[]): NavGroup[] {
   if (has('editor', 'admin')) {
     multimedia.push({ href: '/dashboard/videos', label: 'Videos', Icon: PlayIcon });
   }
+  if (has('photographer', 'editor', 'admin')) {
+    multimedia.push({ href: '/dashboard/galleries', label: 'Galleries', Icon: ImageIcon });
+  }
+  if (has('editor', 'admin')) {
+    multimedia.push({ href: '/dashboard/podcasts', label: 'Podcasts', Icon: MailIcon });
+  }
   if (multimedia.length > 0) {
     groups.push({ section: 'Multimedia', items: multimedia });
   }

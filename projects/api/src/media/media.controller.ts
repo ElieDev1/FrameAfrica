@@ -45,6 +45,17 @@ export class MediaController {
     return apiResponse(await this.media.upload(user.id, file, dto));
   }
 
+  /** Upload an audio or video file (podcasts, self-hosted clips). */
+  @Post('av')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadAV(
+    @CurrentUser() user: AuthenticatedUser,
+    @UploadedFile() file: UploadedImage | undefined,
+    @Body() dto: UploadMediaDto,
+  ) {
+    return apiResponse(await this.media.uploadAV(user.id, file, dto));
+  }
+
   @Get()
   async list() {
     return apiResponse(await this.media.list());
