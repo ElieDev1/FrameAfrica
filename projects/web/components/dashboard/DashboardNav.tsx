@@ -43,73 +43,96 @@ interface NavGroup {
   items: NavItem[];
 }
 
+/**
+ * Build the dashboard nav for a set of roles, grouped by what the work *is*:
+ * Newsroom (your desk), Editorial (the workflow queues), Media (the library +
+ * every multimedia type), Audience (reader-facing ops) and Administration.
+ * Each group is only shown when the user has at least one item in it.
+ */
 function groupsFor(roles: string[]): NavGroup[] {
   const has = (...r: string[]) => r.some((x) => roles.includes(x));
+  const groups: NavGroup[] = [];
+  const push = (section: string, items: (NavItem | false)[]) => {
+    const real = items.filter((i): i is NavItem => Boolean(i));
+    if (real.length > 0) groups.push({ section, items: real });
+  };
 
-  const desk: NavItem[] = [];
-  if (has('sub_editor', 'editor', 'admin')) {
-    desk.push({ href: '/dashboard/copydesk', label: 'Copy desk', Icon: PenIcon });
-  }
-  if (has('editor', 'admin')) {
-    desk.push({ href: '/dashboard/review', label: 'Review queue', Icon: ClipboardCheckIcon });
-    desk.push({ href: '/dashboard/pipeline', label: 'Pipeline', Icon: ColumnsIcon });
-  }
-  if (has('moderator', 'editor', 'admin')) {
-    desk.push({ href: '/dashboard/moderation', label: 'Moderation', Icon: FlagIcon });
-    desk.push({ href: '/dashboard/tips', label: 'Tips inbox', Icon: ShieldIcon });
-  }
+  // 1. Newsroom — your own work.
+  push('Newsroom', [
+    { href: '/dashboard', label: 'Overview', Icon: GridIcon, exact: true },
+    { href: '/dashboard/stories', label: 'My stories', Icon: FileTextIcon },
+    { href: '/dashboard/stories/new', label: 'New story', Icon: PlusIcon, exact: true },
+    { href: '/dashboard/analytics', label: 'Analytics', Icon: BarChartIcon },
+  ]);
 
-  const groups: NavGroup[] = [
-    {
-      section: 'Newsroom',
-      items: [
-        { href: '/dashboard', label: 'Overview', Icon: GridIcon, exact: true },
-        { href: '/dashboard/stories', label: 'My stories', Icon: FileTextIcon },
-        { href: '/dashboard/stories/new', label: 'New story', Icon: PlusIcon, exact: true },
-        { href: '/dashboard/media', label: 'Media library', Icon: ImageIcon },
-        { href: '/dashboard/studio', label: 'Studio', Icon: SparklesIcon },
-        { href: '/dashboard/analytics', label: 'Analytics', Icon: BarChartIcon },
-        ...desk,
-      ],
+  // 2. Editorial desk — the review/moderation workflow.
+  push('Editorial desk', [
+    has('sub_editor', 'editor', 'admin') && {
+      href: '/dashboard/copydesk',
+      label: 'Copy desk',
+      Icon: PenIcon,
     },
-  ];
+    has('editor', 'admin') && {
+      href: '/dashboard/review',
+      label: 'Review queue',
+      Icon: ClipboardCheckIcon,
+    },
+    has('editor', 'admin') && {
+      href: '/dashboard/pipeline',
+      label: 'Pipeline',
+      Icon: ColumnsIcon,
+    },
+    has('moderator', 'editor', 'admin') && {
+      href: '/dashboard/moderation',
+      label: 'Moderation',
+      Icon: FlagIcon,
+    },
+    has('moderator', 'editor', 'admin') && {
+      href: '/dashboard/tips',
+      label: 'Tips inbox',
+      Icon: ShieldIcon,
+    },
+  ]);
 
-  // Multimedia desks — role-gated content types (documents/13 §4.3).
-  const multimedia: NavItem[] = [];
-  if (has('editor', 'admin')) {
-    multimedia.push({ href: '/dashboard/videos', label: 'Videos', Icon: PlayIcon });
-  }
-  if (has('photographer', 'editor', 'admin')) {
-    multimedia.push({ href: '/dashboard/galleries', label: 'Galleries', Icon: ImageIcon });
-  }
-  if (has('editor', 'admin')) {
-    multimedia.push({ href: '/dashboard/podcasts', label: 'Podcasts', Icon: MailIcon });
-    multimedia.push({
+  // 3. Media — the library, the studio, and every multimedia content type.
+  push('Media', [
+    { href: '/dashboard/media', label: 'Media library', Icon: ImageIcon },
+    { href: '/dashboard/studio', label: 'Studio', Icon: SparklesIcon },
+    has('editor', 'admin') && { href: '/dashboard/videos', label: 'Videos', Icon: PlayIcon },
+    has('photographer', 'editor', 'admin') && {
+      href: '/dashboard/galleries',
+      label: 'Galleries',
+      Icon: ImageIcon,
+    },
+    has('editor', 'admin') && { href: '/dashboard/podcasts', label: 'Podcasts', Icon: MailIcon },
+    has('editor', 'admin') && {
       href: '/dashboard/interactives',
       label: 'Data & interactives',
       Icon: BarChartIcon,
-    });
-  }
-  if (multimedia.length > 0) {
-    groups.push({ section: 'Multimedia', items: multimedia });
-  }
+    },
+  ]);
 
-  if (has('admin')) {
-    groups.push({
-      section: 'Administration',
-      items: [
-        { href: '/dashboard/monitor', label: 'Monitor', Icon: ActivityIcon },
-        { href: '/dashboard/audit', label: 'Audit log', Icon: ClipboardCheckIcon },
-        { href: '/dashboard/articles', label: 'All articles', Icon: LayersIcon },
-        { href: '/dashboard/taxonomy', label: 'Taxonomy', Icon: TagIcon },
-        { href: '/dashboard/ads', label: 'House ads', Icon: MegaphoneIcon },
-        { href: '/dashboard/inquiries', label: 'Inquiries', Icon: CommentIcon },
-        { href: '/dashboard/newsletter', label: 'Newsletter', Icon: MailIcon },
-        { href: '/dashboard/users', label: 'Users & roles', Icon: UsersIcon },
-        { href: '/dashboard/settings', label: 'Settings', Icon: SettingsIcon },
-      ],
-    });
-  }
+  // 4. Audience — reader-facing operations.
+  push('Audience', [
+    has('admin') && { href: '/dashboard/inquiries', label: 'Inquiries', Icon: CommentIcon },
+    has('editor', 'admin') && {
+      href: '/dashboard/newsletter',
+      label: 'Newsletter',
+      Icon: MailIcon,
+    },
+  ]);
+
+  // 5. Administration — system + settings.
+  push('Administration', [
+    has('admin') && { href: '/dashboard/articles', label: 'All articles', Icon: LayersIcon },
+    has('admin') && { href: '/dashboard/taxonomy', label: 'Taxonomy', Icon: TagIcon },
+    has('admin') && { href: '/dashboard/ads', label: 'House ads', Icon: MegaphoneIcon },
+    has('admin') && { href: '/dashboard/users', label: 'Users & roles', Icon: UsersIcon },
+    has('admin') && { href: '/dashboard/monitor', label: 'Monitor', Icon: ActivityIcon },
+    has('admin') && { href: '/dashboard/audit', label: 'Audit log', Icon: ClipboardCheckIcon },
+    has('admin') && { href: '/dashboard/settings', label: 'Settings', Icon: SettingsIcon },
+  ]);
+
   return groups;
 }
 
