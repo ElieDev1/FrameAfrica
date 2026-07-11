@@ -7,6 +7,9 @@ export const PUBLIC_API_URL =
 
 export type AdPlacement = 'leaderboard' | 'billboard' | 'rectangle' | 'halfpage' | 'native';
 
+/** Cache tag for every house-ad fetch, so admin changes invalidate the site. */
+export const HOUSE_ADS_TAG = 'house-ads';
+
 export interface HouseAd {
   id: string;
   title: string;
@@ -19,7 +22,7 @@ export interface HouseAd {
 export async function fetchHouseAd(placement: AdPlacement): Promise<HouseAd | null> {
   try {
     const res = await fetch(`${API_URL}/ads?placement=${placement}`, {
-      next: { revalidate: 120 },
+      next: { revalidate: 120, tags: [HOUSE_ADS_TAG] },
     });
     if (!res.ok) return null;
     const json = (await res.json()) as { data: HouseAd | null };

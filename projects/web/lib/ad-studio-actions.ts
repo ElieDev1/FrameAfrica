@@ -1,6 +1,7 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { HOUSE_ADS_TAG } from './ads';
 import { getAccessToken } from './session';
 
 const API_URL =
@@ -49,7 +50,9 @@ export async function publishAdCreative(
     if (adRes.status === 400) return { ok: false, error: 'Use a full https:// destination link.' };
     if (!adRes.ok) return { ok: false, error: 'Could not create the house ad.' };
 
+    revalidateTag(HOUSE_ADS_TAG, 'max');
     revalidatePath('/dashboard/ads');
+    revalidatePath('/', 'layout');
     return { ok: true };
   } catch {
     return { ok: false, error: 'Could not reach the server. Please try again.' };

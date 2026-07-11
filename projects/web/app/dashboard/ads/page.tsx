@@ -11,12 +11,13 @@ export default async function AdsPage() {
   const ads = await fetchHouseAds();
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="w-full">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl font-black tracking-tight text-text">House ads</h1>
-          <p className="mt-1 font-body text-sm text-muted">
-            Manage the creatives served into labelled ad slots. Impressions and clicks are counted.
+          <h1 className="font-heading text-3xl font-black tracking-tight text-text">House ads</h1>
+          <p className="mt-1 max-w-2xl font-body text-sm text-muted">
+            Manage the creatives served into labelled ad slots — {ads.length} total. Images, GIFs,
+            and videos are supported; impressions and clicks are counted.
           </p>
         </div>
         <Link
