@@ -45,6 +45,7 @@ const MULTIMEDIA_HUBS: { name: string; href: string }[] = [
   { name: 'Videos', href: '/videos' },
   { name: 'Photo galleries', href: '/galleries' },
   { name: 'Podcasts', href: '/podcasts' },
+  { name: 'Data & interactives', href: '/interactives' },
 ];
 
 /** The taxonomy "Multimedia" section also links to the hub pages above. */

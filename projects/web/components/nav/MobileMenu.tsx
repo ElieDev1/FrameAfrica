@@ -11,6 +11,7 @@ const MULTIMEDIA_HUBS = [
   { name: 'Videos', href: '/videos' },
   { name: 'Photo galleries', href: '/galleries' },
   { name: 'Podcasts', href: '/podcasts' },
+  { name: 'Data & interactives', href: '/interactives' },
 ];
 
 /** Sub-links for a section: the multimedia hubs, else its taxonomy children. */
