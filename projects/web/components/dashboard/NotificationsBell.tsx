@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BellIcon } from '@/components/icons';
+import { useT } from '@/components/LocaleProvider';
 import {
   fetchNotifications,
   fetchUnreadCount,
@@ -23,6 +24,7 @@ function timeAgo(iso: string): string {
 
 /** Dashboard notifications bell backed by the real `/me/notifications` API. */
 export function NotificationsBell() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(0);
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -96,14 +98,16 @@ export function NotificationsBell() {
           className="absolute right-0 top-full z-30 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-surface shadow-xl"
         >
           <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
-            <span className="font-heading text-sm font-bold text-text">Notifications</span>
+            <span className="font-heading text-sm font-bold text-text">
+              {t('dash.notifications')}
+            </span>
             {items.some((i) => !i.read) && (
               <button
                 type="button"
                 onClick={onMarkAll}
                 className="font-mono text-[10px] uppercase tracking-[0.12em] text-primary hover:underline"
               >
-                Mark all read
+                {t('dash.markAllRead')}
               </button>
             )}
           </div>
@@ -113,7 +117,7 @@ export function NotificationsBell() {
               <p className="px-3 py-8 text-center font-body text-sm text-muted">Loading…</p>
             ) : items.length === 0 ? (
               <div className="px-3 py-8 text-center">
-                <p className="font-body text-sm text-muted">You&apos;re all caught up.</p>
+                <p className="font-body text-sm text-muted">{t('dash.caughtUp')}</p>
                 <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
                   New activity will appear here
                 </p>

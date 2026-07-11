@@ -27,6 +27,8 @@ import {
   TagIcon,
   UsersIcon,
 } from '@/components/icons';
+import { useT } from '@/components/LocaleProvider';
+import type { MessageKey } from '@/lib/i18n';
 
 export type DashboardRole = 'journalist' | 'sub_editor' | 'editor' | 'moderator' | 'admin';
 
@@ -34,12 +36,12 @@ type IconCmp = (p: IconProps) => React.ReactElement;
 
 interface NavItem {
   href: string;
-  label: string;
+  labelKey: MessageKey;
   Icon: IconCmp;
   exact?: boolean;
 }
 interface NavGroup {
-  section: string;
+  sectionKey: MessageKey;
   items: NavItem[];
 }
 
@@ -52,85 +54,93 @@ interface NavGroup {
 function groupsFor(roles: string[]): NavGroup[] {
   const has = (...r: string[]) => r.some((x) => roles.includes(x));
   const groups: NavGroup[] = [];
-  const push = (section: string, items: (NavItem | false)[]) => {
+  const push = (sectionKey: MessageKey, items: (NavItem | false)[]) => {
     const real = items.filter((i): i is NavItem => Boolean(i));
-    if (real.length > 0) groups.push({ section, items: real });
+    if (real.length > 0) groups.push({ sectionKey, items: real });
   };
 
   // 1. Newsroom — your own work.
-  push('Newsroom', [
-    { href: '/dashboard', label: 'Overview', Icon: GridIcon, exact: true },
-    { href: '/dashboard/stories', label: 'My stories', Icon: FileTextIcon },
-    { href: '/dashboard/stories/new', label: 'New story', Icon: PlusIcon, exact: true },
-    { href: '/dashboard/analytics', label: 'Analytics', Icon: BarChartIcon },
+  push('dash.sec.newsroom', [
+    { href: '/dashboard', labelKey: 'dash.overview', Icon: GridIcon, exact: true },
+    { href: '/dashboard/stories', labelKey: 'dash.myStories', Icon: FileTextIcon },
+    { href: '/dashboard/stories/new', labelKey: 'dash.newStory', Icon: PlusIcon, exact: true },
+    { href: '/dashboard/analytics', labelKey: 'dash.analytics', Icon: BarChartIcon },
   ]);
 
   // 2. Editorial desk — the review/moderation workflow.
-  push('Editorial desk', [
+  push('dash.sec.editorial', [
     has('sub_editor', 'editor', 'admin') && {
       href: '/dashboard/copydesk',
-      label: 'Copy desk',
+      labelKey: 'dash.copyDesk',
       Icon: PenIcon,
     },
     has('editor', 'admin') && {
       href: '/dashboard/review',
-      label: 'Review queue',
+      labelKey: 'dash.reviewQueue',
       Icon: ClipboardCheckIcon,
     },
     has('editor', 'admin') && {
       href: '/dashboard/pipeline',
-      label: 'Pipeline',
+      labelKey: 'dash.pipeline',
       Icon: ColumnsIcon,
     },
     has('moderator', 'editor', 'admin') && {
       href: '/dashboard/moderation',
-      label: 'Moderation',
+      labelKey: 'dash.moderation',
       Icon: FlagIcon,
     },
     has('moderator', 'editor', 'admin') && {
       href: '/dashboard/tips',
-      label: 'Tips inbox',
+      labelKey: 'dash.tipsInbox',
       Icon: ShieldIcon,
     },
   ]);
 
   // 3. Media — the library, the studio, and every multimedia content type.
-  push('Media', [
-    { href: '/dashboard/media', label: 'Media library', Icon: ImageIcon },
-    { href: '/dashboard/studio', label: 'Studio', Icon: SparklesIcon },
-    has('editor', 'admin') && { href: '/dashboard/videos', label: 'Videos', Icon: PlayIcon },
+  push('dash.sec.media', [
+    { href: '/dashboard/media', labelKey: 'dash.mediaLibrary', Icon: ImageIcon },
+    { href: '/dashboard/studio', labelKey: 'dash.studio', Icon: SparklesIcon },
+    has('editor', 'admin') && { href: '/dashboard/videos', labelKey: 'mm.videos', Icon: PlayIcon },
     has('photographer', 'editor', 'admin') && {
       href: '/dashboard/galleries',
-      label: 'Galleries',
+      labelKey: 'mm.galleries',
       Icon: ImageIcon,
     },
-    has('editor', 'admin') && { href: '/dashboard/podcasts', label: 'Podcasts', Icon: MailIcon },
+    has('editor', 'admin') && {
+      href: '/dashboard/podcasts',
+      labelKey: 'mm.podcasts',
+      Icon: MailIcon,
+    },
     has('editor', 'admin') && {
       href: '/dashboard/interactives',
-      label: 'Data & interactives',
+      labelKey: 'mm.interactives',
       Icon: BarChartIcon,
     },
   ]);
 
   // 4. Audience — reader-facing operations.
-  push('Audience', [
-    has('admin') && { href: '/dashboard/inquiries', label: 'Inquiries', Icon: CommentIcon },
+  push('dash.sec.audience', [
+    has('admin') && { href: '/dashboard/inquiries', labelKey: 'dash.inquiries', Icon: CommentIcon },
     has('editor', 'admin') && {
       href: '/dashboard/newsletter',
-      label: 'Newsletter',
+      labelKey: 'dash.newsletter',
       Icon: MailIcon,
     },
   ]);
 
   // 5. Administration — system + settings.
-  push('Administration', [
-    has('admin') && { href: '/dashboard/articles', label: 'All articles', Icon: LayersIcon },
-    has('admin') && { href: '/dashboard/taxonomy', label: 'Taxonomy', Icon: TagIcon },
-    has('admin') && { href: '/dashboard/ads', label: 'House ads', Icon: MegaphoneIcon },
-    has('admin') && { href: '/dashboard/users', label: 'Users & roles', Icon: UsersIcon },
-    has('admin') && { href: '/dashboard/monitor', label: 'Monitor', Icon: ActivityIcon },
-    has('admin') && { href: '/dashboard/audit', label: 'Audit log', Icon: ClipboardCheckIcon },
-    has('admin') && { href: '/dashboard/settings', label: 'Settings', Icon: SettingsIcon },
+  push('dash.sec.admin', [
+    has('admin') && { href: '/dashboard/articles', labelKey: 'dash.allArticles', Icon: LayersIcon },
+    has('admin') && { href: '/dashboard/taxonomy', labelKey: 'dash.taxonomy', Icon: TagIcon },
+    has('admin') && { href: '/dashboard/ads', labelKey: 'dash.houseAds', Icon: MegaphoneIcon },
+    has('admin') && { href: '/dashboard/users', labelKey: 'dash.users', Icon: UsersIcon },
+    has('admin') && { href: '/dashboard/monitor', labelKey: 'dash.monitor', Icon: ActivityIcon },
+    has('admin') && {
+      href: '/dashboard/audit',
+      labelKey: 'dash.auditLog',
+      Icon: ClipboardCheckIcon,
+    },
+    has('admin') && { href: '/dashboard/settings', labelKey: 'dash.settings', Icon: SettingsIcon },
   ]);
 
   return groups;
@@ -144,6 +154,7 @@ export function DashboardNav({
   collapsed?: boolean;
 }) {
   const pathname = usePathname();
+  const t = useT();
   const groups = groupsFor(roles);
   const [closed, setClosed] = useState<Record<string, boolean>>({});
 
@@ -164,8 +175,8 @@ export function DashboardNav({
               <Link
                 key={item.href}
                 href={item.href}
-                title={item.label}
-                aria-label={item.label}
+                title={t(item.labelKey)}
+                aria-label={t(item.labelKey)}
                 aria-current={active ? 'page' : undefined}
                 className={`grid h-10 w-10 place-items-center rounded-lg transition-colors ${
                   active
@@ -184,16 +195,16 @@ export function DashboardNav({
   return (
     <nav className="flex flex-col gap-5">
       {groups.map((group) => {
-        const isClosed = closed[group.section];
+        const isClosed = closed[group.sectionKey];
         return (
-          <div key={group.section}>
+          <div key={group.sectionKey}>
             <button
               type="button"
-              onClick={() => setClosed((c) => ({ ...c, [group.section]: !c[group.section] }))}
+              onClick={() => setClosed((c) => ({ ...c, [group.sectionKey]: !c[group.sectionKey] }))}
               aria-expanded={!isClosed}
               className="flex w-full items-center justify-between px-3 pb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-faint hover:text-muted"
             >
-              {group.section}
+              {t(group.sectionKey)}
               <ChevronDownIcon
                 size={13}
                 className={`transition-transform ${isClosed ? '-rotate-90' : ''}`}
@@ -215,7 +226,7 @@ export function DashboardNav({
                         }`}
                       >
                         <item.Icon size={17} />
-                        {item.label}
+                        {t(item.labelKey)}
                       </Link>
                     </li>
                   );

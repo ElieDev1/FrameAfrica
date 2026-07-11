@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { formatDate } from '@/lib/format';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 import { fetchInteractives } from '@/lib/interactives';
 
 export const metadata: Metadata = {
@@ -11,22 +13,19 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function InteractivesPage() {
-  const items = await fetchInteractives(48);
+  const [items, locale] = await Promise.all([fetchInteractives(48), getLocale()]);
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-8">
       <header className="border-b border-border pb-6">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Explore</p>
         <h1 className="mt-1 font-heading text-4xl font-black tracking-tight text-text">
-          Data &amp; interactives
+          {t(locale, 'mm.interactives')}
         </h1>
-        <p className="mt-2 max-w-2xl font-body text-muted">
-          Charts, maps and interactive graphics from the Frame Africa data desk.
-        </p>
+        <p className="mt-2 max-w-2xl font-body text-muted">{t(locale, 'mm.interactivesSub')}</p>
       </header>
 
       {items.length === 0 ? (
-        <p className="py-16 text-center font-body text-muted">Nothing published yet.</p>
+        <p className="py-16 text-center font-body text-muted">{t(locale, 'mm.empty')}</p>
       ) : (
         <div className="grid grid-cols-1 gap-8 pt-8 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((it) => (

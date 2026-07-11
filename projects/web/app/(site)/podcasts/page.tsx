@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 import { fetchPodcastShows } from '@/lib/podcasts';
 
 export const metadata: Metadata = {
@@ -10,22 +12,19 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function PodcastsPage() {
-  const shows = await fetchPodcastShows();
+  const [shows, locale] = await Promise.all([fetchPodcastShows(), getLocale()]);
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-8">
       <header className="border-b border-border pb-6">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
-          Listen &amp; watch
-        </p>
-        <h1 className="mt-1 font-heading text-4xl font-black tracking-tight text-text">Podcasts</h1>
-        <p className="mt-2 max-w-2xl font-body text-muted">
-          Audio and video shows from the Frame Africa newsroom.
-        </p>
+        <h1 className="mt-1 font-heading text-4xl font-black tracking-tight text-text">
+          {t(locale, 'mm.podcasts')}
+        </h1>
+        <p className="mt-2 max-w-2xl font-body text-muted">{t(locale, 'mm.podcastsSub')}</p>
       </header>
 
       {shows.length === 0 ? (
-        <p className="py-16 text-center font-body text-muted">No shows published yet.</p>
+        <p className="py-16 text-center font-body text-muted">{t(locale, 'mm.empty')}</p>
       ) : (
         <div className="grid grid-cols-1 gap-8 pt-8 sm:grid-cols-2 lg:grid-cols-3">
           {shows.map((s) => (

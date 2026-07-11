@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { formatDate } from '@/lib/format';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 import { fetchGalleries } from '@/lib/galleries';
 
 export const metadata: Metadata = {
@@ -11,22 +13,19 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function GalleriesPage() {
-  const galleries = await fetchGalleries(48);
+  const [galleries, locale] = await Promise.all([fetchGalleries(48), getLocale()]);
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-8">
       <header className="border-b border-border pb-6">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">See</p>
         <h1 className="mt-1 font-heading text-4xl font-black tracking-tight text-text">
-          Photo galleries
+          {t(locale, 'mm.galleries')}
         </h1>
-        <p className="mt-2 max-w-2xl font-body text-muted">
-          Visual stories and photojournalism from Rwanda and across the continent.
-        </p>
+        <p className="mt-2 max-w-2xl font-body text-muted">{t(locale, 'mm.galleriesSub')}</p>
       </header>
 
       {galleries.length === 0 ? (
-        <p className="py-16 text-center font-body text-muted">No galleries published yet.</p>
+        <p className="py-16 text-center font-body text-muted">{t(locale, 'mm.empty')}</p>
       ) : (
         <div className="grid grid-cols-1 gap-8 pt-8 sm:grid-cols-2 lg:grid-cols-3">
           {galleries.map((g) => (

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
+import { useT } from '@/components/LocaleProvider';
 import { setCookieConsent } from '@/lib/consent-actions';
 
 /**
@@ -12,6 +13,7 @@ import { setCookieConsent } from '@/lib/consent-actions';
 export function CookieConsent({ initialDecided }: { initialDecided: boolean }) {
   const [decided, setDecided] = useState(initialDecided);
   const [, startTransition] = useTransition();
+  const t = useT();
 
   if (decided) return null;
 
@@ -26,9 +28,9 @@ export function CookieConsent({ initialDecided }: { initialDecided: boolean }) {
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 backdrop-blur-xl">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="font-body text-sm text-muted">
-          We use cookies to keep you signed in and remember your preferences. See our{' '}
+          {t('consent.message')}{' '}
           <Link href="/privacy" className="text-primary hover:underline">
-            privacy notice
+            {t('consent.privacyNotice')}
           </Link>
           .
         </p>
@@ -38,14 +40,14 @@ export function CookieConsent({ initialDecided }: { initialDecided: boolean }) {
             onClick={() => choose(false)}
             className="rounded-lg border border-border px-4 py-1.5 font-mono text-xs uppercase tracking-wide text-muted transition hover:text-text"
           >
-            Decline
+            {t('consent.decline')}
           </button>
           <button
             type="button"
             onClick={() => choose(true)}
             className="rounded-lg bg-primary px-4 py-1.5 font-mono text-xs font-semibold uppercase tracking-wide text-black transition hover:opacity-90"
           >
-            Accept
+            {t('consent.accept')}
           </button>
         </div>
       </div>

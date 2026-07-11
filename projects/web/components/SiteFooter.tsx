@@ -1,39 +1,39 @@
 import Link from 'next/link';
 import { fetchCategories, type CategoryNode } from '@/lib/api';
-import { t } from '@/lib/i18n';
+import { type MessageKey, t } from '@/lib/i18n';
 import { getLocale } from '@/lib/i18n-server';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { Wordmark } from './Wordmark';
 
-const COLUMNS: { title: string; items: { label: string; href: string }[] }[] = [
+const COLUMNS: { titleKey: MessageKey; items: { key: MessageKey; href: string }[] }[] = [
   {
-    title: 'Company',
+    titleKey: 'footer.company',
     items: [
-      { label: 'About us', href: '/about' },
-      { label: 'Advertise', href: '/advertise' },
-      { label: 'Contact', href: '/contact' },
-      { label: 'Send a tip', href: '/tips' },
+      { key: 'footer.aboutUs', href: '/about' },
+      { key: 'footer.advertise', href: '/advertise' },
+      { key: 'footer.contact', href: '/contact' },
+      { key: 'footer.sendTip', href: '/tips' },
     ],
   },
   {
-    title: 'Read',
+    titleKey: 'footer.read',
     items: [
-      { label: 'Latest', href: '/' },
-      { label: 'For you', href: '/for-you' },
-      { label: 'Videos', href: '/videos' },
-      { label: 'Galleries', href: '/galleries' },
-      { label: 'Podcasts', href: '/podcasts' },
-      { label: 'Data & interactives', href: '/interactives' },
-      { label: 'Search', href: '/search' },
+      { key: 'footer.latest', href: '/' },
+      { key: 'nav.forYou', href: '/for-you' },
+      { key: 'mm.videos', href: '/videos' },
+      { key: 'mm.galleries', href: '/galleries' },
+      { key: 'mm.podcasts', href: '/podcasts' },
+      { key: 'mm.interactives', href: '/interactives' },
+      { key: 'footer.search', href: '/search' },
     ],
   },
   {
-    title: 'Legal',
+    titleKey: 'footer.legal',
     items: [
-      { label: 'Privacy', href: '/privacy' },
-      { label: 'Terms', href: '/terms' },
-      { label: 'Editorial standards', href: '/standards' },
-      { label: 'Corrections', href: '/corrections' },
+      { key: 'footer.privacy', href: '/privacy' },
+      { key: 'footer.terms', href: '/terms' },
+      { key: 'footer.standards', href: '/standards' },
+      { key: 'footer.corrections', href: '/corrections' },
     ],
   },
 ];
@@ -63,7 +63,7 @@ export async function SiteFooter() {
 
         <div className="mt-10 grid grid-cols-2 gap-8 sm:grid-cols-4">
           <div>
-            <ColumnHeading>Sections</ColumnHeading>
+            <ColumnHeading>{t(locale, 'nav.sections')}</ColumnHeading>
             <ul className="mt-3 flex flex-col gap-2">
               {sections.map((section) => (
                 <li key={section.id}>
@@ -79,16 +79,16 @@ export async function SiteFooter() {
           </div>
 
           {COLUMNS.map((column) => (
-            <div key={column.title}>
-              <ColumnHeading>{column.title}</ColumnHeading>
+            <div key={column.titleKey}>
+              <ColumnHeading>{t(locale, column.titleKey)}</ColumnHeading>
               <ul className="mt-3 flex flex-col gap-2">
                 {column.items.map((item) => (
-                  <li key={item.label}>
+                  <li key={item.key}>
                     <Link
                       href={item.href}
                       className="font-body text-sm text-muted hover:text-primary"
                     >
-                      {item.label}
+                      {t(locale, item.key)}
                     </Link>
                   </li>
                 ))}
@@ -98,7 +98,9 @@ export async function SiteFooter() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 font-mono text-xs text-faint sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Frame Africa Media Ltd · Kigali, Rwanda</p>
+          <p>
+            © {new Date().getFullYear()} Frame Africa {t(locale, 'footer.rights')}
+          </p>
           <div className="flex items-center gap-2">
             <span className="uppercase tracking-[0.14em]">{t(locale, 'footer.language')}</span>
             <LanguageSwitcher current={locale} />
