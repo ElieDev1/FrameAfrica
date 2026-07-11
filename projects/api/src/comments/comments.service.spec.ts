@@ -1,5 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { CommentStatus } from '@prisma/client';
+import type { NotificationsService } from '../notifications/notifications.service';
 import type { PrismaService } from '../prisma/prisma.service';
 import { buildThread, CommentsService } from './comments.service';
 
@@ -38,10 +39,14 @@ function build() {
       findFirst: jest.fn().mockResolvedValue({ id: 'u1' }),
       update: jest.fn(),
     },
-    $transaction: jest.fn().mockResolvedValue([]),
+    $transaction: jest.fn().mockResolvedValue([{}, { reportCount: 1, body: 'reported body' }]),
   };
-  const service = new CommentsService(prisma as unknown as PrismaService);
-  return { service, prisma };
+  const notifications = { notifyRoles: jest.fn() };
+  const service = new CommentsService(
+    prisma as unknown as PrismaService,
+    notifications as unknown as NotificationsService,
+  );
+  return { service, prisma, notifications };
 }
 
 /** First argument of a jest mock's first call, typed. */

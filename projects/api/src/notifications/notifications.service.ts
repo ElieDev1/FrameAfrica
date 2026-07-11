@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { Prisma } from '@prisma/client';
+import { type Prisma, type RoleName, UserStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateNotification, NotificationItem } from './notifications.types';
 
@@ -30,6 +30,40 @@ export class NotificationsService {
       });
     } catch (error) {
       this.logger.warn(`Failed to create notification: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Fan a single notification out to every active user holding one of the given
+   * roles. Used for "we received X" staff alerts (inquiries, tips, new
+   * subscribers, reported comments) so the right desk sees inbound activity in
+   * the bell. Best-effort — never throws into the caller.
+   */
+  async notifyRoles(
+    roles: readonly RoleName[],
+    input: Omit<CreateNotification, 'userId'>,
+  ): Promise<void> {
+    try {
+      const users = await this.prisma.user.findMany({
+        where: {
+          status: UserStatus.active,
+          deletedAt: null,
+          roles: { some: { role: { name: { in: [...roles] } } } },
+        },
+        select: { id: true },
+      });
+      if (users.length === 0) return;
+      await this.prisma.notification.createMany({
+        data: users.map((u) => ({
+          userId: u.id,
+          type: input.type,
+          title: input.title,
+          body: input.body ?? null,
+          link: input.link ?? null,
+        })),
+      });
+    } catch (error) {
+      this.logger.warn(`Failed to fan out notification: ${(error as Error).message}`);
     }
   }
 

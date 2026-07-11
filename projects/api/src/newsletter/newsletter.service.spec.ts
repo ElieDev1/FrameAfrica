@@ -1,3 +1,4 @@
+import type { NotificationsService } from '../notifications/notifications.service';
 import type { PrismaService } from '../prisma/prisma.service';
 import { NewsletterService } from './newsletter.service';
 
@@ -11,7 +12,20 @@ function build() {
       count: jest.fn(),
     },
   };
-  return { service: new NewsletterService(prisma as unknown as PrismaService), prisma };
+  const notifications = { notifyRoles: jest.fn() };
+  return {
+    service: new NewsletterService(
+      prisma as unknown as PrismaService,
+      notifications as unknown as NotificationsService,
+    ),
+    prisma,
+    notifications,
+  };
+}
+
+/** First argument of a jest mock's first call, typed. */
+function firstArg<T>(fn: { mock: { calls: unknown[][] } }): T {
+  return fn.mock.calls[0][0] as T;
 }
 
 describe('NewsletterService', () => {
@@ -21,9 +35,9 @@ describe('NewsletterService', () => {
       prisma.newsletterSubscriber.findUnique.mockResolvedValue(null);
       prisma.newsletterSubscriber.create.mockResolvedValue({});
       expect(await service.subscribe('  ME@Example.com ')).toEqual({ subscribed: true });
-      const arg = prisma.newsletterSubscriber.create.mock.calls[0][0] as {
+      const arg = firstArg<{
         data: { email: string; unsubscribeToken: string; confirmedAt: Date };
-      };
+      }>(prisma.newsletterSubscriber.create);
       expect(arg.data.email).toBe('me@example.com');
       expect(arg.data.unsubscribeToken).toHaveLength(48);
       expect(arg.data.confirmedAt).toBeInstanceOf(Date);
@@ -37,9 +51,7 @@ describe('NewsletterService', () => {
         unsubscribedAt: new Date('2026-02-01'),
       });
       await service.subscribe('a@b.com');
-      const arg = prisma.newsletterSubscriber.update.mock.calls[0][0] as {
-        data: { unsubscribedAt: null };
-      };
+      const arg = firstArg<{ data: { unsubscribedAt: null } }>(prisma.newsletterSubscriber.update);
       expect(arg.data.unsubscribedAt).toBeNull();
       expect(prisma.newsletterSubscriber.create).not.toHaveBeenCalled();
     });

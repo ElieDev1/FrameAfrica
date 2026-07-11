@@ -1,14 +1,21 @@
 import type { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from './notifications.service';
 
+/** First argument of a jest mock's first call, typed. */
+function firstArg<T>(fn: { mock: { calls: unknown[][] } }): T {
+  return fn.mock.calls[0][0] as T;
+}
+
 function build() {
   const prisma = {
     notification: {
       create: jest.fn(),
+      createMany: jest.fn(),
       findMany: jest.fn(),
       count: jest.fn(),
       updateMany: jest.fn(),
     },
+    user: { findMany: jest.fn() },
   };
   return { service: new NotificationsService(prisma as unknown as PrismaService), prisma };
 }
@@ -57,6 +64,32 @@ describe('NotificationsService', () => {
       const res = await service.list('u1');
       expect(res[0].read).toBe(false);
       expect(res[1].read).toBe(true);
+    });
+  });
+
+  describe('notifyRoles', () => {
+    it('fans one notification out to every user holding a role', async () => {
+      const { service, prisma } = build();
+      prisma.user.findMany.mockResolvedValue([{ id: 'a' }, { id: 'b' }]);
+      await service.notifyRoles(['admin'], { type: 'inquiry_received', title: 'New enquiry' });
+      expect(prisma.notification.createMany).toHaveBeenCalledTimes(1);
+      const arg = firstArg<{ data: { userId: string }[] }>(prisma.notification.createMany);
+      expect(arg.data.map((d) => d.userId)).toEqual(['a', 'b']);
+    });
+
+    it('does nothing when no user holds the role', async () => {
+      const { service, prisma } = build();
+      prisma.user.findMany.mockResolvedValue([]);
+      await service.notifyRoles(['admin'], { type: 'inquiry_received', title: 'New enquiry' });
+      expect(prisma.notification.createMany).not.toHaveBeenCalled();
+    });
+
+    it('never throws (best-effort) when the fan-out fails', async () => {
+      const { service, prisma } = build();
+      prisma.user.findMany.mockRejectedValue(new Error('db down'));
+      await expect(
+        service.notifyRoles(['admin'], { type: 'tip_received', title: 'Tip' }),
+      ).resolves.toBeUndefined();
     });
   });
 

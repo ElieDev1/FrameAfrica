@@ -1,5 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
+import { NotificationType } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 /**
@@ -10,7 +12,10 @@ import { PrismaService } from '../prisma/prisma.service';
  */
 @Injectable()
 export class NewsletterService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async subscribe(rawEmail: string): Promise<{ subscribed: boolean }> {
     const email = rawEmail.trim().toLowerCase();
@@ -31,6 +36,12 @@ export class NewsletterService {
         unsubscribeToken: randomBytes(24).toString('hex'),
       },
     });
+    await this.notifications.notifyRoles(['admin'], {
+      type: NotificationType.subscriber_joined,
+      title: 'New newsletter subscriber',
+      body: email,
+      link: '/dashboard/newsletter',
+    });
     return { subscribed: true };
   }
 
@@ -48,5 +59,42 @@ export class NewsletterService {
       where: { unsubscribedAt: null, confirmedAt: { not: null } },
     });
     return { count };
+  }
+
+  /**
+   * Compose + "send" a campaign to active subscribers. Records the campaign and
+   * a recipient snapshot; the actual SMTP/queue delivery worker plugs in here
+   * later (each recipient has an unsubscribe token ready).
+   */
+  async send(
+    subject: string,
+    body: string,
+    senderId?: string,
+  ): Promise<{ id: string; recipients: number }> {
+    const recipients = await this.prisma.newsletterSubscriber.count({
+      where: { unsubscribedAt: null, confirmedAt: { not: null } },
+    });
+    const campaign = await this.prisma.newsletterCampaign.create({
+      data: { subject, body, recipients, sentAt: new Date(), senderId: senderId ?? null },
+      select: { id: true, recipients: true },
+    });
+    return campaign;
+  }
+
+  /** Recent campaigns for the admin newsletter page. */
+  async campaigns(): Promise<
+    { id: string; subject: string; recipients: number; sentAt: string | null; createdAt: string }[]
+  > {
+    const rows = await this.prisma.newsletterCampaign.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+    return rows.map((r) => ({
+      id: r.id,
+      subject: r.subject,
+      recipients: r.recipients,
+      sentAt: r.sentAt?.toISOString() ?? null,
+      createdAt: r.createdAt.toISOString(),
+    }));
   }
 }
