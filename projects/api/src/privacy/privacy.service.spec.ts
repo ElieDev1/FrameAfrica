@@ -76,7 +76,10 @@ describe('PrivacyService', () => {
       expect(prisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'u1' },
-          data: expect.objectContaining({ status: 'deleted', displayName: 'Deleted user' }),
+          data: expect.objectContaining({
+            status: 'deleted',
+            displayName: 'Deleted user',
+          }) as unknown,
         }),
       );
       expect(tokens.revokeAllForUser).toHaveBeenCalledWith('u1');

@@ -316,6 +316,63 @@ export async function fetchTips(): Promise<TipItem[]> {
   return json.data;
 }
 
+export type InquiryType = 'advertise' | 'contact';
+export type InquiryStatus = 'new' | 'in_progress' | 'closed';
+
+export interface InquiryItem {
+  id: string;
+  type: InquiryType;
+  name: string;
+  email: string;
+  company: string | null;
+  subject: string | null;
+  message: string;
+  budget: string | null;
+  placement: string | null;
+  status: InquiryStatus;
+  createdAt: string;
+}
+
+/** Admin inbox of footer-form inquiries (advertising + contact). */
+export async function fetchInquiries(): Promise<InquiryItem[]> {
+  const res = await fetch(`${API_URL}/admin/inquiries`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load inquiries (${res.status})`);
+  const json = (await res.json()) as { data: InquiryItem[] };
+  return json.data;
+}
+
+/** Recent newsletter campaigns (editor/admin). */
+export interface NewsletterCampaignItem {
+  id: string;
+  subject: string;
+  recipients: number;
+  sentAt: string | null;
+  createdAt: string;
+}
+
+export async function fetchNewsletterData(): Promise<{
+  count: number;
+  campaigns: NewsletterCampaignItem[];
+}> {
+  const headers = await authHeaders();
+  const [countRes, campRes] = await Promise.all([
+    fetch(`${API_URL}/newsletter/subscribers/count`, { headers, cache: 'no-store' }),
+    fetch(`${API_URL}/newsletter/campaigns`, { headers, cache: 'no-store' }),
+  ]);
+  if (countRes.status === 401 || campRes.status === 401) redirect('/login');
+  const count = countRes.ok
+    ? ((await countRes.json()) as { data: { count: number } }).data.count
+    : 0;
+  const campaigns = campRes.ok
+    ? ((await campRes.json()) as { data: NewsletterCampaignItem[] }).data
+    : [];
+  return { count, campaigns };
+}
+
 export interface AuditEntry {
   id: string;
   action: string;

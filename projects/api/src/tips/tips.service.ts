@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import type { TipStatus } from '@prisma/client';
+import { NotificationType, type TipStatus } from '@prisma/client';
 import { stripText } from '../content/blocks';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface TipItem {
@@ -18,7 +19,10 @@ export interface TipItem {
  */
 @Injectable()
 export class TipsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async submit(rawMessage: string, rawContact?: string): Promise<{ received: boolean }> {
     const message = stripText(rawMessage).slice(0, 5000);
@@ -27,6 +31,12 @@ export class TipsService {
     }
     const contact = rawContact ? stripText(rawContact).slice(0, 200) || null : null;
     await this.prisma.tip.create({ data: { message, contact } });
+    await this.notifications.notifyRoles(['editor', 'admin'], {
+      type: NotificationType.tip_received,
+      title: 'New confidential tip',
+      body: message.slice(0, 160),
+      link: '/dashboard/tips',
+    });
     return { received: true };
   }
 

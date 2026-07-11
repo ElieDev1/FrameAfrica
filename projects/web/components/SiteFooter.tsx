@@ -5,12 +5,34 @@ import { getLocale } from '@/lib/i18n-server';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { Wordmark } from './Wordmark';
 
-// Placeholder columns — pages land in later slices, so these read as plain labels
-// rather than dead links.
-const COLUMNS: { title: string; items: string[] }[] = [
-  { title: 'Company', items: ['About us', 'Newsroom', 'Careers', 'Advertise', 'Contact'] },
-  { title: 'Products', items: ['Newsletters', 'Podcasts', 'Premium', 'Mobile app', 'RSS'] },
-  { title: 'Legal', items: ['Privacy', 'Terms', 'Editorial code', 'Corrections', 'Cookies'] },
+const COLUMNS: { title: string; items: { label: string; href: string }[] }[] = [
+  {
+    title: 'Company',
+    items: [
+      { label: 'About us', href: '/about' },
+      { label: 'Advertise', href: '/advertise' },
+      { label: 'Contact', href: '/contact' },
+      { label: 'Send a tip', href: '/tips' },
+    ],
+  },
+  {
+    title: 'Read',
+    items: [
+      { label: 'Latest', href: '/' },
+      { label: 'For you', href: '/for-you' },
+      { label: 'Videos', href: '/videos' },
+      { label: 'Search', href: '/search' },
+    ],
+  },
+  {
+    title: 'Legal',
+    items: [
+      { label: 'Privacy', href: '/privacy' },
+      { label: 'Terms', href: '/terms' },
+      { label: 'Editorial standards', href: '/standards' },
+      { label: 'Corrections', href: '/corrections' },
+    ],
+  },
 ];
 
 function ColumnHeading({ children }: { children: string }) {
@@ -58,8 +80,13 @@ export async function SiteFooter() {
               <ColumnHeading>{column.title}</ColumnHeading>
               <ul className="mt-3 flex flex-col gap-2">
                 {column.items.map((item) => (
-                  <li key={item} className="font-body text-sm text-faint">
-                    {item}
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      className="font-body text-sm text-muted hover:text-primary"
+                    >
+                      {item.label}
+                    </Link>
                   </li>
                 ))}
               </ul>

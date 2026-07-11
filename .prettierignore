@@ -6,6 +6,10 @@ coverage
 .turbo
 pnpm-lock.yaml
 
+# Playwright output (not committed)
+test-results
+playwright-report
+
 # Hand-authored documentation & prose — kept as written, not Prettier-managed.
 # Prettier/CI enforce formatting on code (projects/**) and config only.
 *.md

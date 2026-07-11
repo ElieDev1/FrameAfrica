@@ -69,6 +69,10 @@ enum NotificationType {
   article_published
   article_returned
   comment_reply
+  inquiry_received
+  tip_received
+  subscriber_joined
+  comment_reported
 }
 
 enum TipStatus {
@@ -84,6 +88,17 @@ enum AdPlacement {
   rectangle
   halfpage
   native
+}
+
+enum InquiryType {
+  advertise
+  contact
+}
+
+enum InquiryStatus {
+  new
+  in_progress
+  closed
 }
 
 model User {
@@ -620,6 +635,42 @@ model Tip {
 
   @@index([status, createdAt])
   @@map("tip")
+}
+
+/// A public inquiry from a footer form — an advertiser ("advertise") or a
+/// general "contact" message. Admins see and work on these (status pipeline).
+/// All text is stripped of markup on write.
+model Inquiry {
+  id        String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  type      InquiryType
+  name      String
+  email     String
+  company   String?
+  subject   String?
+  message   String
+  budget    String?
+  placement String?
+  status    InquiryStatus @default(new)
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  @@index([type, status, createdAt])
+  @@map("inquiry")
+}
+
+/// A newsletter campaign composed + sent by an editor/admin. Actual delivery to
+/// subscribers lands with an SMTP/queue worker; this records the campaign and a
+/// recipient snapshot for the audit trail.
+model NewsletterCampaign {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  subject    String
+  body       String
+  recipients Int       @default(0)
+  sentAt     DateTime? @map("sent_at")
+  senderId   String?   @map("sender_id") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("newsletter_campaign")
 }
 
 /// Immutable snapshot captured on every draft save (documents/03 §3.5).

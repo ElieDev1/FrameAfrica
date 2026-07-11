@@ -71,7 +71,7 @@ describe('BookmarksService', () => {
       const res = await service.listSaved('u1');
       expect(res[0].title).toBe('Saved story');
       expect(res[0].featuredImage).toEqual({ url: '/seed/x.jpg', alt: 'x' });
-      const arg = prisma.bookmark.findMany.mock.calls[0][0] as { orderBy: unknown };
+      const arg = (prisma.bookmark.findMany.mock.calls[0] as [{ orderBy: unknown }])[0];
       expect(arg.orderBy).toEqual({ createdAt: 'desc' });
     });
   });

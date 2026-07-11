@@ -31,7 +31,7 @@ describe('LiveService', () => {
 
       expect(res.author).toBe('Jane Uwase');
       // The create was given a stripped body and the article update sets isLive.
-      const txArgs = prisma.$transaction.mock.calls[0][0] as unknown[];
+      const txArgs = (prisma.$transaction.mock.calls[0] as [unknown[]])[0];
       expect(txArgs).toHaveLength(2);
     });
 
@@ -66,7 +66,7 @@ describe('LiveService', () => {
 
       const res = await service.listUpdates('a-slug');
       expect(res[0].body).toBe('Officials confirm the figures.');
-      const arg = prisma.liveUpdate.findMany.mock.calls[0][0] as { orderBy: unknown };
+      const arg = (prisma.liveUpdate.findMany.mock.calls[0] as [{ orderBy: unknown }])[0];
       expect(arg.orderBy).toEqual({ createdAt: 'desc' });
     });
   });

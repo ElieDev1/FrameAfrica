@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import type { NotificationsService } from '../notifications/notifications.service';
 import type { PrismaService } from '../prisma/prisma.service';
 import { TipsService } from './tips.service';
 
@@ -6,7 +7,20 @@ function build() {
   const prisma = {
     tip: { create: jest.fn(), findMany: jest.fn(), update: jest.fn() },
   };
-  return { service: new TipsService(prisma as unknown as PrismaService), prisma };
+  const notifications = { notifyRoles: jest.fn() };
+  return {
+    service: new TipsService(
+      prisma as unknown as PrismaService,
+      notifications as unknown as NotificationsService,
+    ),
+    prisma,
+    notifications,
+  };
+}
+
+/** First argument of a jest mock's first call, typed. */
+function firstArg<T>(fn: { mock: { calls: unknown[][] } }): T {
+  return fn.mock.calls[0][0] as T;
 }
 
 describe('TipsService', () => {
@@ -17,7 +31,7 @@ describe('TipsService', () => {
       expect(await service.submit('  <b>Corruption</b> at the ministry ', 'me@x.com')).toEqual({
         received: true,
       });
-      const arg = prisma.tip.create.mock.calls[0][0] as { data: { message: string } };
+      const arg = firstArg<{ data: { message: string } }>(prisma.tip.create);
       expect(arg.data.message).toBe('Corruption at the ministry');
     });
 

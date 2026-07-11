@@ -4,7 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ArticleStatus, CommentStatus, Prisma } from '@prisma/client';
+import { ArticleStatus, CommentStatus, NotificationType, Prisma } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CommentView, FlaggedComment, LikeResult } from './comments.types';
 import type { CreateCommentDto } from './dto/create-comment.dto';
@@ -24,7 +25,10 @@ type CommentRow = Prisma.CommentGetPayload<{ include: typeof commentInclude }>;
  */
 @Injectable()
 export class CommentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   /** Visible comments for a published article, threaded (top-level + replies). */
   async listForArticle(articleId: string): Promise<CommentView[]> {
@@ -121,15 +125,26 @@ export class CommentsService {
   async report(userId: string, commentId: string, reason?: string): Promise<{ reported: true }> {
     await this.assertComment(commentId);
     try {
-      await this.prisma.$transaction([
+      const [, updated] = await this.prisma.$transaction([
         this.prisma.commentReport.create({
           data: { commentId, reporterId: userId, reason: reason?.slice(0, 500) || null },
         }),
         this.prisma.comment.update({
           where: { id: commentId },
           data: { reportCount: { increment: 1 } },
+          select: { reportCount: true, body: true },
         }),
       ]);
+      // Alert moderators only when a comment first becomes flagged, so a pile-on
+      // of reports on the same comment doesn't flood the bell.
+      if (updated.reportCount === 1) {
+        await this.notifications.notifyRoles(['moderator', 'editor', 'admin'], {
+          type: NotificationType.comment_reported,
+          title: 'Comment reported for review',
+          body: updated.body.slice(0, 160),
+          link: '/dashboard/moderation',
+        });
+      }
     } catch (error) {
       // Duplicate report by the same user — a no-op, not an error.
       if (!(error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002')) {
