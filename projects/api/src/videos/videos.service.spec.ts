@@ -47,7 +47,7 @@ describe('VideosService', () => {
         title: 'Kigali today',
         publishedAt: '2026-02-01T00:00:00.000Z',
       });
-      const arg = prisma.video.findMany.mock.calls[0][0] as { orderBy: unknown };
+      const arg = (prisma.video.findMany.mock.calls[0] as [{ orderBy: unknown }])[0];
       expect(arg.orderBy).toEqual({ publishedAt: 'desc' });
     });
   });

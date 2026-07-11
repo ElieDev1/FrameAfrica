@@ -24,9 +24,9 @@ describe('FollowsService', () => {
       prisma.follow.upsert.mockResolvedValue({});
 
       expect(await service.follow('u1', 'section', 'c1')).toEqual({ following: true });
-      const arg = prisma.follow.upsert.mock.calls[0][0] as {
-        where: { userId_categoryId: unknown };
-      };
+      const arg = (
+        prisma.follow.upsert.mock.calls[0] as [{ where: { userId_categoryId: unknown } }]
+      )[0];
       expect(arg.where.userId_categoryId).toEqual({ userId: 'u1', categoryId: 'c1' });
     });
 

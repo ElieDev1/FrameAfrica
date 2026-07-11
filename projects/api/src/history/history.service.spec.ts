@@ -22,7 +22,9 @@ describe('HistoryService', () => {
       prisma.readingHistory.upsert.mockResolvedValue({});
 
       expect(await service.record('u1', 'a1')).toEqual({ recorded: true });
-      const arg = prisma.readingHistory.upsert.mock.calls[0][0] as { update: { viewedAt: Date } };
+      const arg = (
+        prisma.readingHistory.upsert.mock.calls[0] as [{ update: { viewedAt: Date } }]
+      )[0];
       expect(arg.update.viewedAt).toBeInstanceOf(Date);
     });
 
@@ -57,7 +59,7 @@ describe('HistoryService', () => {
       expect(res[0].title).toBe('Read story');
       expect(res[0].viewedAt).toBe('2026-02-01T00:00:00.000Z');
       expect(res[0].featuredImage).toBeNull();
-      const arg = prisma.readingHistory.findMany.mock.calls[0][0] as { orderBy: unknown };
+      const arg = (prisma.readingHistory.findMany.mock.calls[0] as [{ orderBy: unknown }])[0];
       expect(arg.orderBy).toEqual({ viewedAt: 'desc' });
     });
   });
