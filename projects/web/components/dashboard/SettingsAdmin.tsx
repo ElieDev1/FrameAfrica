@@ -4,20 +4,30 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { removeIntegration, setIntegration } from '@/lib/settings-actions';
 import type { Integration } from '@/lib/settings-types';
+import { formatDate } from '@/lib/format';
 
-function SourceBadge({ integration }: { integration: Integration }) {
+function StatusPill({ integration }: { integration: Integration }) {
   if (!integration.isSet) {
-    return <span className="font-mono text-[11px] text-faint">Not set</span>;
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-faint">
+        <span className="h-1.5 w-1.5 rounded-full bg-faint" /> Not set
+      </span>
+    );
   }
-  const label = integration.source === 'database' ? 'Configured' : 'From environment';
+  const fromDb = integration.source === 'database';
   return (
-    <span className="font-mono text-[11px] text-primary">
-      {integration.maskedValue} <span className="text-muted">· {label}</span>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide ${
+        fromDb ? 'border-accent-green/40 text-accent-green' : 'border-primary/40 text-primary'
+      }`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${fromDb ? 'bg-accent-green' : 'bg-primary'}`} />
+      {fromDb ? 'Configured' : 'Environment'}
     </span>
   );
 }
 
-function IntegrationRow({ integration }: { integration: Integration }) {
+function IntegrationCard({ integration }: { integration: Integration }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState('');
@@ -46,37 +56,48 @@ function IntegrationRow({ integration }: { integration: Integration }) {
   }
 
   return (
-    <div className="border-t border-border px-4 py-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="font-body text-sm font-semibold text-text">{integration.label}</div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-faint">
+    <div className="flex flex-col rounded-xl border border-border bg-surface p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="font-heading font-bold text-text">{integration.label}</h3>
+          <code className="font-mono text-[10px] uppercase tracking-[0.12em] text-faint">
             {integration.key}
-          </div>
-          <p className="mt-1 max-w-md font-body text-xs text-muted">{integration.description}</p>
+          </code>
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <SourceBadge integration={integration} />
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setEditing((e) => !e)}
-              className="font-mono text-[11px] text-primary hover:underline"
-            >
-              {integration.source === 'database' ? 'Update' : 'Set key'}
-            </button>
-            {integration.source === 'database' && (
-              <button
-                type="button"
-                onClick={remove}
-                disabled={pending}
-                className="font-mono text-[11px] text-muted hover:text-accent-red disabled:opacity-50"
-              >
-                Remove
-              </button>
-            )}
-          </div>
-        </div>
+        <StatusPill integration={integration} />
+      </div>
+
+      <p className="mt-2 flex-1 font-body text-sm leading-relaxed text-muted">
+        {integration.description}
+      </p>
+
+      {integration.isSet && integration.maskedValue && (
+        <p className="mt-3 font-mono text-xs text-text">
+          {integration.maskedValue}
+          {integration.updatedAt && (
+            <span className="text-faint"> · updated {formatDate(integration.updatedAt)}</span>
+          )}
+        </p>
+      )}
+
+      <div className="mt-4 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setEditing((e) => !e)}
+          className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary"
+        >
+          {integration.source === 'database' ? 'Update' : 'Set key'}
+        </button>
+        {integration.source === 'database' && (
+          <button
+            type="button"
+            onClick={remove}
+            disabled={pending}
+            className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-accent-red hover:text-accent-red disabled:opacity-50"
+          >
+            Remove
+          </button>
+        )}
       </div>
 
       {editing && (
@@ -87,17 +108,17 @@ function IntegrationRow({ integration }: { integration: Integration }) {
             onChange={(e) => setValue(e.target.value)}
             placeholder={`Paste ${integration.label} key…`}
             autoComplete="off"
-            className="w-72 max-w-full rounded-lg border border-border bg-bg px-3 py-1.5 font-mono text-sm text-text outline-none focus:border-primary"
+            className="min-w-0 flex-1 rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-mono text-sm text-text outline-none focus:border-primary"
           />
           <button
             type="button"
             onClick={save}
             disabled={pending}
-            className="rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-white hover:opacity-90 disabled:opacity-50"
+            className="rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black hover:opacity-90 disabled:opacity-50"
           >
             {pending ? 'Saving…' : 'Save'}
           </button>
-          {error && <span className="font-mono text-[11px] text-accent-red">{error}</span>}
+          {error && <span className="w-full font-mono text-[11px] text-accent-red">{error}</span>}
         </div>
       )}
     </div>
@@ -137,7 +158,7 @@ function AddCustom() {
           value={key}
           onChange={(e) => setKey(e.target.value)}
           placeholder="KEY_NAME"
-          className="w-48 rounded-lg border border-border bg-bg px-3 py-1.5 font-mono text-sm uppercase text-text outline-none focus:border-primary"
+          className="w-48 rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-mono text-sm uppercase text-text outline-none focus:border-primary"
         />
         <input
           type="password"
@@ -145,13 +166,13 @@ function AddCustom() {
           onChange={(e) => setValue(e.target.value)}
           placeholder="Value"
           autoComplete="off"
-          className="w-64 max-w-full rounded-lg border border-border bg-bg px-3 py-1.5 font-mono text-sm text-text outline-none focus:border-primary"
+          className="w-64 max-w-full rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-mono text-sm text-text outline-none focus:border-primary"
         />
         <button
           type="button"
           onClick={add}
           disabled={pending || !key.trim() || !value.trim()}
-          className="rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-white hover:opacity-90 disabled:opacity-50"
+          className="rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black hover:opacity-90 disabled:opacity-50"
         >
           Add
         </button>
@@ -162,20 +183,31 @@ function AddCustom() {
 }
 
 export function SettingsAdmin({ integrations }: { integrations: Integration[] }) {
+  const configured = integrations.filter((i) => i.isSet).length;
+
   return (
     <div className="flex flex-col gap-6">
-      <section className="overflow-hidden rounded-xl border border-border">
-        <div className="bg-surface px-4 py-3">
-          <h2 className="font-heading text-lg font-bold text-text">Integrations &amp; API keys</h2>
-          <p className="mt-1 font-body text-sm text-muted">
-            Keys are stored securely and never shown in full again — only a masked hint. A value set
-            here overrides the matching environment variable.
-          </p>
-        </div>
+      {/* Header */}
+      <div>
+        <h1 className="font-heading text-3xl font-black tracking-tight text-text">Settings</h1>
+        <p className="mt-1 max-w-2xl font-body text-sm text-muted">
+          Integration keys and site configuration — admin-only, stored server-side. Keys are never
+          shown in full again, only a masked hint; a value set here overrides the matching
+          environment variable.
+        </p>
+        <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 font-mono text-[11px] text-muted">
+          <span className="font-bold text-text">{configured}</span> of {integrations.length}{' '}
+          integrations configured
+        </p>
+      </div>
+
+      {/* Integration cards */}
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {integrations.map((i) => (
-          <IntegrationRow key={i.key} integration={i} />
+          <IntegrationCard key={i.key} integration={i} />
         ))}
-      </section>
+      </div>
+
       <AddCustom />
     </div>
   );
