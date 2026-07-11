@@ -515,6 +515,49 @@ export async function fetchAdminPodcast(id: string): Promise<PodcastShowDetail> 
   return json.data;
 }
 
+export type InteractiveProvider = 'datawrapper' | 'flourish' | 'infogram' | 'google' | 'youtube';
+
+export interface InteractiveItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  provider: InteractiveProvider;
+  embedUrl: string;
+  coverUrl: string | null;
+  aspectRatio: string;
+  source: string | null;
+  status: 'draft' | 'published';
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Staff: every interactive (any status). */
+export async function fetchAdminInteractives(): Promise<InteractiveItem[]> {
+  const res = await fetch(`${API_URL}/admin/interactives`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) throw new Error(`Failed to load interactives (${res.status})`);
+  const json = (await res.json()) as { data: InteractiveItem[] };
+  return json.data;
+}
+
+/** Staff: a single interactive for editing. */
+export async function fetchAdminInteractive(id: string): Promise<InteractiveItem> {
+  const res = await fetch(`${API_URL}/admin/interactives/${id}`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (res.status === 404) notFound();
+  if (!res.ok) throw new Error(`Failed to load interactive (${res.status})`);
+  const json = (await res.json()) as { data: InteractiveItem };
+  return json.data;
+}
+
 export interface AuditEntry {
   id: string;
   action: string;

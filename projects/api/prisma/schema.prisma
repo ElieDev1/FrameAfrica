@@ -114,6 +114,16 @@ enum PodcastMediaKind {
   video
 }
 
+/// Allow-listed embed providers for data visualisations / interactive graphics
+/// (documents/13 §4.3). Only these hosts may be embedded, in a sandboxed iframe.
+enum InteractiveProvider {
+  datawrapper
+  flourish
+  infogram
+  google
+  youtube
+}
+
 model User {
   id                 String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   email              String     @unique @db.Citext
@@ -683,6 +693,30 @@ model PodcastEpisode {
 
   @@index([showId, publishedAt])
   @@map("podcast_episode")
+}
+
+/// A data visualisation / interactive graphic (documents/13 §4.3, /interactives).
+/// `embedUrl` is validated against an allow-list of `provider` hosts on write and
+/// rendered in a sandboxed iframe.
+model Interactive {
+  id          String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  slug        String              @unique
+  title       String
+  description String?
+  provider    InteractiveProvider
+  embedUrl    String              @map("embed_url")
+  coverUrl    String?             @map("cover_url")
+  aspectRatio String              @default("16/9") @map("aspect_ratio")
+  source      String?
+  status      MediaStatus         @default(draft)
+  authorId    String              @map("author_id") @db.Uuid
+  publishedAt DateTime?           @map("published_at")
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+  deletedAt   DateTime?           @map("deleted_at")
+
+  @@index([status, publishedAt])
+  @@map("interactive")
 }
 
 /// A house advertisement (documents/14 §4). Managed by admins and served into

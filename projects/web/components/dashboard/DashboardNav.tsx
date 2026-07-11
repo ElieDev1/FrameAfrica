@@ -84,6 +84,11 @@ function groupsFor(roles: string[]): NavGroup[] {
   }
   if (has('editor', 'admin')) {
     multimedia.push({ href: '/dashboard/podcasts', label: 'Podcasts', Icon: MailIcon });
+    multimedia.push({
+      href: '/dashboard/interactives',
+      label: 'Data & interactives',
+      Icon: BarChartIcon,
+    });
   }
   if (multimedia.length > 0) {
     groups.push({ section: 'Multimedia', items: multimedia });

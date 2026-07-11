@@ -23,6 +23,7 @@ const COLUMNS: { title: string; items: { label: string; href: string }[] }[] = [
       { label: 'Videos', href: '/videos' },
       { label: 'Galleries', href: '/galleries' },
       { label: 'Podcasts', href: '/podcasts' },
+      { label: 'Data & interactives', href: '/interactives' },
       { label: 'Search', href: '/search' },
     ],
   },
