@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { CloseIcon, LogOutIcon, MenuIcon, PlusIcon, SearchIcon } from '@/components/icons';
 import { logout } from '@/lib/auth-actions';
 import { DashboardNav } from './DashboardNav';
@@ -159,28 +160,31 @@ export function DashboardTopbar({
         </div>
       </div>
 
-      {/* Mobile drawer */}
-      {drawer && (
-        <div className="fixed inset-0 z-40 md:hidden" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setDrawer(false)} />
-          <div className="no-scrollbar absolute left-0 top-0 flex h-full w-72 max-w-[85%] flex-col gap-6 overflow-y-auto border-r border-border bg-surface p-4">
-            <div className="flex items-center justify-between">
-              <Link href="/dashboard">
-                <Wordmark size="sm" />
-              </Link>
-              <button
-                type="button"
-                onClick={() => setDrawer(false)}
-                aria-label="Close menu"
-                className="grid h-8 w-8 place-items-center rounded-lg border border-border text-text"
-              >
-                <CloseIcon size={16} />
-              </button>
+      {/* Mobile drawer — portalled to body so the topbar's backdrop-blur
+          (which becomes a containing block for fixed children) can't clip it. */}
+      {drawer &&
+        createPortal(
+          <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setDrawer(false)} />
+            <div className="no-scrollbar absolute left-0 top-0 flex h-full w-72 max-w-[85%] flex-col gap-6 overflow-y-auto border-r border-border bg-surface p-4">
+              <div className="flex items-center justify-between">
+                <Link href="/dashboard">
+                  <Wordmark size="sm" />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setDrawer(false)}
+                  aria-label="Close menu"
+                  className="grid h-8 w-8 place-items-center rounded-lg border border-border text-text"
+                >
+                  <CloseIcon size={16} />
+                </button>
+              </div>
+              <DashboardNav roles={roles} />
             </div>
-            <DashboardNav roles={roles} />
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </header>
   );
 }
