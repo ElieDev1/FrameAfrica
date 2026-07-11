@@ -14,6 +14,11 @@ const SHAPE: Record<AdPlacement, string> = {
   native: 'aspect-[16/9]',
 };
 
+/** A video creative (animated/motion ad) vs a static image. */
+function isVideo(url: string): boolean {
+  return /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);
+}
+
 export async function AdSlot({
   variant = 'leaderboard',
   className = '',
@@ -40,7 +45,17 @@ export async function AdSlot({
           rel="noopener sponsored"
           className={`block overflow-hidden rounded-xl ring-1 ring-border ${SHAPE[variant]}`}
         >
-          {ad.imageUrl ? (
+          {ad.imageUrl && isVideo(ad.imageUrl) ? (
+            <video
+              src={ad.imageUrl}
+              autoPlay
+              muted
+              loop
+              playsInline
+              aria-label={ad.title}
+              className="h-full w-full object-cover"
+            />
+          ) : ad.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- ad creatives are arbitrary external hosts
             <img src={ad.imageUrl} alt={ad.title} className="h-full w-full object-cover" />
           ) : (

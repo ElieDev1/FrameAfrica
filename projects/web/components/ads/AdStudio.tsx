@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { PUBLIC_API_URL } from '@/lib/ads';
 import { publishAdCreative } from '@/lib/ad-studio-actions';
+import { createHouseAd } from '@/lib/ads-actions';
 
 /** IAB canvas sizes per placement (px). */
 const SIZES = {
@@ -155,6 +156,32 @@ export function AdStudio({ media }: { media: MediaItem[] }) {
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
 
+  // Video / GIF ad mode
+  const [mode, setMode] = useState<'design' | 'video'>('design');
+  const [vUrl, setVUrl] = useState('');
+  const [vTitle, setVTitle] = useState('');
+  const [vLink, setVLink] = useState('');
+  const [vPlacement, setVPlacement] = useState<Placement>('billboard');
+  const [vMessage, setVMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const [vPending, startVideo] = useTransition();
+
+  function publishVideo() {
+    setVMessage(null);
+    startVideo(async () => {
+      const res = await createHouseAd({
+        title: vTitle,
+        linkUrl: vLink,
+        imageUrl: vUrl,
+        placement: vPlacement,
+      });
+      setVMessage(
+        res.ok
+          ? { ok: true, text: 'Published — the motion ad is now serving in that slot.' }
+          : { ok: false, text: res.error ?? 'Something went wrong.' },
+      );
+    });
+  }
+
   const set = <K extends keyof Design>(k: K, v: Design[K]) => setD((p) => ({ ...p, [k]: v }));
   const applyTemplate = (patch: Partial<Design>) => setD((p) => ({ ...p, ...patch }));
 
@@ -219,248 +246,369 @@ export function AdStudio({ media }: { media: MediaItem[] }) {
   }
 
   const { dim, label } = SIZES[d.placement];
+  const isVid = /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(vUrl);
 
   return (
-    <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
-      {/* ---- Canvas stage ---- */}
-      <div className="min-w-0">
-        <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-border bg-surface-2 p-6">
-          {/* The canvas scales to fit the stage but keeps its exact aspect ratio. */}
-          <canvas
-            ref={canvasRef}
-            className="max-h-[60vh] max-w-full rounded-lg shadow-lg ring-1 ring-border"
-            style={{ aspectRatio: `${SIZES[d.placement].w} / ${SIZES[d.placement].h}` }}
-          />
-        </div>
-
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-faint">
-            {label} · {dim}px
-          </span>
-          <span className="flex-1" />
+    <>
+      {/* Mode switch: static designer vs a motion (video / GIF) ad */}
+      <div className="mt-6 inline-flex gap-1 rounded-lg border border-border bg-surface-2 p-1">
+        {(['design', 'video'] as const).map((m) => (
           <button
+            key={m}
             type="button"
-            onClick={download}
-            className="rounded-lg border border-border px-4 py-2 font-mono text-xs uppercase tracking-wide text-muted hover:border-primary hover:text-primary"
+            onClick={() => setMode(m)}
+            className={`rounded-md px-4 py-1.5 text-xs font-semibold transition-colors ${
+              mode === m ? 'bg-primary text-black' : 'text-muted hover:text-text'
+            }`}
           >
-            Download PNG
+            {m === 'design' ? 'Design creative' : 'Video · GIF'}
           </button>
-          <button
-            type="button"
-            onClick={publish}
-            disabled={pending || !linkUrl}
-            className="rounded-lg bg-primary px-4 py-2 font-mono text-xs font-bold uppercase tracking-wide text-black transition hover:opacity-90 disabled:opacity-50"
-          >
-            {pending ? 'Publishing…' : 'Publish as house ad'}
-          </button>
-        </div>
-        {message && (
-          <p
-            role="status"
-            className={`mt-2 font-mono text-[11px] ${message.ok ? 'text-accent-green' : 'text-accent-red'}`}
-          >
-            {message.text}
-          </p>
-        )}
-
-        {/* ---- Template gallery ---- */}
-        <div className="mt-6">
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-faint">Templates</p>
-          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-            {TEMPLATES.map((t) => (
-              <button
-                key={t.name}
-                type="button"
-                onClick={() => applyTemplate(t.patch)}
-                className="group rounded-lg border border-border p-2 text-left transition hover:border-primary"
-              >
-                <span
-                  className="block h-10 rounded"
-                  style={{ background: t.patch.bg, boxShadow: `inset 0 0 0 3px ${t.patch.accent}` }}
-                />
-                <span className="mt-1.5 block font-heading text-sm font-bold text-text">
-                  {t.name}
-                </span>
-                <span className="block font-mono text-[10px] text-faint">{t.hint}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* ---- Controls ---- */}
-      <aside className="space-y-4">
-        <Field label="Placement">
-          <select
-            value={d.placement}
-            onChange={(e) => set('placement', e.target.value as Placement)}
-            className={inputCls}
-          >
-            {Object.entries(SIZES).map(([k, s]) => (
-              <option key={k} value={k}>
-                {s.label} — {s.dim}
-              </option>
-            ))}
-          </select>
-        </Field>
-
-        <Field label="Headline">
-          <textarea
-            rows={2}
-            value={d.headline}
-            onChange={(e) => set('headline', e.target.value)}
-            className={inputCls}
-          />
-        </Field>
-        <Field label="Subline">
-          <input
-            value={d.subline}
-            onChange={(e) => set('subline', e.target.value)}
-            className={inputCls}
-          />
-        </Field>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Call to action">
-            <input
-              value={d.cta}
-              onChange={(e) => set('cta', e.target.value)}
-              className={inputCls}
-              disabled={!d.showCta}
-            />
-          </Field>
-          <Field label="Text position">
-            <select
-              value={d.align}
-              onChange={(e) => set('align', e.target.value as Align)}
-              className={inputCls}
-            >
-              <option value="top">Top</option>
-              <option value="center">Center</option>
-              <option value="bottom">Bottom</option>
-            </select>
-          </Field>
-        </div>
-
-        <Field label="Font">
-          <div className="flex gap-2">
-            {(['sans', 'serif'] as FontChoice[]).map((f) => (
-              <button
-                key={f}
-                type="button"
-                onClick={() => set('font', f)}
-                className={`flex-1 rounded-lg border px-3 py-2 text-sm capitalize transition ${
-                  d.font === f
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border text-muted hover:text-text'
-                }`}
-                style={{ fontFamily: FONTS[f] }}
+      {mode === 'video' ? (
+        <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_360px]">
+          <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-border bg-surface-2 p-6">
+            {vUrl ? (
+              <div
+                className="w-full max-w-2xl overflow-hidden rounded-lg shadow-lg ring-1 ring-border"
+                style={{ aspectRatio: `${SIZES[vPlacement].w} / ${SIZES[vPlacement].h}` }}
               >
-                {f}
-              </button>
-            ))}
-          </div>
-        </Field>
-
-        {/* Background photo: upload or pick from the library */}
-        <Field label="Background photo">
-          <div className="flex flex-wrap gap-2">
-            <label className="cursor-pointer rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] uppercase text-muted hover:text-text">
-              Upload
-              <input type="file" accept="image/*" onChange={onUpload} className="hidden" />
-            </label>
-            {media.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setShowPicker((s) => !s)}
-                className="rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] uppercase text-muted hover:text-text"
-              >
-                Library
-              </button>
-            )}
-            {photo && (
-              <button
-                type="button"
-                onClick={() => setPhoto(null)}
-                className="rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] uppercase text-accent-red hover:bg-accent-red/10"
-              >
-                Remove
-              </button>
-            )}
-          </div>
-          {showPicker && (
-            <div className="mt-2 grid max-h-40 grid-cols-4 gap-1.5 overflow-y-auto rounded-lg border border-border p-2">
-              {media.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => {
-                    setPhoto(`${PUBLIC_API_URL.replace(/\/v1$/, '')}${m.url}`);
-                    setShowPicker(false);
-                  }}
-                  className="aspect-square overflow-hidden rounded ring-1 ring-border hover:ring-primary"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element -- media thumbnails */}
-                  <img
-                    src={`${PUBLIC_API_URL.replace(/\/v1$/, '')}${m.url}`}
-                    alt={m.alt ?? ''}
+                {isVid ? (
+                  <video
+                    src={vUrl}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
                     className="h-full w-full object-cover"
                   />
-                </button>
-              ))}
-            </div>
-          )}
-          {photo && (
-            <div className="mt-2">
-              <label className="font-mono text-[10px] uppercase text-faint">
-                Darken {d.darken}%
-              </label>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element -- preview of an arbitrary URL
+                  <img src={vUrl} alt="Ad preview" className="h-full w-full object-cover" />
+                )}
+              </div>
+            ) : (
+              <p className="max-w-xs text-center font-body text-sm text-muted">
+                Paste a hosted video (MP4/WebM) or animated GIF URL to preview it here at the slot
+                size.
+              </p>
+            )}
+          </div>
+
+          <aside className="space-y-4">
+            <Field label="Placement">
+              <select
+                value={vPlacement}
+                onChange={(e) => setVPlacement(e.target.value as Placement)}
+                className={inputCls}
+              >
+                {Object.entries(SIZES).map(([k, s]) => (
+                  <option key={k} value={k}>
+                    {s.label} — {s.dim}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Video / GIF URL">
               <input
-                type="range"
-                min={0}
-                max={85}
-                value={d.darken}
-                onChange={(e) => set('darken', Number(e.target.value))}
-                className="w-full accent-primary"
+                type="text"
+                value={vUrl}
+                onChange={(e) => setVUrl(e.target.value)}
+                placeholder="https://…/ad.mp4  or  /uploads/…"
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Ad title (internal)">
+              <input
+                value={vTitle}
+                onChange={(e) => setVTitle(e.target.value)}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Destination link">
+              <input
+                type="url"
+                value={vLink}
+                onChange={(e) => setVLink(e.target.value)}
+                placeholder="https://advertiser.example"
+                className={inputCls}
+              />
+            </Field>
+            <p className="font-mono text-[10px] leading-relaxed text-faint">
+              Motion ads autoplay muted and loop in the slot. Host the file anywhere public (S3, a
+              CDN, the media library) and paste its URL.
+            </p>
+            <button
+              type="button"
+              onClick={publishVideo}
+              disabled={vPending || !vUrl || !vTitle || !vLink}
+              className="w-full rounded-lg bg-primary px-4 py-2.5 font-heading text-sm font-bold text-black transition hover:opacity-90 disabled:opacity-50"
+            >
+              {vPending ? 'Publishing…' : 'Publish motion ad'}
+            </button>
+            {vMessage && (
+              <p
+                role="status"
+                className={`font-mono text-[11px] ${vMessage.ok ? 'text-accent-green' : 'text-accent-red'}`}
+              >
+                {vMessage.text}
+              </p>
+            )}
+          </aside>
+        </div>
+      ) : (
+        <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_360px]">
+          {/* ---- Canvas stage ---- */}
+          <div className="min-w-0">
+            <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-border bg-surface-2 p-6">
+              {/* The canvas scales to fit the stage but keeps its exact aspect ratio. */}
+              <canvas
+                ref={canvasRef}
+                className="max-h-[60vh] max-w-full rounded-lg shadow-lg ring-1 ring-border"
+                style={{ aspectRatio: `${SIZES[d.placement].w} / ${SIZES[d.placement].h}` }}
               />
             </div>
-          )}
-        </Field>
 
-        <ColorRow label="Background" value={d.bg} onChange={(v) => set('bg', v)} />
-        <ColorRow label="Text" value={d.fg} onChange={(v) => set('fg', v)} />
-        <ColorRow label="Accent" value={d.accent} onChange={(v) => set('accent', v)} />
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+                {label} · {dim}px
+              </span>
+              <span className="flex-1" />
+              <button
+                type="button"
+                onClick={download}
+                className="rounded-lg border border-border px-4 py-2 font-mono text-xs uppercase tracking-wide text-muted hover:border-primary hover:text-primary"
+              >
+                Download PNG
+              </button>
+              <button
+                type="button"
+                onClick={publish}
+                disabled={pending || !linkUrl}
+                className="rounded-lg bg-primary px-4 py-2 font-mono text-xs font-bold uppercase tracking-wide text-black transition hover:opacity-90 disabled:opacity-50"
+              >
+                {pending ? 'Publishing…' : 'Publish as house ad'}
+              </button>
+            </div>
+            {message && (
+              <p
+                role="status"
+                className={`mt-2 font-mono text-[11px] ${message.ok ? 'text-accent-green' : 'text-accent-red'}`}
+              >
+                {message.text}
+              </p>
+            )}
 
-        <div className="flex flex-wrap gap-4">
-          <Toggle label="Call to action" checked={d.showCta} onChange={(v) => set('showCta', v)} />
-          <Toggle
-            label="Frame Africa mark"
-            checked={d.showLogo}
-            onChange={(v) => set('showLogo', v)}
-          />
+            {/* ---- Template gallery ---- */}
+            <div className="mt-6">
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-faint">
+                Templates
+              </p>
+              <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+                {TEMPLATES.map((t) => (
+                  <button
+                    key={t.name}
+                    type="button"
+                    onClick={() => applyTemplate(t.patch)}
+                    className="group rounded-lg border border-border p-2 text-left transition hover:border-primary"
+                  >
+                    <span
+                      className="block h-10 rounded"
+                      style={{
+                        background: t.patch.bg,
+                        boxShadow: `inset 0 0 0 3px ${t.patch.accent}`,
+                      }}
+                    />
+                    <span className="mt-1.5 block font-heading text-sm font-bold text-text">
+                      {t.name}
+                    </span>
+                    <span className="block font-mono text-[10px] text-faint">{t.hint}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ---- Controls ---- */}
+          <aside className="space-y-4">
+            <Field label="Placement">
+              <select
+                value={d.placement}
+                onChange={(e) => set('placement', e.target.value as Placement)}
+                className={inputCls}
+              >
+                {Object.entries(SIZES).map(([k, s]) => (
+                  <option key={k} value={k}>
+                    {s.label} — {s.dim}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
+            <Field label="Headline">
+              <textarea
+                rows={2}
+                value={d.headline}
+                onChange={(e) => set('headline', e.target.value)}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Subline">
+              <input
+                value={d.subline}
+                onChange={(e) => set('subline', e.target.value)}
+                className={inputCls}
+              />
+            </Field>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Call to action">
+                <input
+                  value={d.cta}
+                  onChange={(e) => set('cta', e.target.value)}
+                  className={inputCls}
+                  disabled={!d.showCta}
+                />
+              </Field>
+              <Field label="Text position">
+                <select
+                  value={d.align}
+                  onChange={(e) => set('align', e.target.value as Align)}
+                  className={inputCls}
+                >
+                  <option value="top">Top</option>
+                  <option value="center">Center</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+              </Field>
+            </div>
+
+            <Field label="Font">
+              <div className="flex gap-2">
+                {(['sans', 'serif'] as FontChoice[]).map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => set('font', f)}
+                    className={`flex-1 rounded-lg border px-3 py-2 text-sm capitalize transition ${
+                      d.font === f
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border text-muted hover:text-text'
+                    }`}
+                    style={{ fontFamily: FONTS[f] }}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </Field>
+
+            {/* Background photo: upload or pick from the library */}
+            <Field label="Background photo">
+              <div className="flex flex-wrap gap-2">
+                <label className="cursor-pointer rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] uppercase text-muted hover:text-text">
+                  Upload
+                  <input type="file" accept="image/*" onChange={onUpload} className="hidden" />
+                </label>
+                {media.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPicker((s) => !s)}
+                    className="rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] uppercase text-muted hover:text-text"
+                  >
+                    Library
+                  </button>
+                )}
+                {photo && (
+                  <button
+                    type="button"
+                    onClick={() => setPhoto(null)}
+                    className="rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] uppercase text-accent-red hover:bg-accent-red/10"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              {showPicker && (
+                <div className="mt-2 grid max-h-40 grid-cols-4 gap-1.5 overflow-y-auto rounded-lg border border-border p-2">
+                  {media.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => {
+                        setPhoto(`${PUBLIC_API_URL.replace(/\/v1$/, '')}${m.url}`);
+                        setShowPicker(false);
+                      }}
+                      className="aspect-square overflow-hidden rounded ring-1 ring-border hover:ring-primary"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element -- media thumbnails */}
+                      <img
+                        src={`${PUBLIC_API_URL.replace(/\/v1$/, '')}${m.url}`}
+                        alt={m.alt ?? ''}
+                        className="h-full w-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+              {photo && (
+                <div className="mt-2">
+                  <label className="font-mono text-[10px] uppercase text-faint">
+                    Darken {d.darken}%
+                  </label>
+                  <input
+                    type="range"
+                    min={0}
+                    max={85}
+                    value={d.darken}
+                    onChange={(e) => set('darken', Number(e.target.value))}
+                    className="w-full accent-primary"
+                  />
+                </div>
+              )}
+            </Field>
+
+            <ColorRow label="Background" value={d.bg} onChange={(v) => set('bg', v)} />
+            <ColorRow label="Text" value={d.fg} onChange={(v) => set('fg', v)} />
+            <ColorRow label="Accent" value={d.accent} onChange={(v) => set('accent', v)} />
+
+            <div className="flex flex-wrap gap-4">
+              <Toggle
+                label="Call to action"
+                checked={d.showCta}
+                onChange={(v) => set('showCta', v)}
+              />
+              <Toggle
+                label="Frame Africa mark"
+                checked={d.showLogo}
+                onChange={(v) => set('showLogo', v)}
+              />
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <Field label="Ad title (internal)">
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder={d.headline}
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Destination link">
+                <input
+                  type="url"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  placeholder="https://advertiser.example"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
+          </aside>
         </div>
-
-        <div className="border-t border-border pt-4">
-          <Field label="Ad title (internal)">
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={d.headline}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Destination link">
-            <input
-              type="url"
-              value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
-              placeholder="https://advertiser.example"
-              className={inputCls}
-            />
-          </Field>
-        </div>
-      </aside>
-    </div>
+      )}
+    </>
   );
 }
 

@@ -10,12 +10,13 @@ export default async function AdStudioPage() {
   const media = await listMedia().catch(() => []);
 
   return (
-    <div className="mx-auto w-full max-w-[1400px]">
+    <div className="w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl font-black tracking-tight text-text">Ad Studio</h1>
-          <p className="mt-1 font-body text-sm text-muted">
-            Design a creative at the exact IAB size, then publish it straight into a live slot.
+          <h1 className="font-heading text-3xl font-black tracking-tight text-text">Ad Studio</h1>
+          <p className="mt-1 max-w-2xl font-body text-sm text-muted">
+            Design a static creative at the exact IAB size, or drop in a video / GIF ad — then
+            publish it straight into a live slot.
           </p>
         </div>
         <Link
