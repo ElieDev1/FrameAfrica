@@ -101,6 +101,13 @@ enum InquiryStatus {
   closed
 }
 
+/// Publish state shared by standalone multimedia content types (galleries,
+/// podcast episodes) — a simple draft → published toggle (documents/13 §4.3).
+enum MediaStatus {
+  draft
+  published
+}
+
 model User {
   id                 String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   email              String     @unique @db.Citext
@@ -140,6 +147,7 @@ model User {
   readingHistory ReadingHistory[]
   notifications  Notification[]
   auditLogs      AuditLog[]          @relation("UserAuditLogs")
+  galleries      Gallery[]
 
   @@map("user")
 }
@@ -594,6 +602,32 @@ model Video {
 
   @@index([publishedAt])
   @@map("video")
+}
+
+/// A standalone photo gallery / visual story (documents/13 §4.3, /galleries).
+/// Photographers + editors build them from media-library images; the ordered
+/// photos live in `images` as [{ url, alt, caption?, credit? }], validated on
+/// write. A draft is invisible to readers until published.
+model Gallery {
+  id          String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  slug        String      @unique
+  title       String
+  description String?
+  coverUrl    String?     @map("cover_url")
+  coverAlt    String?     @map("cover_alt")
+  images      Json        @default("[]")
+  status      MediaStatus @default(draft)
+  authorId    String      @map("author_id") @db.Uuid
+  viewCount   BigInt      @default(0) @map("view_count")
+  publishedAt DateTime?   @map("published_at")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  deletedAt   DateTime?   @map("deleted_at")
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([status, publishedAt])
+  @@map("gallery")
 }
 
 /// A house advertisement (documents/14 §4). Managed by admins and served into
