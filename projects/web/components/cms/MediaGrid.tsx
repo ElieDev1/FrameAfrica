@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useMemo, useState, useTransition } from 'react';
 import { CheckIcon, LinkIcon, SearchIcon, TrashIcon } from '@/components/icons';
+import { useT } from '@/components/LocaleProvider';
 import type { MediaAsset } from '@/lib/cms';
 import { deleteMediaAction } from '@/lib/media-actions';
 
@@ -13,6 +14,7 @@ function fileSize(bytes: number): string {
 }
 
 function MediaCard({ asset, canDelete }: { asset: MediaAsset; canDelete: boolean }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -51,7 +53,7 @@ function MediaCard({ asset, canDelete }: { asset: MediaAsset; canDelete: boolean
           <button
             type="button"
             onClick={copy}
-            aria-label="Copy URL"
+            aria-label={t('dmg.copyUrl')}
             className="grid h-8 w-8 place-items-center rounded-lg bg-black/60 text-white backdrop-blur transition hover:bg-black/80"
           >
             {copied ? <CheckIcon size={15} /> : <LinkIcon size={15} />}
@@ -61,7 +63,7 @@ function MediaCard({ asset, canDelete }: { asset: MediaAsset; canDelete: boolean
               type="button"
               onClick={remove}
               disabled={pending}
-              aria-label="Delete image"
+              aria-label={t('dmg.deleteImage')}
               className="grid h-8 w-8 place-items-center rounded-lg bg-black/60 text-white backdrop-blur transition hover:bg-accent-red disabled:opacity-50"
             >
               <TrashIcon size={15} />
@@ -71,7 +73,7 @@ function MediaCard({ asset, canDelete }: { asset: MediaAsset; canDelete: boolean
       </div>
       <div className="p-2.5">
         <p className="truncate font-body text-xs text-text" title={asset.alt ?? ''}>
-          {asset.alt || <span className="text-faint">No alt text</span>}
+          {asset.alt || <span className="text-faint">{t('dmg.noAltText')}</span>}
         </p>
         <p className="mt-0.5 font-mono text-[10px] text-faint">
           {asset.mime.replace('image/', '').toUpperCase()} · {fileSize(asset.sizeBytes)}
@@ -83,6 +85,7 @@ function MediaCard({ asset, canDelete }: { asset: MediaAsset; canDelete: boolean
 }
 
 export function MediaGrid({ assets, canDelete }: { assets: MediaAsset[]; canDelete: boolean }) {
+  const t = useT();
   const [query, setQuery] = useState('');
 
   const shown = useMemo(() => {
@@ -110,7 +113,7 @@ export function MediaGrid({ assets, canDelete }: { assets: MediaAsset[]; canDele
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search images…"
+            placeholder={t('dmg.searchImages')}
             className="w-full rounded-lg border border-border bg-surface-2 py-2 pl-9 pr-3 text-sm text-text outline-none focus:border-primary"
           />
         </label>
@@ -118,9 +121,7 @@ export function MediaGrid({ assets, canDelete }: { assets: MediaAsset[]; canDele
 
       {shown.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border p-8 text-center font-body text-sm text-muted">
-          {query
-            ? 'No images match your search.'
-            : 'Nothing here yet — upload your first image above.'}
+          {query ? t('dmg.noImagesMatch') : t('dst.nothingYet')}
         </p>
       ) : (
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">

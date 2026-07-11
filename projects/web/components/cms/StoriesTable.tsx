@@ -10,22 +10,28 @@ import {
   SearchIcon,
   TrashIcon,
 } from '@/components/icons';
+import { useT } from '@/components/LocaleProvider';
 import type { DraftListItem } from '@/lib/cms';
 import { formatDate } from '@/lib/format';
+import type { MessageKey } from '@/lib/i18n';
 
 const PAGE_SIZE = 12;
 
 /** Broad status buckets for the filter tabs. */
-const TABS: { key: string; label: string; match: (s: string) => boolean }[] = [
-  { key: 'all', label: 'All', match: () => true },
-  { key: 'draft', label: 'Drafts', match: (s) => ['draft', 'in_progress', 'rejected'].includes(s) },
+const TABS: { key: string; labelKey: MessageKey; match: (s: string) => boolean }[] = [
+  { key: 'all', labelKey: 'dinq.all', match: () => true },
+  {
+    key: 'draft',
+    labelKey: 'dst.drafts',
+    match: (s) => ['draft', 'in_progress', 'rejected'].includes(s),
+  },
   {
     key: 'review',
-    label: 'In review',
+    labelKey: 'dst.inReview',
     match: (s) => ['copy_edit', 'ready', 'embargoed'].includes(s),
   },
-  { key: 'published', label: 'Published', match: (s) => s === 'published' },
-  { key: 'archived', label: 'Archived', match: (s) => s === 'archived' },
+  { key: 'published', labelKey: 'dst.published', match: (s) => s === 'published' },
+  { key: 'archived', labelKey: 'dst.archived', match: (s) => s === 'archived' },
 ];
 
 const EDITABLE = new Set(['draft', 'in_progress', 'rejected']);
@@ -40,28 +46,33 @@ function RowActions({
   basePath: string;
   deleteAction?: (id: string) => Promise<void>;
 }) {
+  const t = useT();
   const btn =
     'inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold transition hover:border-primary hover:text-primary';
   return (
     <div className="flex items-center gap-1">
       {EDITABLE.has(d.status) && (
-        <Link href={`${basePath}/${d.id}`} aria-label="Edit story" className={`${btn} text-text`}>
-          <PenIcon size={13} /> Edit
+        <Link
+          href={`${basePath}/${d.id}`}
+          aria-label={t('dst.editStory')}
+          className={`${btn} text-text`}
+        >
+          <PenIcon size={13} /> {t('d.common.edit')}
         </Link>
       )}
       {d.status === 'published' && (
         <Link
           href={`/article/${d.slug}`}
           target="_blank"
-          aria-label="View published story"
+          aria-label={t('dst.viewPublished')}
           className={`${btn} text-text`}
         >
-          <ArrowUpRightIcon size={13} /> View
+          <ArrowUpRightIcon size={13} /> {t('dst.view')}
         </Link>
       )}
       {!EDITABLE.has(d.status) && d.status !== 'published' && (
         <Link href={`${basePath}/${d.id}`} className={`${btn} text-muted`}>
-          Open
+          {t('dst.open')}
         </Link>
       )}
       {deleteAction && (
@@ -73,7 +84,7 @@ function RowActions({
         >
           <button
             type="submit"
-            aria-label="Delete article"
+            aria-label={t('dst.deleteArticle')}
             className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 text-xs font-semibold text-muted transition hover:border-accent-red hover:text-accent-red"
           >
             <TrashIcon size={13} />
@@ -99,6 +110,7 @@ export function StoriesTable({
   /** When provided, each row gets a Delete button bound to this action (admin). */
   deleteAction?: (id: string) => Promise<void>;
 }) {
+  const tr = useT();
   const [tab, setTab] = useState('all');
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -140,27 +152,27 @@ export function StoriesTable({
     <div className="mt-6">
       {/* Toolbar: tabs + search */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-1" role="tablist" aria-label="Filter by status">
-          {TABS.map((t) => (
+        <div className="flex flex-wrap gap-1" role="tablist" aria-label={tr('dst.filterByStatus')}>
+          {TABS.map((tabItem) => (
             <button
-              key={t.key}
+              key={tabItem.key}
               type="button"
               role="tab"
-              aria-selected={tab === t.key}
-              onClick={() => selectTab(t.key)}
+              aria-selected={tab === tabItem.key}
+              onClick={() => selectTab(tabItem.key)}
               className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
-                tab === t.key
+                tab === tabItem.key
                   ? 'bg-primary/12 text-primary'
                   : 'text-muted hover:bg-surface-2 hover:text-text'
               }`}
             >
-              {t.label}
+              {tr(tabItem.labelKey)}
               <span
                 className={`rounded-full px-1.5 py-0.5 font-mono text-[10px] ${
-                  tab === t.key ? 'bg-primary/15 text-primary' : 'bg-surface-2 text-faint'
+                  tab === tabItem.key ? 'bg-primary/15 text-primary' : 'bg-surface-2 text-faint'
                 }`}
               >
-                {counts[t.key]}
+                {counts[tabItem.key]}
               </span>
             </button>
           ))}
@@ -173,7 +185,7 @@ export function StoriesTable({
             type="search"
             value={query}
             onChange={(e) => search(e.target.value)}
-            placeholder="Search stories…"
+            placeholder={tr('dst.searchStories')}
             className="w-full rounded-lg border border-border bg-surface-2 py-2 pl-9 pr-3 text-sm text-text outline-none focus:border-primary"
           />
         </label>
@@ -206,7 +218,7 @@ export function StoriesTable({
         ))}
         {rows.length === 0 && (
           <p className="rounded-xl border border-dashed border-border px-4 py-10 text-center font-body text-sm text-muted">
-            {query ? 'No stories match your search.' : 'Nothing here yet.'}
+            {query ? tr('dst.noMatch') : tr('dst.nothingYet')}
           </p>
         )}
       </div>
@@ -217,11 +229,11 @@ export function StoriesTable({
           <table className="w-full min-w-[640px] text-left">
             <thead>
               <tr className="border-b border-border font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-                <th className="px-4 py-3 font-medium">Story</th>
-                <th className="px-4 py-3 font-medium">Section</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Updated</th>
-                <th className="px-4 py-3 text-right font-medium">Actions</th>
+                <th className="px-4 py-3 font-medium">{tr('dst.story')}</th>
+                <th className="px-4 py-3 font-medium">{tr('dst.section')}</th>
+                <th className="px-4 py-3 font-medium">{tr('dst.status')}</th>
+                <th className="px-4 py-3 font-medium">{tr('dst.updated')}</th>
+                <th className="px-4 py-3 text-right font-medium">{tr('dst.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -260,7 +272,7 @@ export function StoriesTable({
 
         {rows.length === 0 && (
           <p className="px-4 py-12 text-center font-body text-sm text-muted">
-            {query ? 'No stories match your search.' : 'Nothing here yet.'}
+            {query ? tr('dst.noMatch') : tr('dst.nothingYet')}
           </p>
         )}
       </div>
@@ -269,7 +281,7 @@ export function StoriesTable({
       {rows.length > 0 && (
         <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
           <p className="font-mono text-xs text-muted">
-            {firstRow}–{lastRow} of {rows.length}
+            {firstRow}–{lastRow} {tr('dpg.of')} {rows.length}
           </p>
           {totalPages > 1 && (
             <div className="flex items-center gap-1">
@@ -279,10 +291,10 @@ export function StoriesTable({
                 disabled={current === 1}
                 className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary disabled:pointer-events-none disabled:opacity-40"
               >
-                <ChevronRightIcon size={13} className="rotate-180" /> Prev
+                <ChevronRightIcon size={13} className="rotate-180" /> {tr('dpg.prev')}
               </button>
               <span className="px-2 font-mono text-xs text-muted">
-                Page {current} / {totalPages}
+                {tr('dpg.page')} {current} / {totalPages}
               </span>
               <button
                 type="button"
@@ -290,7 +302,7 @@ export function StoriesTable({
                 disabled={current === totalPages}
                 className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary disabled:pointer-events-none disabled:opacity-40"
               >
-                Next <ChevronRightIcon size={13} />
+                {tr('dpg.next')} <ChevronRightIcon size={13} />
               </button>
             </div>
           )}

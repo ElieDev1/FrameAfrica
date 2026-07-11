@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useT } from '@/components/LocaleProvider';
 import type { Block } from '@/lib/api';
 import type { CategoryOption, TopicOption } from '@/lib/cms';
 import type { DraftFormState } from '@/lib/cms-actions';
@@ -57,13 +58,14 @@ const inputClass =
 
 function SaveButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
+  const t = useT();
   return (
     <button
       type="submit"
       disabled={pending}
       className="rounded-lg bg-primary px-4 py-2 font-heading font-bold text-black transition disabled:opacity-60"
     >
-      {pending ? 'Saving…' : label}
+      {pending ? t('d.common.saving') : label}
     </button>
   );
 }
@@ -81,6 +83,7 @@ export function DraftForm({
   initial?: DraftInitial;
   mode: 'create' | 'edit';
 }) {
+  const t = useT();
   const [state, formAction] = useActionState(action, {});
   const selected = new Set(initial?.topicSlugs ?? []);
   const [featured, setFeatured] = useState({
@@ -97,14 +100,16 @@ export function DraftForm({
       {/* ── Writing column ─────────────────────────────────────────── */}
       <div className="flex min-w-0 flex-col gap-5">
         <label className="flex flex-col gap-1">
-          <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">Headline</span>
+          <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">
+            {t('ddf.headline')}
+          </span>
           <input
             name="title"
             defaultValue={initial?.title}
             required
             minLength={3}
             maxLength={200}
-            placeholder="Write the headline…"
+            placeholder={t('ddf.writeHeadline')}
             className="rounded-lg border border-border bg-surface-2 px-4 py-3 font-heading text-2xl font-black tracking-tight text-text outline-none placeholder:font-normal placeholder:text-faint focus:border-primary"
           />
         </label>
@@ -141,7 +146,7 @@ export function DraftForm({
             </p>
           )}
           {state.savedAt && <p className="font-mono text-xs text-accent-green">Saved ✓</p>}
-          <SaveButton label={mode === 'create' ? 'Create draft' : 'Save changes'} />
+          <SaveButton label={mode === 'create' ? t('ddf.createDraft') : t('ddf.saveChanges')} />
         </Panel>
 
         <Panel title="Details">

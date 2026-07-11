@@ -1,7 +1,9 @@
 'use client';
 
 import { useId, useMemo, useState } from 'react';
+import { useT } from '@/components/LocaleProvider';
 import type { Block } from '@/lib/api';
+import type { MessageKey } from '@/lib/i18n';
 import { MediaPicker } from './MediaPicker';
 
 /**
@@ -13,17 +15,17 @@ import { MediaPicker } from './MediaPicker';
 
 type EditorBlock = Block & { _id: string };
 
-const ADD_BUTTONS: { type: Block['type']; label: string }[] = [
-  { type: 'paragraph', label: '¶ Paragraph' },
-  { type: 'heading', label: 'H Subhead' },
-  { type: 'image', label: '▣ Image' },
-  { type: 'gallery', label: '▦ Gallery' },
-  { type: 'pullquote', label: '❝ Pull-quote' },
-  { type: 'blockquote', label: '❞ Quote' },
-  { type: 'list', label: '• List' },
-  { type: 'factbox', label: 'ℹ Fact-box' },
-  { type: 'embed', label: '▶ Video' },
-  { type: 'divider', label: '— Divider' },
+const ADD_BUTTONS: { type: Block['type']; icon: string; labelKey: MessageKey }[] = [
+  { type: 'paragraph', icon: '¶', labelKey: 'dbe.paragraph' },
+  { type: 'heading', icon: 'H', labelKey: 'dbe.subhead' },
+  { type: 'image', icon: '▣', labelKey: 'dbe.image' },
+  { type: 'gallery', icon: '▦', labelKey: 'dbe.gallery' },
+  { type: 'pullquote', icon: '❝', labelKey: 'dbe.pullquote' },
+  { type: 'blockquote', icon: '❞', labelKey: 'dbe.quote' },
+  { type: 'list', icon: '•', labelKey: 'dbe.list' },
+  { type: 'factbox', icon: 'ℹ', labelKey: 'dbe.factbox' },
+  { type: 'embed', icon: '▶', labelKey: 'dbe.video' },
+  { type: 'divider', icon: '—', labelKey: 'dbe.divider' },
 ];
 
 let counter = 0;
@@ -140,6 +142,7 @@ export function BlockEditor({
   initialBlocks?: Block[] | null;
   initialBody?: string;
 }) {
+  const t = useT();
   const [blocks, setBlocks] = useState<EditorBlock[]>(() => toEditor(initialBlocks, initialBody));
   const hiddenId = useId();
 
@@ -167,7 +170,7 @@ export function BlockEditor({
 
       {blocks.length === 0 && (
         <p className="rounded-lg border border-dashed border-border p-4 text-center font-body text-sm text-muted">
-          No blocks yet — add one below to start the story.
+          {t('dbe.noBlocks')}
         </p>
       )}
 
@@ -183,7 +186,7 @@ export function BlockEditor({
                 className={ctrlBtn}
                 onClick={() => move(block._id, -1)}
                 disabled={i === 0}
-                aria-label="Move block up"
+                aria-label={t('dbe.moveBlockUp')}
               >
                 ↑
               </button>
@@ -192,7 +195,7 @@ export function BlockEditor({
                 className={ctrlBtn}
                 onClick={() => move(block._id, 1)}
                 disabled={i === blocks.length - 1}
-                aria-label="Move block down"
+                aria-label={t('dbe.moveBlockDown')}
               >
                 ↓
               </button>
@@ -200,7 +203,7 @@ export function BlockEditor({
                 type="button"
                 className={`${ctrlBtn} hover:border-accent-red hover:text-accent-red`}
                 onClick={() => remove(block._id)}
-                aria-label="Remove block"
+                aria-label={t('dbe.removeBlock')}
               >
                 ✕
               </button>
@@ -212,16 +215,16 @@ export function BlockEditor({
 
       <div className="flex flex-wrap gap-2 rounded-xl border border-dashed border-border p-3">
         <span className="w-full font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-          Add block
+          {t('dbe.addBlock')}
         </span>
-        {ADD_BUTTONS.map(({ type, label }) => (
+        {ADD_BUTTONS.map(({ type, icon, labelKey }) => (
           <button
             key={type}
             type="button"
             onClick={() => add(type)}
             className="rounded-lg border border-border px-2.5 py-1.5 font-mono text-[11px] text-muted hover:border-primary hover:text-primary"
           >
-            {label}
+            {icon} {t(labelKey)}
           </button>
         ))}
       </div>
@@ -236,6 +239,7 @@ function BlockFields({
   block: EditorBlock;
   onPatch: (next: Record<string, unknown>) => void;
 }) {
+  const t = useT();
   switch (block.type) {
     case 'paragraph':
       return (
@@ -244,7 +248,7 @@ function BlockFields({
             className={`${input} leading-relaxed`}
             rows={3}
             value={block.text}
-            placeholder="Write a paragraph…"
+            placeholder={t('dbe.writeParagraph')}
             onChange={(e) => onPatch({ text: e.target.value })}
           />
           <label className="flex items-center gap-2 font-body text-xs text-muted">
@@ -272,7 +276,7 @@ function BlockFields({
           <input
             className={input}
             value={block.text}
-            placeholder="Subheading text"
+            placeholder={t('dbe.subheadingText')}
             onChange={(e) => onPatch({ text: e.target.value })}
           />
         </div>
@@ -286,7 +290,7 @@ function BlockFields({
               className={input}
               style={{ flex: 1, minWidth: '12rem' }}
               value={block.url}
-              placeholder="Image URL (https://… or /seed/…)"
+              placeholder={t('dbe.imageUrl')}
               onChange={(e) => onPatch({ url: e.target.value })}
             />
             <MediaPicker
@@ -302,7 +306,7 @@ function BlockFields({
           <input
             className={input}
             value={block.alt}
-            placeholder="Alt text (describe the photo for accessibility)"
+            placeholder={t('dbe.altDescribe')}
             onChange={(e) => onPatch({ alt: e.target.value })}
           />
           <div className="flex flex-wrap gap-2">
@@ -310,14 +314,14 @@ function BlockFields({
               className={input}
               style={{ flex: 1 }}
               value={block.caption ?? ''}
-              placeholder="Caption (optional)"
+              placeholder={t('dbe.captionOptional')}
               onChange={(e) => onPatch({ caption: e.target.value })}
             />
             <input
               className={input}
               style={{ flex: 1 }}
               value={block.credit ?? ''}
-              placeholder="Credit (optional)"
+              placeholder={t('dbe.creditOptional')}
               onChange={(e) => onPatch({ credit: e.target.value })}
             />
           </div>
@@ -346,7 +350,7 @@ function BlockFields({
                 className={input}
                 style={{ flex: 2 }}
                 value={img.alt}
-                placeholder="Alt text"
+                placeholder={t('dbe.altText')}
                 onChange={(e) =>
                   onPatch({
                     images: block.images.map((g, k) =>
@@ -396,13 +400,13 @@ function BlockFields({
             className={input}
             rows={2}
             value={block.text}
-            placeholder="Quote text"
+            placeholder={t('dbe.quoteText')}
             onChange={(e) => onPatch({ text: e.target.value })}
           />
           <input
             className={input}
             value={block.attribution ?? ''}
-            placeholder="Attribution (optional)"
+            placeholder={t('dbe.attributionOptional')}
             onChange={(e) => onPatch({ attribution: e.target.value })}
           />
         </div>
@@ -416,14 +420,14 @@ function BlockFields({
             value={block.style}
             onChange={(e) => onPatch({ style: e.target.value === 'number' ? 'number' : 'bullet' })}
           >
-            <option value="bullet">Bulleted</option>
-            <option value="number">Numbered</option>
+            <option value="bullet">{t('dbe.bulleted')}</option>
+            <option value="number">{t('dbe.numbered')}</option>
           </select>
           <textarea
             className={input}
             rows={4}
             value={block.items.join('\n')}
-            placeholder="One item per line"
+            placeholder={t('dbe.onePerLine')}
             onChange={(e) => onPatch({ items: e.target.value.split('\n') })}
           />
         </div>
@@ -435,14 +439,14 @@ function BlockFields({
           <input
             className={input}
             value={block.title}
-            placeholder="Fact-box title (e.g. What to know)"
+            placeholder={t('dbe.factboxTitle')}
             onChange={(e) => onPatch({ title: e.target.value })}
           />
           <textarea
             className={input}
             rows={3}
             value={block.body}
-            placeholder="Explainer / context"
+            placeholder={t('dbe.explainerContext')}
             onChange={(e) => onPatch({ body: e.target.value })}
           />
         </div>
@@ -453,12 +457,12 @@ function BlockFields({
         <input
           className={input}
           value={block.url}
-          placeholder="YouTube URL (watch, youtu.be, or shorts)"
+          placeholder={t('dbe.youtubeUrl')}
           onChange={(e) => onPatch({ url: e.target.value, embedUrl: '' })}
         />
       );
 
     case 'divider':
-      return <p className="font-body text-xs text-faint">A horizontal section break.</p>;
+      return <p className="font-body text-xs text-faint">{t('dbe.horizontalBreak')}</p>;
   }
 }

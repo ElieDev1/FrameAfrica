@@ -2015,6 +2015,259 @@ const dict = {
     rw: 'Kosora inyandiko, hanyuma uyoherereze abanditsi cyangwa uyisubize uwayanditse. Buri kubika bihita byandikwa.',
     fr: 'Corrigez le texte, puis transmettez-le aux rédacteurs ou renvoyez-le à l’auteur. Chaque sauvegarde crée une révision.',
   },
+
+  // — Stories table —
+  'dst.drafts': { en: 'Drafts', rw: 'Imishinga', fr: 'Brouillons' },
+  'dst.inReview': { en: 'In review', rw: 'Birasuzumwa', fr: 'En relecture' },
+  'dst.published': { en: 'Published', rw: 'Byatangajwe', fr: 'Publiés' },
+  'dst.archived': { en: 'Archived', rw: 'Byabitswe', fr: 'Archivés' },
+  'dst.editStory': { en: 'Edit story', rw: 'Hindura inkuru', fr: 'Modifier l’article' },
+  'dst.viewPublished': {
+    en: 'View published story',
+    rw: 'Reba inkuru yatangajwe',
+    fr: 'Voir l’article publié',
+  },
+  'dst.deleteArticle': { en: 'Delete article', rw: 'Siba inkuru', fr: 'Supprimer l’article' },
+  'dst.filterByStatus': {
+    en: 'Filter by status',
+    rw: 'Shungura uko bihagaze',
+    fr: 'Filtrer par statut',
+  },
+  'dst.searchStories': {
+    en: 'Search stories…',
+    rw: 'Shakisha inkuru…',
+    fr: 'Rechercher des articles…',
+  },
+  'dst.noMatch': {
+    en: 'No stories match your search.',
+    rw: 'Nta nkuru zihuye n’ibyo washatse.',
+    fr: 'Aucun article ne correspond.',
+  },
+  'dst.nothingYet': {
+    en: 'Nothing here yet.',
+    rw: 'Nta kintu kirahaba.',
+    fr: 'Rien pour le moment.',
+  },
+  'dst.story': { en: 'Story', rw: 'Inkuru', fr: 'Article' },
+  'dst.section': { en: 'Section', rw: 'Igice', fr: 'Rubrique' },
+  'dst.status': { en: 'Status', rw: 'Uko bihagaze', fr: 'Statut' },
+  'dst.updated': { en: 'Updated', rw: 'Byavuguruwe', fr: 'Mis à jour' },
+  'dst.actions': { en: 'Actions', rw: 'Ibikorwa', fr: 'Actions' },
+  'dst.view': { en: 'View', rw: 'Reba', fr: 'Voir' },
+  'dst.open': { en: 'Open', rw: 'Fungura', fr: 'Ouvrir' },
+
+  // — Draft form —
+  'ddf.headline': { en: 'Headline', rw: 'Umutwe', fr: 'Titre' },
+  'ddf.writeHeadline': { en: 'Write the headline…', rw: 'Andika umutwe…', fr: 'Écrivez le titre…' },
+  'ddf.createDraft': { en: 'Create draft', rw: 'Kora umushinga', fr: 'Créer le brouillon' },
+  'ddf.saveChanges': { en: 'Save changes', rw: 'Bika impinduka', fr: 'Enregistrer' },
+
+  // — Media upload / grid / picker —
+  'dmu.imageFile': { en: 'Image file', rw: 'Dosiye y’ifoto', fr: 'Fichier image' },
+  'dmg.copyUrl': { en: 'Copy URL', rw: 'Kopera URL', fr: 'Copier l’URL' },
+  'dmg.deleteImage': { en: 'Delete image', rw: 'Siba ifoto', fr: 'Supprimer l’image' },
+  'dmg.noAltText': {
+    en: 'No alt text',
+    rw: 'Nta mwandiko usimbura',
+    fr: 'Pas de texte alternatif',
+  },
+  'dmg.searchImages': {
+    en: 'Search images…',
+    rw: 'Shakisha amafoto…',
+    fr: 'Rechercher des images…',
+  },
+  'dmg.noImagesMatch': {
+    en: 'No images match your search.',
+    rw: 'Nta mafoto ahuye n’ibyo washatse.',
+    fr: 'Aucune image ne correspond.',
+  },
+  'dmp.chooseFromLibrary': {
+    en: 'Choose from library',
+    rw: 'Hitamo mu bubiko',
+    fr: 'Choisir dans la médiathèque',
+  },
+  'dmp.untitled': { en: 'Untitled', rw: 'Nta mutwe', fr: 'Sans titre' },
+
+  // — Live composer —
+  'dlc.posting': { en: 'Posting…', rw: 'Kohereza…', fr: 'Publication…' },
+  'dlc.postUpdate': { en: 'Post update', rw: 'Ohereza ivugurura', fr: 'Publier la mise à jour' },
+  'dlc.headlineOptional': {
+    en: 'Headline (optional)',
+    rw: 'Umutwe (bitegetswe)',
+    fr: 'Titre (facultatif)',
+  },
+  'dlc.postPlaceholder': {
+    en: 'Post an update — readers see it appear live…',
+    rw: 'Ohereza ivugurura — abasomyi barabibona ako kanya…',
+    fr: 'Publiez une mise à jour — les lecteurs la voient en direct…',
+  },
+
+  // — Correction form —
+  'dcf.adding': { en: 'Adding…', rw: 'Kongeraho…', fr: 'Ajout…' },
+  'dcf.addCorrection': {
+    en: 'Add correction',
+    rw: 'Ongeraho igikosorwa',
+    fr: 'Ajouter une correction',
+  },
+  'dcf.placeholder': {
+    en: 'e.g. An earlier version misstated the date. It has been corrected.',
+    rw: 'urugero: Verisiyo ibanza yari yanditse itariki nabi. Yarakosowe.',
+    fr: 'ex. Une version antérieure indiquait une date erronée. Elle a été corrigée.',
+  },
+
+  // — Ad manager —
+  'dam.somethingWrong': {
+    en: 'Something went wrong.',
+    rw: 'Hari ikitagenze neza.',
+    fr: 'Une erreur est survenue.',
+  },
+  'dam.noHouseAds': {
+    en: 'No house ads yet',
+    rw: 'Nta mamamaza arahaba',
+    fr: 'Aucune publicité maison',
+  },
+  'dam.newHouseAd': { en: 'New house ad', rw: 'Kwamamaza gushya', fr: 'Nouvelle publicité' },
+  'dam.titlePlaceholder': {
+    en: 'Title (shown if no image)',
+    rw: 'Umutwe (ugaragara nta foto)',
+    fr: 'Titre (si pas d’image)',
+  },
+  'dam.imagePlaceholder': {
+    en: 'Image, GIF or video URL (or /uploads/… path)',
+    rw: 'URL y’ifoto, GIF cyangwa ishusho (cyangwa /uploads/…)',
+    fr: 'URL image, GIF ou vidéo (ou /uploads/…)',
+  },
+  'dam.addHouseAd': { en: 'Add house ad', rw: 'Ongeraho kwamamaza', fr: 'Ajouter la publicité' },
+  'dam.pause': { en: 'Pause', rw: 'Hagarika', fr: 'Suspendre' },
+  'dam.activate': { en: 'Activate', rw: 'Kora', fr: 'Activer' },
+  'dam.deleteAd': { en: 'Delete ad', rw: 'Siba kwamamaza', fr: 'Supprimer la pub' },
+
+  // — Block editor —
+  'dbe.writeParagraph': {
+    en: 'Write a paragraph…',
+    rw: 'Andika igika…',
+    fr: 'Écrivez un paragraphe…',
+  },
+  'dbe.subheadingText': { en: 'Subheading text', rw: 'Umutwe muto', fr: 'Sous-titre' },
+  'dbe.imageUrl': {
+    en: 'Image URL (https://… or /seed/…)',
+    rw: 'URL y’ifoto (https://… cyangwa /seed/…)',
+    fr: 'URL de l’image (https://… ou /seed/…)',
+  },
+  'dbe.altDescribe': {
+    en: 'Alt text (describe the photo for accessibility)',
+    rw: 'Umwandiko usimbura (sobanura ifoto)',
+    fr: 'Texte alternatif (décrivez la photo)',
+  },
+  'dbe.captionOptional': {
+    en: 'Caption (optional)',
+    rw: 'Umutwe muto (bitegetswe)',
+    fr: 'Légende (facultatif)',
+  },
+  'dbe.creditOptional': {
+    en: 'Credit (optional)',
+    rw: 'Uwabikoze (bitegetswe)',
+    fr: 'Crédit (facultatif)',
+  },
+  'dbe.altText': { en: 'Alt text', rw: 'Umwandiko usimbura', fr: 'Texte alternatif' },
+  'dbe.quoteText': { en: 'Quote text', rw: 'Amagambo yavuzwe', fr: 'Texte de la citation' },
+  'dbe.attributionOptional': {
+    en: 'Attribution (optional)',
+    rw: 'Uwayavuze (bitegetswe)',
+    fr: 'Attribution (facultatif)',
+  },
+  'dbe.bulleted': { en: 'Bulleted', rw: 'Utudomo', fr: 'À puces' },
+  'dbe.numbered': { en: 'Numbered', rw: 'Imibare', fr: 'Numérotée' },
+  'dbe.onePerLine': {
+    en: 'One item per line',
+    rw: 'Ikintu kimwe kuri buri murongo',
+    fr: 'Un élément par ligne',
+  },
+  'dbe.factboxTitle': {
+    en: 'Fact-box title (e.g. What to know)',
+    rw: 'Umutwe w’agasanduku (urugero: Ibyo ukwiye kumenya)',
+    fr: 'Titre de l’encadré (ex. À savoir)',
+  },
+  'dbe.explainerContext': {
+    en: 'Explainer / context',
+    rw: 'Ibisobanuro / imiterere',
+    fr: 'Explication / contexte',
+  },
+  'dbe.youtubeUrl': {
+    en: 'YouTube URL (watch, youtu.be, or shorts)',
+    rw: 'URL ya YouTube (watch, youtu.be, cyangwa shorts)',
+    fr: 'URL YouTube (watch, youtu.be ou shorts)',
+  },
+  'dbe.horizontalBreak': {
+    en: 'A horizontal section break.',
+    rw: 'Umurongo utandukanya ibice.',
+    fr: 'Une séparation horizontale.',
+  },
+  'dbe.noBlocks': {
+    en: 'No blocks yet — add one below to start the story.',
+    rw: 'Nta bice birahaba — ongeraho kimwe hasi utangire inkuru.',
+    fr: 'Aucun bloc — ajoutez-en un ci-dessous pour commencer.',
+  },
+  'dbe.moveBlockUp': { en: 'Move block up', rw: 'Zamura igice', fr: 'Monter le bloc' },
+  'dbe.moveBlockDown': { en: 'Move block down', rw: 'Manura igice', fr: 'Descendre le bloc' },
+  'dbe.removeBlock': { en: 'Remove block', rw: 'Kuraho igice', fr: 'Retirer le bloc' },
+  'dbe.addBlock': { en: 'Add block', rw: 'Ongeraho igice', fr: 'Ajouter un bloc' },
+  'dbe.paragraph': { en: 'Paragraph', rw: 'Igika', fr: 'Paragraphe' },
+  'dbe.subhead': { en: 'Subhead', rw: 'Umutwe muto', fr: 'Sous-titre' },
+  'dbe.image': { en: 'Image', rw: 'Ifoto', fr: 'Image' },
+  'dbe.gallery': { en: 'Gallery', rw: 'Amafoto', fr: 'Galerie' },
+  'dbe.pullquote': { en: 'Pull-quote', rw: 'Amagambo yatoranyijwe', fr: 'Exergue' },
+  'dbe.quote': { en: 'Quote', rw: 'Amagambo', fr: 'Citation' },
+  'dbe.list': { en: 'List', rw: 'Urutonde', fr: 'Liste' },
+  'dbe.factbox': { en: 'Fact-box', rw: 'Agasanduku k’ibyukuri', fr: 'Encadré' },
+  'dbe.video': { en: 'Video', rw: 'Ishusho', fr: 'Vidéo' },
+  'dbe.divider': { en: 'Divider', rw: 'Umurongo', fr: 'Séparateur' },
+
+  // — Ad studio / Flyer studio —
+  'das.top': { en: 'Top', rw: 'Hejuru', fr: 'Haut' },
+  'das.center': { en: 'Center', rw: 'Hagati', fr: 'Centre' },
+  'das.bottom': { en: 'Bottom', rw: 'Hasi', fr: 'Bas' },
+  'dsc.startFromStory': {
+    en: 'Start from a story',
+    rw: 'Tangira ku nkuru',
+    fr: 'Partir d’un article',
+  },
+  'dsc.choosePublished': {
+    en: 'Choose a published story…',
+    rw: 'Hitamo inkuru yatangajwe…',
+    fr: 'Choisir un article publié…',
+  },
+  'dsc.kicker': { en: 'Kicker', rw: 'Akamenyetso', fr: 'Surtitre' },
+  'dsc.headline': { en: 'Headline', rw: 'Umutwe', fr: 'Titre' },
+  'dsc.source': { en: 'Source', rw: 'Aho byavuye', fr: 'Source' },
+  'dsc.ctaPill': { en: 'CTA pill', rw: 'Buto y’ubutumire', fr: 'Bouton d’action' },
+  'dsc.ctaPlaceholder': {
+    en: 'e.g. Read more',
+    rw: 'urugero: Soma byinshi',
+    fr: 'ex. Lire la suite',
+  },
+  'dsc.overlayStyle': {
+    en: 'Overlay style',
+    rw: 'Uburyo bw’igipfukisho',
+    fr: 'Style de superposition',
+  },
+  'dsc.backgroundColour': { en: 'Background colour', rw: 'Ibara ry’inyuma', fr: 'Couleur de fond' },
+  'dsc.align': { en: 'Align', rw: 'Gutondeka', fr: 'Alignement' },
+  'dsc.position': { en: 'Position', rw: 'Aho biri', fr: 'Position' },
+  'dsc.backdropColour': {
+    en: 'Backdrop colour',
+    rw: 'Ibara ry’inyuma y’umwandiko',
+    fr: 'Couleur du fond de texte',
+  },
+  'dsc.text': { en: 'Text', rw: 'Umwandiko', fr: 'Texte' },
+  'dsc.accent': { en: 'Accent', rw: 'Ibara ry’ingenzi', fr: 'Accent' },
+  'dsc.handle': { en: 'Handle', rw: 'Izina rya konti', fr: 'Identifiant' },
+  'dsc.showPlatforms': {
+    en: 'Show platforms',
+    rw: 'Erekana imbuga',
+    fr: 'Afficher les plateformes',
+  },
+  'dsc.customColour': { en: 'custom colour', rw: 'ibara wihitiyemo', fr: 'couleur personnalisée' },
 } as const;
 
 export type MessageKey = keyof typeof dict;

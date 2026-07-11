@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useT } from '@/components/LocaleProvider';
 import { addLiveUpdateAction, endLiveAction, type LiveComposeState } from '@/lib/live-actions';
 
 const input =
@@ -9,13 +10,14 @@ const input =
 
 function PostButton() {
   const { pending } = useFormStatus();
+  const t = useT();
   return (
     <button
       type="submit"
       disabled={pending}
       className="self-start rounded-lg bg-accent-red px-4 py-2 font-mono text-xs uppercase tracking-wide text-white transition hover:opacity-90 disabled:opacity-60"
     >
-      {pending ? 'Posting…' : 'Post update'}
+      {pending ? t('dlc.posting') : t('dlc.postUpdate')}
     </button>
   );
 }
@@ -34,6 +36,7 @@ export function LiveComposer({
   slug: string;
   isLive: boolean;
 }) {
+  const t = useT();
   const post = addLiveUpdateAction.bind(null, articleId, slug);
   const [state, formAction] = useActionState<LiveComposeState, FormData>(post, {});
   const end = endLiveAction.bind(null, articleId, slug);
@@ -60,7 +63,7 @@ export function LiveComposer({
         <input
           name="headline"
           maxLength={200}
-          placeholder="Headline (optional)"
+          placeholder={t('dlc.headlineOptional')}
           className={input}
         />
         <textarea
@@ -68,7 +71,7 @@ export function LiveComposer({
           rows={2}
           maxLength={4000}
           required
-          placeholder="Post an update — readers see it appear live…"
+          placeholder={t('dlc.postPlaceholder')}
           className={input}
         />
         <label className="flex items-center gap-2 font-body text-xs text-muted">

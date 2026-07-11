@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useT } from '@/components/LocaleProvider';
 import { uploadMediaAction } from '@/lib/media-actions';
 
 const input =
@@ -9,19 +10,21 @@ const input =
 
 function UploadButton() {
   const { pending } = useFormStatus();
+  const t = useT();
   return (
     <button
       type="submit"
       disabled={pending}
       className="rounded-lg bg-primary px-4 py-2 font-heading font-bold text-black transition disabled:opacity-60"
     >
-      {pending ? 'Uploading…' : 'Upload'}
+      {pending ? t('d.common.uploading') : t('d.common.upload')}
     </button>
   );
 }
 
 /** Upload an image to the media library (JPEG/PNG/WebP/GIF/AVIF, ≤8 MB). */
 export function MediaUpload() {
+  const t = useT();
   const [state, formAction] = useActionState(uploadMediaAction, {});
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -37,7 +40,9 @@ export function MediaUpload() {
       className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
     >
       <div className="flex flex-col gap-1">
-        <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">Image file</span>
+        <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">
+          {t('dmu.imageFile')}
+        </span>
         <input
           name="file"
           type="file"
@@ -49,14 +54,14 @@ export function MediaUpload() {
       <div className="flex flex-wrap gap-3">
         <input
           name="alt"
-          placeholder="Alt text (accessibility)"
+          placeholder={t('de.altText')}
           maxLength={400}
           className={input}
           style={{ flex: 2 }}
         />
         <input
           name="credit"
-          placeholder="Credit"
+          placeholder={t('de.credit')}
           maxLength={200}
           className={input}
           style={{ flex: 1 }}

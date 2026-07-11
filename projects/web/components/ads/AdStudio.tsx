@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useTransition } from 'react';
+import { useT } from '@/components/LocaleProvider';
 import { PUBLIC_API_URL } from '@/lib/ads';
 import { publishAdCreative } from '@/lib/ad-studio-actions';
 import { createHouseAd } from '@/lib/ads-actions';
@@ -132,6 +133,7 @@ const FONTS: Record<FontChoice, string> = {
 };
 
 export function AdStudio({ media }: { media: MediaItem[] }) {
+  const t = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [d, setD] = useState<Design>({
     placement: 'billboard',
@@ -477,9 +479,9 @@ export function AdStudio({ media }: { media: MediaItem[] }) {
                   onChange={(e) => set('align', e.target.value as Align)}
                   className={inputCls}
                 >
-                  <option value="top">Top</option>
-                  <option value="center">Center</option>
-                  <option value="bottom">Bottom</option>
+                  <option value="top">{t('das.top')}</option>
+                  <option value="center">{t('das.center')}</option>
+                  <option value="bottom">{t('das.bottom')}</option>
                 </select>
               </Field>
             </div>

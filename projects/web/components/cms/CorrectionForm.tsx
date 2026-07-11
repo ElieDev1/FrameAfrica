@@ -2,17 +2,19 @@
 
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useT } from '@/components/LocaleProvider';
 import { addCorrectionAction, type CorrectionState } from '@/lib/cms-actions';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
+  const t = useT();
   return (
     <button
       type="submit"
       disabled={pending}
       className="self-start rounded-lg border border-accent-yellow px-4 py-2 font-mono text-xs uppercase tracking-wide text-accent-yellow transition hover:bg-accent-yellow hover:text-black disabled:opacity-60"
     >
-      {pending ? 'Adding…' : 'Add correction'}
+      {pending ? t('dcf.adding') : t('dcf.addCorrection')}
     </button>
   );
 }
@@ -22,6 +24,7 @@ function SubmitButton() {
  * article. The note appears on the public article page and is append-only.
  */
 export function CorrectionForm({ articleId }: { articleId: string }) {
+  const t = useT();
   const action = addCorrectionAction.bind(null, articleId);
   const [state, formAction] = useActionState<CorrectionState, FormData>(action, {});
 
@@ -36,7 +39,7 @@ export function CorrectionForm({ articleId }: { articleId: string }) {
           rows={2}
           maxLength={1000}
           required
-          placeholder="e.g. An earlier version misstated the date. It has been corrected."
+          placeholder={t('dcf.placeholder')}
           className="rounded-lg border border-border bg-surface-2 px-3 py-2 font-body text-sm text-text outline-none focus:border-primary"
         />
       </label>

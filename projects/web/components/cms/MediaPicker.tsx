@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { useT } from '@/components/LocaleProvider';
 import type { MediaAsset } from '@/lib/cms';
 import { listMediaAction } from '@/lib/media-actions';
 
@@ -13,11 +14,12 @@ import { listMediaAction } from '@/lib/media-actions';
  */
 export function MediaPicker({
   onSelect,
-  label = 'Choose from library',
+  label,
 }: {
   onSelect: (asset: MediaAsset) => void;
   label?: string;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [assets, setAssets] = useState<MediaAsset[] | null>(null);
 
@@ -44,7 +46,7 @@ export function MediaPicker({
         onClick={() => setOpen(true)}
         className="rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] text-muted hover:border-primary hover:text-primary"
       >
-        {label}
+        {label ?? t('dmp.chooseFromLibrary')}
       </button>
 
       {open && (
@@ -52,7 +54,7 @@ export function MediaPicker({
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
           role="dialog"
           aria-modal="true"
-          aria-label="Media library"
+          aria-label={t('dash.mediaLibrary')}
           onClick={() => setOpen(false)}
         >
           <div
@@ -60,12 +62,12 @@ export function MediaPicker({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-border px-5 py-3">
-              <h2 className="font-heading text-lg font-bold text-text">Media library</h2>
+              <h2 className="font-heading text-lg font-bold text-text">{t('dash.mediaLibrary')}</h2>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 className="rounded border border-border px-2 py-1 font-mono text-[11px] text-muted hover:border-primary hover:text-primary"
-                aria-label="Close"
+                aria-label={t('common.close')}
               >
                 ✕
               </button>
@@ -73,10 +75,12 @@ export function MediaPicker({
 
             <div className="max-h-[calc(80vh-3.5rem)] overflow-y-auto p-5">
               {assets === null ? (
-                <p className="py-12 text-center font-body text-sm text-muted">Loading…</p>
+                <p className="py-12 text-center font-body text-sm text-muted">
+                  {t('common.loading')}
+                </p>
               ) : assets.length === 0 ? (
                 <p className="py-12 text-center font-body text-sm text-muted">
-                  No images yet. Upload some on the Media library page first.
+                  {t('dmg.noImagesMatch')}
                 </p>
               ) : (
                 <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
@@ -100,7 +104,7 @@ export function MediaPicker({
                           />
                         </span>
                         <span className="block truncate px-2 py-1 font-body text-[11px] text-muted">
-                          {asset.alt || asset.originalName || 'Untitled'}
+                          {asset.alt || asset.originalName || t('dmp.untitled')}
                         </span>
                       </button>
                     </li>
