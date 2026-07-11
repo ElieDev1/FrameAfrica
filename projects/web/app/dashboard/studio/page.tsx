@@ -3,7 +3,7 @@ import { StudioCanvas, type StudioArticle } from '@/components/studio/StudioCanv
 import { fetchArticles } from '@/lib/api';
 import { requireStaff } from '@/lib/cms';
 
-export const metadata: Metadata = { title: 'Studio — Frame Africa' };
+export const metadata: Metadata = { title: 'Flyer Studio — Frame Africa' };
 
 export default async function StudioPage() {
   await requireStaff();
@@ -19,10 +19,11 @@ export default async function StudioPage() {
 
   return (
     <div className="w-full">
-      <h1 className="font-heading text-3xl font-black tracking-tight text-text">Studio</h1>
+      <h1 className="font-heading text-3xl font-black tracking-tight text-text">Flyer Studio</h1>
       <p className="mt-1 max-w-2xl font-body text-sm text-muted">
-        Make branded social cards and flyers — start from a story or a template, customise
-        everything, and download a PNG. No external software needed.
+        Design branded flyers and social cards — start from a story or a preset, then customise
+        every element: photo &amp; overlay, a readability backdrop and shadow behind the text, where
+        it sits, colours, a CTA, and a social-media bar. Download a print-ready PNG.
       </p>
 
       <div className="mt-6">
