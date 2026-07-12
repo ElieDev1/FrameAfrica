@@ -44,8 +44,9 @@ export function BreakingTicker({
       onMouseLeave={() => setPaused(false)}
     >
       <div className="mx-auto flex max-w-[1440px] items-stretch px-6">
-        {/* Flag */}
-        <span className="fa-breaking-badge relative z-10 -ml-6 flex shrink-0 items-center gap-2 bg-accent-red py-2.5 pl-6 pr-6 text-[12px] font-extrabold uppercase tracking-[0.12em] text-white">
+        {/* Flag — compact on phones (labels like "Dernière minute" are long),
+            fuller padding and letter-spacing from `sm` up. */}
+        <span className="fa-breaking-badge relative z-10 -ml-6 flex shrink-0 items-center gap-1.5 whitespace-nowrap bg-accent-red py-2.5 pl-6 pr-4 text-[11px] font-extrabold uppercase tracking-[0.04em] text-white sm:gap-2 sm:pr-6 sm:text-[12px] sm:tracking-[0.12em]">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/80" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
@@ -54,7 +55,7 @@ export function BreakingTicker({
         </span>
 
         {/* Rolling headline with its section kicker */}
-        <div className="relative min-w-0 flex-1 overflow-hidden py-2.5 pl-4 pr-4">
+        <div className="relative min-w-0 flex-1 overflow-hidden py-2.5 pl-3 pr-1 sm:pl-4 sm:pr-4">
           <div className="relative h-6">
             <Link
               key={index}
