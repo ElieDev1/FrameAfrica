@@ -58,6 +58,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # gitleaks diffs the PR's commit range, so it needs the history —
+          # the default shallow clone makes it fail to scan the repository.
+          fetch-depth: 0
 
       - name: Dependency audit
         run: pnpm audit --audit-level=high || true

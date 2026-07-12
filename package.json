@@ -26,6 +26,9 @@
     "*.{ts,tsx,js,jsx}": [
       "prettier --write"
     ],
+    "*.css": [
+      "prettier --write"
+    ],
     "*.{md,json,yml,yaml}": [
       "prettier --write"
     ]
