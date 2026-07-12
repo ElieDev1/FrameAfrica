@@ -49,9 +49,10 @@ function Meta({ article, locale }: { article: ArticleSummary; locale?: Locale })
 }
 
 /**
- * The hero's secondary column: a lead item with a wide image, then compact
- * thumbnail rows. Fills the space beside the front-page lead with real
- * hierarchy instead of a flat list of headlines.
+ * The hero's secondary column: one lead item carries a wide image, and every
+ * story below it is headline-only (no photo) — a single photo anchors the
+ * column and the rest read as a clean list, the way a print front page runs its
+ * "more top stories".
  */
 export function HeroSidebar({ articles, locale }: { articles: ArticleSummary[]; locale?: Locale }) {
   if (articles.length === 0) return null;
@@ -96,37 +97,19 @@ export function HeroSidebar({ articles, locale }: { articles: ArticleSummary[]; 
         </div>
       </article>
 
-      {/* Remaining stories — compact thumbnail rows */}
+      {/* Remaining stories — headline-only, no photo */}
       <div className="divide-y divide-border">
         {rows.map((article) => (
-          <article key={article.id} className="group flex gap-4 py-4">
-            <Link
-              href={`/article/${article.slug}`}
-              className="relative aspect-square w-[4.5rem] shrink-0 overflow-hidden ring-1 ring-border"
-            >
-              {article.featuredImage ? (
-                <Image
-                  src={article.featuredImage.url}
-                  alt={article.featuredImage.alt ?? ''}
-                  fill
-                  sizes="72px"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              ) : (
-                <span className="media-fill absolute inset-0" aria-hidden />
-              )}
-            </Link>
-            <div className="min-w-0 flex-1">
-              <Kicker article={article} small locale={locale} />
-              <h3 className="mt-1 font-heading text-[15px] font-bold leading-snug text-text">
-                <Link
-                  href={`/article/${article.slug}`}
-                  className="line-clamp-3 transition-colors group-hover:text-primary"
-                >
-                  {article.title}
-                </Link>
-              </h3>
-            </div>
+          <article key={article.id} className="group py-3.5">
+            <Kicker article={article} small locale={locale} />
+            <h3 className="mt-1 font-heading text-[15px] font-bold leading-snug text-text">
+              <Link
+                href={`/article/${article.slug}`}
+                className="line-clamp-3 transition-colors group-hover:text-primary"
+              >
+                {article.title}
+              </Link>
+            </h3>
           </article>
         ))}
       </div>

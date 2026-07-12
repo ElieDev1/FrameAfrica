@@ -55,8 +55,10 @@ export default async function Home() {
   // The front-page lead is the newest editor-featured story (fallback: newest).
   const lead = featured[0] ?? latest[0];
   const rest = latest.filter((a) => a.id !== lead.id);
-  const secondary = rest.slice(0, 4);
-  const river = rest.slice(4);
+  // The secondary "Top stories" column: one leads with a photo, the rest are
+  // headline-only, so it can carry a few more without crowding.
+  const secondary = rest.slice(0, 5);
+  const river = rest.slice(5);
   const featuredPicks = featured.filter((a) => a.id !== lead.id);
   const picks = (featuredPicks.length > 0 ? featuredPicks : rest).slice(0, 4);
   const breaking = latest.filter((a) => a.isBreaking);
