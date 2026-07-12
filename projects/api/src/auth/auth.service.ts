@@ -25,6 +25,8 @@ const DUMMY_PASSWORD_HASH =
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  /** Consecutive failed sign-ins before the account is locked. */
+  private static readonly MAX_FAILED_ATTEMPTS = 5;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -99,7 +101,14 @@ export class AuthService {
       input.password,
     );
 
+    // A locked account stays locked until an admin clears it — reject even a
+    // correct password so brute-forcing can't slip through on the 6th try.
+    if (user?.lockedAt) {
+      throw new UnauthorizedException('ACCOUNT_LOCKED');
+    }
+
     if (!user || !user.passwordHash || !passwordOk) {
+      if (user) await this.registerFailedLogin(user.id, user.failedLoginAttempts);
       throw new UnauthorizedException('Invalid email or password');
     }
     if (user.status !== UserStatus.active) {
@@ -118,12 +127,26 @@ export class AuthService {
       }
     }
 
+    // Success clears the failure counter (and any residual lock state).
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { lastLoginAt: new Date() },
+      data: { lastLoginAt: new Date(), failedLoginAttempts: 0, lockedAt: null },
     });
 
     return this.issueSession(user);
+  }
+
+  /**
+   * Count a failed sign-in. Once the threshold is reached the account is locked
+   * and only an admin can clear it (documents/05 §3.2 — brute-force lockout).
+   */
+  private async registerFailedLogin(userId: string, current: number): Promise<void> {
+    const attempts = current + 1;
+    const locked = attempts >= AuthService.MAX_FAILED_ATTEMPTS;
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { failedLoginAttempts: attempts, lockedAt: locked ? new Date() : null },
+    });
   }
 
   async refresh(rawRefreshToken: string): Promise<AuthResult> {

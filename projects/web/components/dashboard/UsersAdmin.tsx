@@ -1,9 +1,16 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { ChevronRightIcon, PlusIcon, SearchIcon } from '@/components/icons';
 import { useT } from '@/components/LocaleProvider';
-import { createUser, resetUserPassword, setUserRoles, setUserStatus } from '@/lib/admin-actions';
+import {
+  createUser,
+  resetUserPassword,
+  setUserRoles,
+  setUserStatus,
+  unlockUser,
+} from '@/lib/admin-actions';
 import { type AdminUser, ROLE_NAMES, type RoleName, type UserStatus } from '@/lib/admin-types';
 import { formatDate } from '@/lib/format';
 import type { MessageKey } from '@/lib/i18n';
@@ -299,7 +306,10 @@ function StatusBadge({ status }: { status: UserStatus }) {
 /** One user table row with role editor, status toggle + reset-password. */
 function UserRow({ user, onChange }: { user: AdminUser; onChange: (u: AdminUser) => void }) {
   const t = useT();
+  const ask = useConfirm();
   const [note, setNote] = useState<string | null>(null);
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function toggleStatus() {
@@ -311,12 +321,40 @@ function UserRow({ user, onChange }: { user: AdminUser; onChange: (u: AdminUser)
     });
   }
 
-  function reset() {
+  function unlock() {
     setNote(null);
     startTransition(async () => {
-      const res = await resetUserPassword(user.id);
-      setNote(res.error ?? `${t('dusr.passwordEmailedTo')} ${res.email}`);
+      const res = await unlockUser(user.id);
+      if (!res.error) onChange({ ...user, locked: false });
+      else setNote(res.error);
     });
+  }
+
+  async function reset() {
+    if (!(await ask({ message: t('dusr.resetConfirm'), danger: true }))) return;
+    setNote(null);
+    setTempPassword(null);
+    setCopied(false);
+    startTransition(async () => {
+      const res = await resetUserPassword(user.id);
+      if (res.error) {
+        setNote(res.error);
+      } else {
+        setTempPassword(res.temporaryPassword ?? null);
+        onChange({ ...user, mustChangePassword: true });
+      }
+    });
+  }
+
+  async function copyTemp() {
+    if (!tempPassword) return;
+    try {
+      await navigator.clipboard.writeText(tempPassword);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard blocked — the password is visible to copy manually */
+    }
   }
 
   return (
@@ -332,9 +370,36 @@ function UserRow({ user, onChange }: { user: AdminUser; onChange: (u: AdminUser)
                   {t('dusr.invited')}
                 </span>
               )}
+              {user.locked && (
+                <span className="shrink-0 rounded bg-accent-red/15 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-accent-red">
+                  {t('dusr.locked')}
+                </span>
+              )}
             </div>
             <div className="truncate font-mono text-[11px] text-muted">{user.email}</div>
             {note && <div className="mt-1 font-mono text-[10px] text-primary">{note}</div>}
+            {tempPassword && (
+              <div className="mt-2 max-w-xs rounded-lg border border-primary/40 bg-primary/5 p-2">
+                <p className="font-mono text-[9px] uppercase tracking-wide text-muted">
+                  {t('dusr.tempPassword')}
+                </p>
+                <div className="mt-1 flex items-center gap-2">
+                  <code className="min-w-0 flex-1 truncate rounded bg-surface-2 px-2 py-1 font-mono text-xs font-bold text-text">
+                    {tempPassword}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={copyTemp}
+                    className="shrink-0 rounded border border-border px-2 py-1 font-mono text-[10px] font-semibold text-muted transition hover:border-primary hover:text-primary"
+                  >
+                    {copied ? t('dusr.copied') : t('dusr.copy')}
+                  </button>
+                </div>
+                <p className="mt-1.5 font-mono text-[9px] leading-snug text-muted">
+                  {t('dusr.tempPasswordHint')}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </td>
@@ -349,6 +414,16 @@ function UserRow({ user, onChange }: { user: AdminUser; onChange: (u: AdminUser)
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center justify-end gap-1">
+          {user.locked && (
+            <button
+              type="button"
+              onClick={unlock}
+              disabled={pending}
+              className="rounded-lg border border-accent-red/40 px-2.5 py-1.5 text-xs font-semibold text-accent-red transition hover:bg-accent-red/10 disabled:opacity-40"
+            >
+              {t('dusr.unlock')}
+            </button>
+          )}
           <button
             type="button"
             onClick={toggleStatus}

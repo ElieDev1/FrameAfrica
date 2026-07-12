@@ -110,6 +110,12 @@ export class AdminUsersController {
   async resetPassword(@Param('id', ParseUUIDPipe) id: string) {
     return apiResponse(await this.users.resetPassword(id));
   }
+
+  /** Clear a brute-force lockout so the user can sign in again. */
+  @Post(':id/unlock')
+  async unlock(@Param('id', ParseUUIDPipe) id: string) {
+    return apiResponse(await this.users.unlock(id));
+  }
 }
 
 function isRole(value?: string): value is RoleName {

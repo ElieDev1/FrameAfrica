@@ -147,6 +147,10 @@ model User {
   twoFactorEnabled   Boolean    @default(false) @map("two_factor_enabled")
   twoFactorSecret    String?    @map("two_factor_secret")
   mustChangePassword Boolean    @default(false) @map("must_change_password")
+  /// Brute-force lockout: consecutive failed sign-ins, and when the account was
+  /// locked (non-null = locked; only an admin can clear it).
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedAt           DateTime?  @map("locked_at")
   commentsBannedAt   DateTime?  @map("comments_banned_at")
   /// Paid access through this instant; null/past = not a subscriber. Granted by
   /// an admin today; self-serve payments (MoMo/Airtel) land with billing.

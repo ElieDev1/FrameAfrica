@@ -22,6 +22,8 @@ export interface AdminUser {
   roles: string[];
   status: UserStatus;
   mustChangePassword: boolean;
+  /** Locked out after too many failed sign-ins; an admin must unlock. */
+  locked: boolean;
   lastLoginAt: string | null;
   createdAt: string;
 }

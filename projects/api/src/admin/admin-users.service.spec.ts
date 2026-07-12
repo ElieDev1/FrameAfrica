@@ -13,6 +13,7 @@ const userRow = (over: Record<string, unknown> = {}) => ({
   avatarUrl: null,
   status: UserStatus.active,
   mustChangePassword: true,
+  lockedAt: null as Date | null,
   lastLoginAt: null as Date | null,
   createdAt: new Date('2026-01-01T00:00:00Z'),
   roles: [{ role: { name: RoleName.journalist } }],
@@ -89,20 +90,41 @@ describe('AdminUsersService', () => {
   });
 
   describe('resetPassword', () => {
-    it('sets a new temp password and emails it (not returned to the admin)', async () => {
+    it('sets a new temp password, emails it, and returns it once to the admin', async () => {
       const { service, prisma, mailer } = build();
       prisma.user.findFirst.mockResolvedValue({ email: 'ret@frameafrica.rw' });
       prisma.user.update.mockResolvedValue(userRow());
 
       const res = await service.resetPassword('u1');
 
-      expect(res).toEqual({ email: 'ret@frameafrica.rw', emailed: true });
+      expect(res.email).toBe('ret@frameafrica.rw');
+      expect(res.emailed).toBe(true);
+      expect(typeof res.temporaryPassword).toBe('string');
+      expect(res.temporaryPassword.length).toBeGreaterThan(0);
+      // The admin gets the same password that was emailed.
       expect(mailer.sendTemporaryPassword).toHaveBeenCalledWith(
         'ret@frameafrica.rw',
-        expect.any(String),
+        res.temporaryPassword,
       );
       const { data } = firstArg<{ data: { mustChangePassword: boolean } }>(prisma.user.update);
       expect(data.mustChangePassword).toBe(true);
+    });
+  });
+
+  describe('unlock', () => {
+    it('clears the lock and resets the failure counter', async () => {
+      const { service, prisma } = build();
+      prisma.user.findFirst.mockResolvedValue({ email: 'locked@frameafrica.rw' });
+      prisma.user.update.mockResolvedValue(userRow({ lockedAt: null }));
+
+      const res = await service.unlock('u1');
+
+      const { data } = firstArg<{ data: { failedLoginAttempts: number; lockedAt: null } }>(
+        prisma.user.update,
+      );
+      expect(data.failedLoginAttempts).toBe(0);
+      expect(data.lockedAt).toBeNull();
+      expect(res.locked).toBe(false);
     });
   });
 

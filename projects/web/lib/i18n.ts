@@ -20,6 +20,7 @@ const dict = {
   'common.save': { en: 'Save', rw: 'Bika', fr: 'Enregistrer' },
   'common.saving': { en: 'Saving…', rw: 'Kubika…', fr: 'Enregistrement…' },
   'common.cancel': { en: 'Cancel', rw: 'Kureka', fr: 'Annuler' },
+  'common.confirm': { en: 'Confirm', rw: 'Emeza', fr: 'Confirmer' },
   'common.delete': { en: 'Delete', rw: 'Siba', fr: 'Supprimer' },
   'common.edit': { en: 'Edit', rw: 'Hindura', fr: 'Modifier' },
   'common.add': { en: 'Add', rw: 'Ongeraho', fr: 'Ajouter' },
@@ -1888,6 +1889,8 @@ const dict = {
   'dusr.email': { en: 'Email', rw: 'Email', fr: 'E-mail' },
   'dusr.displayName': { en: 'Display name', rw: 'Izina rigaragara', fr: 'Nom affiché' },
   'dusr.invited': { en: 'Invited', rw: 'Yatumiwe', fr: 'Invité' },
+  'dusr.locked': { en: 'Locked', rw: 'Yafunzwe', fr: 'Verrouillé' },
+  'dusr.unlock': { en: 'Unlock', rw: 'Fungura', fr: 'Déverrouiller' },
   'dusr.resetPassword': { en: 'Reset password', rw: 'Hindura ijambobanga', fr: 'Réinitialiser' },
   'dusr.passwordEmailedTo': {
     en: 'New password emailed to',
@@ -1895,6 +1898,18 @@ const dict = {
     fr: 'Nouveau mot de passe envoyé à',
   },
   'dusr.cancel': { en: 'cancel', rw: 'kureka', fr: 'annuler' },
+  'dusr.resetConfirm': {
+    en: 'Reset this user’s password? They’ll get a temporary one and must change it at next sign-in.',
+    rw: 'Guhindura ijambobanga ry’uyu mukoresha? Azahabwa iry’agateganyo agomba guhindura igihe akoze.',
+    fr: 'Réinitialiser le mot de passe de cet utilisateur ? Il en recevra un temporaire à changer à la prochaine connexion.',
+  },
+  'dusr.tempPasswordHint': {
+    en: 'Share it with the user (also emailed). They must set their own at first sign-in.',
+    rw: 'Rihe umukoresha (ryanoherejwe kuri email). Agomba gushyiraho irye bwite igihe akoze bwa mbere.',
+    fr: 'Communiquez-le à l’utilisateur (aussi envoyé par e-mail). Il devra définir le sien à la première connexion.',
+  },
+  'dusr.copy': { en: 'Copy', rw: 'Koporora', fr: 'Copier' },
+  'dusr.copied': { en: 'Copied', rw: 'Byakoporowe', fr: 'Copié' },
 
   // — Dashboard pages (headings, subtitles, empty states) —
   'dpage.total': { en: 'total', rw: 'byose', fr: 'au total' },
@@ -2026,6 +2041,38 @@ const dict = {
   'dpage.copyEdit': { en: 'Copy-edit', rw: 'Gukosora', fr: 'Relecture' },
 
   // — Analytics dashboard —
+  'dana.totalViews': { en: 'Total views', rw: 'Ibitangazwa byose', fr: 'Vues totales' },
+  'dana.totalLikes': { en: 'Total likes', rw: 'Bakunze byose', fr: 'J’aime totaux' },
+  'dana.totalComments': {
+    en: 'Total comments',
+    rw: 'Ibitekerezo byose',
+    fr: 'Commentaires totaux',
+  },
+  'dana.totalShares': { en: 'Total shares', rw: 'Basangije byose', fr: 'Partages totaux' },
+  'dana.interactionsByType': {
+    en: 'Interactions by content type',
+    rw: 'Ukwitabira ku bwoko bw’ibikubiyemo',
+    fr: 'Interactions par type de contenu',
+  },
+  'dana.viewsTrendTitle': { en: 'Views', rw: 'Ibitangazwa', fr: 'Vues' },
+  'dana.commentsTrendTitle': { en: 'Comments', rw: 'Ibitekerezo', fr: 'Commentaires' },
+  'dana.last14Days': { en: 'Last 14 days', rw: 'Iminsi 14 ishize', fr: '14 derniers jours' },
+  'dana.commentHealth': {
+    en: 'Comment moderation',
+    rw: 'Igenzura ry’ibitekerezo',
+    fr: 'Modération des commentaires',
+  },
+  'dana.topByViews': {
+    en: 'Most viewed articles',
+    rw: 'Inkuru zasomwe cyane',
+    fr: 'Articles les plus vus',
+  },
+  'dana.contentType': { en: 'Type', rw: 'Ubwoko', fr: 'Type' },
+  'dana.colViews': { en: 'Views', rw: 'Ibitangazwa', fr: 'Vues' },
+  'dana.colLikes': { en: 'Likes', rw: 'Bakunze', fr: 'J’aime' },
+  'dana.colComments': { en: 'Comments', rw: 'Ibitekerezo', fr: 'Commentaires' },
+  'dana.colShares': { en: 'Shares', rw: 'Basangije', fr: 'Partages' },
+  'dana.noData': { en: 'No data yet', rw: 'Nta makuru arahari', fr: 'Pas encore de données' },
   'dana.readingNow': { en: 'Reading now', rw: 'Barasoma ubu', fr: 'Lecteurs actifs' },
   'dana.viewsToday': { en: 'Views today', rw: 'Barebye uyu munsi', fr: 'Vues aujourd’hui' },
   'dana.topStories': { en: 'Top stories', rw: 'Inkuru z’ingenzi', fr: 'Articles phares' },

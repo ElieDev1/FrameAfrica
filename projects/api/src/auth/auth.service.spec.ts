@@ -15,6 +15,8 @@ const userWithRoles = (over: Record<string, unknown> = {}) => ({
   passwordHash: 'hashed',
   status: 'active',
   deletedAt: null,
+  failedLoginAttempts: 0,
+  lockedAt: null,
   roles: [{ role: { name: 'reader' } }],
   ...over,
 });
@@ -149,6 +151,33 @@ describe('AuthService', () => {
       await expect(
         service.login({ email: 'reader@frameafrica.rw', password: 'bad' }),
       ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('locks the account on the 5th consecutive failed sign-in', async () => {
+      const { service, prisma, passwords } = build();
+      prisma.user.findFirst.mockResolvedValue(userWithRoles({ failedLoginAttempts: 4 }));
+      passwords.verify.mockResolvedValue(false);
+      prisma.user.update.mockResolvedValue({});
+
+      await expect(
+        service.login({ email: 'reader@frameafrica.rw', password: 'bad' }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+
+      const { data } = (prisma.user.update.mock.calls[0] as [{ data: Record<string, unknown> }])[0];
+      expect(data.failedLoginAttempts).toBe(5);
+      expect(data.lockedAt).toBeInstanceOf(Date);
+    });
+
+    it('rejects a locked account even with the correct password', async () => {
+      const { service, prisma, passwords } = build();
+      prisma.user.findFirst.mockResolvedValue(userWithRoles({ lockedAt: new Date() }));
+      passwords.verify.mockResolvedValue(true);
+
+      await expect(
+        service.login({ email: 'reader@frameafrica.rw', password: 'pw' }),
+      ).rejects.toThrow('ACCOUNT_LOCKED');
+      // A locked account is never issued a session.
+      expect(prisma.user.update).not.toHaveBeenCalled();
     });
 
     it('rejects a suspended account', async () => {
