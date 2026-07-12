@@ -180,8 +180,8 @@ export function DashboardNav({
                 aria-current={active ? 'page' : undefined}
                 className={`grid h-10 w-10 place-items-center rounded-lg transition-colors ${
                   active
-                    ? 'bg-primary/15 text-primary'
-                    : 'text-muted hover:bg-surface-2 hover:text-text'
+                    ? 'bg-elev text-primary ring-1 ring-border'
+                    : 'text-muted hover:bg-elev hover:text-text'
                 }`}
               >
                 <item.Icon size={18} />
@@ -221,8 +221,8 @@ export function DashboardNav({
                         aria-current={active ? 'page' : undefined}
                         className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                           active
-                            ? 'bg-primary/15 font-semibold text-primary'
-                            : 'text-muted hover:bg-surface-2 hover:text-text'
+                            ? 'bg-elev font-semibold text-primary ring-1 ring-border'
+                            : 'text-muted hover:bg-elev hover:text-text'
                         }`}
                       >
                         <item.Icon size={17} />

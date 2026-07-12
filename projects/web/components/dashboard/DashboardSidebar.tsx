@@ -34,7 +34,7 @@ export function DashboardSidebar({ roles }: { roles: string[] }) {
 
   return (
     <aside
-      className={`sticky top-0 hidden h-screen shrink-0 flex-col overflow-hidden border-r border-border bg-surface-2 md:flex ${
+      className={`dash-sidenav sticky top-0 hidden h-screen shrink-0 flex-col overflow-hidden border-r border-border bg-surface-2 md:flex ${
         collapsed ? 'w-16' : 'w-60'
       }`}
     >

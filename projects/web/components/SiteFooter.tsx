@@ -56,7 +56,7 @@ export async function SiteFooter() {
   }
 
   return (
-    <footer className="border-t border-border bg-surface">
+    <footer className="site-footer">
       <div className="mx-auto max-w-[1440px] px-6 py-12">
         <Wordmark />
         <p className="mt-3 max-w-sm font-body text-sm text-muted">{t(locale, 'footer.tagline')}</p>
