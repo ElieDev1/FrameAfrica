@@ -224,6 +224,13 @@ export interface AdminOverview {
   users: { total: number; active: number; suspended: number; newLast7Days: number };
   articles: { total: number; published: number; inPipeline: number };
   comments: { visible: number; flagged: number };
+  // Optional so the page degrades gracefully if the API hasn't been redeployed
+  // with the advanced-overview fields yet.
+  publishTrend?: { date: string; count: number }[];
+  articlesByStatus?: { status: string; count: number }[];
+  topCategories?: { name: string; count: number }[];
+  media?: { videos: number; galleries: number; episodes: number; interactives: number };
+  engagement?: { views: number; likes: number; comments: number; shares: number };
   recentArticles: {
     id: string;
     slug: string;

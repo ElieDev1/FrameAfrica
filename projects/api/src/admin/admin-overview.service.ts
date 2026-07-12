@@ -1,11 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { ArticleStatus, CommentStatus, UserStatus } from '@prisma/client';
+import { ArticleStatus, CommentStatus, MediaStatus, UserStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface AdminOverview {
   users: { total: number; active: number; suspended: number; newLast7Days: number };
   articles: { total: number; published: number; inPipeline: number };
   comments: { visible: number; flagged: number };
+  /** Articles published per day for the last 14 days — the publishing-trend chart. */
+  publishTrend: { date: string; count: number }[];
+  /** How the whole archive splits across the workflow — the pipeline breakdown. */
+  articlesByStatus: { status: string; count: number }[];
+  /** The busiest desks — top categories by published count. */
+  topCategories: { name: string; count: number }[];
+  /** Published multimedia across the four hubs. */
+  media: { videos: number; galleries: number; episodes: number; interactives: number };
+  /** Site-wide engagement totals. */
+  engagement: { views: number; likes: number; comments: number; shares: number };
   recentArticles: {
     id: string;
     slug: string;
@@ -48,6 +58,11 @@ export class AdminOverviewService {
 
   async get(): Promise<AdminOverview> {
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    // 14 day buckets, aligned to UTC midnight, oldest first.
+    const trendStart = new Date();
+    trendStart.setUTCHours(0, 0, 0, 0);
+    trendStart.setUTCDate(trendStart.getUTCDate() - 13);
+    const publishedFilter = { status: MediaStatus.published, deletedAt: null } as const;
 
     const [
       users,
@@ -59,6 +74,16 @@ export class AdminOverviewService {
       inPipeline,
       commentsVisible,
       commentsFlagged,
+      statusGroups,
+      categoryGroups,
+      trendRows,
+      videoCount,
+      galleryCount,
+      episodeCount,
+      interactiveCount,
+      likeCount,
+      commentTotal,
+      articleAgg,
       recentArticles,
       recentComments,
       recentUsers,
@@ -80,6 +105,39 @@ export class AdminOverviewService {
           deletedAt: null,
           OR: [{ reportCount: { gt: 0 } }, { status: CommentStatus.pending }],
         },
+      }),
+      // Workflow breakdown across every status.
+      this.prisma.article.groupBy({
+        by: ['status'],
+        where: { deletedAt: null },
+        _count: { _all: true },
+      }),
+      // Busiest desks — top categories by published article count.
+      this.prisma.article.groupBy({
+        by: ['categoryId'],
+        where: { deletedAt: null, status: ArticleStatus.published },
+        _count: { _all: true },
+        orderBy: { _count: { categoryId: 'desc' } },
+        take: 6,
+      }),
+      // Publishing trend: published articles in the last 14 days, bucketed in JS.
+      this.prisma.article.findMany({
+        where: {
+          deletedAt: null,
+          status: ArticleStatus.published,
+          publishedAt: { gte: trendStart },
+        },
+        select: { publishedAt: true },
+      }),
+      this.prisma.video.count({ where: { isHidden: false } }),
+      this.prisma.gallery.count({ where: publishedFilter }),
+      this.prisma.podcastEpisode.count({ where: publishedFilter }),
+      this.prisma.interactive.count({ where: publishedFilter }),
+      this.prisma.contentLike.count(),
+      this.prisma.comment.count({ where: { deletedAt: null } }),
+      this.prisma.article.aggregate({
+        where: { deletedAt: null },
+        _sum: { viewCount: true, shareCount: true },
       }),
       this.prisma.article.findMany({
         where: { deletedAt: null },
@@ -120,10 +178,55 @@ export class AdminOverviewService {
       }),
     ]);
 
+    // Resolve category names for the top desks.
+    const categoryIds = categoryGroups
+      .map((g) => g.categoryId)
+      .filter((id): id is string => Boolean(id));
+    const categories = categoryIds.length
+      ? await this.prisma.category.findMany({
+          where: { id: { in: categoryIds } },
+          select: { id: true, name: true },
+        })
+      : [];
+    const categoryName = new Map(categories.map((c) => [c.id, c.name]));
+
+    // Bucket the publishing trend into 14 UTC days, oldest first.
+    const trend = new Map<string, number>();
+    for (let i = 0; i < 14; i += 1) {
+      const d = new Date(trendStart);
+      d.setUTCDate(d.getUTCDate() + i);
+      trend.set(d.toISOString().slice(0, 10), 0);
+    }
+    for (const row of trendRows) {
+      if (!row.publishedAt) continue;
+      const key = row.publishedAt.toISOString().slice(0, 10);
+      if (trend.has(key)) trend.set(key, (trend.get(key) ?? 0) + 1);
+    }
+
     return {
       users: { total: users, active, suspended, newLast7Days: newUsers },
       articles: { total: articleTotal, published, inPipeline },
       comments: { visible: commentsVisible, flagged: commentsFlagged },
+      publishTrend: [...trend.entries()].map(([date, count]) => ({ date, count })),
+      articlesByStatus: statusGroups
+        .map((g) => ({ status: g.status, count: g._count._all }))
+        .sort((a, b) => b.count - a.count),
+      topCategories: categoryGroups.map((g) => ({
+        name: (g.categoryId && categoryName.get(g.categoryId)) || 'Uncategorised',
+        count: g._count._all,
+      })),
+      media: {
+        videos: videoCount,
+        galleries: galleryCount,
+        episodes: episodeCount,
+        interactives: interactiveCount,
+      },
+      engagement: {
+        views: Number(articleAgg._sum.viewCount ?? 0),
+        likes: likeCount,
+        comments: commentTotal,
+        shares: articleAgg._sum.shareCount ?? 0,
+      },
       recentArticles: recentArticles.map((a) => ({
         id: a.id,
         slug: a.slug,
