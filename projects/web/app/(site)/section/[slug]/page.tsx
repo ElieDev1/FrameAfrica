@@ -145,7 +145,7 @@ export default async function SectionPage({ params }: PageProps) {
             // Editorial layout: a wide lead story, then a dense column of small
             // cards, beside a "Just in" rail showing how recently each story
             // landed — a news page, not a grid of uniform product tiles.
-            <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
               <div className="min-w-0">
                 {lead && (
                   <div className="border-b border-border pb-8">
