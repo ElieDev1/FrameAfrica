@@ -122,6 +122,7 @@ export class SearchService {
         where: where(published),
         select: {
           id: true,
+          slug: true,
           title: true,
           description: true,
           coverUrl: true,
@@ -175,7 +176,7 @@ export class SearchService {
         title: e.title,
         description: e.description,
         imageUrl: e.coverUrl ?? e.show.coverUrl,
-        url: `/podcasts/${e.show.slug}`,
+        url: `/podcasts/${e.show.slug}/${e.slug}`,
         publishedAt: e.publishedAt?.toISOString() ?? null,
       })),
       ...videos.map((v): MediaSearchResult => ({
@@ -184,7 +185,7 @@ export class SearchService {
         title: v.title,
         description: v.description,
         imageUrl: v.thumbnailUrl ?? `https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg`,
-        url: '/videos',
+        url: `/videos/${v.id}`,
         publishedAt: v.publishedAt.toISOString(),
       })),
       ...interactives.map((i): MediaSearchResult => ({

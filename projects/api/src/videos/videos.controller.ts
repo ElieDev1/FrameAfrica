@@ -16,6 +16,7 @@ import { Roles } from '../common/auth/roles.decorator';
 import { RolesGuard } from '../common/auth/roles.guard';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { apiResponse } from '../common/http/api-response';
+import { pagination, readPaging } from '../common/http/paging';
 import { AddVideoDto } from './dto/add-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { VideosService } from './videos.service';
@@ -26,9 +27,16 @@ export class VideosController {
 
   /** Public: the cached video hub (visible clips, featured first). */
   @Get('videos')
-  async list(@Query('limit') limit?: string) {
-    const n = Number(limit);
-    return apiResponse(await this.videos.list(Number.isFinite(n) && n > 0 ? n : 12));
+  async list(@Query('limit') limit?: string, @Query('page') page?: string, @Query('q') q?: string) {
+    const paging = readPaging(limit, page, 12);
+    const { items, hasMore } = await this.videos.listPage(paging.limit, paging.page, q);
+    return apiResponse(items, pagination(paging.page, hasMore));
+  }
+
+  /** Public: one clip, for its own page (comments, likes, shares live there). */
+  @Get('videos/:id')
+  async getOne(@Param('id', ParseUUIDPipe) id: string) {
+    return apiResponse(await this.videos.getPublic(id));
   }
 
   /** Admin: every cached clip, including hidden, for the management dashboard. */

@@ -89,9 +89,12 @@
 | GET | `/articles/{slug}/related` | Related articles |
 | GET | `/categories` | Category tree |
 | GET | `/categories/{slug}/articles` | Articles in category |
-| GET | `/search?q=` | Search (proxy to OpenSearch) |
+| GET | `/search?q=` | Search articles (relevance-ranked, paginated) |
+| GET | `/search/media?q=` | Search multimedia (galleries, episodes, videos, interactives) |
 | GET | `/live/{id}` | Live blog stream (SSE/WebSocket upgrade) |
 | GET | `/notices` | Public notices / tenders / obituaries |
+| GET | `/videos` · `/galleries` · `/podcasts` · `/interactives` | Multimedia hubs — accept `?limit=&page=`, answer `meta.pagination.hasMore` |
+| GET | `/videos/{id}` · `/galleries/{slug}` · `/podcasts/{slug}` · `/interactives/{slug}` | One item, for its own page |
 
 ### CMS (journalist / editor) — role-gated
 | Method | Path | Description | Role |
@@ -115,13 +118,22 @@ Rejected if the transition is not allowed for the caller's role or current state
 
 ## 6. Engagement Endpoints
 
+Engagement is **polymorphic**: `{type}` is one of `article | gallery | episode | interactive | video`,
+and `{id}` is that item's UUID. One comment table, one like table and one moderation
+queue serve every content type.
+
 | Method | Path | Description | Auth |
 |---|---|---|---|
-| GET | `/articles/{id}/comments` | List approved comments | Public |
-| POST | `/articles/{id}/comments` | Add comment (AI-screened) | User |
+| GET | `/engagement/{type}/{id}` | Like / share / comment counts (+ `liked` when signed in) | Public |
+| POST | `/engagement/{type}/{id}/like` | Like / unlike | User |
+| POST | `/engagement/{type}/{id}/share` | Record a share (rate-limited) | Public |
+| GET | `/comments/{type}/{id}` | List visible comments (threaded) | Public |
+| POST | `/comments/{type}/{id}` | Add comment (AI-screened) | User |
+| GET | `/articles/{id}/comments` | List approved comments (article alias) | Public |
+| POST | `/articles/{id}/comments` | Add comment (article alias) | User |
 | POST | `/comments/{id}/like` | Like a comment | User |
 | POST | `/comments/{id}/report` | Report abuse | User |
-| POST | `/cms/comments/{id}/moderate` | Approve/hide/remove | moderator |
+| POST | `/cms/comments/{id}/moderate` | Approve/hide/remove (any type) | moderator |
 | POST | `/me/bookmarks/{articleId}` | Bookmark | User |
 | GET | `/me/bookmarks` | List bookmarks | User |
 | POST | `/me/follows/{categoryId}` | Follow category | User |

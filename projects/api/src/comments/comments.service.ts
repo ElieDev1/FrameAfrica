@@ -262,14 +262,14 @@ export class CommentsService {
           case EngagementTarget.episode: {
             const rowsFound = await this.prisma.podcastEpisode.findMany({
               where: { id: { in: ids } },
-              select: { id: true, title: true, show: { select: { slug: true } } },
+              select: { id: true, title: true, slug: true, show: { select: { slug: true } } },
             });
             return add(
               type,
               rowsFound.map((e) => ({
                 id: e.id,
                 title: e.title,
-                url: `/podcasts/${e.show.slug}`,
+                url: `/podcasts/${e.show.slug}/${e.slug}`,
               })),
             );
           }
@@ -290,7 +290,7 @@ export class CommentsService {
             });
             return add(
               type,
-              rowsFound.map((v) => ({ id: v.id, title: v.title, url: '/videos' })),
+              rowsFound.map((v) => ({ id: v.id, title: v.title, url: `/videos/${v.id}` })),
             );
           }
         }

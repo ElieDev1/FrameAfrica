@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { AdminSettingsService } from '../admin/admin-settings.service';
+import { textFilter } from '../common/prisma/text-filter';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface VideoView {
@@ -49,6 +50,29 @@ export class VideosService {
       take: Math.min(Math.max(limit, 1), MAX_ITEMS),
     });
     return rows.map(toView);
+  }
+
+  /** One page of visible clips, for the hub's pager (optional `q` filter). */
+  async listPage(
+    limit: number,
+    page: number,
+    q?: string,
+  ): Promise<{ items: VideoView[]; hasMore: boolean }> {
+    const take = Math.min(Math.max(limit, 1), MAX_ITEMS);
+    const rows = await this.prisma.video.findMany({
+      where: { isHidden: false, ...textFilter(q) },
+      orderBy: [{ isFeatured: 'desc' }, { publishedAt: 'desc' }],
+      skip: (Math.max(page, 1) - 1) * take,
+      take: take + 1, // one extra row answers "is there a next page?"
+    });
+    return { items: rows.slice(0, take).map(toView), hasMore: rows.length > take };
+  }
+
+  /** A single visible clip, for its public page. */
+  async getPublic(id: string): Promise<VideoView> {
+    const row = await this.prisma.video.findFirst({ where: { id, isHidden: false } });
+    if (!row) throw new NotFoundException('Video not found');
+    return toView(row);
   }
 
   /** Every cached clip (including hidden) for the management dashboard. */

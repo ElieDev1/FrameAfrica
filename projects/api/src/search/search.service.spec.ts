@@ -73,6 +73,7 @@ describe('SearchService', () => {
       prisma.podcastEpisode.findMany.mockResolvedValue([
         {
           id: 'e1',
+          slug: 'coffee-economics',
           title: 'Coffee economics',
           description: null,
           coverUrl: null,
@@ -103,10 +104,11 @@ describe('SearchService', () => {
 
       const res = await service.searchMedia('coffee');
 
+      // Every hit deep-links to the item's own page, where its comments live.
       expect(res.map((r) => [r.kind, r.url])).toEqual([
         ['gallery', '/galleries/kigali-nights'],
-        ['episode', '/podcasts/the-brief'],
-        ['video', '/videos'],
+        ['episode', '/podcasts/the-brief/coffee-economics'],
+        ['video', '/videos/v1'],
         ['interactive', '/interactives/coffee-exports'],
       ]);
       // An episode with no cover of its own falls back to the show's artwork,

@@ -1,5 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { CommentStatus } from '@prisma/client';
+import { CommentStatus, EngagementTarget } from '@prisma/client';
 import type { EngagementService } from '../engagement/engagement.service';
 import type { NotificationsService } from '../notifications/notifications.service';
 import type { PrismaService } from '../prisma/prisma.service';
@@ -8,7 +8,9 @@ import { buildThread, CommentsService } from './comments.service';
 const author = { id: 'u1', displayName: 'Reader', avatarUrl: null };
 const commentRow = (over: Record<string, unknown> = {}) => ({
   id: 'c1',
-  articleId: 'a1',
+  targetType: EngagementTarget.article,
+  targetId: 'a1',
+  articleId: 'a1' as string | null,
   authorId: 'u1',
   parentId: null as string | null,
   body: 'Hi',
