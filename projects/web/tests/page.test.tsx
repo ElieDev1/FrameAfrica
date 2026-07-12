@@ -50,23 +50,18 @@ function sampleArticle(id: string, title: string): ArticleSummary {
 describe('Home', () => {
   afterEach(() => jest.clearAllMocks());
 
-  it('renders the lead, secondary stories, and a Most-read list', async () => {
-    mockFetchArticles.mockImplementation((params) =>
-      Promise.resolve({
-        articles:
-          params?.sort === 'popular'
-            ? [sampleArticle('p1', 'Most read one')]
-            : [sampleArticle('a1', 'Lead story'), sampleArticle('a2', 'Second story')],
-      }),
-    );
+  it('renders the lead, secondary stories, and a Just-in timeline', async () => {
+    mockFetchArticles.mockResolvedValue({
+      articles: [sampleArticle('a1', 'Lead story'), sampleArticle('a2', 'Second story')],
+    });
 
     render(await Home());
 
     expect(screen.getByRole('heading', { name: 'Lead story' })).toBeInTheDocument();
-    // "Second story" also appears under Editor's picks, so there may be more than one.
+    // "Second story" also appears under Editor's picks and Just in.
     expect(screen.getAllByRole('heading', { name: 'Second story' }).length).toBeGreaterThan(0);
-    expect(screen.getByRole('heading', { name: 'Most read' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Most read one' })).toBeInTheDocument();
+    // The chronological "Just in" rail replaced the popularity list.
+    expect(screen.getByRole('heading', { name: 'Just in' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: "Editor's picks" })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Weather' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Markets' })).toBeInTheDocument();

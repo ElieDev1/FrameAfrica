@@ -2,8 +2,8 @@ import { AdSlot } from '@/components/AdSlot';
 import { ArticleCard } from '@/components/ArticleCard';
 import { BreakingTicker } from '@/components/BreakingTicker';
 import { EditorsPicks } from '@/components/EditorsPicks';
-import { MostRead } from '@/components/HeadlineList';
 import { HeroSidebar } from '@/components/HeroSidebar';
+import { JustIn } from '@/components/JustIn';
 import { MarketsWidget } from '@/components/MarketsWidget';
 import { NewsletterBox } from '@/components/NewsletterBox';
 import { SectionBlock } from '@/components/SectionBlock';
@@ -25,18 +25,15 @@ interface SectionData {
 export default async function Home() {
   const locale = await getLocale();
   let latest: ArticleSummary[] = [];
-  let popular: ArticleSummary[] = [];
   let featured: ArticleSummary[] = [];
   let failed = false;
 
   try {
-    const [latestRes, popularRes, featuredRes] = await Promise.all([
+    const [latestRes, featuredRes] = await Promise.all([
       fetchArticles({ limit: 19 }),
-      fetchArticles({ sort: 'popular', limit: 6 }),
       fetchArticles({ featured: true, limit: 5 }),
     ]);
     latest = latestRes.articles;
-    popular = popularRes.articles;
     featured = featuredRes.articles;
   } catch {
     failed = true;
@@ -116,7 +113,7 @@ export default async function Home() {
           </main>
 
           <aside className="flex flex-col gap-8">
-            <MostRead articles={popular} locale={locale} />
+            <JustIn articles={rest.slice(0, 7)} locale={locale} />
             <EditorsPicks articles={picks} />
             <WeatherWidget />
             <MarketsWidget />

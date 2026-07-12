@@ -246,6 +246,7 @@ const dict = {
 
   // — Homepage sections —
   'home.mostRead': { en: 'Most read', rw: 'Bisomwa cyane', fr: 'Les plus lus' },
+  'home.justIn': { en: 'Just in', rw: 'Bimaze kugera', fr: 'Dernières infos' },
   'home.editorsPicks': {
     en: "Editor's picks",
     rw: 'Ibyatoranyijwe',

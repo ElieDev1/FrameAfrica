@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **The homepage sidebar leads with a chronological "Just in" timeline instead of "Most read."** In place of the popularity list, the right rail now shows the newest stories in the order they were released — a text-only timeline (no images) with a connector line and a hollow node per story, each with a relative timestamp ("3 hours ago"), its section, and the headline. Backed by a new locale-aware `timeAgo` helper (en/fr via `Intl`, a hand-built Kinyarwanda form). This drops the homepage's popularity API call.
 - **Content cards are now square-cornered rectangles.** The article cards (homepage hero, latest river, section/topic lists, related news) and the multimedia cards (video hub stage/rail/grid, video strip, gallery/podcast/interactive hubs, homepage sidebar) drop their rounded corners for a cleaner, more editorial look. Round elements that should stay round — play buttons, avatars, badges/pills, toggle dots — are untouched.
 
 ### Security
