@@ -19,7 +19,7 @@ export interface AdminOverview {
     body: string;
     createdAt: string;
     author: string;
-    articleSlug: string;
+    articleSlug: string | null;
   }[];
   recentUsers: {
     id: string;
@@ -137,7 +137,8 @@ export class AdminOverviewService {
         body: c.body.length > 140 ? `${c.body.slice(0, 140)}…` : c.body,
         createdAt: c.createdAt.toISOString(),
         author: c.author.displayName,
-        articleSlug: c.article.slug,
+        // null for comments on galleries/podcasts/interactives/videos
+        articleSlug: c.article?.slug ?? null,
       })),
       recentUsers: recentUsers.map((u) => ({
         id: u.id,

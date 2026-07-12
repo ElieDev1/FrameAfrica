@@ -1,5 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { CommentStatus } from '@prisma/client';
+import type { EngagementService } from '../engagement/engagement.service';
 import type { NotificationsService } from '../notifications/notifications.service';
 import type { PrismaService } from '../prisma/prisma.service';
 import { buildThread, CommentsService } from './comments.service';
@@ -42,11 +43,14 @@ function build() {
     $transaction: jest.fn().mockResolvedValue([{}, { reportCount: 1, body: 'reported body' }]),
   };
   const notifications = { notifyRoles: jest.fn() };
+  // Visible by default so create() proceeds; tests override to assert the 404.
+  const engagement = { assertVisible: jest.fn().mockResolvedValue(undefined) };
   const service = new CommentsService(
     prisma as unknown as PrismaService,
     notifications as unknown as NotificationsService,
+    engagement as unknown as EngagementService,
   );
-  return { service, prisma, notifications };
+  return { service, prisma, notifications, engagement };
 }
 
 /** First argument of a jest mock's first call, typed. */
@@ -67,16 +71,21 @@ describe('CommentsService', () => {
       const res = await service.listForArticle('a1');
 
       const { where } = firstArg<{ where: Record<string, unknown> }>(prisma.comment.findMany);
-      expect(where).toMatchObject({ articleId: 'a1', status: 'visible', deletedAt: null });
+      expect(where).toMatchObject({
+        targetType: 'article',
+        targetId: 'a1',
+        status: 'visible',
+        deletedAt: null,
+      });
       expect(res).toHaveLength(2); // two top-level
       expect(res[0].replies.map((r) => r.id)).toEqual(['c2']);
     });
   });
 
   describe('create', () => {
-    it('404s when the article is not published', async () => {
-      const { service, prisma } = build();
-      prisma.article.findFirst.mockResolvedValue(null);
+    it('404s when the target is not published', async () => {
+      const { service, engagement } = build();
+      engagement.assertVisible.mockRejectedValue(new NotFoundException('Content not found'));
       await expect(service.create('u1', 'a1', { body: 'hello' })).rejects.toBeInstanceOf(
         NotFoundException,
       );

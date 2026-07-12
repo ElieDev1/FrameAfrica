@@ -22,8 +22,22 @@ export interface SearchSuggestion {
   slug: string;
 }
 
+/** A hit in the multimedia library — a gallery, podcast episode, video or interactive. */
+export interface MediaSearchResult {
+  kind: 'gallery' | 'episode' | 'video' | 'interactive';
+  id: string;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  /** The public page this hit links to. */
+  url: string;
+  publishedAt: string | null;
+}
+
 export interface SearchResponse {
   results: SearchResult[];
+  /** Matching multimedia, so search covers the whole site — not just articles. */
+  media: MediaSearchResult[];
   hasMore: boolean;
   page: number;
 }

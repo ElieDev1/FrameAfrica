@@ -1,79 +1,60 @@
 import { NotFoundException } from '@nestjs/common';
-import type { PrismaService } from '../prisma/prisma.service';
+import { EngagementTarget } from '@prisma/client';
+import type { EngagementService } from '../engagement/engagement.service';
 import { LikesService } from './likes.service';
 
 function build() {
-  const prisma = {
-    articleLike: { findUnique: jest.fn(), create: jest.fn(), delete: jest.fn() },
-    article: { findFirst: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
-    $transaction: jest.fn().mockResolvedValue([]),
-  };
-  return { service: new LikesService(prisma as unknown as PrismaService), prisma };
+  const engagement = { like: jest.fn(), counts: jest.fn() };
+  return { service: new LikesService(engagement as unknown as EngagementService), engagement };
 }
 
 describe('LikesService', () => {
-  describe('like', () => {
-    it('creates a like and bumps the count when not already liked', async () => {
-      const { service, prisma } = build();
-      prisma.article.findFirst.mockResolvedValue({ id: 'a1' }); // published
-      prisma.articleLike.findUnique.mockResolvedValue(null); // not yet liked
-      prisma.article.findUnique.mockResolvedValue({ likeCount: 6 });
-
-      const res = await service.like('u1', 'a1');
-
-      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
-      expect(res).toEqual({ liked: true, likeCount: 6 });
+  it('likes an article through the polymorphic engagement store', async () => {
+    const { service, engagement } = build();
+    engagement.like.mockResolvedValue({
+      liked: true,
+      likeCount: 7,
+      shareCount: 0,
+      commentCount: 0,
     });
 
-    it('is idempotent when already liked (no double count)', async () => {
-      const { service, prisma } = build();
-      prisma.article.findFirst.mockResolvedValue({ id: 'a1' });
-      prisma.articleLike.findUnique.mockResolvedValue({ userId: 'u1' });
-      prisma.article.findUnique.mockResolvedValue({ likeCount: 6 });
+    const res = await service.like('u1', 'a1');
 
-      const res = await service.like('u1', 'a1');
-
-      expect(prisma.$transaction).not.toHaveBeenCalled();
-      expect(res.liked).toBe(true);
-    });
-
-    it('404s an unpublished/unknown article', async () => {
-      const { service, prisma } = build();
-      prisma.article.findFirst.mockResolvedValue(null);
-      await expect(service.like('u1', 'a1')).rejects.toBeInstanceOf(NotFoundException);
-    });
+    expect(engagement.like).toHaveBeenCalledWith('u1', EngagementTarget.article, 'a1', true);
+    expect(res).toEqual({ liked: true, likeCount: 7 });
   });
 
-  describe('unlike', () => {
-    it('removes a like and decrements when it existed', async () => {
-      const { service, prisma } = build();
-      prisma.articleLike.findUnique.mockResolvedValue({ userId: 'u1' });
-      prisma.article.findUnique.mockResolvedValue({ likeCount: 5 });
-
-      const res = await service.unlike('u1', 'a1');
-
-      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
-      expect(res).toEqual({ liked: false, likeCount: 5 });
+  it('unlikes an article', async () => {
+    const { service, engagement } = build();
+    engagement.like.mockResolvedValue({
+      liked: false,
+      likeCount: 6,
+      shareCount: 0,
+      commentCount: 0,
     });
 
-    it('is a no-op when not liked', async () => {
-      const { service, prisma } = build();
-      prisma.articleLike.findUnique.mockResolvedValue(null);
-      prisma.article.findUnique.mockResolvedValue({ likeCount: 5 });
+    const res = await service.unlike('u1', 'a1');
 
-      await service.unlike('u1', 'a1');
-
-      expect(prisma.$transaction).not.toHaveBeenCalled();
-    });
+    expect(engagement.like).toHaveBeenCalledWith('u1', EngagementTarget.article, 'a1', false);
+    expect(res).toEqual({ liked: false, likeCount: 6 });
   });
 
-  describe('status', () => {
-    it('reports liked + count', async () => {
-      const { service, prisma } = build();
-      prisma.articleLike.findUnique.mockResolvedValue({ userId: 'u1' });
-      prisma.article.findUnique.mockResolvedValue({ likeCount: 9 });
-
-      expect(await service.status('u1', 'a1')).toEqual({ liked: true, likeCount: 9 });
+  it('reports the viewer status', async () => {
+    const { service, engagement } = build();
+    engagement.counts.mockResolvedValue({
+      liked: true,
+      likeCount: 3,
+      shareCount: 1,
+      commentCount: 2,
     });
+
+    expect(await service.status('u1', 'a1')).toEqual({ liked: true, likeCount: 3 });
+    expect(engagement.counts).toHaveBeenCalledWith(EngagementTarget.article, 'a1', 'u1');
+  });
+
+  it('propagates a 404 for an unpublished/unknown article', async () => {
+    const { service, engagement } = build();
+    engagement.like.mockRejectedValue(new NotFoundException('Content not found'));
+    await expect(service.like('u1', 'nope')).rejects.toBeInstanceOf(NotFoundException);
   });
 });

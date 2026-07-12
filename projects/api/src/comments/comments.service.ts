@@ -4,7 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ArticleStatus, CommentStatus, NotificationType, Prisma } from '@prisma/client';
+import { CommentStatus, EngagementTarget, NotificationType, Prisma } from '@prisma/client';
+import { EngagementService } from '../engagement/engagement.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CommentView, FlaggedComment, LikeResult } from './comments.types';
@@ -28,20 +29,39 @@ export class CommentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly engagement: EngagementService,
   ) {}
 
-  /** Visible comments for a published article, threaded (top-level + replies). */
-  async listForArticle(articleId: string): Promise<CommentView[]> {
+  /** Visible comments on an article — the article is just one target type. */
+  listForArticle(articleId: string): Promise<CommentView[]> {
+    return this.listFor(EngagementTarget.article, articleId);
+  }
+
+  /** Add a comment to a published article. */
+  create(userId: string, articleId: string, dto: CreateCommentDto): Promise<CommentView> {
+    return this.createFor(userId, EngagementTarget.article, articleId, dto);
+  }
+
+  /**
+   * Visible comments on *any* content type, threaded (top-level + replies).
+   * Galleries, podcast episodes, interactives and videos all read through here.
+   */
+  async listFor(type: EngagementTarget, targetId: string): Promise<CommentView[]> {
     const rows = await this.prisma.comment.findMany({
-      where: { articleId, status: CommentStatus.visible, deletedAt: null },
+      where: { targetType: type, targetId, status: CommentStatus.visible, deletedAt: null },
       include: commentInclude,
       orderBy: { createdAt: 'asc' },
     });
     return buildThread(rows);
   }
 
-  /** Add a comment to a published article. */
-  async create(userId: string, articleId: string, dto: CreateCommentDto): Promise<CommentView> {
+  /** Add a comment to any published content. */
+  async createFor(
+    userId: string,
+    type: EngagementTarget,
+    targetId: string,
+    dto: CreateCommentDto,
+  ): Promise<CommentView> {
     // Banned users can still read, but not post (documents/14 §2).
     const author = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -51,20 +71,15 @@ export class CommentsService {
       throw new ForbiddenException('You are banned from commenting');
     }
 
-    const article = await this.prisma.article.findFirst({
-      where: { id: articleId, status: ArticleStatus.published, deletedAt: null },
-      select: { id: true },
-    });
-    if (!article) {
-      throw new NotFoundException('Article not found');
-    }
+    // 404s on a draft, a soft-deleted row, or a hidden video.
+    await this.engagement.assertVisible(type, targetId);
 
     // Resolve the reply target and flatten to a single level: a reply to a reply
     // attaches to the original top-level comment.
     let parentId: string | null = null;
     if (dto.parentId) {
       const parent = await this.prisma.comment.findFirst({
-        where: { id: dto.parentId, articleId, deletedAt: null },
+        where: { id: dto.parentId, targetType: type, targetId, deletedAt: null },
         select: { id: true, parentId: true },
       });
       if (!parent) {
@@ -79,7 +94,15 @@ export class CommentsService {
     }
 
     const created = await this.prisma.comment.create({
-      data: { articleId, authorId: userId, parentId, body },
+      data: {
+        targetType: type,
+        targetId,
+        // Articles keep the FK too, so their cascade-on-delete still applies.
+        articleId: type === EngagementTarget.article ? targetId : null,
+        authorId: userId,
+        parentId,
+        body,
+      },
       include: commentInclude,
     });
     return toView(created);
@@ -154,7 +177,12 @@ export class CommentsService {
     return { reported: true };
   }
 
-  /** Moderation queue: reported comments and anything pending review. */
+  /**
+   * Moderation queue: reported comments and anything pending review, across
+   * every content type. Each row carries the title + public URL of whatever it
+   * was posted on, so a moderator can open a gallery or podcast as easily as an
+   * article.
+   */
   async listFlagged(): Promise<FlaggedComment[]> {
     const rows = await this.prisma.comment.findMany({
       where: {
@@ -165,11 +193,13 @@ export class CommentsService {
         author: {
           select: { id: true, displayName: true, avatarUrl: true, commentsBannedAt: true },
         },
-        article: { select: { slug: true, title: true } },
       },
       orderBy: [{ reportCount: 'desc' }, { createdAt: 'desc' }],
       take: 100,
     });
+
+    const targets = await this.resolveTargets(rows);
+
     return rows.map((row) => ({
       id: row.id,
       body: row.body,
@@ -182,8 +212,91 @@ export class CommentsService {
         avatarUrl: row.author.avatarUrl,
         banned: row.author.commentsBannedAt !== null,
       },
-      article: row.article,
+      target: targets.get(`${row.targetType}:${row.targetId}`) ?? {
+        type: row.targetType,
+        title: 'Deleted content',
+        url: null,
+      },
     }));
+  }
+
+  /** Batch-load the title + URL of everything the flagged comments hang off. */
+  private async resolveTargets(
+    rows: { targetType: EngagementTarget; targetId: string }[],
+  ): Promise<Map<string, { type: EngagementTarget; title: string; url: string | null }>> {
+    const byType = new Map<EngagementTarget, string[]>();
+    for (const r of rows) {
+      byType.set(r.targetType, [...(byType.get(r.targetType) ?? []), r.targetId]);
+    }
+    const out = new Map<string, { type: EngagementTarget; title: string; url: string | null }>();
+    const add = (
+      type: EngagementTarget,
+      items: { id: string; title: string; url: string | null }[],
+    ) => {
+      for (const i of items) out.set(`${type}:${i.id}`, { type, title: i.title, url: i.url });
+    };
+
+    await Promise.all(
+      [...byType.entries()].map(async ([type, ids]) => {
+        switch (type) {
+          case EngagementTarget.article: {
+            const rowsFound = await this.prisma.article.findMany({
+              where: { id: { in: ids } },
+              select: { id: true, title: true, slug: true },
+            });
+            return add(
+              type,
+              rowsFound.map((a) => ({ id: a.id, title: a.title, url: `/article/${a.slug}` })),
+            );
+          }
+          case EngagementTarget.gallery: {
+            const rowsFound = await this.prisma.gallery.findMany({
+              where: { id: { in: ids } },
+              select: { id: true, title: true, slug: true },
+            });
+            return add(
+              type,
+              rowsFound.map((g) => ({ id: g.id, title: g.title, url: `/galleries/${g.slug}` })),
+            );
+          }
+          case EngagementTarget.episode: {
+            const rowsFound = await this.prisma.podcastEpisode.findMany({
+              where: { id: { in: ids } },
+              select: { id: true, title: true, show: { select: { slug: true } } },
+            });
+            return add(
+              type,
+              rowsFound.map((e) => ({
+                id: e.id,
+                title: e.title,
+                url: `/podcasts/${e.show.slug}`,
+              })),
+            );
+          }
+          case EngagementTarget.interactive: {
+            const rowsFound = await this.prisma.interactive.findMany({
+              where: { id: { in: ids } },
+              select: { id: true, title: true, slug: true },
+            });
+            return add(
+              type,
+              rowsFound.map((i) => ({ id: i.id, title: i.title, url: `/interactives/${i.slug}` })),
+            );
+          }
+          case EngagementTarget.video: {
+            const rowsFound = await this.prisma.video.findMany({
+              where: { id: { in: ids } },
+              select: { id: true, title: true },
+            });
+            return add(
+              type,
+              rowsFound.map((v) => ({ id: v.id, title: v.title, url: '/videos' })),
+            );
+          }
+        }
+      }),
+    );
+    return out;
   }
 
   /** Ban a user from commenting (moderator). Their existing comments stay. */

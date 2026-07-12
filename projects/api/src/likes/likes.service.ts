@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { ArticleStatus } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { EngagementTarget } from '@prisma/client';
+import { EngagementService } from '../engagement/engagement.service';
 
 export interface LikeStatus {
   liked: boolean;
@@ -8,73 +8,28 @@ export interface LikeStatus {
 }
 
 /**
- * Reader "likes" on published articles. One like per user per article; the
- * denormalised `article.likeCount` is kept in step inside a transaction so the
- * public count stays accurate.
+ * Reader "likes" on published articles. Kept as its own thin service so the
+ * existing `/articles/:id/like` routes stay put, but the work now happens in the
+ * polymorphic EngagementService — an article is just one target type, and a
+ * single like table sits behind every content type.
  */
 @Injectable()
 export class LikesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly engagement: EngagementService) {}
 
   async like(userId: string, articleId: string): Promise<LikeStatus> {
-    await this.assertPublished(articleId);
-    const existing = await this.find(userId, articleId);
-    if (!existing) {
-      await this.prisma.$transaction([
-        this.prisma.articleLike.create({ data: { userId, articleId } }),
-        this.prisma.article.update({
-          where: { id: articleId },
-          data: { likeCount: { increment: 1 } },
-        }),
-      ]);
-    }
-    return { liked: true, likeCount: await this.count(articleId) };
+    return toStatus(await this.engagement.like(userId, EngagementTarget.article, articleId, true));
   }
 
   async unlike(userId: string, articleId: string): Promise<LikeStatus> {
-    const existing = await this.find(userId, articleId);
-    if (existing) {
-      await this.prisma.$transaction([
-        this.prisma.articleLike.delete({ where: { userId_articleId: { userId, articleId } } }),
-        this.prisma.article.update({
-          where: { id: articleId },
-          data: { likeCount: { decrement: 1 } },
-        }),
-      ]);
-    }
-    return { liked: false, likeCount: await this.count(articleId) };
+    return toStatus(await this.engagement.like(userId, EngagementTarget.article, articleId, false));
   }
 
   async status(userId: string, articleId: string): Promise<LikeStatus> {
-    const [existing, likeCount] = await Promise.all([
-      this.find(userId, articleId),
-      this.count(articleId),
-    ]);
-    return { liked: Boolean(existing), likeCount };
+    return toStatus(await this.engagement.counts(EngagementTarget.article, articleId, userId));
   }
+}
 
-  private find(userId: string, articleId: string) {
-    return this.prisma.articleLike.findUnique({
-      where: { userId_articleId: { userId, articleId } },
-      select: { userId: true },
-    });
-  }
-
-  private async count(articleId: string): Promise<number> {
-    const article = await this.prisma.article.findUnique({
-      where: { id: articleId },
-      select: { likeCount: true },
-    });
-    return article?.likeCount ?? 0;
-  }
-
-  private async assertPublished(articleId: string): Promise<void> {
-    const article = await this.prisma.article.findFirst({
-      where: { id: articleId, status: ArticleStatus.published, deletedAt: null },
-      select: { id: true },
-    });
-    if (!article) {
-      throw new NotFoundException('Article not found');
-    }
-  }
+function toStatus(counts: { liked: boolean; likeCount: number }): LikeStatus {
+  return { liked: counts.liked, likeCount: counts.likeCount };
 }

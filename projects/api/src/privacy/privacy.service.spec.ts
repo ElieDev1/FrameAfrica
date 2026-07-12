@@ -12,7 +12,7 @@ function build() {
     bookmark: { findMany: jest.fn().mockResolvedValue([]), deleteMany: jest.fn() },
     follow: { findMany: jest.fn().mockResolvedValue([]), deleteMany: jest.fn() },
     readingHistory: { findMany: jest.fn().mockResolvedValue([]), deleteMany: jest.fn() },
-    articleLike: { findMany: jest.fn().mockResolvedValue([]), deleteMany: jest.fn() },
+    contentLike: { findMany: jest.fn().mockResolvedValue([]), deleteMany: jest.fn() },
     commentLike: { deleteMany: jest.fn() },
     commentReport: { deleteMany: jest.fn() },
     notification: { findMany: jest.fn().mockResolvedValue([]), deleteMany: jest.fn() },

@@ -30,6 +30,7 @@ import { InquiriesModule } from './inquiries/inquiries.module';
 import { GalleriesModule } from './galleries/galleries.module';
 import { PodcastsModule } from './podcasts/podcasts.module';
 import { InteractivesModule } from './interactives/interactives.module';
+import { EngagementModule } from './engagement/engagement.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AiModule } from './ai/ai.module';
 import { AdminModule } from './admin/admin.module';
@@ -66,6 +67,7 @@ import { AdminModule } from './admin/admin.module';
     GalleriesModule,
     PodcastsModule,
     InteractivesModule,
+    EngagementModule,
     AnalyticsModule,
     AiModule,
     AdminModule,

@@ -39,7 +39,7 @@ export class PrivacyService {
     const [comments, bookmarks, follows, history, likes, notifications] = await Promise.all([
       this.prisma.comment.findMany({
         where: { authorId: userId },
-        select: { body: true, articleId: true, createdAt: true },
+        select: { body: true, targetType: true, targetId: true, createdAt: true },
       }),
       this.prisma.bookmark.findMany({
         where: { userId },
@@ -53,9 +53,9 @@ export class PrivacyService {
         where: { userId },
         select: { articleId: true, viewedAt: true },
       }),
-      this.prisma.articleLike.findMany({
+      this.prisma.contentLike.findMany({
         where: { userId },
-        select: { articleId: true, createdAt: true },
+        select: { targetType: true, targetId: true, createdAt: true },
       }),
       this.prisma.notification.findMany({
         where: { userId },
@@ -76,7 +76,8 @@ export class PrivacyService {
       },
       comments: comments.map((c) => ({
         body: c.body,
-        articleId: c.articleId,
+        targetType: c.targetType,
+        targetId: c.targetId,
         createdAt: c.createdAt.toISOString(),
       })),
       bookmarks: bookmarks.map((b) => ({
@@ -92,7 +93,11 @@ export class PrivacyService {
         articleId: h.articleId,
         viewedAt: h.viewedAt.toISOString(),
       })),
-      likes: likes.map((l) => ({ articleId: l.articleId, createdAt: l.createdAt.toISOString() })),
+      likes: likes.map((l) => ({
+        targetType: l.targetType,
+        targetId: l.targetId,
+        createdAt: l.createdAt.toISOString(),
+      })),
       notifications: notifications.map((n) => ({
         type: n.type,
         title: n.title,
@@ -123,7 +128,7 @@ export class PrivacyService {
       this.prisma.bookmark.deleteMany({ where: { userId } }),
       this.prisma.follow.deleteMany({ where: { userId } }),
       this.prisma.readingHistory.deleteMany({ where: { userId } }),
-      this.prisma.articleLike.deleteMany({ where: { userId } }),
+      this.prisma.contentLike.deleteMany({ where: { userId } }),
       this.prisma.commentLike.deleteMany({ where: { userId } }),
       this.prisma.commentReport.deleteMany({ where: { reporterId: userId } }),
       this.prisma.notification.deleteMany({ where: { userId } }),
