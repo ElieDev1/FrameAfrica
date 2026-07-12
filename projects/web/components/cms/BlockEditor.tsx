@@ -28,6 +28,20 @@ const ADD_BUTTONS: { type: Block['type']; icon: string; labelKey: MessageKey }[]
   { type: 'divider', icon: '—', labelKey: 'dbe.divider' },
 ];
 
+/** Block type → its translated display name (shown on each block's header). */
+const TYPE_KEYS: Record<Block['type'], MessageKey> = {
+  paragraph: 'dbe.paragraph',
+  heading: 'dbe.subhead',
+  image: 'dbe.image',
+  gallery: 'dbe.gallery',
+  pullquote: 'dbe.pullquote',
+  blockquote: 'dbe.quote',
+  list: 'dbe.list',
+  factbox: 'dbe.factbox',
+  embed: 'dbe.video',
+  divider: 'dbe.divider',
+};
+
 let counter = 0;
 const nextId = (): string => `b${Date.now().toString(36)}-${counter++}`;
 
@@ -178,7 +192,7 @@ export function BlockEditor({
         <div key={block._id} className="rounded-xl border border-border bg-surface p-3">
           <div className="mb-2 flex items-center justify-between">
             <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-primary">
-              {block.type}
+              {t(TYPE_KEYS[block.type])}
             </span>
             <div className="flex items-center gap-1">
               <button
@@ -257,7 +271,7 @@ function BlockFields({
               checked={block.lede ?? false}
               onChange={(e) => onPatch({ lede: e.target.checked })}
             />
-            Lede (larger opening paragraph)
+            {t('dbe.lede')}
           </label>
         </div>
       );
@@ -363,7 +377,7 @@ function BlockFields({
                 type="button"
                 className={ctrlBtn}
                 onClick={() => onPatch({ images: block.images.filter((_, k) => k !== idx) })}
-                aria-label="Remove gallery image"
+                aria-label={t('dbe.removeGalleryImage')}
               >
                 ✕
               </button>

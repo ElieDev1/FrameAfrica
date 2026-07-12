@@ -711,7 +711,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
               checked={design.quotes}
               onChange={(e) => set({ quotes: e.target.checked })}
             />
-            Wrap the headline in quote marks
+            {t('dsc.wrapQuotes')}
           </label>
         </Section>
 
@@ -729,7 +729,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
                 onClick={removeImage}
                 className="shrink-0 rounded border border-border px-2 py-1 font-mono text-[11px] text-muted hover:border-accent-red hover:text-accent-red"
               >
-                Remove
+                {t('dsc.remove')}
               </button>
             )}
           </div>
@@ -829,7 +829,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
                 checked={design.textShadow}
                 onChange={(e) => set({ textShadow: e.target.checked })}
               />
-              Drop shadow behind text
+              {t('dsc.dropShadow')}
             </label>
             <label className="flex items-center gap-2 font-body text-xs text-muted">
               <input

@@ -202,7 +202,7 @@ export function StoriesTable({
               <span className="min-w-0">{d.title}</span>
               {d.isPremium && (
                 <span className="mt-0.5 shrink-0 rounded bg-accent-yellow/20 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-accent-yellow">
-                  Premium
+                  {tr('dst.premium')}
                 </span>
               )}
             </Link>
@@ -247,7 +247,7 @@ export function StoriesTable({
                       <span className="truncate">{d.title}</span>
                       {d.isPremium && (
                         <span className="shrink-0 rounded bg-accent-yellow/20 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-accent-yellow">
-                          Premium
+                          {tr('dst.premium')}
                         </span>
                       )}
                     </Link>

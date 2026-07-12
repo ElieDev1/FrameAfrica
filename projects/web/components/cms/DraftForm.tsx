@@ -114,7 +114,7 @@ export function DraftForm({
           />
         </label>
 
-        <Field label="Standfirst (subtitle)">
+        <Field label={t('ddf.standfirst')}>
           <input
             name="subtitle"
             defaultValue={initial?.subtitle}
@@ -125,13 +125,13 @@ export function DraftForm({
 
         <div className="flex flex-col gap-2">
           <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">
-            Article body
+            {t('ddf.articleBody')}
           </span>
           <BlockEditor initialBlocks={initial?.blocks} initialBody={initial?.body ?? ''} />
         </div>
 
         {mode === 'edit' && (
-          <Field label="Change note (optional)">
+          <Field label={t('ddf.changeNote')}>
             <input name="changeNote" maxLength={300} className={inputClass} />
           </Field>
         )}
@@ -139,18 +139,18 @@ export function DraftForm({
 
       {/* ── Settings sidebar ───────────────────────────────────────── */}
       <aside className="flex flex-col gap-5 lg:sticky lg:top-20">
-        <Panel title="Publish">
+        <Panel title={t('ddf.publish')}>
           {state.error && (
             <p role="alert" className="font-mono text-xs text-accent-red">
               {state.error}
             </p>
           )}
-          {state.savedAt && <p className="font-mono text-xs text-accent-green">Saved ✓</p>}
+          {state.savedAt && <p className="font-mono text-xs text-accent-green">{t('ddf.saved')}</p>}
           <SaveButton label={mode === 'create' ? t('ddf.createDraft') : t('ddf.saveChanges')} />
         </Panel>
 
-        <Panel title="Details">
-          <Field label="Section">
+        <Panel title={t('ddf.details')}>
+          <Field label={t('ddf.section')}>
             <select
               name="categoryId"
               defaultValue={initial?.categoryId ?? ''}
@@ -158,7 +158,7 @@ export function DraftForm({
               className={inputClass}
             >
               <option value="" disabled>
-                Choose a section…
+                {t('ddf.chooseSection')}
               </option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -167,7 +167,7 @@ export function DraftForm({
               ))}
             </select>
           </Field>
-          <Field label="Language">
+          <Field label={t('ddf.language')}>
             <select name="language" defaultValue={initial?.language ?? 'en'} className={inputClass}>
               {LANGUAGES.map(([value, label]) => (
                 <option key={value} value={value}>
@@ -178,9 +178,9 @@ export function DraftForm({
           </Field>
           <label className="flex items-center gap-2 font-body text-sm text-muted">
             <input type="checkbox" name="isPremium" defaultChecked={initial?.isPremium} />
-            Premium (subscribers only)
+            {t('ddf.premium')}
           </label>
-          <Field label="Excerpt">
+          <Field label={t('ddf.excerpt')}>
             <textarea
               name="excerpt"
               defaultValue={initial?.excerpt}
@@ -191,7 +191,7 @@ export function DraftForm({
           </Field>
         </Panel>
 
-        <Panel title="Featured image">
+        <Panel title={t('ddf.featuredImage')}>
           {featured.url && (
             // eslint-disable-next-line @next/next/no-img-element -- preview, arbitrary host
             <img
@@ -202,7 +202,7 @@ export function DraftForm({
           )}
           <div className="flex items-end gap-2">
             <div className="min-w-0 flex-1">
-              <Field label="Image URL">
+              <Field label={t('ddf.imageUrl')}>
                 <input
                   name="featuredImageUrl"
                   value={featured.url}
@@ -219,7 +219,7 @@ export function DraftForm({
               }
             />
           </div>
-          <Field label="Alt text (for accessibility)">
+          <Field label={t('ddf.altAccessibility')}>
             <input
               name="featuredImageAlt"
               value={featured.alt}
@@ -228,7 +228,7 @@ export function DraftForm({
               className={inputClass}
             />
           </Field>
-          <Field label="Credit">
+          <Field label={t('ddf.credit')}>
             <input
               name="featuredImageCredit"
               value={featured.credit}
@@ -240,7 +240,7 @@ export function DraftForm({
         </Panel>
 
         {topics.length > 0 && (
-          <Panel title="Topics">
+          <Panel title={t('ddf.topics')}>
             <div className="flex flex-wrap gap-2">
               {topics.map((topic) => (
                 <label

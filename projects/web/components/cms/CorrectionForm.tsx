@@ -32,7 +32,7 @@ export function CorrectionForm({ articleId }: { articleId: string }) {
     <form action={formAction} className="mt-4 flex flex-col gap-2">
       <label className="flex flex-col gap-1">
         <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-          Add a correction
+          {t('dcf.heading')}
         </span>
         <textarea
           name="note"

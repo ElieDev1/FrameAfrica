@@ -176,7 +176,7 @@ export function DashboardTopbar({
                 <button
                   type="button"
                   onClick={() => setDrawer(false)}
-                  aria-label="Close menu"
+                  aria-label={t('dash.closeMenu')}
                   className="grid h-8 w-8 place-items-center rounded-lg border border-border text-text"
                 >
                   <CloseIcon size={16} />

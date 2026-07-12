@@ -68,14 +68,12 @@ export function AdManager({ ads }: { ads: HouseAdAdmin[] }) {
       {/* ---- Ad list ---- */}
       <div>
         <h2 className="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-muted">
-          Live &amp; paused ({ads.length})
+          {t('dam.livePaused')} ({ads.length})
         </h2>
         {ads.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border px-6 py-12 text-center">
             <p className="font-heading text-lg font-bold text-text">{t('dam.noHouseAds')}</p>
-            <p className="mt-1 font-body text-sm text-muted">
-              Create one on the right, or design one in the Ad Studio.
-            </p>
+            <p className="mt-1 font-body text-sm text-muted">{t('dam.createHint')}</p>
           </div>
         ) : (
           <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
@@ -136,9 +134,7 @@ export function AdManager({ ads }: { ads: HouseAdAdmin[] }) {
               placeholder={t('dam.imagePlaceholder')}
               className={inputCls}
             />
-            <span className="font-mono text-[10px] text-faint">
-              jpg · png · gif · mp4 · webm — videos autoplay muted &amp; loop
-            </span>
+            <span className="font-mono text-[10px] text-faint">{t('dam.formats')}</span>
           </label>
         </div>
         {error && <p className="mt-2 font-mono text-[11px] text-accent-red">{error}</p>}
@@ -174,12 +170,12 @@ function AdRow({ ad }: { ad: HouseAdAdmin }) {
           <span className="truncate font-heading text-sm font-bold text-text">{ad.title}</span>
           {ad.imageUrl && isVideo(ad.imageUrl) && (
             <span className="shrink-0 rounded bg-surface-2 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide text-muted">
-              Video
+              {t('dam.video')}
             </span>
           )}
         </p>
         <p className="truncate font-mono text-[11px] text-muted">
-          {ad.placement} · {ad.impressions} impr · {ad.clicks} clicks
+          {ad.placement} · {ad.impressions} {t('dam.impressions')} · {ad.clicks} {t('dam.clicks')}
         </p>
       </div>
       <button

@@ -53,7 +53,7 @@ export function LiveComposer({
               type="submit"
               className="rounded border border-border px-2 py-1 font-mono text-[11px] text-muted hover:border-accent-red hover:text-accent-red"
             >
-              End coverage
+              {t('dlc.endCoverage')}
             </button>
           </form>
         )}
@@ -76,7 +76,7 @@ export function LiveComposer({
         />
         <label className="flex items-center gap-2 font-body text-xs text-muted">
           <input type="checkbox" name="isKeyEvent" className="accent-primary" />
-          Mark as a key event
+          {t('dlc.keyEvent')}
         </label>
         {state.error && (
           <p role="alert" className="font-mono text-xs text-accent-red">

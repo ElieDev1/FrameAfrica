@@ -2061,6 +2061,42 @@ const dict = {
   'ddf.writeHeadline': { en: 'Write the headline…', rw: 'Andika umutwe…', fr: 'Écrivez le titre…' },
   'ddf.createDraft': { en: 'Create draft', rw: 'Kora umushinga', fr: 'Créer le brouillon' },
   'ddf.saveChanges': { en: 'Save changes', rw: 'Bika impinduka', fr: 'Enregistrer' },
+  'ddf.standfirst': {
+    en: 'Standfirst (subtitle)',
+    rw: 'Umutwe wungirije',
+    fr: 'Chapeau (sous-titre)',
+  },
+  'ddf.articleBody': { en: 'Article body', rw: 'Umubiri w’inkuru', fr: 'Corps de l’article' },
+  'ddf.changeNote': {
+    en: 'Change note (optional)',
+    rw: 'Icyahindutse (bitegetswe)',
+    fr: 'Note de modification (facultatif)',
+  },
+  'ddf.publish': { en: 'Publish', rw: 'Gutangaza', fr: 'Publication' },
+  'ddf.saved': { en: 'Saved ✓', rw: 'Byabitswe ✓', fr: 'Enregistré ✓' },
+  'ddf.details': { en: 'Details', rw: 'Ibisobanuro', fr: 'Détails' },
+  'ddf.section': { en: 'Section', rw: 'Igice', fr: 'Rubrique' },
+  'ddf.chooseSection': {
+    en: 'Choose a section…',
+    rw: 'Hitamo igice…',
+    fr: 'Choisir une rubrique…',
+  },
+  'ddf.language': { en: 'Language', rw: 'Ururimi', fr: 'Langue' },
+  'ddf.premium': {
+    en: 'Premium (subscribers only)',
+    rw: 'Premium (abiyandikishije gusa)',
+    fr: 'Premium (abonnés uniquement)',
+  },
+  'ddf.excerpt': { en: 'Excerpt', rw: 'Incamake', fr: 'Extrait' },
+  'ddf.featuredImage': { en: 'Featured image', rw: 'Ifoto y’ibanze', fr: 'Image à la une' },
+  'ddf.imageUrl': { en: 'Image URL', rw: 'URL y’ifoto', fr: 'URL de l’image' },
+  'ddf.altAccessibility': {
+    en: 'Alt text (for accessibility)',
+    rw: 'Umwandiko usimbura (ku bafite ubumuga)',
+    fr: 'Texte alternatif (accessibilité)',
+  },
+  'ddf.credit': { en: 'Credit', rw: 'Uwabikoze', fr: 'Crédit' },
+  'ddf.topics': { en: 'Topics', rw: 'Insanganyamatsiko', fr: 'Sujets' },
 
   // — Media upload / grid / picker —
   'dmu.imageFile': { en: 'Image file', rw: 'Dosiye y’ifoto', fr: 'Fichier image' },
@@ -2222,6 +2258,65 @@ const dict = {
   'dbe.factbox': { en: 'Fact-box', rw: 'Agasanduku k’ibyukuri', fr: 'Encadré' },
   'dbe.video': { en: 'Video', rw: 'Ishusho', fr: 'Vidéo' },
   'dbe.divider': { en: 'Divider', rw: 'Umurongo', fr: 'Séparateur' },
+  'dbe.lede': {
+    en: 'Lede (larger opening paragraph)',
+    rw: 'Intangiriro (igika cya mbere kinini)',
+    fr: 'Chapeau (paragraphe d’ouverture)',
+  },
+  'dbe.removeGalleryImage': {
+    en: 'Remove gallery image',
+    rw: 'Kuraho ifoto',
+    fr: 'Retirer l’image',
+  },
+  'dcf.heading': {
+    en: 'Add a correction',
+    rw: 'Ongeraho igikosorwa',
+    fr: 'Ajouter une correction',
+  },
+  'dlc.endCoverage': { en: 'End coverage', rw: 'Soza ikurikirana', fr: 'Terminer la couverture' },
+  'dlc.keyEvent': {
+    en: 'Mark as a key event',
+    rw: 'Shyiraho nk’igikorwa cy’ingenzi',
+    fr: 'Marquer comme événement clé',
+  },
+  'dst.premium': { en: 'Premium', rw: 'Premium', fr: 'Premium' },
+  'dam.video': { en: 'Video', rw: 'Ishusho', fr: 'Vidéo' },
+  'dam.livePaused': {
+    en: 'Live & paused',
+    rw: 'Bikora & byahagaritswe',
+    fr: 'Actives et suspendues',
+  },
+  'dam.createHint': {
+    en: 'Create one on the right, or design one in the Ad Studio.',
+    rw: 'Kora rimwe iburyo, cyangwa uripange muri Studio yo Kwamamaza.',
+    fr: 'Créez-en une à droite, ou concevez-la dans le Studio Pub.',
+  },
+  'dam.formats': {
+    en: 'jpg · png · gif · mp4 · webm — videos autoplay muted & loop',
+    rw: 'jpg · png · gif · mp4 · webm — amashusho atangira wenyine adafite ijwi',
+    fr: 'jpg · png · gif · mp4 · webm — les vidéos démarrent en muet, en boucle',
+  },
+  'dam.impressions': { en: 'impr', rw: 'kurebwa', fr: 'impr' },
+  'dam.clicks': { en: 'clicks', rw: 'gukandwa', fr: 'clics' },
+  'das.downloadPng': { en: 'Download PNG', rw: 'Kuramo PNG', fr: 'Télécharger le PNG' },
+  'das.templates': { en: 'Templates', rw: 'Ibyitegererezo', fr: 'Modèles' },
+  'dsc.wrapQuotes': {
+    en: 'Wrap the headline in quote marks',
+    rw: 'Shyira umutwe mu tugereranyo',
+    fr: 'Mettre le titre entre guillemets',
+  },
+  'dsc.remove': { en: 'Remove', rw: 'Kuraho', fr: 'Retirer' },
+  'dsc.dropShadow': {
+    en: 'Drop shadow behind text',
+    rw: 'Igicucu inyuma y’umwandiko',
+    fr: 'Ombre portée derrière le texte',
+  },
+  'dash.closeMenu': { en: 'Close menu', rw: 'Funga menu', fr: 'Fermer le menu' },
+  'dash.newActivity': {
+    en: 'New activity will appear here',
+    rw: 'Ibikorwa bishya bizagaragara hano',
+    fr: 'La nouvelle activité apparaîtra ici',
+  },
 
   // — Ad studio / Flyer studio —
   'das.top': { en: 'Top', rw: 'Hejuru', fr: 'Haut' },

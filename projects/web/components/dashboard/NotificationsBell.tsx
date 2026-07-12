@@ -119,7 +119,7 @@ export function NotificationsBell() {
               <div className="px-3 py-8 text-center">
                 <p className="font-body text-sm text-muted">{t('dash.caughtUp')}</p>
                 <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-                  New activity will appear here
+                  {t('dash.newActivity')}
                 </p>
               </div>
             ) : (
