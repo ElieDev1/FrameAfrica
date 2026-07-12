@@ -36,15 +36,14 @@ export default async function GalleriesPage({
   const tiles = showLead ? rest : galleries;
 
   return (
-    <div className="mx-auto max-w-[1440px] px-6 py-8">
-      <header className="border-b border-border pb-6">
+    <div className="mx-auto max-w-[1440px] px-6 pb-8 pt-4">
+      <header className="border-b border-border pb-4">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
           {t(locale, 'gal.kicker')}
         </p>
-        <h1 className="mt-1 font-heading text-4xl font-black tracking-tight text-text">
+        <h1 className="mt-0.5 font-heading text-3xl font-black tracking-tight text-text">
           {t(locale, 'mm.galleries')}
         </h1>
-        <p className="mt-2 max-w-2xl font-body text-muted">{t(locale, 'mm.galleriesSub')}</p>
         <HubSearch
           basePath="/galleries"
           q={q}
@@ -69,7 +68,7 @@ export default async function GalleriesPage({
           )}
           {/* Lead gallery — full-bleed cover with the copy overlaid */}
           {lead && (
-            <Link href={`/galleries/${lead.slug}`} className="group mt-8 block">
+            <Link href={`/galleries/${lead.slug}`} className="group mt-5 block">
               <div className="relative aspect-[21/9] overflow-hidden rounded-2xl bg-surface-2 ring-1 ring-border">
                 {lead.coverUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -99,7 +98,7 @@ export default async function GalleriesPage({
           )}
 
           {tiles.length > 0 && (
-            <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {tiles.map((g) => (
                 <Link key={g.id} href={`/galleries/${g.slug}`} className="group min-w-0">
                   <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-surface-2 ring-1 ring-border">

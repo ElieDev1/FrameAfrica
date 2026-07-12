@@ -32,7 +32,7 @@ export function VideoHub({ videos }: { videos: VideoItem[] }) {
 
   return (
     <>
-      <section className="grid gap-8 pt-8 lg:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)]">
+      <section className="grid gap-8 pt-5 lg:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)]">
         {/* ── Stage ── */}
         <div ref={stageRef} className="min-w-0 scroll-mt-24">
           {playing ? (
@@ -42,14 +42,16 @@ export function VideoHub({ videos }: { videos: VideoItem[] }) {
               title={current.title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              className="aspect-video w-full rounded-xl ring-1 ring-border"
+              // Cap to the viewport (minus navbar + header) so the whole player
+              // is visible without scrolling; it centres and keeps 16:9.
+              className="mx-auto aspect-video max-h-[calc(100dvh_-_13rem)] w-full max-w-[calc((100dvh_-_13rem)_*_16/9)] rounded-xl ring-1 ring-border"
             />
           ) : (
             <button
               type="button"
               onClick={() => setPlaying(true)}
               aria-label={`${t('mm.play')}: ${current.title}`}
-              className="media-fill relative block aspect-video w-full overflow-hidden rounded-xl ring-1 ring-border"
+              className="media-fill relative mx-auto block aspect-video max-h-[calc(100dvh_-_13rem)] w-full max-w-[calc((100dvh_-_13rem)_*_16/9)] overflow-hidden rounded-xl ring-1 ring-border"
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- YouTube thumbnail host */}
               <img src={thumb(current)} alt="" className="h-full w-full object-cover" />

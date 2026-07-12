@@ -29,15 +29,14 @@ export default async function PodcastsPage({
   ]);
 
   return (
-    <div className="mx-auto max-w-[1440px] px-6 py-8">
-      <header className="border-b border-border pb-6">
+    <div className="mx-auto max-w-[1440px] px-6 pb-8 pt-4">
+      <header className="border-b border-border pb-4">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
           {t(locale, 'home.listen')}
         </p>
-        <h1 className="mt-1 font-heading text-4xl font-black tracking-tight text-text">
+        <h1 className="mt-0.5 font-heading text-3xl font-black tracking-tight text-text">
           {t(locale, 'mm.podcasts')}
         </h1>
-        <p className="mt-2 max-w-2xl font-body text-muted">{t(locale, 'mm.podcastsSub')}</p>
         <HubSearch basePath="/podcasts" q={q} locale={locale} placeholderKey="mm.searchPodcasts" />
       </header>
 
@@ -55,7 +54,7 @@ export default async function PodcastsPage({
               {t(locale, 'mm.searchResults')} “{q}”
             </p>
           )}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-9 pt-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-9 pt-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {shows.map((s) => (
               <Link key={s.id} href={`/podcasts/${s.slug}`} className="group min-w-0">
                 <div className="relative aspect-square overflow-hidden rounded-xl bg-surface-2 ring-1 ring-border">

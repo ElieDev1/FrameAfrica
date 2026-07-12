@@ -28,15 +28,14 @@ export default async function VideosPage({
   ]);
 
   return (
-    <div className="mx-auto max-w-[1440px] px-6 py-8">
-      <header className="border-b border-border pb-6">
+    <div className="mx-auto max-w-[1440px] px-6 pb-8 pt-4">
+      <header className="border-b border-border pb-4">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
           {t(locale, 'home.watch')}
         </p>
-        <h1 className="mt-1 font-heading text-4xl font-black tracking-tight text-text">
+        <h1 className="mt-0.5 font-heading text-3xl font-black tracking-tight text-text">
           {t(locale, 'mm.videos')}
         </h1>
-        <p className="mt-2 max-w-2xl font-body text-muted">{t(locale, 'mm.videosSub')}</p>
         <HubSearch basePath="/videos" q={q} locale={locale} placeholderKey="mm.searchVideos" />
       </header>
 
