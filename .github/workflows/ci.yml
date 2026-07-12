@@ -47,7 +47,10 @@ jobs:
         run: pnpm typecheck
 
       - name: Unit & integration tests
-        run: pnpm test -- --coverage
+        # Args reach Jest only when they come after turbo's own `--`. Writing
+        # `pnpm test -- --coverage` collapses to `turbo run test "--coverage"`,
+        # which turbo rejects as an unexpected argument.
+        run: pnpm turbo run test -- --coverage
 
       - name: Build
         run: pnpm build
