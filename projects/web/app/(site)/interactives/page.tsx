@@ -39,15 +39,8 @@ export default async function InteractivesPage({
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 pb-8 pt-1">
-      <header className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
-            {t(locale, 'mm.latest')}
-          </p>
-          <h1 className="mt-0.5 font-heading text-3xl font-black tracking-tight text-text">
-            {t(locale, 'mm.interactives')}
-          </h1>
-        </div>
+      <header className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <h1 className="sr-only">{t(locale, 'mm.interactives')}</h1>
         <HubSearch
           basePath="/interactives"
           q={q}

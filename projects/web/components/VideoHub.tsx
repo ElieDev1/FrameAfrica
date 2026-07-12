@@ -47,15 +47,15 @@ export function VideoHub({ videos, initialId }: { videos: VideoItem[]; initialId
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               // Cap to the viewport (minus navbar + header) so the whole player
-              // is visible without scrolling; it centres and keeps 16:9.
-              className="mx-auto aspect-video max-h-[calc(100dvh_-_13rem)] w-full max-w-[calc((100dvh_-_13rem)_*_16/9)] ring-1 ring-border"
+              // is visible without scrolling; left-aligned to the content edge.
+              className="aspect-video max-h-[calc(100dvh_-_13rem)] w-full max-w-[calc((100dvh_-_13rem)_*_16/9)] ring-1 ring-border"
             />
           ) : (
             <button
               type="button"
               onClick={() => setPlaying(true)}
               aria-label={`${t('mm.play')}: ${current.title}`}
-              className="media-fill relative mx-auto block aspect-video max-h-[calc(100dvh_-_13rem)] w-full max-w-[calc((100dvh_-_13rem)_*_16/9)] overflow-hidden ring-1 ring-border"
+              className="media-fill relative block aspect-video max-h-[calc(100dvh_-_13rem)] w-full max-w-[calc((100dvh_-_13rem)_*_16/9)] overflow-hidden ring-1 ring-border"
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- YouTube thumbnail host */}
               <img src={thumb(current)} alt="" className="h-full w-full object-cover" />

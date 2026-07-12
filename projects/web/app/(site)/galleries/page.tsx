@@ -37,15 +37,8 @@ export default async function GalleriesPage({
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 pb-8 pt-1">
-      <header className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
-            {t(locale, 'gal.kicker')}
-          </p>
-          <h1 className="mt-0.5 font-heading text-3xl font-black tracking-tight text-text">
-            {t(locale, 'mm.galleries')}
-          </h1>
-        </div>
+      <header className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <h1 className="sr-only">{t(locale, 'mm.galleries')}</h1>
         <HubSearch
           basePath="/galleries"
           q={q}

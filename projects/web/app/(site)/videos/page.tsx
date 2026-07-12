@@ -29,15 +29,10 @@ export default async function VideosPage({
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 pb-8 pt-1">
-      <header className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
-            {t(locale, 'home.watch')}
-          </p>
-          <h1 className="mt-0.5 font-heading text-3xl font-black tracking-tight text-text">
-            {t(locale, 'mm.videos')}
-          </h1>
-        </div>
+      {/* The breadcrumb (Home › Videos) already names the page, so the heading is
+          screen-reader-only and the row carries just the search. */}
+      <header className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <h1 className="sr-only">{t(locale, 'mm.videos')}</h1>
         <HubSearch basePath="/videos" q={q} locale={locale} placeholderKey="mm.searchVideos" />
       </header>
 
