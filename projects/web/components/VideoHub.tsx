@@ -16,10 +16,14 @@ function thumb(video: VideoItem): string {
  * clip — in the "Up next" rail or the grid below — swaps it into the stage and
  * starts it, rather than opening a separate page.
  */
-export function VideoHub({ videos }: { videos: VideoItem[] }) {
+export function VideoHub({ videos, initialId }: { videos: VideoItem[]; initialId?: string }) {
   const t = useT();
-  const [current, setCurrent] = useState(videos[0]);
-  const [playing, setPlaying] = useState(false);
+  // On a watch page (`/videos/:id`) start on that clip and autoplay it, like
+  // YouTube; on the hub it defaults to the newest clip, paused.
+  const [current, setCurrent] = useState(
+    () => (initialId && videos.find((v) => v.id === initialId)) || videos[0],
+  );
+  const [playing, setPlaying] = useState(Boolean(initialId));
   const stageRef = useRef<HTMLDivElement>(null);
 
   function select(video: VideoItem) {

@@ -39,7 +39,7 @@ export async function VideoStrip() {
           {videos.map((video) => (
             <article key={video.id} className="w-64 shrink-0">
               <Link
-                href="/videos"
+                href={`/videos/${video.id}`}
                 className="media-fill relative flex aspect-video items-center justify-center overflow-hidden rounded-xl ring-1 ring-border"
               >
                 {video.thumbnailUrl && (
@@ -51,7 +51,9 @@ export async function VideoStrip() {
                 </span>
               </Link>
               <h3 className="mt-2 line-clamp-2 font-heading text-sm font-bold leading-snug text-text">
-                {video.title}
+                <Link href={`/videos/${video.id}`} className="hover:text-primary">
+                  {video.title}
+                </Link>
               </h3>
             </article>
           ))}
