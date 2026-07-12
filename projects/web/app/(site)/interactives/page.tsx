@@ -38,14 +38,16 @@ export default async function InteractivesPage({
   const tiles = showLead ? rest : items;
 
   return (
-    <div className="mx-auto max-w-[1440px] px-6 pb-8 pt-4">
-      <header className="border-b border-border pb-4">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
-          {t(locale, 'mm.latest')}
-        </p>
-        <h1 className="mt-0.5 font-heading text-3xl font-black tracking-tight text-text">
-          {t(locale, 'mm.interactives')}
-        </h1>
+    <div className="mx-auto max-w-[1440px] px-6 pb-8 pt-1">
+      <header className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
+            {t(locale, 'mm.latest')}
+          </p>
+          <h1 className="mt-0.5 font-heading text-3xl font-black tracking-tight text-text">
+            {t(locale, 'mm.interactives')}
+          </h1>
+        </div>
         <HubSearch
           basePath="/interactives"
           q={q}
