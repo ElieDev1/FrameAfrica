@@ -5,10 +5,11 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CloseIcon, LogOutIcon, MenuIcon, PlusIcon, SearchIcon } from '@/components/icons';
-import { useT } from '@/components/LocaleProvider';
+import { useLocale, useT } from '@/components/LocaleProvider';
 import { logout } from '@/lib/auth-actions';
 import { DashboardNav } from './DashboardNav';
 import { NotificationsBell } from './NotificationsBell';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 import { ThemeToggle } from '../ThemeToggle';
 import { Wordmark } from '../Wordmark';
 
@@ -28,6 +29,7 @@ export function DashboardTopbar({
 }) {
   const pathname = usePathname();
   const t = useT();
+  const locale = useLocale();
   const [drawer, setDrawer] = useState(false);
   const [menu, setMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -96,6 +98,12 @@ export function DashboardTopbar({
         >
           <PlusIcon size={15} /> <span className="hidden sm:inline">{t('dash.newStory')}</span>
         </Link>
+
+        {/* Language: staff switch the dashboard between EN / RW / FR. */}
+        <div className="hidden items-center rounded-lg border border-border px-2 py-1 sm:flex">
+          <LanguageSwitcher current={locale} />
+        </div>
+
         <ThemeToggle />
 
         {/* Notifications */}
@@ -183,6 +191,14 @@ export function DashboardTopbar({
                 </button>
               </div>
               <DashboardNav roles={roles} />
+
+              {/* Language switcher — the topbar one is desktop-only. */}
+              <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-4">
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-faint">
+                  {t('footer.language')}
+                </span>
+                <LanguageSwitcher current={locale} />
+              </div>
             </div>
           </div>,
           document.body,
