@@ -15,6 +15,8 @@ jest.mock('@/lib/follows-actions', () => ({
   getFollowStatus: jest.fn().mockResolvedValue(null),
   toggleFollow: jest.fn(),
 }));
+// AdSlot is an async server component that serves a house ad from the API.
+jest.mock('@/components/AdSlot', () => ({ AdSlot: () => <aside aria-label="Advertisement" /> }));
 
 const mockFetchArticles = fetchArticles as jest.MockedFunction<typeof fetchArticles>;
 const mockFetchCategory = fetchCategory as jest.MockedFunction<typeof fetchCategory>;
@@ -62,7 +64,10 @@ describe('SectionPage', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: 'Business' })).toBeInTheDocument();
     expect(screen.getByText(/Money, markets/)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Coffee exports climb' })).toBeInTheDocument();
+    // The story shows in both the main grid and the "Just in" rail.
+    expect(screen.getAllByRole('heading', { name: 'Coffee exports climb' }).length).toBeGreaterThan(
+      0,
+    );
     expect(mockFetchArticles).toHaveBeenCalledWith({ category: 'business', limit: 12 });
     // Sub-section chip links through to the child section.
     expect(screen.getByRole('link', { name: 'Economy' })).toHaveAttribute(

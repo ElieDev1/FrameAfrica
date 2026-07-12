@@ -46,26 +46,20 @@ function Meta({ article, locale }: { article: ArticleSummary; locale?: Locale })
 
 /** The featured image, or a deliberate branded panel when the story has none. */
 function Thumb({
-  featured,
+  aspect,
+  sizes,
   kicker,
   image,
 }: {
-  featured: boolean;
+  aspect: string;
+  sizes: string;
   kicker: string;
   image: FeaturedImage | null;
 }) {
-  // A shorter 21:9 on the lead keeps the hero from eating the whole viewport.
-  const aspect = featured ? 'aspect-[21/9]' : 'aspect-[16/10]';
   if (image) {
     return (
       <div className={`relative w-full overflow-hidden ${aspect}`}>
-        <Image
-          src={image.url}
-          alt={image.alt ?? ''}
-          fill
-          sizes={featured ? '(max-width: 1024px) 100vw, 66vw' : '(max-width: 640px) 100vw, 33vw'}
-          className="object-cover"
-        />
+        <Image src={image.url} alt={image.alt ?? ''} fill sizes={sizes} className="object-cover" />
       </div>
     );
   }
@@ -82,12 +76,15 @@ export function ArticleCard({
   article,
   featured = false,
   compact = false,
+  horizontal = false,
   locale,
 }: {
   article: ArticleSummary;
   featured?: boolean;
   /** Dense variant for the multi-up section bands: no excerpt, smaller headline. */
   compact?: boolean;
+  /** Wide lead variant: image beside the text, used at the top of a section. */
+  horizontal?: boolean;
   locale?: Locale;
 }) {
   const href = `/article/${article.slug}`;
@@ -95,41 +92,71 @@ export function ArticleCard({
     ? translateCategory(locale, article.category.slug, article.category.name)
     : article.category.name;
 
-  const headingSize = featured
-    ? 'text-2xl md:text-3xl'
-    : compact
-      ? 'text-[15px] leading-snug'
-      : 'text-lg';
+  const headingSize = horizontal
+    ? 'text-xl md:text-2xl'
+    : featured
+      ? 'text-2xl md:text-3xl'
+      : compact
+        ? 'text-[15px] leading-snug'
+        : 'text-lg';
+
+  // A shorter 21:9 keeps the featured hero from eating the viewport; the wide
+  // lead and standard cards use a comfortable landscape crop.
+  const aspect = featured ? 'aspect-[21/9]' : 'aspect-[16/10]';
+  const sizes = featured
+    ? '(max-width: 1024px) 100vw, 66vw'
+    : horizontal
+      ? '(max-width: 640px) 100vw, 45vw'
+      : '(max-width: 640px) 100vw, 33vw';
+
+  const thumb = (
+    <Link
+      href={href}
+      className="block overflow-hidden ring-1 ring-border transition-all duration-300 group-hover:ring-border-2"
+    >
+      <div className="transition-transform duration-500 group-hover:scale-[1.03]">
+        <Thumb aspect={aspect} sizes={sizes} kicker={kicker} image={article.featuredImage} />
+      </div>
+    </Link>
+  );
+
+  const text = (
+    <div className={`flex flex-col ${compact ? 'gap-1' : 'gap-2'}`}>
+      <Badges article={article} locale={locale} />
+      <h3
+        className={`font-heading font-bold leading-[1.14] tracking-tight text-text ${headingSize}`}
+      >
+        <Link
+          href={href}
+          className={`transition-colors group-hover:text-primary ${compact ? 'line-clamp-3' : ''}`}
+        >
+          {article.title}
+        </Link>
+      </h3>
+      {!compact && article.excerpt && (
+        <p
+          className={`font-body text-muted ${featured || horizontal ? 'text-base' : 'text-[0.95rem]'}`}
+        >
+          {article.excerpt}
+        </p>
+      )}
+      <Meta article={article} locale={locale} />
+    </div>
+  );
+
+  if (horizontal) {
+    return (
+      <article className="group grid gap-5 sm:grid-cols-[1.35fr_1fr] sm:items-center">
+        {thumb}
+        {text}
+      </article>
+    );
+  }
 
   return (
     <article className={`group flex flex-col ${compact ? 'gap-2' : 'gap-3'}`}>
-      <Link
-        href={href}
-        className="block overflow-hidden ring-1 ring-border transition-all duration-300 group-hover:ring-border-2"
-      >
-        <div className="transition-transform duration-500 group-hover:scale-[1.03]">
-          <Thumb featured={featured} kicker={kicker} image={article.featuredImage} />
-        </div>
-      </Link>
-      <div className={`flex flex-col ${compact ? 'gap-1' : 'gap-2'}`}>
-        <Badges article={article} locale={locale} />
-        <h3
-          className={`font-heading font-bold leading-[1.14] tracking-tight text-text ${headingSize}`}
-        >
-          <Link
-            href={href}
-            className={`transition-colors group-hover:text-primary ${compact ? 'line-clamp-3' : ''}`}
-          >
-            {article.title}
-          </Link>
-        </h3>
-        {!compact && article.excerpt && (
-          <p className={`font-body text-muted ${featured ? 'text-base' : 'text-[0.95rem]'}`}>
-            {article.excerpt}
-          </p>
-        )}
-        <Meta article={article} locale={locale} />
-      </div>
+      {thumb}
+      {text}
     </article>
   );
 }

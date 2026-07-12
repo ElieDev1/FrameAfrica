@@ -19,6 +19,7 @@ export function LoadMore({
   topic,
   feed = false,
   pageSize = 12,
+  compact = false,
 }: {
   initialArticles: ArticleSummary[];
   initialCursor: string | null;
@@ -27,6 +28,8 @@ export function LoadMore({
   /** When true, paginate the signed-in reader's personalised feed instead. */
   feed?: boolean;
   pageSize?: number;
+  /** Dense small-card grid (used on section pages beside a sidebar). */
+  compact?: boolean;
 }) {
   const [articles, setArticles] = useState(initialArticles);
   const [cursor, setCursor] = useState(initialCursor);
@@ -54,9 +57,15 @@ export function LoadMore({
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-10 pt-8 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        className={
+          compact
+            ? 'grid grid-cols-2 gap-x-5 gap-y-8 pt-6 sm:grid-cols-2 lg:grid-cols-3'
+            : 'grid grid-cols-1 gap-10 pt-8 sm:grid-cols-2 lg:grid-cols-3'
+        }
+      >
         {articles.map((article) => (
-          <ArticleCard key={article.id} article={article} locale={locale} />
+          <ArticleCard key={article.id} article={article} compact={compact} locale={locale} />
         ))}
       </div>
 
