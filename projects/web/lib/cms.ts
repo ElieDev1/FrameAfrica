@@ -296,6 +296,13 @@ export interface AnalyticsOverview {
   totalToday: number;
   topToday: { views: number; article: { id: string; slug: string; title: string } }[];
   topReferrers: { host: string; views: number }[];
+  // Optional so the page degrades gracefully before the API ships these.
+  totals?: { views: number; likes: number; comments: number; shares: number };
+  byType?: { type: string; views: number; likes: number; comments: number; shares: number }[];
+  viewsTrend?: { date: string; count: number }[];
+  commentsTrend?: { date: string; count: number }[];
+  commentStatus?: { status: string; count: number }[];
+  topArticles?: { id: string; slug: string; title: string; views: number }[];
 }
 
 /** Real-time editor analytics overview (staff). */

@@ -84,6 +84,8 @@ export class AdminOverviewService {
       likeCount,
       commentTotal,
       articleAgg,
+      totalSiteViews,
+      mediaShares,
       recentArticles,
       recentComments,
       recentUsers,
@@ -139,6 +141,21 @@ export class AdminOverviewService {
         where: { deletedAt: null },
         _sum: { viewCount: true, shareCount: true },
       }),
+      // Real site-wide views (every logged page view), not just article counters.
+      this.prisma.pageView.count(),
+      // Shares across the multimedia hubs, summed into the site-wide total.
+      Promise.all([
+        this.prisma.video.aggregate({ _sum: { shareCount: true } }),
+        this.prisma.gallery.aggregate({ where: { deletedAt: null }, _sum: { shareCount: true } }),
+        this.prisma.podcastEpisode.aggregate({
+          where: { deletedAt: null },
+          _sum: { shareCount: true },
+        }),
+        this.prisma.interactive.aggregate({
+          where: { deletedAt: null },
+          _sum: { shareCount: true },
+        }),
+      ]),
       this.prisma.article.findMany({
         where: { deletedAt: null },
         orderBy: { updatedAt: 'desc' },
@@ -222,10 +239,12 @@ export class AdminOverviewService {
         interactives: interactiveCount,
       },
       engagement: {
-        views: Number(articleAgg._sum.viewCount ?? 0),
+        views: totalSiteViews,
         likes: likeCount,
         comments: commentTotal,
-        shares: articleAgg._sum.shareCount ?? 0,
+        shares:
+          (articleAgg._sum.shareCount ?? 0) +
+          mediaShares.reduce((sum, m) => sum + (m._sum.shareCount ?? 0), 0),
       },
       recentArticles: recentArticles.map((a) => ({
         id: a.id,

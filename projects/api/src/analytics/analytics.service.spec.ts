@@ -2,9 +2,27 @@ import type { PrismaService } from '../prisma/prisma.service';
 import { AnalyticsService } from './analytics.service';
 
 function build() {
+  const shareSum = { _sum: { shareCount: 0 } };
   const prisma = {
-    pageView: { create: jest.fn(), count: jest.fn(), groupBy: jest.fn() },
-    article: { findMany: jest.fn() },
+    pageView: {
+      create: jest.fn(),
+      count: jest.fn().mockResolvedValue(0),
+      groupBy: jest.fn().mockResolvedValue([]),
+      findMany: jest.fn().mockResolvedValue([]),
+    },
+    article: {
+      findMany: jest.fn().mockResolvedValue([]),
+      aggregate: jest.fn().mockResolvedValue(shareSum),
+    },
+    comment: {
+      groupBy: jest.fn().mockResolvedValue([]),
+      findMany: jest.fn().mockResolvedValue([]),
+    },
+    contentLike: { groupBy: jest.fn().mockResolvedValue([]) },
+    video: { aggregate: jest.fn().mockResolvedValue(shareSum) },
+    gallery: { aggregate: jest.fn().mockResolvedValue(shareSum) },
+    podcastEpisode: { aggregate: jest.fn().mockResolvedValue(shareSum) },
+    interactive: { aggregate: jest.fn().mockResolvedValue(shareSum) },
   };
   return { service: new AnalyticsService(prisma as unknown as PrismaService), prisma };
 }
