@@ -1,5 +1,7 @@
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import type { AuditService } from '../audit/audit.service';
+import type { NotificationsService } from '../notifications/notifications.service';
 import type { PrismaService } from '../prisma/prisma.service';
 import type { AccountService } from './account.service';
 import { AuthService } from './auth.service';
@@ -41,14 +43,18 @@ function build() {
   };
   const account = { sendVerification: jest.fn().mockResolvedValue(undefined) };
   const twoFactor = { verify: jest.fn().mockReturnValue(true) };
+  const audit = { record: jest.fn().mockResolvedValue(undefined) };
+  const notifications = { notifyRoles: jest.fn().mockResolvedValue(undefined) };
   const service = new AuthService(
     prisma as unknown as PrismaService,
     passwords as unknown as PasswordService,
     tokens as unknown as TokenService,
     account as unknown as AccountService,
     twoFactor as unknown as TwoFactorService,
+    audit as unknown as AuditService,
+    notifications as unknown as NotificationsService,
   );
-  return { service, prisma, passwords, tokens, account, twoFactor };
+  return { service, prisma, passwords, tokens, account, twoFactor, audit, notifications };
 }
 
 describe('AuthService', () => {
@@ -153,8 +159,8 @@ describe('AuthService', () => {
       ).rejects.toBeInstanceOf(UnauthorizedException);
     });
 
-    it('locks the account on the 5th consecutive failed sign-in', async () => {
-      const { service, prisma, passwords } = build();
+    it('locks the account on the 5th failure, audits it and notifies admins', async () => {
+      const { service, prisma, passwords, audit, notifications } = build();
       prisma.user.findFirst.mockResolvedValue(userWithRoles({ failedLoginAttempts: 4 }));
       passwords.verify.mockResolvedValue(false);
       prisma.user.update.mockResolvedValue({});
@@ -167,6 +173,13 @@ describe('AuthService', () => {
       const { data } = (prisma.user.update.mock.calls[0] as [{ data: Record<string, unknown> }])[0];
       expect(data.failedLoginAttempts).toBe(5);
       expect(data.lockedAt).toBeInstanceOf(Date);
+      expect(audit.record).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'user.locked', targetId: 'u1' }),
+      );
+      expect(notifications.notifyRoles).toHaveBeenCalledWith(
+        ['admin'],
+        expect.objectContaining({ type: 'account_locked' }),
+      );
     });
 
     it('rejects a locked account even with the correct password', async () => {

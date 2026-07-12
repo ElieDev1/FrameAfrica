@@ -107,14 +107,31 @@ export class AdminUsersController {
   }
 
   @Post(':id/reset-password')
-  async resetPassword(@Param('id', ParseUUIDPipe) id: string) {
-    return apiResponse(await this.users.resetPassword(id));
+  async resetPassword(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    const result = await this.users.resetPassword(id);
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'user.password_reset',
+      targetType: 'user',
+      targetId: id,
+    });
+    return apiResponse(result);
   }
 
   /** Clear a brute-force lockout so the user can sign in again. */
   @Post(':id/unlock')
-  async unlock(@Param('id', ParseUUIDPipe) id: string) {
-    return apiResponse(await this.users.unlock(id));
+  async unlock(@CurrentUser() actor: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
+    const result = await this.users.unlock(id);
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'user.unlocked',
+      targetType: 'user',
+      targetId: id,
+    });
+    return apiResponse(result);
   }
 }
 

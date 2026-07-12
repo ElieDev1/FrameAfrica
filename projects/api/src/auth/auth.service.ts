@@ -1,5 +1,7 @@
 import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { Prisma, RoleName, UserStatus } from '@prisma/client';
+import { NotificationType, Prisma, RoleName, UserStatus } from '@prisma/client';
+import { AuditService } from '../audit/audit.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AccountService } from './account.service';
 import { PasswordService } from './password.service';
@@ -34,6 +36,8 @@ export class AuthService {
     private readonly tokens: TokenService,
     private readonly account: AccountService,
     private readonly twoFactor: TwoFactorService,
+    private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async register(input: RegisterInput): Promise<AuthResult> {
@@ -112,7 +116,10 @@ export class AuthService {
       // don't make the reader guess after a 6th try.
       if (user) {
         const nowLocked = await this.registerFailedLogin(user.id, user.failedLoginAttempts);
-        if (nowLocked) throw new UnauthorizedException('ACCOUNT_LOCKED');
+        if (nowLocked) {
+          await this.onAccountLocked(user);
+          throw new UnauthorizedException('ACCOUNT_LOCKED');
+        }
       }
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -153,6 +160,36 @@ export class AuthService {
       data: { failedLoginAttempts: attempts, lockedAt: locked ? new Date() : null },
     });
     return locked;
+  }
+
+  /**
+   * A brute-force lock just fired: record it to the audit trail (system actor)
+   * and flag every admin so they can investigate and unlock. Both sinks are
+   * best-effort and never throw into the login flow.
+   */
+  private async onAccountLocked(user: {
+    id: string;
+    email: string;
+    displayName: string;
+  }): Promise<void> {
+    await this.audit.record({
+      actorId: null,
+      action: 'user.locked',
+      targetType: 'user',
+      targetId: user.id,
+      meta: {
+        email: user.email,
+        reason: 'too_many_failed_logins',
+        attempts: AuthService.MAX_FAILED_ATTEMPTS,
+      },
+    });
+    await this.notifications.notifyRoles([RoleName.admin], {
+      type: NotificationType.account_locked,
+      title: 'Account locked',
+      body: `${user.displayName} (${user.email}) was locked after ${AuthService.MAX_FAILED_ATTEMPTS} failed sign-ins.`,
+      link: '/dashboard/users',
+    });
+    this.logger.warn(`Account ${user.email} locked after too many failed sign-ins`);
   }
 
   async refresh(rawRefreshToken: string): Promise<AuthResult> {

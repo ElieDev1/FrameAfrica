@@ -84,6 +84,7 @@ enum NotificationType {
   tip_received
   subscriber_joined
   comment_reported
+  account_locked
 }
 
 enum TipStatus {
