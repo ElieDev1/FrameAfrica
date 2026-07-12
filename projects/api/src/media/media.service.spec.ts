@@ -122,10 +122,8 @@ describe('MediaService', () => {
 
       expect(res.items).toHaveLength(2); // the peek row is trimmed off
       expect(res.hasMore).toBe(true);
-      const args = prisma.mediaAsset.findMany.mock.calls[0]?.[0] as {
-        skip: number;
-        take: number;
-      };
+      const calls = prisma.mediaAsset.findMany.mock.calls as unknown[][];
+      const args = calls[0]?.[0] as { skip: number; take: number };
       expect(args.skip).toBe(0);
       expect(args.take).toBe(3);
     });

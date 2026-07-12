@@ -24,7 +24,7 @@ import { apiResponse } from '../common/http/api-response';
 import { pagination, readPaging } from '../common/http/paging';
 import { CreateAlbumDto, SetAssetAlbumDto, UpdateAlbumDto } from './dto/album.dto';
 import { UploadMediaDto } from './dto/upload-media.dto';
-import type { AlbumFilter, KindFilter } from './media.service';
+import type { KindFilter } from './media.service';
 import { MediaService } from './media.service';
 import type { UploadedImage } from './media.types';
 
@@ -77,7 +77,7 @@ export class MediaController {
     const { items, hasMore } = await this.media.list(
       paging.limit,
       paging.page,
-      album as AlbumFilter,
+      album,
       asKind(kind),
     );
     return apiResponse(items, pagination(paging.page, hasMore));

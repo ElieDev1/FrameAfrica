@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CommentStatus, EngagementTarget } from '@prisma/client';
+import { EngagementTarget } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface AnalyticsOverview {

@@ -38,8 +38,11 @@ export interface UploadMeta {
   albumId?: string;
 }
 
-/** Which slice of the library to list: one album, only unfiled, or everything. */
-export type AlbumFilter = string | 'unfiled' | undefined;
+/**
+ * Which slice of the library to list: an album's id, the literal `'unfiled'`
+ * (files in no album), or undefined for everything.
+ */
+export type AlbumFilter = string | undefined;
 
 /** Which file kinds to list — the explorer's type tabs. */
 export type KindFilter = 'image' | 'video' | 'audio' | undefined;
