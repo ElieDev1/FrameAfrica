@@ -70,7 +70,7 @@ async function authenticate(
       if (message === 'ACCOUNT_LOCKED') {
         return {
           error:
-            'This account is locked after too many failed sign-ins. Ask an administrator to unlock it.',
+            'This account is temporarily locked after too many failed sign-ins. Please try again in about 15 minutes, or ask an administrator to unlock it now.',
         };
       }
       return { error: 'Invalid email or password.' };

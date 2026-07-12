@@ -43,7 +43,18 @@ Every arrow is a boundary that authenticates, validates, and logs. Secrets never
 - Phone OTP is rate-limited and single-use with short expiry.
 
 ### 3.4 Brute-force & credential-stuffing defense
-- Progressive lockout/backoff after failed attempts; CAPTCHA on suspicion.
+- **Temporary account lockout.** After 5 consecutive failed sign-ins the account
+  is locked and rejects even a correct password. The lock is **time-boxed**
+  (`AUTH_LOCKOUT_MINUTES`, default 15) and lifts itself on the next attempt once
+  the window passes — a permanent lock would let the sole admin trap themselves
+  out of a live system with no way back in. A lock is also cleared instantly by
+  an admin (dashboard) or by ops via the break-glass CLI. Every lock is written
+  to the audit trail and notifies all admins.
+- **Break-glass recovery** (`pnpm --filter api admin:recover <email>`): a
+  server-side script that unlocks and/or resets any account with the app's own
+  Argon2id hashing, for the case where the only admin is locked out or has
+  forgotten their password and no other admin can help. Requires shell +
+  `DATABASE_URL` access to the host (i.e. it assumes you already hold the box).
 - Cloudflare bot management + rate limiting at the edge.
 - Alerting on anomalous login geography/velocity.
 
