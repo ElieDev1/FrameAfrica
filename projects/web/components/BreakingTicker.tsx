@@ -44,14 +44,16 @@ export function BreakingTicker({
       onMouseLeave={() => setPaused(false)}
     >
       <div className="mx-auto flex max-w-[1440px] items-stretch px-6">
-        {/* Flag — compact on phones (labels like "Dernière minute" are long),
-            fuller padding and letter-spacing from `sm` up. */}
-        <span className="fa-breaking-badge relative z-10 -ml-6 flex shrink-0 items-center gap-1 whitespace-nowrap bg-accent-red py-2.5 pl-4 pr-3 text-[10px] font-extrabold uppercase tracking-[0.02em] text-white sm:gap-2 sm:pl-6 sm:pr-6 sm:text-[12px] sm:tracking-[0.12em]">
-          <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+        {/* Flag — on phones just the pulsing dot (labels like "Dernière minute"
+            are long and would crowd out the headline); the word returns at `sm`. */}
+        <span className="fa-breaking-badge relative z-10 -ml-6 flex shrink-0 items-center gap-2 whitespace-nowrap bg-accent-red py-2.5 pl-6 pr-4 text-[12px] font-extrabold uppercase tracking-[0.12em] text-white sm:pr-6">
+          <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/80" />
-            <span className="relative inline-flex h-full w-full rounded-full bg-white" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
           </span>
-          {locale ? t(locale, 'home.breaking') : 'Breaking'}
+          <span className="hidden sm:inline">
+            {locale ? t(locale, 'home.breaking') : 'Breaking'}
+          </span>
         </span>
 
         {/* Rolling headline with its section kicker */}
