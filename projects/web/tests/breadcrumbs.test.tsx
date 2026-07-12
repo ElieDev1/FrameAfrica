@@ -36,11 +36,23 @@ describe('SiteBreadcrumbs', () => {
   });
 
   it('skips prefix-only segments and humanizes a slug', () => {
-    mockPath.mockReturnValue('/article/rwanda-coffee-boom');
+    mockPath.mockReturnValue('/topic/rwanda-coffee-boom');
     render(<SiteBreadcrumbs />);
-    // "article" is a route prefix with no index — it must not appear.
-    expect(screen.queryByText(/^article$/i)).not.toBeInTheDocument();
+    // "topic" is a route prefix with no index — it must not appear.
+    expect(screen.queryByText(/^topic$/i)).not.toBeInTheDocument();
     expect(screen.getByText('Rwanda Coffee Boom')).toBeInTheDocument();
+  });
+
+  it('defers to the page on section/article routes (they own their breadcrumb)', () => {
+    // These pages render a hierarchy-aware trail (Home › Section › …) from
+    // server data, so the layout one must not stack a second, flatter trail.
+    mockPath.mockReturnValue('/section/mobile');
+    const { container: sectionC } = render(<SiteBreadcrumbs />);
+    expect(sectionC).toBeEmptyDOMElement();
+
+    mockPath.mockReturnValue('/article/rwanda-coffee-boom');
+    const { container: articleC } = render(<SiteBreadcrumbs />);
+    expect(articleC).toBeEmptyDOMElement();
   });
 
   it('labels an opaque id from its parent collection', () => {

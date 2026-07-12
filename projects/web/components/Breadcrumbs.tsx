@@ -86,8 +86,15 @@ const SITE_LABELS: Record<string, MessageKey> = {
   signup: 'nav.subscribe',
 };
 
+/**
+ * Routes whose page renders its own breadcrumb from server data — a section
+ * knows its parent category, an article knows its section — which the pathname
+ * alone can't reconstruct. We render nothing here so the two don't stack.
+ */
+const SITE_SELF_MANAGED = new Set(['section', 'article']);
+
 /** Segments that are route prefixes with no index page — skipped in the trail. */
-const SITE_PREFIX_ONLY = new Set(['section', 'topic', 'article']);
+const SITE_PREFIX_ONLY = new Set(['topic']);
 
 /** Singular label for a detail page whose id is opaque, keyed by parent. */
 const SITE_SINGULAR: Record<string, MessageKey> = {
@@ -102,6 +109,9 @@ export function SiteBreadcrumbs() {
   const pathname = usePathname();
   const t = useT();
   const segments = pathname.split('/').filter(Boolean);
+
+  // Let section/article pages own their (hierarchy-aware) breadcrumb.
+  if (segments.length > 0 && SITE_SELF_MANAGED.has(segments[0])) return null;
 
   const items: Crumb[] = [{ label: t('nav.home'), href: '/' }];
   let href = '';

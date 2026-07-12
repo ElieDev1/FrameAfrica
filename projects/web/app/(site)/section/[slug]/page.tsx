@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ChevronRightIcon } from '@/components/icons';
 import { FollowButton } from '@/components/FollowButton';
 import { LoadMore } from '@/components/LoadMore';
 import { MultimediaHubs } from '@/components/MultimediaHubs';
@@ -55,22 +56,31 @@ export default async function SectionPage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-8">
       <header className="border-b border-border pb-6">
-        {category.parent ? (
-          <nav aria-label="Breadcrumb" className="font-mono text-xs text-muted">
-            <Link
-              href={`/section/${category.parent.slug}`}
-              className="text-primary hover:underline"
-            >
-              {translateCategory(locale, category.parent.slug, category.parent.name)}
-            </Link>
-            <span aria-hidden> › </span>
-            <span>{categoryName}</span>
-          </nav>
-        ) : (
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
-            {t(locale, 'common.section')}
-          </p>
-        )}
+        {/* Home › [parent section ›] this section. The parent only exists for a
+            sub-section; a top-level section is just Home › Name. */}
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1 font-mono text-xs text-muted"
+        >
+          <Link href="/" className="hover:text-primary">
+            {t(locale, 'nav.home')}
+          </Link>
+          <ChevronRightIcon size={12} className="text-faint" />
+          {category.parent && (
+            <>
+              <Link
+                href={`/section/${category.parent.slug}`}
+                className="text-primary hover:underline"
+              >
+                {translateCategory(locale, category.parent.slug, category.parent.name)}
+              </Link>
+              <ChevronRightIcon size={12} className="text-faint" />
+            </>
+          )}
+          <span aria-current="page" className="text-text">
+            {categoryName}
+          </span>
+        </nav>
         <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-heading text-4xl font-black tracking-tight text-text">
             {categoryName}
