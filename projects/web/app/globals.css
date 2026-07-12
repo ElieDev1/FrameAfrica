@@ -26,17 +26,21 @@
    burnt amber so orange text/kickers clear ~4.3:1 contrast. */
 :root[data-theme='light'] {
   --color-bg: #ffffff;
-  --color-surface: #ffffff;
+  /* Cards/panels sit a hair off the pure-white page — a clean, cool-neutral
+     fill so they read as surfaces without a heavy grey or any warm cast. */
+  --color-surface: #f7f8fa;
   /* A pure-neutral light grey (equal channels) — the old #f3f2f4 had its green
      channel lowest, giving a faint magenta/pink cast that read as "red" on the
      white page. Secondary fills across the app inherit this. */
   --color-surface-2: #f3f3f3;
   --color-elev: #ffffff;
-  --color-border: rgba(24, 22, 20, 0.12);
-  --color-border-2: rgba(24, 22, 20, 0.2);
-  --color-text: #16130d;
-  --color-muted: #574f45;
-  --color-faint: #857c6f;
+  --color-border: rgba(20, 20, 24, 0.14);
+  --color-border-2: rgba(20, 20, 24, 0.22);
+  /* Darker, neutral (not warm-brown) ink so text reads crisp and near-black on
+     white. muted ~11:1, faint ~6:1 contrast — well past AA. */
+  --color-text: #121316;
+  --color-muted: #363840;
+  --color-faint: #585b64;
   --color-primary: #bf6a0a;
 }
 
@@ -163,18 +167,18 @@ body::after {
     repeating-conic-gradient(
       from 178deg at 100% 0%,
       transparent 0 5.4deg,
-      color-mix(in srgb, var(--color-text) 3%, transparent) 5.4deg 6deg
+      color-mix(in srgb, var(--color-text) 1.6%, transparent) 5.4deg 6deg
     ),
     repeating-radial-gradient(
       circle at 100% 0%,
       transparent 0 45px,
-      color-mix(in srgb, var(--color-text) 4.5%, transparent) 45px 46.5px,
+      color-mix(in srgb, var(--color-text) 2.5%, transparent) 45px 46.5px,
       transparent 46.5px 92px
     ),
     repeating-radial-gradient(
       circle at 100% 0%,
       transparent 0 137px,
-      color-mix(in srgb, var(--color-text) 8%, transparent) 137px 139px,
+      color-mix(in srgb, var(--color-text) 4.5%, transparent) 137px 139px,
       transparent 139px 276px
     );
 }
@@ -303,10 +307,10 @@ body::after {
   background: rgba(0, 0, 0, 0.04);
 }
 
-/* Dashboard sidenav: standard warm-dark surface in dark mode; in light mode the
-   same opacity-only neutral shade as the footer. */
+/* Dashboard sidenav: standard warm-dark surface in dark mode; in light mode a
+   very light opacity-only shade so it's almost white, just off the page. */
 :root[data-theme='light'] .dash-sidenav {
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba(0, 0, 0, 0.02);
 }
 
 /* Placeholder media: a deliberate branded panel, not a "missing image" gap. */
