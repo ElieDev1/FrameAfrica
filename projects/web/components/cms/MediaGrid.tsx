@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useMemo, useState, useTransition } from 'react';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { CheckIcon, LinkIcon, SearchIcon, TrashIcon } from '@/components/icons';
 import { useT } from '@/components/LocaleProvider';
 import type { MediaAsset } from '@/lib/cms';
@@ -15,6 +16,7 @@ function fileSize(bytes: number): string {
 
 function MediaCard({ asset, canDelete }: { asset: MediaAsset; canDelete: boolean }) {
   const t = useT();
+  const ask = useConfirm();
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -29,8 +31,12 @@ function MediaCard({ asset, canDelete }: { asset: MediaAsset; canDelete: boolean
     }
   }
 
-  function remove() {
-    if (!confirm('Delete this image from the library? Stories keep their copy of the URL.')) return;
+  async function remove() {
+    const ok = await ask({
+      message: 'Delete this image from the library? Stories keep their copy of the URL.',
+      danger: true,
+    });
+    if (!ok) return;
     setError(null);
     start(async () => {
       const res = await deleteMediaAction(asset.id);

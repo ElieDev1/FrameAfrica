@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import { StatusBadge } from '@/components/cms/StatusBadge';
+import { useConfirm } from '@/components/ConfirmProvider';
 import {
   ArrowUpRightIcon,
   ChevronRightIcon,
@@ -47,6 +48,8 @@ function RowActions({
   deleteAction?: (id: string) => Promise<void>;
 }) {
   const t = useT();
+  const ask = useConfirm();
+  const [deleting, startDelete] = useTransition();
   const btn =
     'inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold transition hover:border-primary hover:text-primary';
   return (
@@ -76,20 +79,23 @@ function RowActions({
         </Link>
       )}
       {deleteAction && (
-        <form
-          action={deleteAction.bind(null, d.id)}
-          onSubmit={(e) => {
-            if (!confirm(`Delete “${d.title}”? This cannot be undone.`)) e.preventDefault();
+        <button
+          type="button"
+          disabled={deleting}
+          aria-label={t('dst.deleteArticle')}
+          onClick={async () => {
+            if (
+              await ask({ message: `Delete “${d.title}”? This cannot be undone.`, danger: true })
+            ) {
+              startDelete(() => {
+                void deleteAction(d.id);
+              });
+            }
           }}
+          className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 text-xs font-semibold text-muted transition hover:border-accent-red hover:text-accent-red disabled:opacity-50"
         >
-          <button
-            type="submit"
-            aria-label={t('dst.deleteArticle')}
-            className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 text-xs font-semibold text-muted transition hover:border-accent-red hover:text-accent-red"
-          >
-            <TrashIcon size={13} />
-          </button>
-        </form>
+          <TrashIcon size={13} />
+        </button>
       )}
     </div>
   );

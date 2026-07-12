@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 import { CheckIcon, ClockIcon, EyeIcon, PlayIcon, PlusIcon, TrashIcon } from '@/components/icons';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { useT } from '@/components/LocaleProvider';
 import type { AdminVideoItem } from '@/lib/cms';
 import { formatDate } from '@/lib/format';
@@ -36,6 +37,7 @@ function AddButton() {
 export function VideosAdmin({ videos }: { videos: AdminVideoItem[] }) {
   const router = useRouter();
   const t = useT();
+  const ask = useConfirm();
   const [pending, startTransition] = useTransition();
   const [notice, setNotice] = useState<string | null>(null);
   const [addState, addAction] = useActionState<AddVideoState, FormData>(addVideo, {});
@@ -211,9 +213,12 @@ export function VideosAdmin({ videos }: { videos: AdminVideoItem[] }) {
                   <button
                     type="button"
                     disabled={pending}
-                    onClick={() => {
-                      if (confirm(`Delete “${v.title}” from the hub?`))
+                    onClick={async () => {
+                      if (
+                        await ask({ message: `Delete “${v.title}” from the hub?`, danger: true })
+                      ) {
                         act(() => deleteVideo(v.id), t('d.common.deleted'));
+                      }
                     }}
                     className="ml-auto inline-flex items-center rounded-md border border-border px-2 py-1 text-muted transition hover:border-accent-red hover:text-accent-red disabled:opacity-50"
                     aria-label={t('dvid.deleteAria')}

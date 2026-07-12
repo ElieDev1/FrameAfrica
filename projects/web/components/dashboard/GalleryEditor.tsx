@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { ImageIcon, PlusIcon, TrashIcon } from '@/components/icons';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { useT } from '@/components/LocaleProvider';
 import type { GalleryDetail, GalleryImage } from '@/lib/cms';
 import {
@@ -25,6 +26,7 @@ function toRows(images: GalleryImage[]): Row[] {
 export function GalleryEditor({ gallery }: { gallery?: GalleryDetail }) {
   const router = useRouter();
   const t = useT();
+  const ask = useConfirm();
   const [pending, startTransition] = useTransition();
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -104,8 +106,9 @@ export function GalleryEditor({ gallery }: { gallery?: GalleryDetail }) {
     });
   }
 
-  function onDelete() {
-    if (!gallery || !confirm(`Delete “${gallery.title}”?`)) return;
+  async function onDelete() {
+    if (!gallery) return;
+    if (!(await ask({ message: `Delete “${gallery.title}”?`, danger: true }))) return;
     startTransition(async () => {
       const res = await deleteGallery(gallery.id);
       if (res.error) setNotice(res.error);

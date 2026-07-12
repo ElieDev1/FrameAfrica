@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { BarChartIcon, TrashIcon } from '@/components/icons';
 import { EmbedFrame } from '@/components/EmbedFrame';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { useT } from '@/components/LocaleProvider';
 import type { InteractiveItem } from '@/lib/cms';
 import { createInteractive, deleteInteractive, updateInteractive } from '@/lib/interactive-actions';
@@ -16,6 +17,7 @@ const RATIOS = ['16/9', '4/3', '1/1', '3/2', '2/1'];
 export function InteractiveEditor({ interactive }: { interactive?: InteractiveItem }) {
   const router = useRouter();
   const t = useT();
+  const ask = useConfirm();
   const [pending, start] = useTransition();
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -70,8 +72,9 @@ export function InteractiveEditor({ interactive }: { interactive?: InteractiveIt
     });
   }
 
-  function onDelete() {
-    if (!interactive || !confirm(`Delete “${interactive.title}”?`)) return;
+  async function onDelete() {
+    if (!interactive) return;
+    if (!(await ask({ message: `Delete “${interactive.title}”?`, danger: true }))) return;
     start(async () => {
       const res = await deleteInteractive(interactive.id);
       if (res.error) setNotice(res.error);

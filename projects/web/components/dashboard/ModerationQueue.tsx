@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { useT } from '@/components/LocaleProvider';
 import {
   deleteComment,
@@ -32,6 +33,7 @@ const CSTAT: Record<string, MessageKey> = {
 
 export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
   const t = useT();
+  const ask = useConfirm();
   const [queue, setQueue] = useState(initial);
   const [busy, setBusy] = useState<string | null>(null);
   const [, startTransition] = useTransition();
@@ -48,8 +50,8 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
     });
   }
 
-  function removeComment(id: string) {
-    if (!confirm(t('dmod.deleteConfirm'))) return;
+  async function removeComment(id: string) {
+    if (!(await ask({ message: t('dmod.deleteConfirm'), danger: true }))) return;
     setBusy(id);
     startTransition(async () => {
       try {

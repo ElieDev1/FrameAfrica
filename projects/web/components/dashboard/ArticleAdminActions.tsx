@@ -1,12 +1,14 @@
 'use client';
 
 import { useTransition } from 'react';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { useT } from '@/components/LocaleProvider';
 import { adminArticleStatusAction, adminDeleteArticleAction } from '@/lib/cms-actions';
 
 /** Admin god-mode controls for a single article (edit page). */
 export function ArticleAdminActions({ id, status }: { id: string; status: string }) {
   const t = useT();
+  const ask = useConfirm();
   const [pending, start] = useTransition();
 
   const setStatus = (action: 'publish' | 'unpublish' | 'archive') =>
@@ -14,8 +16,8 @@ export function ArticleAdminActions({ id, status }: { id: string; status: string
       await adminArticleStatusAction(id, action);
     });
 
-  const remove = () => {
-    if (!confirm(t('daa.deleteConfirm'))) return;
+  const remove = async () => {
+    if (!(await ask({ message: t('daa.deleteConfirm'), danger: true }))) return;
     start(async () => {
       await adminDeleteArticleAction(id);
     });

@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { MailIcon, PlayIcon, PlusIcon, TrashIcon } from '@/components/icons';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { useT } from '@/components/LocaleProvider';
 import type { PodcastEpisodeItem, PodcastShowDetail } from '@/lib/cms';
 import {
@@ -22,6 +23,7 @@ const label = 'mb-1 block font-mono text-[11px] uppercase tracking-[0.12em] text
 export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
   const router = useRouter();
   const t = useT();
+  const ask = useConfirm();
   const [pending, start] = useTransition();
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -76,8 +78,9 @@ export function ShowEditor({ show }: { show?: PodcastShowDetail }) {
     });
   }
 
-  function onDelete() {
-    if (!show || !confirm(`Delete “${show.title}” and its episodes?`)) return;
+  async function onDelete() {
+    if (!show) return;
+    if (!(await ask({ message: `Delete “${show.title}” and its episodes?`, danger: true }))) return;
     start(async () => {
       const res = await deleteShow(show.id);
       if (res.error) setNotice(res.error);
@@ -336,6 +339,7 @@ function EpisodeRow({
   slug: string;
 }) {
   const t = useT();
+  const ask = useConfirm();
   const published = ep.status === 'published';
   return (
     <li className="flex flex-wrap items-center gap-3 py-3">
@@ -368,8 +372,10 @@ function EpisodeRow({
       <button
         type="button"
         disabled={pending}
-        onClick={() => {
-          if (confirm(`Delete “${ep.title}”?`)) act(() => deleteEpisode(ep.id));
+        onClick={async () => {
+          if (await ask({ message: `Delete “${ep.title}”?`, danger: true })) {
+            act(() => deleteEpisode(ep.id));
+          }
         }}
         className="rounded-md border border-border p-1 text-muted transition hover:border-accent-red hover:text-accent-red disabled:opacity-50"
         aria-label={t('dpod.deleteEpisode')}

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { IBM_Plex_Mono, Roboto } from 'next/font/google';
+import { ConfirmProvider } from '@/components/ConfirmProvider';
 import { LocaleProvider } from '@/components/LocaleProvider';
 import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
 import { getLocale } from '@/lib/i18n-server';
@@ -91,7 +92,9 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col" suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <style dangerouslySetInnerHTML={{ __html: scrollbarCss }} />
-        <LocaleProvider locale={locale}>{children}</LocaleProvider>
+        <LocaleProvider locale={locale}>
+          <ConfirmProvider>{children}</ConfirmProvider>
+        </LocaleProvider>
         <ServiceWorkerRegister />
       </body>
     </html>
