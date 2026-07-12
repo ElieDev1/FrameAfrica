@@ -169,6 +169,7 @@ model User {
   tokens         UserToken[]
   comments       Comment[]
   mediaAssets    MediaAsset[]
+  mediaAlbums    MediaAlbum[]        @relation("UserMediaAlbums")
   corrections    ArticleCorrection[] @relation("UserCorrections")
   likes          ContentLike[]
   liveUpdates    LiveUpdate[]        @relation("UserLiveUpdates")
@@ -296,9 +297,33 @@ model LiveUpdate {
 /// An uploaded media file in the library / DAM (documents/13 §5). The binary is
 /// held by the storage driver (local dir in dev, S3 in prod); this row is the
 /// catalogue entry with the required alt/credit/licence metadata (`06` §6).
+/// An album groups the photos from one event/shoot so they can be found again
+/// (documents/13 §5). Photographers own this, but any staffer may file into it.
+/// Deleting an album never deletes its photos — they fall back to "Unfiled".
+model MediaAlbum {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name        String
+  slug        String    @unique
+  description String?
+  /// When the event happened (may differ from when the photos were uploaded).
+  eventDate   DateTime? @map("event_date")
+  coverUrl    String?   @map("cover_url")
+  createdById String    @map("created_by_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  createdBy User         @relation("UserMediaAlbums", fields: [createdById], references: [id])
+  assets    MediaAsset[]
+
+  @@index([createdAt])
+  @@map("media_album")
+}
+
 model MediaAsset {
   id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   uploaderId   String   @map("uploader_id") @db.Uuid
+  /// Null = "Unfiled". Set null (not cascade) when an album is deleted.
+  albumId      String?  @map("album_id") @db.Uuid
   url          String
   alt          String?
   credit       String?
@@ -308,9 +333,11 @@ model MediaAsset {
   originalName String?  @map("original_name")
   createdAt    DateTime @default(now()) @map("created_at")
 
-  uploader User @relation(fields: [uploaderId], references: [id])
+  uploader User        @relation(fields: [uploaderId], references: [id])
+  album    MediaAlbum? @relation(fields: [albumId], references: [id], onDelete: SetNull)
 
   @@index([uploaderId, createdAt])
+  @@index([albumId, createdAt])
   @@map("media_asset")
 }
 

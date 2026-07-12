@@ -8,6 +8,20 @@ export interface MediaAssetDto {
   mime: string;
   sizeBytes: number;
   originalName: string | null;
+  /** The event album this photo belongs to; null = "Unfiled". */
+  albumId: string | null;
+  createdAt: string;
+}
+
+/** An event album, with how many photos are filed under it. */
+export interface MediaAlbumDto {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  eventDate: string | null;
+  coverUrl: string | null;
+  assetCount: number;
   createdAt: string;
 }
 

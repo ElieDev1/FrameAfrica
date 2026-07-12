@@ -21,7 +21,7 @@ export function Wordmark({ size = 'md' }: { size?: 'md' | 'sm' }) {
         width={w}
         priority
         className="brand-logo brand-logo-dark"
-        style={{ height: h, width: 'auto' }}
+        style={{ width: 'auto', height: 'auto' }}
       />
       <Image
         src={logoLight}
@@ -30,7 +30,7 @@ export function Wordmark({ size = 'md' }: { size?: 'md' | 'sm' }) {
         width={w}
         priority
         className="brand-logo brand-logo-light"
-        style={{ height: h, width: 'auto' }}
+        style={{ width: 'auto', height: 'auto' }}
       />
     </span>
   );

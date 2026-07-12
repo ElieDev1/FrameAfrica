@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 /** Metadata fields that accompany a media upload (multipart form fields). */
 export class UploadMediaDto {
@@ -16,4 +16,9 @@ export class UploadMediaDto {
   @IsString()
   @MaxLength(200)
   licence?: string;
+
+  /** File the upload straight into an event album. */
+  @IsOptional()
+  @IsUUID()
+  albumId?: string;
 }

@@ -9,7 +9,13 @@ export const metadata: Metadata = { title: 'Ad Studio — Frame Africa' };
 
 export default async function AdStudioPage() {
   await requireAdmin();
-  const [media, locale] = await Promise.all([listMedia().catch(() => []), getLocale()]);
+  // The Studio only needs images to pick from — one generous page is plenty.
+  const [media, locale] = await Promise.all([
+    listMedia(undefined, 'image', 1, 100)
+      .then((r) => r.items)
+      .catch(() => []),
+    getLocale(),
+  ]);
 
   return (
     <div className="w-full">
