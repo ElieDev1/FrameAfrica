@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ActivityIcon } from '@/components/icons';
 import { t } from '@/lib/i18n';
 import { getLocale } from '@/lib/i18n-server';
 import { fetchPodcastShows } from '@/lib/podcasts';
@@ -17,6 +18,9 @@ export default async function PodcastsPage() {
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-8">
       <header className="border-b border-border pb-6">
+        <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
+          {t(locale, 'home.listen')}
+        </p>
         <h1 className="mt-1 font-heading text-4xl font-black tracking-tight text-text">
           {t(locale, 'mm.podcasts')}
         </h1>
@@ -24,13 +28,16 @@ export default async function PodcastsPage() {
       </header>
 
       {shows.length === 0 ? (
-        <p className="py-16 text-center font-body text-muted">{t(locale, 'mm.empty')}</p>
+        <div className="mt-8 rounded-xl border border-dashed border-border p-10">
+          <p className="font-heading text-lg font-bold text-text">{t(locale, 'mm.empty')}</p>
+          <p className="mt-1 font-body text-sm text-muted">{t(locale, 'mm.emptyHint')}</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 gap-8 pt-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-9 pt-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {shows.map((s) => (
-            <Link key={s.id} href={`/podcasts/${s.slug}`} className="group flex gap-4">
-              <div className="h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-surface-2">
-                {s.coverUrl && (
+            <Link key={s.id} href={`/podcasts/${s.slug}`} className="group min-w-0">
+              <div className="relative aspect-square overflow-hidden rounded-xl bg-surface-2 ring-1 ring-border">
+                {s.coverUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={s.coverUrl}
@@ -38,19 +45,24 @@ export default async function PodcastsPage() {
                     className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
                     loading="lazy"
                   />
+                ) : (
+                  <span className="grid h-full w-full place-items-center text-faint">
+                    <ActivityIcon size={28} />
+                  </span>
                 )}
               </div>
-              <div className="min-w-0">
-                <h2 className="font-heading text-lg font-bold leading-snug text-text group-hover:text-primary">
-                  {s.title}
-                </h2>
-                {s.description && (
-                  <p className="mt-1 line-clamp-2 font-body text-sm text-muted">{s.description}</p>
-                )}
-                <span className="mt-2 block font-mono text-[11px] text-faint">
-                  {s.episodeCount} episode{s.episodeCount === 1 ? '' : 's'}
-                </span>
-              </div>
+              <h2 className="mt-2.5 line-clamp-2 font-heading text-base font-bold leading-snug text-text group-hover:text-primary">
+                {s.title}
+              </h2>
+              {s.description && (
+                <p className="mt-1 line-clamp-2 font-body text-sm leading-relaxed text-muted">
+                  {s.description}
+                </p>
+              )}
+              <span className="mt-1.5 block font-mono text-[11px] text-faint">
+                {s.episodeCount}{' '}
+                {t(locale, s.episodeCount === 1 ? 'pod.episode' : 'pod.episodes').toLowerCase()}
+              </span>
             </Link>
           ))}
         </div>

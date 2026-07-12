@@ -123,6 +123,35 @@ const dict = {
     rw: 'Nta kintu kirasohoka.',
     fr: 'Rien de publié pour le moment.',
   },
+  'mm.emptyHint': {
+    en: 'Check back soon — the newsroom publishes here regularly.',
+    rw: 'Garuka vuba — abanyamakuru batangaza hano kenshi.',
+    fr: 'Revenez bientôt — la rédaction publie ici régulièrement.',
+  },
+  'mm.latest': { en: 'Latest', rw: 'Ibiheruka', fr: 'À la une' },
+  'mm.more': { en: 'More', rw: 'Ibindi', fr: 'Plus' },
+  'mm.allVideos': { en: 'All videos', rw: 'Amashusho yose', fr: 'Toutes les vidéos' },
+  'mm.upNext': { en: 'Up next', rw: 'Ibikurikira', fr: 'À suivre' },
+  'mm.nowPlaying': { en: 'Now playing', rw: 'Birimo gukina', fr: 'En lecture' },
+  'mm.play': { en: 'Play', rw: 'Kina', fr: 'Lire' },
+  'pod.kicker': { en: 'Podcast', rw: 'Podcast', fr: 'Podcast' },
+  'pod.episodes': { en: 'Episodes', rw: 'Ibice', fr: 'Épisodes' },
+  'pod.episode': { en: 'episode', rw: 'igice', fr: 'épisode' },
+  'pod.noEpisodes': {
+    en: 'No episodes yet.',
+    rw: 'Nta bice birahaba.',
+    fr: 'Aucun épisode pour le moment.',
+  },
+  'pod.ep': { en: 'Ep', rw: 'Igice', fr: 'Ép' },
+  'pod.listenOn': { en: 'Listen on', rw: 'Umva kuri', fr: 'Écouter sur' },
+  'gal.kicker': { en: 'Photo gallery', rw: 'Amafoto', fr: 'Galerie photo' },
+  'gal.photos': { en: 'photos', rw: 'amafoto', fr: 'photos' },
+  'gal.by': { en: 'By', rw: 'Byakozwe na', fr: 'Par' },
+  'gal.noPhotos': {
+    en: 'This gallery has no photos yet.',
+    rw: 'Aya mafoto ntaracyabamo.',
+    fr: 'Cette galerie ne contient pas encore de photos.',
+  },
 
   // — Footer —
   'footer.tagline': {
