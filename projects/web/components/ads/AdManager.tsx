@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { TrashIcon } from '@/components/icons';
+import { useT } from '@/components/LocaleProvider';
 import { createHouseAd, deleteHouseAd, toggleHouseAd } from '@/lib/ads-actions';
 import type { HouseAdAdmin } from '@/lib/cms';
 
@@ -31,6 +32,7 @@ function Creative({
 }
 
 export function AdManager({ ads }: { ads: HouseAdAdmin[] }) {
+  const t = useT();
   const [title, setTitle] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -53,7 +55,7 @@ export function AdManager({ ads }: { ads: HouseAdAdmin[] }) {
         setLinkUrl('');
         setImageUrl('');
       } else {
-        setError(res.error ?? 'Something went wrong.');
+        setError(res.error ?? t('dam.somethingWrong'));
       }
     });
   }
@@ -66,14 +68,12 @@ export function AdManager({ ads }: { ads: HouseAdAdmin[] }) {
       {/* ---- Ad list ---- */}
       <div>
         <h2 className="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-muted">
-          Live &amp; paused ({ads.length})
+          {t('dam.livePaused')} ({ads.length})
         </h2>
         {ads.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border px-6 py-12 text-center">
-            <p className="font-heading text-lg font-bold text-text">No house ads yet</p>
-            <p className="mt-1 font-body text-sm text-muted">
-              Create one on the right, or design one in the Ad Studio.
-            </p>
+            <p className="font-heading text-lg font-bold text-text">{t('dam.noHouseAds')}</p>
+            <p className="mt-1 font-body text-sm text-muted">{t('dam.createHint')}</p>
           </div>
         ) : (
           <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
@@ -89,7 +89,9 @@ export function AdManager({ ads }: { ads: HouseAdAdmin[] }) {
         onSubmit={onCreate}
         className="rounded-xl border border-border bg-surface p-4 lg:sticky lg:top-20"
       >
-        <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-muted">New house ad</h2>
+        <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
+          {t('dam.newHouseAd')}
+        </h2>
 
         {imageUrl && (
           <div className="mt-3 overflow-hidden rounded-lg ring-1 ring-border">
@@ -102,7 +104,7 @@ export function AdManager({ ads }: { ads: HouseAdAdmin[] }) {
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title (shown if no image)"
+            placeholder={t('dam.titlePlaceholder')}
             className={inputCls}
           />
           <select
@@ -129,12 +131,10 @@ export function AdManager({ ads }: { ads: HouseAdAdmin[] }) {
               type="text"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="Image, GIF or video URL (or /uploads/… path)"
+              placeholder={t('dam.imagePlaceholder')}
               className={inputCls}
             />
-            <span className="font-mono text-[10px] text-faint">
-              jpg · png · gif · mp4 · webm — videos autoplay muted &amp; loop
-            </span>
+            <span className="font-mono text-[10px] text-faint">{t('dam.formats')}</span>
           </label>
         </div>
         {error && <p className="mt-2 font-mono text-[11px] text-accent-red">{error}</p>}
@@ -143,7 +143,7 @@ export function AdManager({ ads }: { ads: HouseAdAdmin[] }) {
           disabled={pending}
           className="mt-3 w-full rounded-lg bg-primary px-4 py-2 font-heading text-sm font-bold text-black transition hover:opacity-90 disabled:opacity-50"
         >
-          {pending ? 'Saving…' : 'Add house ad'}
+          {pending ? t('d.common.saving') : t('dam.addHouseAd')}
         </button>
       </form>
     </div>
@@ -151,6 +151,7 @@ export function AdManager({ ads }: { ads: HouseAdAdmin[] }) {
 }
 
 function AdRow({ ad }: { ad: HouseAdAdmin }) {
+  const t = useT();
   const [pending, startTransition] = useTransition();
   return (
     <li className="flex flex-wrap items-center gap-3 px-4 py-3">
@@ -169,12 +170,12 @@ function AdRow({ ad }: { ad: HouseAdAdmin }) {
           <span className="truncate font-heading text-sm font-bold text-text">{ad.title}</span>
           {ad.imageUrl && isVideo(ad.imageUrl) && (
             <span className="shrink-0 rounded bg-surface-2 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide text-muted">
-              Video
+              {t('dam.video')}
             </span>
           )}
         </p>
         <p className="truncate font-mono text-[11px] text-muted">
-          {ad.placement} · {ad.impressions} impr · {ad.clicks} clicks
+          {ad.placement} · {ad.impressions} {t('dam.impressions')} · {ad.clicks} {t('dam.clicks')}
         </p>
       </div>
       <button
@@ -183,13 +184,13 @@ function AdRow({ ad }: { ad: HouseAdAdmin }) {
         onClick={() => startTransition(() => toggleHouseAd(ad.id, !ad.isActive))}
         className="rounded-lg border border-border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wide text-muted transition hover:border-primary hover:text-text disabled:opacity-50"
       >
-        {ad.isActive ? 'Pause' : 'Activate'}
+        {ad.isActive ? t('dam.pause') : t('dam.activate')}
       </button>
       <button
         type="button"
         disabled={pending}
         onClick={() => startTransition(() => deleteHouseAd(ad.id))}
-        aria-label="Delete ad"
+        aria-label={t('dam.deleteAd')}
         className="grid h-8 w-8 place-items-center rounded-lg border border-border text-muted transition hover:border-accent-red hover:text-accent-red disabled:opacity-50"
       >
         <TrashIcon size={14} />

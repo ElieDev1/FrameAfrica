@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { CheckIcon, FlagIcon, HeartFilledIcon, HeartIcon } from '@/components/icons';
 import { reportComment, toggleCommentLike } from '@/lib/comments-actions';
+import { useT } from '@/components/LocaleProvider';
 
 /** Like + report controls for a single comment (client — talks to the BFF). */
 export function CommentActions({
@@ -18,6 +19,7 @@ export function CommentActions({
   const [liked, setLiked] = useState(false);
   const [reported, setReported] = useState(false);
   const [, startTransition] = useTransition();
+  const t = useT();
 
   if (!signedIn) {
     return likes > 0 ? (
@@ -62,14 +64,14 @@ export function CommentActions({
         type="button"
         onClick={like}
         aria-pressed={liked}
-        aria-label={liked ? 'Unlike' : 'Like'}
+        aria-label={liked ? t('comments.unlike') : t('comments.like')}
         className={`inline-flex items-center gap-1 ${liked ? 'text-accent-red' : 'text-muted hover:text-primary'}`}
       >
         {liked ? <HeartFilledIcon size={14} /> : <HeartIcon size={14} />} {likes}
       </button>
       {reported ? (
         <span className="inline-flex items-center gap-1 text-faint">
-          <CheckIcon size={13} /> Reported
+          <CheckIcon size={13} /> {t('comments.reported')}
         </span>
       ) : (
         <button
@@ -77,7 +79,7 @@ export function CommentActions({
           onClick={report}
           className="inline-flex items-center gap-1 text-muted hover:text-accent-red"
         >
-          <FlagIcon size={13} /> Report
+          <FlagIcon size={13} /> {t('comments.report')}
         </button>
       )}
     </div>

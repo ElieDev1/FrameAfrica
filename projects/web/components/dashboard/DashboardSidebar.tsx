@@ -5,12 +5,14 @@ import { useEffect, useState } from 'react';
 import { PanelLeftIcon } from '@/components/icons';
 import { DashboardNav } from './DashboardNav';
 import { Wordmark } from '../Wordmark';
+import { useT } from '@/components/LocaleProvider';
 
 const KEY = 'fa-dash-collapsed';
 
 /** Desktop dashboard sidebar with a collapse (icons-only) / expand toggle. */
 export function DashboardSidebar({ roles }: { roles: string[] }) {
   const [collapsed, setCollapsed] = useState(false);
+  const t = useT();
 
   // Restore the saved preference after mount (avoids a hydration mismatch).
   useEffect(() => {
@@ -32,7 +34,7 @@ export function DashboardSidebar({ roles }: { roles: string[] }) {
 
   return (
     <aside
-      className={`sticky top-0 hidden h-screen shrink-0 flex-col overflow-hidden border-r border-border bg-surface-2 md:flex ${
+      className={`dash-sidenav sticky top-0 hidden h-screen shrink-0 flex-col overflow-hidden border-r border-border bg-surface-2 md:flex ${
         collapsed ? 'w-16' : 'w-60'
       }`}
     >
@@ -51,7 +53,7 @@ export function DashboardSidebar({ roles }: { roles: string[] }) {
         <button
           type="button"
           onClick={toggle}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? t('dash.expandSidebar') : t('dash.collapseSidebar')}
           className="grid h-8 w-8 place-items-center rounded-lg border border-border text-muted transition-colors hover:text-text"
         >
           <PanelLeftIcon size={16} />

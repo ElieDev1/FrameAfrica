@@ -26,14 +26,21 @@
    burnt amber so orange text/kickers clear ~4.3:1 contrast. */
 :root[data-theme='light'] {
   --color-bg: #ffffff;
-  --color-surface: #ffffff;
-  --color-surface-2: #f3f2f4;
+  /* Cards/panels sit a hair off the pure-white page — a clean, cool-neutral
+     fill so they read as surfaces without a heavy grey or any warm cast. */
+  --color-surface: #f7f8fa;
+  /* A pure-neutral light grey (equal channels) — the old #f3f2f4 had its green
+     channel lowest, giving a faint magenta/pink cast that read as "red" on the
+     white page. Secondary fills across the app inherit this. */
+  --color-surface-2: #f3f3f3;
   --color-elev: #ffffff;
-  --color-border: rgba(24, 22, 20, 0.12);
-  --color-border-2: rgba(24, 22, 20, 0.2);
-  --color-text: #16130d;
-  --color-muted: #574f45;
-  --color-faint: #857c6f;
+  --color-border: rgba(20, 20, 24, 0.14);
+  --color-border-2: rgba(20, 20, 24, 0.22);
+  /* Darker, neutral (not warm-brown) ink so text reads crisp and near-black on
+     white. muted ~11:1, faint ~6:1 contrast — well past AA. */
+  --color-text: #121316;
+  --color-muted: #363840;
+  --color-faint: #585b64;
   --color-primary: #bf6a0a;
 }
 
@@ -65,14 +72,24 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans), system-ui, sans-serif;
-  /* The canvas stays almost flat — just a whisper-fine dot grid for texture.
-     The real "design" lives in the top-right corner accent (body::before). */
-  background-image: radial-gradient(
-    circle at 1px 1px,
-    color-mix(in srgb, var(--color-text) 2%, transparent) 1px,
-    transparent 0
-  );
-  background-size: 26px 26px;
+  /* Canvas texture (dark mode only — light is pure white): fine, tightly-spaced
+     diagonal hairlines for a clean "engraved paper" feel, over a whisper of the
+     dot grid. Both are barely-there so text stays crisp; cards cover them, so
+     the lines mainly read in the page gutters and section bands. */
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 7px,
+      color-mix(in srgb, var(--color-text) 0.1%, transparent) 7px 8px
+    ),
+    radial-gradient(
+      circle at 1px 1px,
+      color-mix(in srgb, var(--color-text) 2%, transparent) 1px,
+      transparent 0
+    );
+  background-size:
+    auto,
+    26px 26px;
   background-repeat: repeat;
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
@@ -89,59 +106,88 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(
-      560px 480px at 100% -6%,
-      color-mix(in srgb, var(--color-primary) 11%, transparent),
-      transparent 62%
+    /* Radial spokes fanning out from the corner… */
+    repeating-conic-gradient(
+      from 178deg at 100% 0%,
+      transparent 0 5.4deg,
+      color-mix(in srgb, var(--color-text) 7%, transparent) 5.4deg 6deg
     ),
-    radial-gradient(
-      440px 420px at 82% 6%,
-      color-mix(in srgb, var(--color-accent-red) 6%, transparent),
-      transparent 58%
-    ),
+    /* …crossed by concentric arcs → a fine polar grid, like a blueprint emblem. */
     repeating-radial-gradient(
-      circle at 100% 0%,
-      transparent 0 50px,
-      color-mix(in srgb, var(--color-text) 6%, transparent) 50px 51px,
-      transparent 51px 102px
-    );
-  -webkit-mask-image: radial-gradient(80% 64% at 100% 0%, #000 0%, transparent 72%);
-  mask-image: radial-gradient(80% 64% at 100% 0%, #000 0%, transparent 72%);
+        circle at 100% 0%,
+        transparent 0 45px,
+        color-mix(in srgb, var(--color-text) 12%, transparent) 45px 46.5px,
+        transparent 46.5px 92px
+      ),
+    /* a couple of bolder marker rings give the grid a designed rhythm */
+    repeating-radial-gradient(
+        circle at 100% 0%,
+        transparent 0 137px,
+        color-mix(in srgb, var(--color-text) 20%, transparent) 137px 139px,
+        transparent 139px 276px
+      ),
+    /* soft neutral bloom underneath, for depth */
+    radial-gradient(
+        640px 560px at 100% -6%,
+        color-mix(in srgb, var(--color-text) 7%, transparent),
+        transparent 62%
+      );
+  -webkit-mask-image: radial-gradient(58% 46% at 100% 0%, #000 0%, transparent 76%);
+  mask-image: radial-gradient(58% 46% at 100% 0%, #000 0%, transparent 76%);
 }
 
-/* Keep the light page pure white: soften the corner bloom (the arcs stay as a
-   crisp, neutral geometric flourish that reads as design, not a colour cast). */
+/* Bottom-left counter-glow — balances the top-right accent so the ambient wash
+   reads as a deliberate composition (two soft light sources) rather than a lone
+   corner. Masked to the corner, so the centre reading column stays clean. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    640px 560px at -4% 104%,
+    color-mix(in srgb, var(--color-text) 5%, transparent),
+    transparent 60%
+  );
+  -webkit-mask-image: radial-gradient(78% 62% at 0% 100%, #000 0%, transparent 72%);
+  mask-image: radial-gradient(78% 62% at 0% 100%, #000 0%, transparent 72%);
+}
+/* Light page: the neutral corner light is invisible on white, so drop it and
+   let the fine arcs + dot grid carry the texture. */
+:root[data-theme='light'] body::after {
+  background: none;
+}
+
+/* Light mode: the same polar-grid corner emblem as dark, in a faint neutral grey
+   so the white page still reads as a designed surface, not a bare void. The base
+   mask (58% 46%) keeps it contained to the corner. */
 :root[data-theme='light'] body::before {
   background:
-    radial-gradient(
-      520px 460px at 100% -6%,
-      color-mix(in srgb, var(--color-primary) 6%, transparent),
-      transparent 60%
-    ),
-    radial-gradient(
-      420px 400px at 82% 6%,
-      color-mix(in srgb, var(--color-accent-red) 3%, transparent),
-      transparent 56%
+    repeating-conic-gradient(
+      from 178deg at 100% 0%,
+      transparent 0 5.4deg,
+      color-mix(in srgb, var(--color-text) 1.6%, transparent) 5.4deg 6deg
     ),
     repeating-radial-gradient(
       circle at 100% 0%,
-      transparent 0 50px,
-      color-mix(in srgb, var(--color-text) 5%, transparent) 50px 51px,
-      transparent 51px 102px
+      transparent 0 45px,
+      color-mix(in srgb, var(--color-text) 2.5%, transparent) 45px 46.5px,
+      transparent 46.5px 92px
+    ),
+    repeating-radial-gradient(
+      circle at 100% 0%,
+      transparent 0 137px,
+      color-mix(in srgb, var(--color-text) 4.5%, transparent) 137px 139px,
+      transparent 139px 276px
     );
 }
 
-/* In light mode keep the page pure white: drop the warm mesh blobs (they read
-   as a yellow cast on white) and keep only the whisper-fine neutral dot grid. */
+/* Light mode: a completely pure white canvas — no dot grid, no glow. The only
+   shaded light-mode surfaces are the footer and the dashboard sidenav. */
 :root[data-theme='light'] body,
 :root[data-theme='light'] .dash-surface {
-  background-image: radial-gradient(
-    circle at 1px 1px,
-    color-mix(in srgb, var(--color-text) 3.5%, transparent) 1px,
-    transparent 0
-  );
-  background-size: 24px 24px;
-  background-repeat: repeat;
+  background-image: none;
 }
 
 ::selection {
@@ -229,6 +275,44 @@ body::before {
   padding-inline: 1.5rem;
 }
 
+/* Site footer — deliberately a shade apart from the page so it reads as the
+   solid "base" of the layout, not more canvas. A soft surface→elev gradient
+   (a light neutral in light mode), a warm bloom rising from the top edge, and a
+   glowing brand hairline seam across the very top. Existing tokens only. */
+.site-footer {
+  position: relative;
+  /* A flat, neutral surface tone (the same fill as cards) — a shade off the
+     page so it reads as the base of the layout, without any warm gradient. */
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border-2);
+}
+.site-footer::before {
+  /* A soft neutral edge-light along the very top, so the footer looks lifted
+     off the page — no colour. */
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-text) 16%, transparent) 22%,
+    color-mix(in srgb, var(--color-text) 16%, transparent) 78%,
+    transparent
+  );
+}
+:root[data-theme='light'] .site-footer {
+  /* White mode stays white — the shade is a pure low-opacity black overlay, so
+     it's perfectly neutral (no hue, none of surface-2's pink cast). */
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* Dashboard sidenav: standard warm-dark surface in dark mode; in light mode a
+   very light opacity-only shade so it's almost white, just off the page. */
+:root[data-theme='light'] .dash-sidenav {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
 /* Placeholder media: a deliberate branded panel, not a "missing image" gap. */
 /* Placeholder for stories without a photo. A quiet, modern surface (in the
    spirit of Fluent's subtle fills): the card tone, a barely-there dot grid, and
@@ -263,6 +347,15 @@ body::before {
     color-mix(in srgb, var(--color-text) 3%, transparent),
     transparent 42%
   );
+}
+/* Light mode: drop the amber corner so placeholders are a clean neutral grey. */
+:root[data-theme='light'] .media-fill {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in srgb, var(--color-text) 6%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 22px 22px;
 }
 
 /* Dashboard workspace canvas — the same quiet mesh as the public page, dialled a

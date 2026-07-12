@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { ArticleSummary } from '@/lib/api';
 import { ChevronRightIcon } from './icons';
+import { type Locale, t, translateCategory } from '@/lib/i18n';
 
 const ROTATE_MS = 5500;
 const MAX_DOTS = 7;
@@ -14,7 +15,13 @@ const MAX_DOTS = 7;
  * bar; and clickable dot indicators to jump between stories. Pauses on hover and
  * honours reduced-motion. Uses the page font (no monospace).
  */
-export function BreakingTicker({ articles }: { articles: ArticleSummary[] }) {
+export function BreakingTicker({
+  articles,
+  locale,
+}: {
+  articles: ArticleSummary[];
+  locale?: Locale;
+}) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = articles.length;
@@ -31,7 +38,7 @@ export function BreakingTicker({ articles }: { articles: ArticleSummary[] }) {
 
   return (
     <aside
-      aria-label="Breaking news"
+      aria-label={locale ? t(locale, 'home.breaking') : 'Breaking news'}
       className="border-b border-accent-red/30 bg-gradient-to-r from-accent-red/12 via-accent-red/5 to-transparent"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -43,7 +50,7 @@ export function BreakingTicker({ articles }: { articles: ArticleSummary[] }) {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/80" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
           </span>
-          Breaking
+          {locale ? t(locale, 'home.breaking') : 'Breaking'}
         </span>
 
         {/* Rolling headline with its section kicker */}
@@ -55,7 +62,9 @@ export function BreakingTicker({ articles }: { articles: ArticleSummary[] }) {
               className={`fa-breaking-item absolute inset-0 flex items-center gap-2 ${paused ? 'fa-paused' : ''}`}
             >
               <span className="hidden shrink-0 text-[11px] font-bold uppercase tracking-[0.08em] text-accent-red sm:inline">
-                {current.category.name}
+                {locale
+                  ? translateCategory(locale, current.category.slug, current.category.name)
+                  : current.category.name}
               </span>
               <span className="hidden h-3 w-px shrink-0 bg-border sm:block" />
               <span className="truncate text-sm font-semibold text-text transition-colors hover:text-accent-red">
@@ -81,7 +90,7 @@ export function BreakingTicker({ articles }: { articles: ArticleSummary[] }) {
               <div
                 className="flex items-center gap-1.5"
                 role="tablist"
-                aria-label="Breaking stories"
+                aria-label={locale ? t(locale, 'home.breaking') : 'Breaking stories'}
               >
                 {articles.map((a, i) => (
                   <button
@@ -106,7 +115,7 @@ export function BreakingTicker({ articles }: { articles: ArticleSummary[] }) {
             )}
             <Link
               href={`/article/${current.slug}`}
-              aria-label="Read this breaking story"
+              aria-label={locale ? t(locale, 'common.readMore') : 'Read this breaking story'}
               className="grid h-6 w-6 place-items-center rounded-full text-faint transition hover:bg-accent-red/10 hover:text-accent-red"
             >
               <ChevronRightIcon size={14} />

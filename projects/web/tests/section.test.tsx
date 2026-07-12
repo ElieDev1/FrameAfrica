@@ -6,6 +6,10 @@ jest.mock('@/lib/api', () => ({
   fetchArticles: jest.fn(),
   fetchCategory: jest.fn(),
 }));
+jest.mock('next/headers', () => ({
+  cookies: jest.fn().mockResolvedValue({ get: () => undefined }),
+  headers: jest.fn().mockResolvedValue({ get: () => undefined }),
+}));
 jest.mock('@/lib/session', () => ({ getSession: jest.fn().mockResolvedValue(null) }));
 jest.mock('@/lib/follows-actions', () => ({
   getFollowStatus: jest.fn().mockResolvedValue(null),

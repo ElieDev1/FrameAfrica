@@ -1,10 +1,19 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { ChevronRightIcon, PlusIcon, SearchIcon } from '@/components/icons';
-import { createUser, resetUserPassword, setUserRoles, setUserStatus } from '@/lib/admin-actions';
+import { useT } from '@/components/LocaleProvider';
+import {
+  createUser,
+  resetUserPassword,
+  setUserRoles,
+  setUserStatus,
+  unlockUser,
+} from '@/lib/admin-actions';
 import { type AdminUser, ROLE_NAMES, type RoleName, type UserStatus } from '@/lib/admin-types';
 import { formatDate } from '@/lib/format';
+import type { MessageKey } from '@/lib/i18n';
 
 const PAGE_SIZE = 12;
 const STAFF_ROLES = new Set([
@@ -17,8 +26,10 @@ const STAFF_ROLES = new Set([
   'admin',
 ]);
 
-function roleLabel(role: string): string {
-  return role.replace(/_/g, ' ');
+function roleLabel(role: string, t: (k: MessageKey) => string): string {
+  const key = `drole.${role}` as MessageKey;
+  const translated = t(key);
+  return translated === key ? role.replace(/_/g, ' ') : translated;
 }
 
 function isStaff(u: AdminUser): boolean {
@@ -30,12 +41,12 @@ function initials(name: string): string {
   return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?';
 }
 
-const TABS: { key: string; label: string; match: (u: AdminUser) => boolean }[] = [
-  { key: 'all', label: 'All', match: () => true },
-  { key: 'active', label: 'Active', match: (u) => u.status === 'active' },
-  { key: 'suspended', label: 'Suspended', match: (u) => u.status === 'suspended' },
-  { key: 'staff', label: 'Staff', match: (u) => isStaff(u) },
-  { key: 'readers', label: 'Readers', match: (u) => !isStaff(u) },
+const TABS: { key: string; labelKey: MessageKey; match: (u: AdminUser) => boolean }[] = [
+  { key: 'all', labelKey: 'dusr.tabAll', match: () => true },
+  { key: 'active', labelKey: 'dusr.tabActive', match: (u) => u.status === 'active' },
+  { key: 'suspended', labelKey: 'dusr.tabSuspended', match: (u) => u.status === 'suspended' },
+  { key: 'staff', labelKey: 'dusr.tabStaff', match: (u) => isStaff(u) },
+  { key: 'readers', labelKey: 'dusr.tabReaders', match: (u) => !isStaff(u) },
 ];
 
 /** Avatar photo, or an initials monogram. */
@@ -59,6 +70,7 @@ function Avatar({ user }: { user: AdminUser }) {
 
 /** New-user form; on success surfaces the generated password once. */
 function CreateUser({ onCreated }: { onCreated: (u: AdminUser) => void }) {
+  const t = useT();
   const [email, setEmail] = useState('');
   const [displayName, setName] = useState('');
   const [roles, setRoles] = useState<RoleName[]>(['journalist']);
@@ -92,17 +104,14 @@ function CreateUser({ onCreated }: { onCreated: (u: AdminUser) => void }) {
 
   return (
     <section className="rounded-xl border border-border bg-surface p-5">
-      <h2 className="font-heading text-lg font-bold text-text">Create a user</h2>
-      <p className="mt-1 font-body text-sm text-muted">
-        A temporary password is generated. Hand it to the person — they set their own at first
-        sign-in.
-      </p>
+      <h2 className="font-heading text-lg font-bold text-text">{t('dusr.createUser')}</h2>
+      <p className="mt-1 font-body text-sm text-muted">{t('dusr.createDesc')}</p>
 
       {tempPassword && (
         <div className="mt-4 rounded-lg border border-primary/40 bg-primary/10 p-4">
           <p className="font-body text-sm text-text">
-            Account created for <strong>{tempPassword.email}</strong>. Temporary password (shown
-            once):
+            {t('dusr.accountCreatedFor')} <strong>{tempPassword.email}</strong>.{' '}
+            {t('dusr.tempPassword')}
           </p>
           <code className="mt-2 block select-all rounded bg-bg px-3 py-2 font-mono text-sm text-primary">
             {tempPassword.password}
@@ -112,7 +121,7 @@ function CreateUser({ onCreated }: { onCreated: (u: AdminUser) => void }) {
             onClick={() => setTempPassword(null)}
             className="mt-2 font-mono text-[11px] text-muted hover:text-text"
           >
-            Dismiss
+            {t('dusr.dismiss')}
           </button>
         </div>
       )}
@@ -120,7 +129,7 @@ function CreateUser({ onCreated }: { onCreated: (u: AdminUser) => void }) {
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
           <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Email
+            {t('dusr.email')}
           </span>
           <input
             type="email"
@@ -132,21 +141,21 @@ function CreateUser({ onCreated }: { onCreated: (u: AdminUser) => void }) {
         </label>
         <label className="flex flex-col gap-1">
           <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Display name
+            {t('dusr.displayName')}
           </span>
           <input
             type="text"
             value={displayName}
             onChange={(e) => setName(e.target.value)}
             className="rounded-lg border border-border bg-bg px-3 py-2 font-body text-sm text-text outline-none focus:border-primary"
-            placeholder="Jane Uwase"
+            placeholder={t('dusr.namePlaceholder')}
           />
         </label>
       </div>
 
       <fieldset className="mt-4">
         <legend className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-          Roles
+          {t('dusr.roles')}
         </legend>
         <div className="mt-2 flex flex-wrap gap-2">
           {ROLE_NAMES.map((role) => (
@@ -164,7 +173,7 @@ function CreateUser({ onCreated }: { onCreated: (u: AdminUser) => void }) {
                 checked={roles.includes(role)}
                 onChange={() => toggleRole(role)}
               />
-              {roleLabel(role)}
+              {roleLabel(role, t)}
             </label>
           ))}
         </div>
@@ -178,7 +187,7 @@ function CreateUser({ onCreated }: { onCreated: (u: AdminUser) => void }) {
         disabled={pending}
         className="mt-4 rounded-lg bg-primary px-4 py-2 font-heading text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {pending ? 'Creating…' : 'Create user'}
+        {pending ? t('dusr.creating') : t('dusr.createUser')}
       </button>
     </section>
   );
@@ -186,6 +195,7 @@ function CreateUser({ onCreated }: { onCreated: (u: AdminUser) => void }) {
 
 /** Inline role editor for a row. */
 function RoleEditor({ user, onSaved }: { user: AdminUser; onSaved: (roles: string[]) => void }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [roles, setRoles] = useState<string[]>(user.roles);
   const [error, setError] = useState<string | null>(null);
@@ -216,7 +226,7 @@ function RoleEditor({ user, onSaved }: { user: AdminUser; onSaved: (roles: strin
             key={r}
             className="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] capitalize text-muted"
           >
-            {roleLabel(r)}
+            {roleLabel(r, t)}
           </span>
         ))}
         <button
@@ -227,7 +237,7 @@ function RoleEditor({ user, onSaved }: { user: AdminUser; onSaved: (roles: strin
           }}
           className="ml-1 font-mono text-[10px] text-primary hover:underline"
         >
-          edit
+          {t('d.common.edit')}
         </button>
       </div>
     );
@@ -251,7 +261,7 @@ function RoleEditor({ user, onSaved }: { user: AdminUser; onSaved: (roles: strin
               checked={roles.includes(role)}
               onChange={() => toggle(role)}
             />
-            {roleLabel(role)}
+            {roleLabel(role, t)}
           </label>
         ))}
       </div>
@@ -263,14 +273,14 @@ function RoleEditor({ user, onSaved }: { user: AdminUser; onSaved: (roles: strin
           disabled={pending}
           className="font-mono text-[10px] text-primary hover:underline disabled:opacity-50"
         >
-          save
+          {t('d.common.save')}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
           className="font-mono text-[10px] text-muted hover:underline"
         >
-          cancel
+          {t('dusr.cancel')}
         </button>
       </div>
     </div>
@@ -278,20 +288,28 @@ function RoleEditor({ user, onSaved }: { user: AdminUser; onSaved: (roles: strin
 }
 
 function StatusBadge({ status }: { status: UserStatus }) {
+  const t = useT();
   const tone =
     status === 'active'
       ? 'text-primary'
       : status === 'suspended'
         ? 'text-accent-red'
         : 'text-faint';
+  const key = (
+    status === 'active' ? 'dusr.active' : status === 'suspended' ? 'dusr.suspended' : 'dusr.deleted'
+  ) as MessageKey;
   return (
-    <span className={`font-mono text-[11px] uppercase tracking-[0.12em] ${tone}`}>{status}</span>
+    <span className={`font-mono text-[11px] uppercase tracking-[0.12em] ${tone}`}>{t(key)}</span>
   );
 }
 
 /** One user table row with role editor, status toggle + reset-password. */
 function UserRow({ user, onChange }: { user: AdminUser; onChange: (u: AdminUser) => void }) {
+  const t = useT();
+  const ask = useConfirm();
   const [note, setNote] = useState<string | null>(null);
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function toggleStatus() {
@@ -303,12 +321,40 @@ function UserRow({ user, onChange }: { user: AdminUser; onChange: (u: AdminUser)
     });
   }
 
-  function reset() {
+  function unlock() {
     setNote(null);
     startTransition(async () => {
-      const res = await resetUserPassword(user.id);
-      setNote(res.error ?? `New password emailed to ${res.email}`);
+      const res = await unlockUser(user.id);
+      if (!res.error) onChange({ ...user, locked: false });
+      else setNote(res.error);
     });
+  }
+
+  async function reset() {
+    if (!(await ask({ message: t('dusr.resetConfirm'), danger: true }))) return;
+    setNote(null);
+    setTempPassword(null);
+    setCopied(false);
+    startTransition(async () => {
+      const res = await resetUserPassword(user.id);
+      if (res.error) {
+        setNote(res.error);
+      } else {
+        setTempPassword(res.temporaryPassword ?? null);
+        onChange({ ...user, mustChangePassword: true });
+      }
+    });
+  }
+
+  async function copyTemp() {
+    if (!tempPassword) return;
+    try {
+      await navigator.clipboard.writeText(tempPassword);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard blocked — the password is visible to copy manually */
+    }
   }
 
   return (
@@ -321,12 +367,39 @@ function UserRow({ user, onChange }: { user: AdminUser; onChange: (u: AdminUser)
               <span className="truncate font-heading font-bold text-text">{user.displayName}</span>
               {user.mustChangePassword && (
                 <span className="shrink-0 rounded bg-accent-yellow/20 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-accent-yellow">
-                  Invited
+                  {t('dusr.invited')}
+                </span>
+              )}
+              {user.locked && (
+                <span className="shrink-0 rounded bg-accent-red/15 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-accent-red">
+                  {t('dusr.locked')}
                 </span>
               )}
             </div>
             <div className="truncate font-mono text-[11px] text-muted">{user.email}</div>
             {note && <div className="mt-1 font-mono text-[10px] text-primary">{note}</div>}
+            {tempPassword && (
+              <div className="mt-2 max-w-xs rounded-lg border border-primary/40 bg-primary/5 p-2">
+                <p className="font-mono text-[9px] uppercase tracking-wide text-muted">
+                  {t('dusr.tempPassword')}
+                </p>
+                <div className="mt-1 flex items-center gap-2">
+                  <code className="min-w-0 flex-1 truncate rounded bg-surface-2 px-2 py-1 font-mono text-xs font-bold text-text">
+                    {tempPassword}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={copyTemp}
+                    className="shrink-0 rounded border border-border px-2 py-1 font-mono text-[10px] font-semibold text-muted transition hover:border-primary hover:text-primary"
+                  >
+                    {copied ? t('dusr.copied') : t('dusr.copy')}
+                  </button>
+                </div>
+                <p className="mt-1.5 font-mono text-[9px] leading-snug text-muted">
+                  {t('dusr.tempPasswordHint')}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </td>
@@ -341,13 +414,23 @@ function UserRow({ user, onChange }: { user: AdminUser; onChange: (u: AdminUser)
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center justify-end gap-1">
+          {user.locked && (
+            <button
+              type="button"
+              onClick={unlock}
+              disabled={pending}
+              className="rounded-lg border border-accent-red/40 px-2.5 py-1.5 text-xs font-semibold text-accent-red transition hover:bg-accent-red/10 disabled:opacity-40"
+            >
+              {t('dusr.unlock')}
+            </button>
+          )}
           <button
             type="button"
             onClick={toggleStatus}
             disabled={pending || user.status === 'deleted'}
             className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary disabled:opacity-40"
           >
-            {user.status === 'active' ? 'Suspend' : 'Activate'}
+            {user.status === 'active' ? t('dusr.suspend') : t('dusr.activate')}
           </button>
           <button
             type="button"
@@ -355,7 +438,7 @@ function UserRow({ user, onChange }: { user: AdminUser; onChange: (u: AdminUser)
             disabled={pending}
             className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-muted transition hover:border-primary hover:text-primary disabled:opacity-40"
           >
-            Reset password
+            {t('dusr.resetPassword')}
           </button>
         </div>
       </td>
@@ -364,6 +447,7 @@ function UserRow({ user, onChange }: { user: AdminUser; onChange: (u: AdminUser)
 }
 
 export function UsersAdmin({ initial }: { initial: AdminUser[] }) {
+  const tr = useT();
   const [users, setUsers] = useState(initial);
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState('all');
@@ -420,19 +504,16 @@ export function UsersAdmin({ initial }: { initial: AdminUser[] }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-heading text-3xl font-black tracking-tight text-text">
-            Users &amp; roles
+            {tr('dash.users')}
           </h1>
-          <p className="mt-1 max-w-2xl font-body text-sm text-muted">
-            {users.length} accounts — assign roles, suspend access, and reset passwords. New
-            accounts get a generated password and set their own at first sign-in.
-          </p>
+          <p className="mt-1 max-w-2xl font-body text-sm text-muted">{tr('dusr.subtitle')}</p>
         </div>
         <button
           type="button"
           onClick={() => setShowCreate((s) => !s)}
           className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 font-heading font-bold text-black transition hover:opacity-90"
         >
-          <PlusIcon size={16} /> New user
+          <PlusIcon size={16} /> {tr('dusr.createUser')}
         </button>
       </div>
 
@@ -440,27 +521,27 @@ export function UsersAdmin({ initial }: { initial: AdminUser[] }) {
 
       {/* Toolbar: tabs + search */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-1" role="tablist" aria-label="Filter users">
-          {TABS.map((t) => (
+        <div className="flex flex-wrap gap-1" role="tablist" aria-label={tr('dusr.filterUsers')}>
+          {TABS.map((tabItem) => (
             <button
-              key={t.key}
+              key={tabItem.key}
               type="button"
               role="tab"
-              aria-selected={tab === t.key}
-              onClick={() => selectTab(t.key)}
+              aria-selected={tab === tabItem.key}
+              onClick={() => selectTab(tabItem.key)}
               className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
-                tab === t.key
+                tab === tabItem.key
                   ? 'bg-primary/12 text-primary'
                   : 'text-muted hover:bg-surface-2 hover:text-text'
               }`}
             >
-              {t.label}
+              {tr(tabItem.labelKey)}
               <span
                 className={`rounded-full px-1.5 py-0.5 font-mono text-[10px] ${
-                  tab === t.key ? 'bg-primary/15 text-primary' : 'bg-surface-2 text-faint'
+                  tab === tabItem.key ? 'bg-primary/15 text-primary' : 'bg-surface-2 text-faint'
                 }`}
               >
-                {counts[t.key]}
+                {counts[tabItem.key]}
               </span>
             </button>
           ))}
@@ -473,7 +554,7 @@ export function UsersAdmin({ initial }: { initial: AdminUser[] }) {
             type="search"
             value={query}
             onChange={(e) => search(e.target.value)}
-            placeholder="Search name, email, role…"
+            placeholder={tr('dusr.searchPlaceholder')}
             className="w-full rounded-lg border border-border bg-surface-2 py-2 pl-9 pr-3 text-sm text-text outline-none focus:border-primary"
           />
         </label>
@@ -485,11 +566,11 @@ export function UsersAdmin({ initial }: { initial: AdminUser[] }) {
           <table className="w-full min-w-[720px] text-left">
             <thead>
               <tr className="border-b border-border font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-                <th className="px-4 py-3 font-medium">User</th>
-                <th className="px-4 py-3 font-medium">Roles</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Last active</th>
-                <th className="px-4 py-3 text-right font-medium">Actions</th>
+                <th className="px-4 py-3 font-medium">{tr('dusr.user')}</th>
+                <th className="px-4 py-3 font-medium">{tr('dusr.roles')}</th>
+                <th className="px-4 py-3 font-medium">{tr('dusr.status')}</th>
+                <th className="px-4 py-3 font-medium">{tr('dusr.lastActive')}</th>
+                <th className="px-4 py-3 text-right font-medium">{tr('dusr.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -501,7 +582,7 @@ export function UsersAdmin({ initial }: { initial: AdminUser[] }) {
         </div>
         {rows.length === 0 && (
           <p className="px-4 py-12 text-center font-body text-sm text-muted">
-            {query ? 'No users match your search.' : 'No users here.'}
+            {query ? tr('dusr.noMatch') : tr('dusr.noUsers')}
           </p>
         )}
       </div>
@@ -510,7 +591,7 @@ export function UsersAdmin({ initial }: { initial: AdminUser[] }) {
       {rows.length > 0 && (
         <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
           <p className="font-mono text-xs text-muted">
-            {firstRow}–{lastRow} of {rows.length}
+            {firstRow}–{lastRow} {tr('dpg.of')} {rows.length}
           </p>
           {totalPages > 1 && (
             <div className="flex items-center gap-1">
@@ -520,10 +601,10 @@ export function UsersAdmin({ initial }: { initial: AdminUser[] }) {
                 disabled={current === 1}
                 className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary disabled:pointer-events-none disabled:opacity-40"
               >
-                <ChevronRightIcon size={13} className="rotate-180" /> Prev
+                <ChevronRightIcon size={13} className="rotate-180" /> {tr('dpg.prev')}
               </button>
               <span className="px-2 font-mono text-xs text-muted">
-                Page {current} / {totalPages}
+                {tr('dpg.page')} {current} / {totalPages}
               </span>
               <button
                 type="button"
@@ -531,7 +612,7 @@ export function UsersAdmin({ initial }: { initial: AdminUser[] }) {
                 disabled={current === totalPages}
                 className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary disabled:pointer-events-none disabled:opacity-40"
               >
-                Next <ChevronRightIcon size={13} />
+                {tr('dpg.next')} <ChevronRightIcon size={13} />
               </button>
             </div>
           )}

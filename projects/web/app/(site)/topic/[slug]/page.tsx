@@ -6,6 +6,8 @@ import { fetchArticles, fetchTopic } from '@/lib/api';
 import { getFollowStatus } from '@/lib/follows-actions';
 import { getSession } from '@/lib/session';
 import { absoluteUrl } from '@/lib/site';
+import { getLocale } from '@/lib/i18n-server';
+import { t } from '@/lib/i18n';
 
 export const revalidate = 60;
 
@@ -17,7 +19,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!topic) {
     return { title: 'Topic not found' };
   }
-  const description = topic.description ?? `The latest on ${topic.name} from Frame Africa.`;
+  const locale = await getLocale();
+  const description =
+    topic.description ?? `${t(locale, 'common.topic')}: ${topic.name} — Frame Africa.`;
   const path = `/topic/${topic.slug}`;
   return {
     title: topic.name,
@@ -34,6 +38,7 @@ export default async function TopicPage({ params }: PageProps) {
     notFound();
   }
 
+  const locale = await getLocale();
   const [{ articles, pagination }, user, follow] = await Promise.all([
     fetchArticles({ topic: slug, limit: 12 }),
     getSession(),
@@ -43,7 +48,9 @@ export default async function TopicPage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-8">
       <header className="border-b border-border pb-6">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Topic</p>
+        <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
+          {t(locale, 'common.topic')}
+        </p>
         <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-heading text-4xl font-black tracking-tight text-text">
             {topic.name}
@@ -61,9 +68,7 @@ export default async function TopicPage({ params }: PageProps) {
       </header>
 
       {articles.length === 0 ? (
-        <p className="py-16 text-center font-body text-muted">
-          No stories tagged with this topic yet.
-        </p>
+        <p className="py-16 text-center font-body text-muted">{t(locale, 'topic.empty')}</p>
       ) : (
         <LoadMore
           initialArticles={articles}

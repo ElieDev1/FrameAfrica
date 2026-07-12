@@ -24,9 +24,9 @@ jobs:
 
       # pnpm must be installed before setup-node so its `cache: pnpm` can find it.
       - name: Install pnpm
+        # No `version:` — the action reads `packageManager` from package.json
+        # (pnpm@9.15.0). Specifying both is an error in action-setup v4.
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -47,7 +47,10 @@ jobs:
         run: pnpm typecheck
 
       - name: Unit & integration tests
-        run: pnpm test -- --coverage
+        # Args reach Jest only when they come after turbo's own `--`. Writing
+        # `pnpm test -- --coverage` collapses to `turbo run test "--coverage"`,
+        # which turbo rejects as an unexpected argument.
+        run: pnpm turbo run test -- --coverage
 
       - name: Build
         run: pnpm build
@@ -58,12 +61,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # gitleaks diffs the PR's commit range, so it needs the history —
+          # the default shallow clone makes it fail to scan the repository.
+          fetch-depth: 0
 
       - name: Dependency audit
         run: pnpm audit --audit-level=high || true
 
       - name: Secret scan (gitleaks)
         uses: gitleaks/gitleaks-action@v2
+        env:
+          # Required since gitleaks-action v2 to scan pull requests.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: SAST (CodeQL) — enable via GitHub "Code scanning"
       #   uses: github/codeql-action/analyze@v3
@@ -95,9 +105,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install pnpm
+        # No `version:` — the action reads `packageManager` from package.json
+        # (pnpm@9.15.0). Specifying both is an error in action-setup v4.
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node
         uses: actions/setup-node@v4

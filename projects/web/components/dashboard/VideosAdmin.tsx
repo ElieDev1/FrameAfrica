@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 import { CheckIcon, ClockIcon, EyeIcon, PlayIcon, PlusIcon, TrashIcon } from '@/components/icons';
+import { useConfirm } from '@/components/ConfirmProvider';
+import { useT } from '@/components/LocaleProvider';
 import type { AdminVideoItem } from '@/lib/cms';
 import { formatDate } from '@/lib/format';
 import {
@@ -19,6 +21,7 @@ const field =
 
 function AddButton() {
   const { pending } = useFormStatus();
+  const t = useT();
   return (
     <button
       type="submit"
@@ -26,13 +29,15 @@ function AddButton() {
       className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 font-heading text-sm font-bold text-black transition hover:opacity-90 disabled:opacity-60"
     >
       <PlusIcon size={15} />
-      {pending ? 'Adding…' : 'Add clip'}
+      {pending ? t('d.common.adding') : t('dvid.addClip')}
     </button>
   );
 }
 
 export function VideosAdmin({ videos }: { videos: AdminVideoItem[] }) {
   const router = useRouter();
+  const t = useT();
+  const ask = useConfirm();
   const [pending, startTransition] = useTransition();
   const [notice, setNotice] = useState<string | null>(null);
   const [addState, addAction] = useActionState<AddVideoState, FormData>(addVideo, {});
@@ -57,8 +62,7 @@ export function VideosAdmin({ videos }: { videos: AdminVideoItem[] }) {
     startTransition(async () => {
       const res = await syncVideos();
       if (res.error) setNotice(res.error);
-      else if (res.reason === 'not_configured')
-        setNotice('YouTube isn’t configured yet — add the API key + channel id in Settings.');
+      else if (res.reason === 'not_configured') setNotice(t('dvid.notConfigured'));
       else setNotice(`Synced ${res.synced ?? 0} clip${res.synced === 1 ? '' : 's'} from YouTube.`);
       router.refresh();
     });
@@ -70,11 +74,12 @@ export function VideosAdmin({ videos }: { videos: AdminVideoItem[] }) {
         <div>
           <div className="flex items-center gap-2">
             <PlayIcon size={20} className="text-primary" />
-            <h1 className="font-heading text-3xl font-black tracking-tight text-text">Videos</h1>
+            <h1 className="font-heading text-3xl font-black tracking-tight text-text">
+              {t('mm.videos')}
+            </h1>
           </div>
           <p className="mt-1 font-body text-sm text-muted">
-            The YouTube hub — sync the channel or curate clips by hand. {videos.length} in the
-            library.
+            {t('dvid.subtitle')} {videos.length} {t('dvid.inLibrary')}.
           </p>
         </div>
         <button
@@ -84,7 +89,7 @@ export function VideosAdmin({ videos }: { videos: AdminVideoItem[] }) {
           className="inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 font-heading text-sm font-bold text-text transition hover:bg-surface-2 disabled:opacity-60"
         >
           <CheckIcon size={15} className="text-primary" />
-          Sync from YouTube
+          {t('dvid.sync')}
         </button>
       </div>
 
@@ -96,15 +101,15 @@ export function VideosAdmin({ videos }: { videos: AdminVideoItem[] }) {
       >
         <label className="min-w-[16rem] flex-1">
           <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
-            YouTube URL
+            {t('dvid.youtubeUrl')}
           </span>
           <input name="url" required placeholder="https://youtu.be/…" className={field} />
         </label>
         <label className="min-w-[12rem] flex-1">
           <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
-            Title <span className="text-faint">(optional if API key set)</span>
+            {t('d.common.title')} <span className="text-faint">{t('dvid.titleOptional')}</span>
           </span>
-          <input name="title" placeholder="Clip title" className={field} />
+          <input name="title" placeholder={t('dvid.clipTitle')} className={field} />
         </label>
         <AddButton />
       </form>
@@ -121,9 +126,9 @@ export function VideosAdmin({ videos }: { videos: AdminVideoItem[] }) {
       {/* Grid */}
       {videos.length === 0 ? (
         <div className="mt-8 rounded-xl border border-dashed border-border p-12 text-center">
-          <p className="font-body text-sm text-muted">No videos yet.</p>
+          <p className="font-body text-sm text-muted">{t('dvid.empty')}</p>
           <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-            Sync a channel or add a clip by URL
+            {t('dvid.emptyHint')}
           </p>
         </div>
       ) : (
@@ -156,12 +161,12 @@ export function VideosAdmin({ videos }: { videos: AdminVideoItem[] }) {
                 <span className="absolute left-2 top-2 flex gap-1">
                   {v.isFeatured && (
                     <span className="rounded bg-primary px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-black">
-                      Featured
+                      {t('dvid.featured')}
                     </span>
                   )}
                   {v.isHidden && (
                     <span className="rounded bg-black/70 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-white">
-                      Hidden
+                      {t('dvid.hidden')}
                     </span>
                   )}
                 </span>
@@ -178,7 +183,10 @@ export function VideosAdmin({ videos }: { videos: AdminVideoItem[] }) {
                     type="button"
                     disabled={pending}
                     onClick={() =>
-                      act(() => setVideoFlags(v.id, { isFeatured: !v.isFeatured }), 'Updated.')
+                      act(
+                        () => setVideoFlags(v.id, { isFeatured: !v.isFeatured }),
+                        t('d.common.updated'),
+                      )
                     }
                     className={`rounded-md border px-2 py-1 font-mono text-[10px] uppercase tracking-wide transition disabled:opacity-50 ${
                       v.isFeatured
@@ -186,28 +194,34 @@ export function VideosAdmin({ videos }: { videos: AdminVideoItem[] }) {
                         : 'border-border text-muted hover:text-text'
                     }`}
                   >
-                    {v.isFeatured ? 'Featured' : 'Feature'}
+                    {v.isFeatured ? t('dvid.featured') : t('dvid.feature')}
                   </button>
                   <button
                     type="button"
                     disabled={pending}
                     onClick={() =>
-                      act(() => setVideoFlags(v.id, { isHidden: !v.isHidden }), 'Updated.')
+                      act(
+                        () => setVideoFlags(v.id, { isHidden: !v.isHidden }),
+                        t('d.common.updated'),
+                      )
                     }
                     className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 font-mono text-[10px] uppercase tracking-wide text-muted transition hover:text-text disabled:opacity-50"
                   >
                     <EyeIcon size={11} />
-                    {v.isHidden ? 'Show' : 'Hide'}
+                    {v.isHidden ? t('dvid.show') : t('dvid.hide')}
                   </button>
                   <button
                     type="button"
                     disabled={pending}
-                    onClick={() => {
-                      if (confirm(`Delete “${v.title}” from the hub?`))
-                        act(() => deleteVideo(v.id), 'Deleted.');
+                    onClick={async () => {
+                      if (
+                        await ask({ message: `Delete “${v.title}” from the hub?`, danger: true })
+                      ) {
+                        act(() => deleteVideo(v.id), t('d.common.deleted'));
+                      }
                     }}
                     className="ml-auto inline-flex items-center rounded-md border border-border px-2 py-1 text-muted transition hover:border-accent-red hover:text-accent-red disabled:opacity-50"
-                    aria-label="Delete video"
+                    aria-label={t('dvid.deleteAria')}
                   >
                     <TrashIcon size={12} />
                   </button>

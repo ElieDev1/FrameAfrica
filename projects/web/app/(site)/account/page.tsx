@@ -14,7 +14,13 @@ import { formatDate } from '@/lib/format';
 import { fetchHistory, type HistoryArticle } from '@/lib/history-actions';
 import { getSession } from '@/lib/session';
 
-export const metadata: Metadata = { title: 'Your account — Frame Africa' };
+import { getLocale } from '@/lib/i18n-server';
+import { type Locale, type MessageKey, t, translateCategory } from '@/lib/i18n';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return { title: `${t(locale, 'dash.myAccount')} — Frame Africa` };
+}
 
 const STAFF_ROLES = ['journalist', 'sub_editor', 'photographer', 'editor', 'moderator', 'admin'];
 
@@ -29,6 +35,7 @@ export default async function AccountPage() {
     redirect('/login');
   }
 
+  const locale = await getLocale();
   const isStaff = user.roles.some((role) => STAFF_ROLES.includes(role));
   const [saved, follows, history] = await Promise.all([
     fetchSaved(),
@@ -60,17 +67,20 @@ export default async function AccountPage() {
             </h1>
             <p className="truncate font-body text-sm text-muted">{user.email}</p>
             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-              {(user.roles.length ? user.roles : ['reader']).map((r) => (
-                <span
-                  key={r}
-                  className="rounded-full bg-surface-2 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted"
-                >
-                  {r.replace('_', ' ')}
-                </span>
-              ))}
+              {(user.roles.length ? user.roles : ['reader']).map((r) => {
+                const roleKey = `role.${r}` as MessageKey;
+                return (
+                  <span
+                    key={r}
+                    className="rounded-full bg-surface-2 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted"
+                  >
+                    {t(locale, roleKey)}
+                  </span>
+                );
+              })}
               {user.twoFactorEnabled && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-accent-green/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-accent-green">
-                  <CheckIcon size={11} aria-hidden /> 2FA on
+                  <CheckIcon size={11} aria-hidden /> {t(locale, 'account.twoFactorOn')}
                 </span>
               )}
             </div>
@@ -83,14 +93,14 @@ export default async function AccountPage() {
             href="/for-you"
             className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-text transition hover:border-primary hover:text-primary"
           >
-            For You
+            {t(locale, 'nav.forYou')}
           </Link>
           {isStaff && (
             <Link
               href="/dashboard"
               className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-black transition hover:opacity-90"
             >
-              Newsroom
+              {t(locale, 'nav.newsroomDashboard').split(' ')[0] || 'Newsroom'}
             </Link>
           )}
           <form action={logout}>
@@ -98,7 +108,7 @@ export default async function AccountPage() {
               type="submit"
               className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted transition hover:border-accent-red hover:text-accent-red"
             >
-              Sign out
+              {t(locale, 'nav.signOut')}
             </button>
           </form>
         </div>
@@ -106,40 +116,37 @@ export default async function AccountPage() {
 
       {/* ---- Stats ---- */}
       <div className="mt-6 grid grid-cols-3 gap-4">
-        <StatTile label="Following" value={followingCount} />
-        <StatTile label="Saved" value={saved.length} />
-        <StatTile label="Recently read" value={history.length} />
+        <StatTile label={t(locale, 'account.following')} value={followingCount} />
+        <StatTile label={t(locale, 'account.saved')} value={saved.length} />
+        <StatTile label={t(locale, 'account.recentlyRead')} value={history.length} />
       </div>
 
       {/* ---- Main + sidebar ---- */}
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
         <div className="space-y-8 lg:col-span-2">
-          <Panel title="Saved stories" count={saved.length}>
+          <Panel title={t(locale, 'nav.savedStories')} count={saved.length}>
             {saved.length === 0 ? (
-              <Empty>
-                Nothing saved yet. Tap <span className="text-text">Save</span> on any story to keep
-                it here.
-              </Empty>
+              <Empty>{t(locale, 'account.emptySaved')}</Empty>
             ) : (
               <ul className="divide-y divide-border">
                 {saved.map((a) => (
-                  <StoryRow key={a.id} article={a} />
+                  <StoryRow key={a.id} article={a} locale={locale} />
                 ))}
               </ul>
             )}
           </Panel>
 
           <Panel
-            title="Recently read"
+            title={t(locale, 'account.recentlyRead')}
             count={history.length}
             action={history.length > 0 ? <ClearHistoryButton /> : undefined}
           >
             {history.length === 0 ? (
-              <Empty>Stories you read while signed in show up here.</Empty>
+              <Empty>{t(locale, 'account.emptyHistory')}</Empty>
             ) : (
               <ul className="divide-y divide-border">
                 {history.map((a) => (
-                  <StoryRow key={a.id} article={a} readAt={a.viewedAt} />
+                  <StoryRow key={a.id} article={a} readAt={a.viewedAt} locale={locale} />
                 ))}
               </ul>
             )}
@@ -148,34 +155,34 @@ export default async function AccountPage() {
 
         {/* Sidebar */}
         <aside className="space-y-8">
-          <Panel title="Following" count={followingCount}>
+          <Panel title={t(locale, 'account.following')} count={followingCount}>
             <FollowedList sections={follows.sections} topics={follows.topics} />
           </Panel>
 
-          <Panel title="Account &amp; security">
+          <Panel title={t(locale, 'nav.accountSecurity')}>
             <Link
               href="/account/security"
               className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5 text-sm text-text transition hover:border-primary"
             >
-              Two-factor authentication
+              {t(locale, 'account.twoFactorAuth')}
               <span
                 className={`font-mono text-[11px] ${user.twoFactorEnabled ? 'text-accent-green' : 'text-faint'}`}
               >
-                {user.twoFactorEnabled ? 'On' : 'Set up'}
+                {user.twoFactorEnabled
+                  ? t(locale, 'account.twoFactorOn')
+                  : t(locale, 'account.twoFactorSetUp')}
               </span>
             </Link>
           </Panel>
 
-          <Panel title="Privacy &amp; data">
-            <p className="mb-3 font-body text-sm text-muted">
-              Download everything we hold about you, or delete your account (Law N° 058/2021).
-            </p>
+          <Panel title={t(locale, 'account.privacyAndData')}>
+            <p className="mb-3 font-body text-sm text-muted">{t(locale, 'account.privacyDesc')}</p>
             <div className="flex flex-col gap-3">
               <a
                 href="/account/export"
                 className="inline-flex w-fit items-center rounded-lg border border-border px-4 py-2 font-mono text-xs uppercase tracking-wide text-muted transition hover:border-primary hover:text-primary"
               >
-                Download my data
+                {t(locale, 'account.downloadData')}
               </a>
               <DeleteAccountForm />
             </div>
@@ -231,9 +238,11 @@ function Empty({ children }: { children: React.ReactNode }) {
 function StoryRow({
   article,
   readAt,
+  locale,
 }: {
   article: SavedArticle | HistoryArticle;
   readAt?: string;
+  locale: Locale;
 }) {
   return (
     <li>
@@ -248,14 +257,14 @@ function StoryRow({
         </span>
         <span className="min-w-0 flex-1">
           <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
-            {article.category.name}
+            {translateCategory(locale, article.category.slug, article.category.name)}
           </span>
           <span className="line-clamp-2 font-heading text-sm font-bold text-text group-hover:text-primary">
             {article.title}
           </span>
           <span className="font-mono text-[11px] text-faint">
             {readAt
-              ? `Read ${formatDate(readAt)}`
+              ? t(locale, 'account.readAt').replace('{date}', formatDate(readAt))
               : article.publishedAt
                 ? formatDate(article.publishedAt)
                 : ''}

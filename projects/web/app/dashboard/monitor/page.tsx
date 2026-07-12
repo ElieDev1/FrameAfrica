@@ -11,6 +11,8 @@ import {
 } from '@/components/icons';
 import { fetchOverview, requireAdmin } from '@/lib/cms';
 import { formatDate } from '@/lib/format';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
 export const metadata: Metadata = { title: 'Monitor — Frame Africa' };
 
@@ -66,46 +68,48 @@ function Panel({
 
 export default async function MonitorPage() {
   await requireAdmin();
-  const o = await fetchOverview();
+  const [o, locale] = await Promise.all([fetchOverview(), getLocale()]);
 
   return (
     <div className="w-full">
-      <h1 className="font-heading text-3xl font-black tracking-tight text-text">Monitor</h1>
+      <h1 className="font-heading text-3xl font-black tracking-tight text-text">
+        {t(locale, 'dash.monitor')}
+      </h1>
       <p className="mt-1 max-w-2xl font-body text-sm text-muted">
-        A live snapshot of everything happening across Frame Africa.
+        {t(locale, 'dpage.monitorSubtitle')}
       </p>
 
       {/* KPI cards */}
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         <StatCard
           icon={UsersIcon}
-          label="Users"
+          label={t(locale, 'dov.users')}
           value={o.users.total}
-          hint={`${o.users.active} active · ${o.users.suspended} suspended`}
+          hint={`${o.users.active} ${t(locale, 'dmon.active')} · ${o.users.suspended} ${t(locale, 'dmon.suspended')}`}
         />
         <StatCard
           icon={SparklesIcon}
-          label="New (7 days)"
+          label={t(locale, 'dmon.new7days')}
           value={o.users.newLast7Days}
-          hint="signups this week"
+          hint={t(locale, 'dmon.signupsWeek')}
         />
         <StatCard
           icon={FileTextIcon}
-          label="Published"
+          label={t(locale, 'dov.published')}
           value={o.articles.published}
-          hint={`${o.articles.inPipeline} in pipeline`}
+          hint={`${o.articles.inPipeline} ${t(locale, 'dov.inPipelineHint')}`}
         />
         <StatCard
           icon={FlagIcon}
-          label="Flagged comments"
+          label={t(locale, 'dov.flaggedComments')}
           value={o.comments.flagged}
-          hint={`${o.comments.visible} visible`}
+          hint={`${o.comments.visible} ${t(locale, 'dov.visible')}`}
         />
       </div>
 
       {/* Activity panels */}
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <Panel title="Recent articles" icon={FileTextIcon}>
+        <Panel title={t(locale, 'dmon.recentArticles')} icon={FileTextIcon}>
           {o.recentArticles.map((a) => (
             <li key={a.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
               <div className="min-w-0">
@@ -115,14 +119,16 @@ export default async function MonitorPage() {
                 >
                   {a.title}
                 </Link>
-                <div className="font-mono text-[10px] text-muted">by {a.author}</div>
+                <div className="font-mono text-[10px] text-muted">
+                  {t(locale, 'dmon.by')} {a.author}
+                </div>
               </div>
               <StatusBadge status={a.status} />
             </li>
           ))}
         </Panel>
 
-        <Panel title="Recent comments" icon={CommentIcon}>
+        <Panel title={t(locale, 'dmon.recentComments')} icon={CommentIcon}>
           {o.recentComments.map((c) => (
             <li key={c.id} className="flex gap-3 px-4 py-2.5">
               <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface-2 font-heading text-[10px] font-black text-muted ring-1 ring-border">

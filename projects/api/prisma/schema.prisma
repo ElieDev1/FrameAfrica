@@ -65,6 +65,17 @@ enum CommentStatus {
   removed
 }
 
+/// What a comment / like / share is attached to. Engagement is polymorphic so
+/// every content type carries the same conversation and reaction surface —
+/// there is no separate "media comments" system to moderate.
+enum EngagementTarget {
+  article
+  gallery
+  episode
+  interactive
+  video
+}
+
 enum NotificationType {
   article_published
   article_returned
@@ -73,6 +84,7 @@ enum NotificationType {
   tip_received
   subscriber_joined
   comment_reported
+  account_locked
 }
 
 enum TipStatus {
@@ -136,6 +148,10 @@ model User {
   twoFactorEnabled   Boolean    @default(false) @map("two_factor_enabled")
   twoFactorSecret    String?    @map("two_factor_secret")
   mustChangePassword Boolean    @default(false) @map("must_change_password")
+  /// Brute-force lockout: consecutive failed sign-ins, and when the account was
+  /// locked (non-null = locked; only an admin can clear it).
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedAt           DateTime?  @map("locked_at")
   commentsBannedAt   DateTime?  @map("comments_banned_at")
   /// Paid access through this instant; null/past = not a subscriber. Granted by
   /// an admin today; self-serve payments (MoMo/Airtel) land with billing.
@@ -153,8 +169,9 @@ model User {
   tokens         UserToken[]
   comments       Comment[]
   mediaAssets    MediaAsset[]
+  mediaAlbums    MediaAlbum[]        @relation("UserMediaAlbums")
   corrections    ArticleCorrection[] @relation("UserCorrections")
-  likes          ArticleLike[]
+  likes          ContentLike[]
   liveUpdates    LiveUpdate[]        @relation("UserLiveUpdates")
   bookmarks      Bookmark[]
   commentLikes   CommentLike[]
@@ -277,27 +294,36 @@ model LiveUpdate {
   @@map("live_update")
 }
 
-/// A reader's like on an article (one per user per article). The denormalised
-/// `article.like_count` is kept in step on like/unlike.
-model ArticleLike {
-  userId    String   @map("user_id") @db.Uuid
-  articleId String   @map("article_id") @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at")
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
-
-  @@id([userId, articleId])
-  @@index([articleId])
-  @@map("article_like")
-}
-
 /// An uploaded media file in the library / DAM (documents/13 §5). The binary is
 /// held by the storage driver (local dir in dev, S3 in prod); this row is the
 /// catalogue entry with the required alt/credit/licence metadata (`06` §6).
+/// An album groups the photos from one event/shoot so they can be found again
+/// (documents/13 §5). Photographers own this, but any staffer may file into it.
+/// Deleting an album never deletes its photos — they fall back to "Unfiled".
+model MediaAlbum {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name        String
+  slug        String    @unique
+  description String?
+  /// When the event happened (may differ from when the photos were uploaded).
+  eventDate   DateTime? @map("event_date")
+  coverUrl    String?   @map("cover_url")
+  createdById String    @map("created_by_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  createdBy User         @relation("UserMediaAlbums", fields: [createdById], references: [id])
+  assets    MediaAsset[]
+
+  @@index([createdAt])
+  @@map("media_album")
+}
+
 model MediaAsset {
   id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   uploaderId   String   @map("uploader_id") @db.Uuid
+  /// Null = "Unfiled". Set null (not cascade) when an album is deleted.
+  albumId      String?  @map("album_id") @db.Uuid
   url          String
   alt          String?
   credit       String?
@@ -307,9 +333,11 @@ model MediaAsset {
   originalName String?  @map("original_name")
   createdAt    DateTime @default(now()) @map("created_at")
 
-  uploader User @relation(fields: [uploaderId], references: [id])
+  uploader User        @relation(fields: [uploaderId], references: [id])
+  album    MediaAlbum? @relation(fields: [albumId], references: [id], onDelete: SetNull)
 
   @@index([uploaderId, createdAt])
+  @@index([albumId, createdAt])
   @@map("media_asset")
 }
 
@@ -453,7 +481,6 @@ model Article {
   comments       Comment[]
   topics         ArticleTopic[]
   corrections    ArticleCorrection[]
-  likes          ArticleLike[]
   liveUpdates    LiveUpdate[]
   bookmarks      Bookmark[]
   readingHistory ReadingHistory[]
@@ -515,27 +542,47 @@ model ArticleTopic {
 /// Reader comments on an article (documents/04 §6). Threaded one level via
 /// `parentId`; `status` drives moderation (visible/pending/hidden/removed).
 model Comment {
-  id          String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  articleId   String        @map("article_id") @db.Uuid
-  authorId    String        @map("author_id") @db.Uuid
-  parentId    String?       @map("parent_id") @db.Uuid
+  id          String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  /// What this comment hangs off. `targetId` always points at the content row;
+  /// `articleId` additionally keeps the FK (and its cascade) for articles, which
+  /// are by far the most-commented type.
+  targetType  EngagementTarget @default(article) @map("target_type")
+  targetId    String           @map("target_id") @db.Uuid
+  articleId   String?          @map("article_id") @db.Uuid
+  authorId    String           @map("author_id") @db.Uuid
+  parentId    String?          @map("parent_id") @db.Uuid
   body        String
-  status      CommentStatus @default(visible)
-  likeCount   Int           @default(0) @map("like_count")
-  reportCount Int           @default(0) @map("report_count")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-  deletedAt   DateTime?     @map("deleted_at")
+  status      CommentStatus    @default(visible)
+  likeCount   Int              @default(0) @map("like_count")
+  reportCount Int              @default(0) @map("report_count")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  deletedAt   DateTime?        @map("deleted_at")
 
-  article Article         @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  article Article?        @relation(fields: [articleId], references: [id], onDelete: Cascade)
   author  User            @relation(fields: [authorId], references: [id])
   parent  Comment?        @relation("CommentReplies", fields: [parentId], references: [id])
   replies Comment[]       @relation("CommentReplies")
   likes   CommentLike[]
   reports CommentReport[]
 
+  @@index([targetType, targetId, status, createdAt])
   @@index([articleId, status, createdAt])
   @@map("comment")
+}
+
+/// A like on any content type (replaces the article-only `article_like`).
+model ContentLike {
+  userId     String           @map("user_id") @db.Uuid
+  targetType EngagementTarget @map("target_type")
+  targetId   String           @map("target_id") @db.Uuid
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@map("content_like")
 }
 
 /// A reader's like on a comment (one per user per comment). Denormalised
@@ -613,6 +660,8 @@ model Video {
   // it (it can otherwise re-appear on the next sync).
   isFeatured   Boolean  @default(false) @map("is_featured")
   isHidden     Boolean  @default(false) @map("is_hidden")
+  likeCount    Int      @default(0) @map("like_count")
+  shareCount   Int      @default(0) @map("share_count")
   publishedAt  DateTime @map("published_at")
   createdAt    DateTime @default(now()) @map("created_at")
 
@@ -635,6 +684,8 @@ model Gallery {
   status      MediaStatus @default(draft)
   authorId    String      @map("author_id") @db.Uuid
   viewCount   BigInt      @default(0) @map("view_count")
+  likeCount   Int         @default(0) @map("like_count")
+  shareCount  Int         @default(0) @map("share_count")
   publishedAt DateTime?   @map("published_at")
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
@@ -684,6 +735,8 @@ model PodcastEpisode {
   durationSec Int?             @map("duration_sec")
   episodeNo   Int?             @map("episode_no")
   status      MediaStatus      @default(draft)
+  likeCount   Int              @default(0) @map("like_count")
+  shareCount  Int              @default(0) @map("share_count")
   publishedAt DateTime?        @map("published_at")
   createdAt   DateTime         @default(now()) @map("created_at")
   updatedAt   DateTime         @updatedAt @map("updated_at")
@@ -710,6 +763,8 @@ model Interactive {
   source      String?
   status      MediaStatus         @default(draft)
   authorId    String              @map("author_id") @db.Uuid
+  likeCount   Int                 @default(0) @map("like_count")
+  shareCount  Int                 @default(0) @map("share_count")
   publishedAt DateTime?           @map("published_at")
   createdAt   DateTime            @default(now()) @map("created_at")
   updatedAt   DateTime            @updatedAt @map("updated_at")

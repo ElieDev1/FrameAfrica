@@ -34,6 +34,8 @@ import {
 import { formatDate } from '@/lib/format';
 import { getAccessToken, getSession } from '@/lib/session';
 import { absoluteUrl, SITE_NAME } from '@/lib/site';
+import { getLocale } from '@/lib/i18n-server';
+import { type Locale, t, translateCategory } from '@/lib/i18n';
 
 export const revalidate = 60;
 
@@ -45,6 +47,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!article) {
     return { title: 'Article not found' };
   }
+  const locale = await getLocale();
+  const catName = translateCategory(locale, article.category.slug, article.category.name);
   const description = article.excerpt ?? article.subtitle ?? undefined;
   const path = `/article/${article.slug}`;
   const images = article.featuredImage ? [{ url: article.featuredImage.url }] : undefined;
@@ -57,7 +61,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: article.title,
       description,
       url: absoluteUrl(path),
-      section: article.category.name,
+      section: catName,
       publishedTime: article.publishedAt ?? undefined,
       modifiedTime: article.updatedAt,
       authors: [article.author.displayName],
@@ -83,13 +87,13 @@ function isMeaningfullyUpdated(publishedAt: string | null, updatedAt: string): b
 }
 
 /** schema.org NewsArticle structured data (documents/01 §4.8, SEO). */
-function newsArticleJsonLd(article: ArticleDetail): string {
+function newsArticleJsonLd(article: ArticleDetail, locale: Locale): string {
   const data = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
     headline: article.title,
     description: article.excerpt ?? article.subtitle ?? undefined,
-    articleSection: article.category.name,
+    articleSection: translateCategory(locale, article.category.slug, article.category.name),
     inLanguage: article.language,
     datePublished: article.publishedAt ?? undefined,
     dateModified: article.updatedAt,
@@ -107,7 +111,7 @@ export default async function ArticlePage({ params }: PageProps) {
 
   // Reader identity for the paywall: an opaque device key + the signed-in
   // reader's token (so a subscription unlocks the story).
-  const [jar, accessToken] = await Promise.all([cookies(), getAccessToken()]);
+  const [jar, accessToken, locale] = await Promise.all([cookies(), getAccessToken(), getLocale()]);
   const article = await fetchArticle(slug, {
     readerKey: jar.get('fa_reader')?.value,
     accessToken: accessToken ?? undefined,
@@ -140,7 +144,7 @@ export default async function ArticlePage({ params }: PageProps) {
       <StickyShare title={article.title} />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: newsArticleJsonLd(article) }}
+        dangerouslySetInnerHTML={{ __html: newsArticleJsonLd(article, locale) }}
       />
 
       <div className="lg:grid lg:grid-cols-[3rem_minmax(0,1fr)_18rem] lg:gap-8 xl:grid-cols-[3rem_minmax(0,52rem)_minmax(18rem,1fr)] xl:gap-12">
@@ -158,14 +162,14 @@ export default async function ArticlePage({ params }: PageProps) {
             className="mb-6 flex items-center gap-1 font-mono text-xs text-muted"
           >
             <Link href="/" className="hover:text-primary">
-              Home
+              {t(locale, 'nav.home')}
             </Link>
             <ChevronRightIcon size={12} className="text-faint" />
             <Link
               href={`/section/${article.category.slug}`}
               className="text-primary hover:underline"
             >
-              {article.category.name}
+              {translateCategory(locale, article.category.slug, article.category.name)}
             </Link>
           </nav>
 
@@ -174,22 +178,22 @@ export default async function ArticlePage({ params }: PageProps) {
               href={`/section/${article.category.slug}`}
               className="font-mono text-[11px] uppercase tracking-[0.16em] text-primary hover:underline"
             >
-              {article.category.name}
+              {translateCategory(locale, article.category.slug, article.category.name)}
             </Link>
             {article.isLive && (
               <span className="inline-flex items-center gap-1 rounded bg-accent-red px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-white">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" aria-hidden />
-                Live
+                {t(locale, 'article.live')}
               </span>
             )}
             {article.isBreaking && !article.isLive && (
               <span className="rounded bg-accent-red px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-white">
-                Breaking
+                {t(locale, 'home.breaking')}
               </span>
             )}
             {article.isPremium && (
               <span className="rounded bg-accent-yellow px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-black">
-                Premium
+                {t(locale, 'article.premium')}
               </span>
             )}
           </div>
@@ -209,11 +213,13 @@ export default async function ArticlePage({ params }: PageProps) {
             {article.publishedAt && <span>· {formatDate(article.publishedAt)}</span>}
             {article.readTimeMin && (
               <span className="inline-flex items-center gap-1">
-                · <ClockIcon size={12} /> {article.readTimeMin} min read
+                · <ClockIcon size={12} /> {article.readTimeMin} {t(locale, 'article.minRead')}
               </span>
             )}
             {updated && (
-              <span className="text-primary">· Updated {formatDate(article.updatedAt)}</span>
+              <span className="text-primary">
+                · {t(locale, 'article.updated')} {formatDate(article.updatedAt)}
+              </span>
             )}
           </div>
 
@@ -238,7 +244,9 @@ export default async function ArticlePage({ params }: PageProps) {
               className="mt-6 rounded-xl border-l-4 border-accent-yellow bg-surface px-4 py-3"
             >
               <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-yellow">
-                {article.corrections.length === 1 ? 'Correction' : 'Corrections'}
+                {article.corrections.length === 1
+                  ? t(locale, 'article.correction')
+                  : t(locale, 'footer.corrections')}
               </p>
               <ul className="mt-1 flex flex-col gap-1.5">
                 {article.corrections.map((correction) => (
@@ -265,7 +273,7 @@ export default async function ArticlePage({ params }: PageProps) {
               </div>
               {article.featuredImage.credit && (
                 <figcaption className="mt-2 font-mono text-[11px] text-faint">
-                  Photo: {article.featuredImage.credit}
+                  {t(locale, 'article.photoCredit')}: {article.featuredImage.credit}
                 </figcaption>
               )}
             </figure>
@@ -275,7 +283,7 @@ export default async function ArticlePage({ params }: PageProps) {
               aria-hidden
             >
               <span className="absolute left-5 top-5 font-mono text-[10px] uppercase tracking-[0.18em] text-text/70">
-                {article.category.name}
+                {translateCategory(locale, article.category.slug, article.category.name)}
               </span>
             </div>
           )}
@@ -289,9 +297,12 @@ export default async function ArticlePage({ params }: PageProps) {
           </div>
 
           {article.topics.length > 0 && (
-            <nav aria-label="Topics" className="mt-10 flex flex-wrap items-center gap-2">
+            <nav
+              aria-label={t(locale, 'article.topics')}
+              className="mt-10 flex flex-wrap items-center gap-2"
+            >
               <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-faint">
-                Topics
+                {t(locale, 'article.topics')}
               </span>
               {article.topics.map((topic) => (
                 <Link
@@ -308,37 +319,43 @@ export default async function ArticlePage({ params }: PageProps) {
           {article.isLocked && (
             <div className="mt-8 flex flex-col items-center gap-3 rounded-xl border border-border-2 bg-surface px-6 py-10 text-center">
               <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-primary">
-                Premium story
+                {t(locale, 'article.premiumStory')}
               </span>
-              <p className="font-heading text-xl font-bold text-text">Subscribe to keep reading</p>
+              <p className="font-heading text-xl font-bold text-text">
+                {t(locale, 'article.subscribeKeepReading')}
+              </p>
               <p className="max-w-sm font-body text-sm text-muted">
-                This story is available to Frame Africa subscribers. Plans and payment (MoMo, Airtel
-                Money, card) are coming soon.
+                {t(locale, 'article.lockedBody')}
               </p>
             </div>
           )}
 
           {related.length > 0 && (
-            <section aria-label="Related stories" className="mt-12 border-t border-border pt-8">
-              <SectionHeading title="Related stories" />
+            <section
+              aria-label={t(locale, 'article.related')}
+              className="mt-12 border-t border-border pt-8"
+            >
+              <SectionHeading title={t(locale, 'article.related')} />
               <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
                 {related.map((item) => (
-                  <ArticleCard key={item.id} article={item} />
+                  <ArticleCard key={item.id} article={item} locale={locale} />
                 ))}
               </div>
             </section>
           )}
 
           <CommentsSection
-            articleId={article.id}
-            slug={article.slug}
+            targetType="article"
+            targetId={article.id}
+            path={`/article/${article.slug}`}
             comments={comments}
             signedIn={Boolean(user)}
+            locale={locale}
           />
 
           <div className="mt-10 border-t border-border pt-6">
             <Link href="/" className="font-mono text-xs text-primary hover:underline">
-              ← Back to home
+              ← {t(locale, 'common.backToHome').replace(' →', '')}
             </Link>
           </div>
         </article>
@@ -347,7 +364,7 @@ export default async function ArticlePage({ params }: PageProps) {
             below the article so readers still get Most-read + newsletter. */}
         <aside className="mt-10 border-t border-border pt-8 lg:mt-0 lg:border-0 lg:pt-0">
           <div className="space-y-8 lg:sticky lg:top-24">
-            {popular.length > 0 && <MostRead articles={popular} />}
+            {popular.length > 0 && <MostRead articles={popular} locale={locale} />}
             <NewsletterBox />
             {/* The tall half-page ad is desktop-only; mobile keeps a compact slot. */}
             <div className="hidden lg:block">

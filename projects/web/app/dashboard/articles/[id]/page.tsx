@@ -5,6 +5,8 @@ import { DraftForm } from '@/components/cms/DraftForm';
 import { StatusBadge } from '@/components/cms/StatusBadge';
 import { categoryOptions, getAnyArticle, requireAdmin, topicOptions } from '@/lib/cms';
 import { updateAnyArticleAction } from '@/lib/cms-actions';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
 export const metadata: Metadata = { title: 'Edit article — Frame Africa' };
 
@@ -13,10 +15,11 @@ type PageProps = { params: Promise<{ id: string }> };
 export default async function AdminEditArticlePage({ params }: PageProps) {
   await requireAdmin();
   const { id } = await params;
-  const [article, categories, topics] = await Promise.all([
+  const [article, categories, topics, locale] = await Promise.all([
     getAnyArticle(id),
     categoryOptions(),
     topicOptions(),
+    getLocale(),
   ]);
 
   const updateAction = updateAnyArticleAction.bind(null, id);
@@ -24,10 +27,12 @@ export default async function AdminEditArticlePage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
       <Link href="/dashboard/articles" className="font-mono text-xs text-primary hover:underline">
-        ← All articles
+        {t(locale, 'dpage.backAllArticles')}
       </Link>
       <div className="mt-3 flex items-center gap-3">
-        <h1 className="font-heading text-2xl font-black tracking-tight text-text">Edit article</h1>
+        <h1 className="font-heading text-2xl font-black tracking-tight text-text">
+          {t(locale, 'dpage.editArticle')}
+        </h1>
         <StatusBadge status={article.status} />
       </div>
       <p className="mt-2 font-body text-sm text-muted">

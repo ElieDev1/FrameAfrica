@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import type { MediaAsset } from '@prisma/client';
+import type { MediaAsset, Prisma } from '@prisma/client';
+import { slugify } from '../common/slug';
 import { StorageService } from '../common/storage/storage.service';
 import { PrismaService } from '../prisma/prisma.service';
-import type { MediaAssetDto, UploadedImage } from './media.types';
+import type { MediaAlbumDto, MediaAssetDto, UploadedImage } from './media.types';
 
 /** Accepted image types → file extension. Everything else is rejected. */
 const ALLOWED_TYPES: Record<string, string> = {
@@ -33,6 +34,24 @@ export interface UploadMeta {
   alt?: string;
   credit?: string;
   licence?: string;
+  /** File the upload straight into an event album. */
+  albumId?: string;
+}
+
+/**
+ * Which slice of the library to list: an album's id, the literal `'unfiled'`
+ * (files in no album), or undefined for everything.
+ */
+export type AlbumFilter = string | undefined;
+
+/** Which file kinds to list — the explorer's type tabs. */
+export type KindFilter = 'image' | 'video' | 'audio' | undefined;
+
+export interface CreateAlbumInput {
+  name: string;
+  description?: string;
+  eventDate?: string;
+  coverUrl?: string;
 }
 
 @Injectable()
@@ -64,6 +83,7 @@ export class MediaService {
     const asset = await this.prisma.mediaAsset.create({
       data: {
         uploaderId,
+        albumId: meta.albumId || null,
         url,
         mime: file.mimetype,
         sizeBytes: file.size,
@@ -102,6 +122,7 @@ export class MediaService {
     const asset = await this.prisma.mediaAsset.create({
       data: {
         uploaderId,
+        albumId: meta.albumId || null,
         url,
         mime: file.mimetype,
         sizeBytes: file.size,
@@ -113,13 +134,40 @@ export class MediaService {
     return toDto(asset);
   }
 
-  /** The newest assets in the library (most recent first). */
-  async list(limit = 60): Promise<MediaAssetDto[]> {
+  /**
+   * One page of the library, newest first — optionally narrowed to an album (or
+   * the unfiled pile) and to one kind of file. This is what the explorer browses.
+   */
+  async list(
+    limit = 24,
+    page = 1,
+    album: AlbumFilter = undefined,
+    kind: KindFilter = undefined,
+  ): Promise<{ items: MediaAssetDto[]; hasMore: boolean }> {
+    const where: Prisma.MediaAssetWhereInput = {};
+    if (album === 'unfiled') where.albumId = null;
+    else if (album) where.albumId = album;
+    if (kind) where.mime = { startsWith: `${kind}/` };
+
+    const take = Math.min(Math.max(limit, 1), 100);
     const rows = await this.prisma.mediaAsset.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
-      take: limit,
+      skip: (Math.max(page, 1) - 1) * take,
+      take: take + 1, // one extra row answers "is there a next page?"
     });
-    return rows.map(toDto);
+    return { items: rows.slice(0, take).map(toDto), hasMore: rows.length > take };
+  }
+
+  /** How the library breaks down by file kind — the explorer's header stats. */
+  async counts(): Promise<{ total: number; image: number; video: number; audio: number }> {
+    const [total, image, video, audio] = await Promise.all([
+      this.prisma.mediaAsset.count(),
+      this.prisma.mediaAsset.count({ where: { mime: { startsWith: 'image/' } } }),
+      this.prisma.mediaAsset.count({ where: { mime: { startsWith: 'video/' } } }),
+      this.prisma.mediaAsset.count({ where: { mime: { startsWith: 'audio/' } } }),
+    ]);
+    return { total, image, video, audio };
   }
 
   /** Remove an asset from the library. Articles keep their stored URL string. */
@@ -129,6 +177,123 @@ export class MediaService {
       throw new NotFoundException('Media not found');
     }
     await this.prisma.mediaAsset.delete({ where: { id } });
+  }
+
+  // ── Albums ────────────────────────────────────────────────────────────────
+
+  /** Every album with its file count and a cover (its own, or the newest file). */
+  async listAlbums(): Promise<MediaAlbumDto[]> {
+    const rows = await this.prisma.mediaAlbum.findMany({
+      orderBy: [{ eventDate: 'desc' }, { createdAt: 'desc' }],
+      include: {
+        _count: { select: { assets: true } },
+        // Newest image in the album, to stand in as a cover when none is set.
+        assets: {
+          where: { mime: { startsWith: 'image/' } },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: { url: true },
+        },
+      },
+    });
+    return rows.map((a) => ({
+      id: a.id,
+      name: a.name,
+      slug: a.slug,
+      description: a.description,
+      eventDate: a.eventDate?.toISOString() ?? null,
+      coverUrl: a.coverUrl ?? a.assets[0]?.url ?? null,
+      assetCount: a._count.assets,
+      createdAt: a.createdAt.toISOString(),
+    }));
+  }
+
+  /** How many files sit outside any album — the "Unfiled" bucket. */
+  async unfiledCount(): Promise<number> {
+    return this.prisma.mediaAsset.count({ where: { albumId: null } });
+  }
+
+  async createAlbum(createdById: string, input: CreateAlbumInput): Promise<MediaAlbumDto> {
+    const name = input.name.trim();
+    if (!name) throw new BadRequestException('An album needs a name');
+
+    const album = await this.prisma.mediaAlbum.create({
+      data: {
+        createdById,
+        name,
+        slug: await this.uniqueSlug(name),
+        description: input.description?.trim() || null,
+        eventDate: input.eventDate ? new Date(input.eventDate) : null,
+        coverUrl: input.coverUrl?.trim() || null,
+      },
+    });
+    return {
+      id: album.id,
+      name: album.name,
+      slug: album.slug,
+      description: album.description,
+      eventDate: album.eventDate?.toISOString() ?? null,
+      coverUrl: album.coverUrl,
+      assetCount: 0,
+      createdAt: album.createdAt.toISOString(),
+    };
+  }
+
+  async updateAlbum(id: string, input: Partial<CreateAlbumInput>): Promise<MediaAlbumDto> {
+    await this.assertAlbum(id);
+    await this.prisma.mediaAlbum.update({
+      where: { id },
+      data: {
+        ...(input.name !== undefined ? { name: input.name.trim() } : {}),
+        ...(input.description !== undefined
+          ? { description: input.description.trim() || null }
+          : {}),
+        ...(input.eventDate !== undefined
+          ? { eventDate: input.eventDate ? new Date(input.eventDate) : null }
+          : {}),
+        ...(input.coverUrl !== undefined ? { coverUrl: input.coverUrl.trim() || null } : {}),
+      },
+    });
+    const [album] = await this.listAlbums().then((all) => all.filter((a) => a.id === id));
+    return album;
+  }
+
+  /** Delete an album. Its files are unfiled (SET NULL), never deleted. */
+  async deleteAlbum(id: string): Promise<void> {
+    await this.assertAlbum(id);
+    await this.prisma.mediaAlbum.delete({ where: { id } });
+  }
+
+  /** File a asset into an album, or pass null to unfile it. */
+  async setAssetAlbum(assetId: string, albumId: string | null): Promise<MediaAssetDto> {
+    const asset = await this.prisma.mediaAsset.findUnique({ where: { id: assetId } });
+    if (!asset) throw new NotFoundException('Media not found');
+    if (albumId) await this.assertAlbum(albumId);
+
+    const updated = await this.prisma.mediaAsset.update({
+      where: { id: assetId },
+      data: { albumId },
+    });
+    return toDto(updated);
+  }
+
+  private async assertAlbum(id: string): Promise<void> {
+    const found = await this.prisma.mediaAlbum.findUnique({ where: { id }, select: { id: true } });
+    if (!found) throw new NotFoundException('Album not found');
+  }
+
+  /** `kigali-summit`, `kigali-summit-2`, … */
+  private async uniqueSlug(name: string): Promise<string> {
+    const base = slugify(name) || 'album';
+    let slug = base;
+    for (let i = 2; ; i += 1) {
+      const clash = await this.prisma.mediaAlbum.findUnique({
+        where: { slug },
+        select: { id: true },
+      });
+      if (!clash) return slug;
+      slug = `${base}-${i}`;
+    }
   }
 }
 
@@ -142,6 +307,7 @@ function toDto(asset: MediaAsset): MediaAssetDto {
     mime: asset.mime,
     sizeBytes: asset.sizeBytes,
     originalName: asset.originalName,
+    albumId: asset.albumId,
     createdAt: asset.createdAt.toISOString(),
   };
 }

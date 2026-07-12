@@ -66,10 +66,20 @@ export async function setUserStatus(id: string, status: string): Promise<{ error
   return {};
 }
 
-export async function resetUserPassword(id: string): Promise<{ error?: string; email?: string }> {
+export async function unlockUser(id: string): Promise<{ error?: string }> {
+  const res = await adminFetch(`/users/${id}/unlock`, 'POST');
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) return { error: 'Could not unlock the account.' };
+  revalidatePath('/dashboard/users');
+  return {};
+}
+
+export async function resetUserPassword(
+  id: string,
+): Promise<{ error?: string; email?: string; temporaryPassword?: string }> {
   const res = await adminFetch(`/users/${id}/reset-password`, 'POST');
   if (res.status === 401) redirect('/login');
   if (!res.ok) return { error: 'Could not reset the password.' };
-  const json = (await res.json()) as { data: { email: string } };
-  return { email: json.data.email };
+  const json = (await res.json()) as { data: { email: string; temporaryPassword: string } };
+  return { email: json.data.email, temporaryPassword: json.data.temporaryPassword };
 }

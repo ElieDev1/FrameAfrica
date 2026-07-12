@@ -1,7 +1,14 @@
 // Frame Africa — development seed data.
 // Idempotent: re-running upserts the same rows. Run with `pnpm db:seed`.
 
-import { ArticleLanguage, ArticleStatus, Prisma, PrismaClient, RoleName } from '@prisma/client';
+import {
+  ArticleLanguage,
+  ArticleStatus,
+  EngagementTarget,
+  Prisma,
+  PrismaClient,
+  RoleName,
+} from '@prisma/client';
 import * as argon2 from 'argon2';
 import type { Block } from '../src/content/blocks/block.types';
 import { plainTextFromBlocks } from '../src/content/blocks/block.transform';
@@ -1622,8 +1629,11 @@ async function main(): Promise<void> {
     select: { id: true },
   });
   if (coffee && (await prisma.comment.count({ where: { articleId: coffee.id } })) === 0) {
+    // Comments are polymorphic now: `targetType`/`targetId` say what they hang off.
     const top = await prisma.comment.create({
       data: {
+        targetType: EngagementTarget.article,
+        targetId: coffee.id,
         articleId: coffee.id,
         authorId: reader.id,
         body: 'Great to see specialty demand rewarding smallholder growers.',
@@ -1631,6 +1641,8 @@ async function main(): Promise<void> {
     });
     await prisma.comment.create({
       data: {
+        targetType: EngagementTarget.article,
+        targetId: coffee.id,
         articleId: coffee.id,
         authorId: author.id,
         parentId: top.id,

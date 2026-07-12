@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { type ArticleLanguage, Prisma } from '@prisma/client';
+import { type ArticleLanguage, MediaStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   HL_START,
   HL_STOP,
+  type MediaSearchResult,
   type SearchResponse,
   type SearchResult,
   type SearchSuggestion,
@@ -45,7 +46,7 @@ export class SearchService {
     const q = params.q.trim();
     const limit = Math.min(Math.max(params.limit ?? 20, 1), 50);
     const page = Math.max(params.page ?? 1, 1);
-    if (!q) return { results: [], hasMore: false, page };
+    if (!q) return { results: [], media: [], hasMore: false, page };
     const offset = (page - 1) * limit;
 
     const langFilter = params.language
@@ -81,7 +82,122 @@ export class SearchService {
 
     const hasMore = rows.length > limit;
     const pageRows = hasMore ? rows.slice(0, limit) : rows;
-    return { results: pageRows.map(toResult), hasMore, page };
+    // Multimedia is only worth showing on the first page of results — it's a
+    // side-panel of extra hits, not part of the article pagination.
+    const media = page === 1 ? await this.searchMedia(q) : [];
+    return { results: pageRows.map(toResult), media, hasMore, page };
+  }
+
+  /**
+   * Search the multimedia library — galleries, podcast episodes, videos and
+   * interactives — so search covers the whole site, not just articles. These
+   * are small tables with short text, so a case-insensitive title/description
+   * match is enough; they don't need the article FTS machinery.
+   */
+  async searchMedia(rawQ: string, limit = 4): Promise<MediaSearchResult[]> {
+    const q = rawQ.trim();
+    if (q.length < 2) return [];
+    const match = { contains: q, mode: 'insensitive' as const };
+    const where = (extra: object) => ({
+      OR: [{ title: match }, { description: match }],
+      ...extra,
+    });
+    const published = { status: MediaStatus.published, deletedAt: null };
+
+    const [galleries, episodes, videos, interactives] = await Promise.all([
+      this.prisma.gallery.findMany({
+        where: where(published),
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          description: true,
+          coverUrl: true,
+          publishedAt: true,
+        },
+        orderBy: { publishedAt: 'desc' },
+        take: limit,
+      }),
+      this.prisma.podcastEpisode.findMany({
+        where: where(published),
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          description: true,
+          coverUrl: true,
+          publishedAt: true,
+          show: { select: { slug: true, coverUrl: true } },
+        },
+        orderBy: { publishedAt: 'desc' },
+        take: limit,
+      }),
+      this.prisma.video.findMany({
+        where: where({ isHidden: false }),
+        select: {
+          id: true,
+          youtubeId: true,
+          title: true,
+          description: true,
+          thumbnailUrl: true,
+          publishedAt: true,
+        },
+        orderBy: { publishedAt: 'desc' },
+        take: limit,
+      }),
+      this.prisma.interactive.findMany({
+        where: where(published),
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          description: true,
+          coverUrl: true,
+          publishedAt: true,
+        },
+        orderBy: { publishedAt: 'desc' },
+        take: limit,
+      }),
+    ]);
+
+    return [
+      ...galleries.map((g): MediaSearchResult => ({
+        kind: 'gallery',
+        id: g.id,
+        title: g.title,
+        description: g.description,
+        imageUrl: g.coverUrl,
+        url: `/galleries/${g.slug}`,
+        publishedAt: g.publishedAt?.toISOString() ?? null,
+      })),
+      ...episodes.map((e): MediaSearchResult => ({
+        kind: 'episode',
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        imageUrl: e.coverUrl ?? e.show.coverUrl,
+        url: `/podcasts/${e.show.slug}/${e.slug}`,
+        publishedAt: e.publishedAt?.toISOString() ?? null,
+      })),
+      ...videos.map((v): MediaSearchResult => ({
+        kind: 'video',
+        id: v.id,
+        title: v.title,
+        description: v.description,
+        imageUrl: v.thumbnailUrl ?? `https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg`,
+        url: `/videos/${v.id}`,
+        publishedAt: v.publishedAt.toISOString(),
+      })),
+      ...interactives.map((i): MediaSearchResult => ({
+        kind: 'interactive',
+        id: i.id,
+        title: i.title,
+        description: i.description,
+        imageUrl: i.coverUrl,
+        url: `/interactives/${i.slug}`,
+        publishedAt: i.publishedAt?.toISOString() ?? null,
+      })),
+    ];
   }
 
   /**

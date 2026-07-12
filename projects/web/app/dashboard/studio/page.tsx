@@ -2,11 +2,14 @@ import type { Metadata } from 'next';
 import { StudioCanvas, type StudioArticle } from '@/components/studio/StudioCanvas';
 import { fetchArticles } from '@/lib/api';
 import { requireStaff } from '@/lib/cms';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
 export const metadata: Metadata = { title: 'Flyer Studio — Frame Africa' };
 
 export default async function StudioPage() {
   await requireStaff();
+  const locale = await getLocale();
 
   // Recent published stories, offered for one-click "prefill".
   const { articles } = await fetchArticles({ limit: 24 });
@@ -19,11 +22,11 @@ export default async function StudioPage() {
 
   return (
     <div className="w-full">
-      <h1 className="font-heading text-3xl font-black tracking-tight text-text">Flyer Studio</h1>
+      <h1 className="font-heading text-3xl font-black tracking-tight text-text">
+        {t(locale, 'dpage.flyerStudio')}
+      </h1>
       <p className="mt-1 max-w-2xl font-body text-sm text-muted">
-        Design branded flyers and social cards — start from a story or a preset, then customise
-        every element: photo &amp; overlay, a readability backdrop and shadow behind the text, where
-        it sits, colours, a CTA, and a social-media bar. Download a print-ready PNG.
+        {t(locale, 'dpage.studioSubtitle')}
       </p>
 
       <div className="mt-6">

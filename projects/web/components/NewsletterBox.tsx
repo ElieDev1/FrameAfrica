@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { subscribeNewsletter } from '@/lib/newsletter-actions';
+import { useT } from '@/components/LocaleProvider';
 
 /** Newsletter signup — persists to the API (WS11). */
 export function NewsletterBox() {
@@ -9,6 +10,7 @@ export function NewsletterBox() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const t = useT();
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,13 +28,11 @@ export function NewsletterBox() {
 
   return (
     <section className="rounded-xl border border-border bg-surface-2 p-5">
-      <h2 className="font-heading text-lg font-bold text-text">The Daily Frame</h2>
-      <p className="mt-1 font-body text-sm text-muted">
-        Rwanda and Africa&apos;s top stories in your inbox each morning.
-      </p>
+      <h2 className="font-heading text-lg font-bold text-text">{t('nlbox.title')}</h2>
+      <p className="mt-1 font-body text-sm text-muted">{t('nlbox.subtitle')}</p>
       {done ? (
         <p className="mt-3 rounded-lg border border-accent-green/40 bg-accent-green/5 px-3 py-2 font-body text-sm text-text">
-          You&apos;re subscribed. Welcome to The Daily Frame.
+          {t('nlbox.subscribedSuccess')}
         </p>
       ) : (
         <form onSubmit={onSubmit} className="mt-3 flex flex-col gap-2">
@@ -42,7 +42,7 @@ export function NewsletterBox() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            aria-label="Email address"
+            aria-label={t('nlbox.emailAria')}
             className="rounded-lg border border-border bg-bg px-3 py-2 font-body text-sm text-text outline-none focus:border-primary"
           />
           <button
@@ -50,7 +50,7 @@ export function NewsletterBox() {
             disabled={pending}
             className="rounded-lg bg-primary px-3 py-2 font-heading text-sm font-bold text-black transition hover:opacity-90 disabled:opacity-50"
           >
-            {pending ? 'Subscribing…' : 'Subscribe'}
+            {pending ? t('newsletter.subscribing') : t('newsletter.subscribe')}
           </button>
           {error && (
             <p role="alert" className="font-mono text-[11px] text-accent-red">
@@ -59,7 +59,7 @@ export function NewsletterBox() {
           )}
         </form>
       )}
-      <p className="mt-2 font-mono text-[10px] text-faint">Unsubscribe anytime.</p>
+      <p className="mt-2 font-mono text-[10px] text-faint">{t('nlbox.unsubscribeAnytime')}</p>
     </section>
   );
 }

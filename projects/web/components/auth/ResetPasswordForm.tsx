@@ -3,15 +3,17 @@
 import { useActionState } from 'react';
 import { resetPassword } from '@/lib/account-actions';
 import { AuthField, SubmitButton } from './form-controls';
+import { useT } from '@/components/LocaleProvider';
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const [state, action] = useActionState(resetPassword, {});
+  const t = useT();
 
   return (
     <form action={action} className="flex flex-col gap-4">
       <input type="hidden" name="token" value={token} />
       <AuthField
-        label="New password"
+        label={t('auth.newPassword')}
         name="password"
         type="password"
         autoComplete="new-password"
@@ -23,7 +25,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           {state.error}
         </p>
       )}
-      <SubmitButton>Set new password</SubmitButton>
+      <SubmitButton>{t('auth.chooseNewPassword')}</SubmitButton>
     </form>
   );
 }

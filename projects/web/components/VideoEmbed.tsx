@@ -18,6 +18,10 @@ export function VideoEmbed({
   thumbnailUrl: string | null;
 }) {
   const [playing, setPlaying] = useState(false);
+  // Every YouTube video has a deterministic thumbnail, so fall back to it when
+  // the caller has none (podcast episodes carry no cover of their own) — the
+  // poster must never be an empty placeholder.
+  const poster = thumbnailUrl ?? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
 
   if (playing) {
     return (
@@ -38,10 +42,8 @@ export function VideoEmbed({
       aria-label={`Play: ${title}`}
       className="media-fill relative block aspect-video w-full overflow-hidden rounded-xl ring-1 ring-border"
     >
-      {thumbnailUrl && (
-        // eslint-disable-next-line @next/next/no-img-element -- YouTube thumbnail host
-        <img src={thumbnailUrl} alt="" className="h-full w-full object-cover" />
-      )}
+      {/* eslint-disable-next-line @next/next/no-img-element -- YouTube thumbnail host */}
+      <img src={poster} alt="" loading="lazy" className="h-full w-full object-cover" />
       <span className="absolute inset-0 grid place-items-center">
         <span className="grid h-12 w-12 place-items-center rounded-full bg-black/50 pl-0.5 text-white ring-1 ring-white/30 backdrop-blur">
           <PlayIcon size={20} />

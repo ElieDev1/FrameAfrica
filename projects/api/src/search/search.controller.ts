@@ -19,6 +19,15 @@ export class SearchController {
     return apiResponse(results, { nextCursor: hasMore ? String(page + 1) : null, hasMore });
   }
 
+  /**
+   * Matching multimedia — galleries, podcast episodes, videos, interactives.
+   * Kept off `GET /search` so the article envelope stays a clean paginated list.
+   */
+  @Get('media')
+  async media(@Query('q') q?: string) {
+    return apiResponse(await this.search.searchMedia(q ?? '', 8));
+  }
+
   @Get('suggest')
   async suggest(@Query('q') q?: string) {
     return apiResponse(await this.search.suggest(q ?? ''));

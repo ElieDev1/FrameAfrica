@@ -2,24 +2,37 @@
 
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { postComment } from '@/lib/comments-actions';
+import { useT } from '@/components/LocaleProvider';
+import type { EngagementTarget } from '@/lib/engagement';
+import { postContentComment } from '@/lib/engagement-actions';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
+  const t = useT();
   return (
     <button
       type="submit"
       disabled={pending}
       className="self-start rounded-full bg-primary px-4 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-black transition disabled:opacity-60"
     >
-      {pending ? 'Posting…' : 'Post comment'}
+      {pending ? t('comments.posting') : t('comments.post')}
     </button>
   );
 }
 
-export function CommentForm({ articleId, slug }: { articleId: string; slug: string }) {
-  const action = postComment.bind(null, articleId, slug);
+/** Comment composer for any content type — the target and the page to revalidate. */
+export function CommentForm({
+  targetType,
+  targetId,
+  path,
+}: {
+  targetType: EngagementTarget;
+  targetId: string;
+  path: string;
+}) {
+  const action = postContentComment.bind(null, targetType, targetId, path);
   const [state, formAction] = useActionState(action, {});
+  const t = useT();
 
   return (
     <form action={formAction} className="flex flex-col gap-3" key={state.ok ? 'posted' : 'idle'}>
@@ -28,7 +41,7 @@ export function CommentForm({ articleId, slug }: { articleId: string; slug: stri
         required
         maxLength={2000}
         rows={3}
-        placeholder="Add to the conversation…"
+        placeholder={t('comments.placeholder')}
         className="rounded-xl border border-border bg-surface-2 px-4 py-3 font-body text-text outline-none focus:border-primary"
       />
       {state.error && (
@@ -36,7 +49,9 @@ export function CommentForm({ articleId, slug }: { articleId: string; slug: stri
           {state.error}
         </p>
       )}
-      {state.ok && <p className="font-mono text-xs text-accent-green">Posted ✓</p>}
+      {state.ok && (
+        <p className="font-mono text-xs text-accent-green">{t('comments.postedSuccess')}</p>
+      )}
       <SubmitButton />
     </form>
   );

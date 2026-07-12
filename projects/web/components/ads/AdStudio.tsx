@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useTransition } from 'react';
+import { useT } from '@/components/LocaleProvider';
 import { PUBLIC_API_URL } from '@/lib/ads';
 import { publishAdCreative } from '@/lib/ad-studio-actions';
 import { createHouseAd } from '@/lib/ads-actions';
@@ -132,6 +133,7 @@ const FONTS: Record<FontChoice, string> = {
 };
 
 export function AdStudio({ media }: { media: MediaItem[] }) {
+  const t = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [d, setD] = useState<Design>({
     placement: 'billboard',
@@ -380,7 +382,7 @@ export function AdStudio({ media }: { media: MediaItem[] }) {
                 onClick={download}
                 className="rounded-lg border border-border px-4 py-2 font-mono text-xs uppercase tracking-wide text-muted hover:border-primary hover:text-primary"
               >
-                Download PNG
+                {t('das.downloadPng')}
               </button>
               <button
                 type="button"
@@ -403,7 +405,7 @@ export function AdStudio({ media }: { media: MediaItem[] }) {
             {/* ---- Template gallery ---- */}
             <div className="mt-6">
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-faint">
-                Templates
+                {t('das.templates')}
               </p>
               <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                 {TEMPLATES.map((t) => (
@@ -477,9 +479,9 @@ export function AdStudio({ media }: { media: MediaItem[] }) {
                   onChange={(e) => set('align', e.target.value as Align)}
                   className={inputCls}
                 >
-                  <option value="top">Top</option>
-                  <option value="center">Center</option>
-                  <option value="bottom">Bottom</option>
+                  <option value="top">{t('das.top')}</option>
+                  <option value="center">{t('das.center')}</option>
+                  <option value="bottom">{t('das.bottom')}</option>
                 </select>
               </Field>
             </div>
@@ -508,7 +510,7 @@ export function AdStudio({ media }: { media: MediaItem[] }) {
             <Field label="Background photo">
               <div className="flex flex-wrap gap-2">
                 <label className="cursor-pointer rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] uppercase text-muted hover:text-text">
-                  Upload
+                  {t('d.common.upload')}
                   <input type="file" accept="image/*" onChange={onUpload} className="hidden" />
                 </label>
                 {media.length > 0 && (

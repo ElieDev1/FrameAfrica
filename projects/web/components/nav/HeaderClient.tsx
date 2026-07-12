@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { CategoryNode } from '@/lib/api';
-import { type Locale, t } from '@/lib/i18n';
+import { type Locale, type MessageKey, t, translateCategory } from '@/lib/i18n';
 import { ChevronDownIcon, ChevronRightIcon, SearchIcon } from '../icons';
 import { ThemeToggle } from '../ThemeToggle';
 import { Wordmark } from '../Wordmark';
@@ -41,11 +41,11 @@ function shortLabel(name: string): string {
 }
 
 /** Standalone multimedia hub pages, surfaced under the Multimedia nav dropdown. */
-const MULTIMEDIA_HUBS: { name: string; href: string }[] = [
-  { name: 'Videos', href: '/videos' },
-  { name: 'Photo galleries', href: '/galleries' },
-  { name: 'Podcasts', href: '/podcasts' },
-  { name: 'Data & interactives', href: '/interactives' },
+const MULTIMEDIA_HUBS: { nameKey: MessageKey; href: string }[] = [
+  { nameKey: 'mm.videos', href: '/videos' },
+  { nameKey: 'mm.galleries', href: '/galleries' },
+  { nameKey: 'mm.podcasts', href: '/podcasts' },
+  { nameKey: 'mm.interactives', href: '/interactives' },
 ];
 
 /** The taxonomy "Multimedia" section also links to the hub pages above. */
@@ -103,6 +103,7 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
               isEditor={user?.isEditor ?? false}
               isAdmin={user?.isAdmin ?? false}
               firstName={user?.firstName ?? null}
+              locale={locale}
             />
           </div>
           <Link href="/" aria-label="Frame Africa — home" className="shrink-0">
@@ -126,7 +127,7 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
                         active ? 'text-text after:scale-x-100' : 'text-muted after:scale-x-0'
                       }`}
                     >
-                      {shortLabel(section.name)}
+                      {shortLabel(translateCategory(locale, section.slug, section.name))}
                       {hasMenu(section) && (
                         <ChevronDownIcon
                           size={12}
@@ -137,7 +138,12 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
                     </Link>
 
                     {hasMenu(section) && (
-                      <MegaMenu section={section} featured={feat} activeSlug={pathname} />
+                      <MegaMenu
+                        section={section}
+                        featured={feat}
+                        activeSlug={pathname}
+                        locale={locale}
+                      />
                     )}
                   </li>
                 );
@@ -202,10 +208,12 @@ function MegaMenu({
   section,
   featured,
   activeSlug,
+  locale,
 }: {
   section: CategoryNode;
   featured?: FeaturedStory;
   activeSlug: string;
+  locale: Locale;
 }) {
   const wide = Boolean(featured);
   return (
@@ -215,12 +223,14 @@ function MegaMenu({
       }`}
     >
       <div className="mb-2 flex items-center justify-between gap-8 border-b border-border pb-2">
-        <span className="font-heading text-sm font-bold text-text">{section.name}</span>
+        <span className="font-heading text-sm font-bold text-text">
+          {translateCategory(locale, section.slug, section.name)}
+        </span>
         <Link
           href={`/section/${section.slug}`}
-          className="inline-flex shrink-0 items-center gap-0.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-primary hover:underline"
+          className="inline-flex shrink-0 items-center gap-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-primary hover:underline"
         >
-          View all
+          {t(locale, 'common.viewAll')}
           <ChevronRightIcon size={12} aria-hidden />
         </Link>
       </div>
@@ -242,7 +252,7 @@ function MegaMenu({
                   activeSlug === hub.href ? 'text-primary' : 'text-text'
                 }`}
               >
-                {hub.name}
+                {t(locale, hub.nameKey)}
               </Link>
             ))}
           {!isMultimedia(section.slug) &&
@@ -256,7 +266,7 @@ function MegaMenu({
                     active ? 'text-primary' : 'text-muted'
                   }`}
                 >
-                  {child.name}
+                  {translateCategory(locale, child.slug, child.name)}
                 </Link>
               );
             })}
@@ -272,7 +282,7 @@ function MegaMenu({
                 <span className="media-fill absolute inset-0" />
               )}
               <span className="absolute left-2 top-2 rounded bg-black/55 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
-                Latest
+                {t(locale, 'home.latest')}
               </span>
             </span>
             <span className="mt-1.5 line-clamp-2 font-heading text-sm font-bold leading-snug text-text group-hover/feat:text-primary">

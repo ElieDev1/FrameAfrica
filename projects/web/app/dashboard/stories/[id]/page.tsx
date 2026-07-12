@@ -18,6 +18,8 @@ import {
   submitDraftAction,
   updateDraftAction,
 } from '@/lib/cms-actions';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
 export const metadata: Metadata = { title: 'Edit draft — Frame Africa' };
 
@@ -26,10 +28,11 @@ type PageProps = { params: Promise<{ id: string }> };
 export default async function EditDraftPage({ params }: PageProps) {
   const user = await requireStaff();
   const { id } = await params;
-  const [draft, categories, topics] = await Promise.all([
+  const [draft, categories, topics, locale] = await Promise.all([
     getDraft(id),
     categoryOptions(),
     topicOptions(),
+    getLocale(),
   ]);
   const editable = isEditable(draft.status);
 
@@ -39,17 +42,19 @@ export default async function EditDraftPage({ params }: PageProps) {
   return (
     <div className="w-full">
       <Link href="/dashboard/stories" className="font-mono text-xs text-primary hover:underline">
-        ← Newsroom
+        {t(locale, 'dpage.backNewsroom')}
       </Link>
       <div className="mt-3 flex items-center gap-3">
-        <h1 className="font-heading text-3xl font-black tracking-tight text-text">Edit story</h1>
+        <h1 className="font-heading text-3xl font-black tracking-tight text-text">
+          {t(locale, 'dpage.editStory')}
+        </h1>
         <StatusBadge status={draft.status} />
       </div>
 
       {draft.reviewNote && (
         <div className="mt-4 max-w-3xl rounded-xl border-l-4 border-accent-red bg-surface px-4 py-3">
           <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-red">
-            Returned by an editor
+            {t(locale, 'dpage.returnedByEditor')}
           </p>
           <p className="mt-1 font-body text-sm text-text">{draft.reviewNote}</p>
         </div>

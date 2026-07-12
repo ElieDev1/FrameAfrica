@@ -2,20 +2,28 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AuthShell } from '@/components/auth/AuthShell';
 import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm';
+import { getLocale } from '@/lib/i18n-server';
+import { t } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Reset your password — Frame Africa' };
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return { title: `${t(locale, 'auth.forgotPassword')} — Frame Africa` };
+}
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+  const locale = await getLocale();
+
   return (
     <AuthShell
-      eyebrow="Account recovery"
-      title="Reset your password"
-      subtitle="Enter your email and we'll send you a link to set a new password."
+      eyebrow={t(locale, 'auth.accountRecovery')}
+      title={t(locale, 'auth.forgotPassword')}
+      subtitle={t(locale, 'auth.forgotPasswordSubtitle')}
+      locale={locale}
       footer={
         <p className="font-body text-sm text-muted">
-          Remembered it?{' '}
+          {t(locale, 'auth.rememberedIt')}{' '}
           <Link href="/login" className="font-semibold text-primary hover:underline">
-            Back to sign in
+            {t(locale, 'auth.backToSignIn')}
           </Link>
         </p>
       }

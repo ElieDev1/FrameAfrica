@@ -2,8 +2,11 @@ import Link from 'next/link';
 import { BarChartIcon, PlusIcon } from '@/components/icons';
 import type { InteractiveItem } from '@/lib/cms';
 import { formatDate } from '@/lib/format';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
-export function InteractivesAdmin({ interactives }: { interactives: InteractiveItem[] }) {
+export async function InteractivesAdmin({ interactives }: { interactives: InteractiveItem[] }) {
+  const locale = await getLocale();
   return (
     <div className="w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -11,26 +14,26 @@ export function InteractivesAdmin({ interactives }: { interactives: InteractiveI
           <div className="flex items-center gap-2">
             <BarChartIcon size={20} className="text-primary" />
             <h1 className="font-heading text-3xl font-black tracking-tight text-text">
-              Data &amp; interactives
+              {t(locale, 'mm.interactives')}
             </h1>
           </div>
           <p className="mt-1 font-body text-sm text-muted">
-            Embedded charts and interactive graphics. {interactives.length} total.
+            {t(locale, 'dint.subtitle')} {interactives.length} {t(locale, 'd.common.total')}.
           </p>
         </div>
         <Link
           href="/dashboard/interactives/new"
           className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 font-heading text-sm font-bold text-black transition hover:opacity-90"
         >
-          <PlusIcon size={15} /> New interactive
+          <PlusIcon size={15} /> {t(locale, 'dint.newInteractive')}
         </Link>
       </div>
 
       {interactives.length === 0 ? (
         <div className="mt-8 rounded-xl border border-dashed border-border p-12 text-center">
-          <p className="font-body text-sm text-muted">Nothing yet.</p>
+          <p className="font-body text-sm text-muted">{t(locale, 'dint.empty')}</p>
           <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-            Embed a Datawrapper, Flourish, Infogram or Google chart
+            {t(locale, 'dint.emptyHint')}
           </p>
         </div>
       ) : (
@@ -61,7 +64,7 @@ export function InteractivesAdmin({ interactives }: { interactives: InteractiveI
                       : 'bg-black/70 text-white'
                   }`}
                 >
-                  {it.status}
+                  {t(locale, it.status === 'published' ? 'd.common.published' : 'd.common.draft')}
                 </span>
               </div>
               <div className="p-3">

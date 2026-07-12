@@ -7,6 +7,7 @@ import {
   type Prisma,
 } from '@prisma/client';
 import { slugify } from '../common/slug';
+import { textFilter } from '../common/prisma/text-filter';
 import { safeImageUrl, stripText } from '../content/blocks';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateEpisodeDto, UpdateEpisodeDto } from './dto/episode.dto';
@@ -31,6 +32,23 @@ export class PodcastsService {
       include: { _count: { select: { episodes: { where: publishedEpisode } } } },
     });
     return rows.map(toShowView);
+  }
+
+  /** Public: one page of published shows, for the hub's pager (optional `q` filter). */
+  async listShowsPage(
+    limit: number,
+    page: number,
+    q?: string,
+  ): Promise<{ items: ShowView[]; hasMore: boolean }> {
+    const take = Math.min(Math.max(limit, 1), 60);
+    const rows = await this.prisma.podcastShow.findMany({
+      where: { status: MediaStatus.published, deletedAt: null, ...textFilter(q) },
+      orderBy: { updatedAt: 'desc' },
+      include: { _count: { select: { episodes: { where: publishedEpisode } } } },
+      skip: (Math.max(page, 1) - 1) * take,
+      take: take + 1, // one extra row answers "is there a next page?"
+    });
+    return { items: rows.slice(0, take).map(toShowView), hasMore: rows.length > take };
   }
 
   async getShow(slug: string): Promise<ShowDetail> {

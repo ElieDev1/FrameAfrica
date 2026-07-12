@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { DraftForm } from '@/components/cms/DraftForm';
 import { categoryOptions, getCopyDeskItem, requireCopyDesk, topicOptions } from '@/lib/cms';
 import { copyEditSaveAction, passCopyEditAction, returnCopyEditAction } from '@/lib/cms-actions';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
 export const metadata: Metadata = { title: 'Copy-edit — Frame Africa' };
 
@@ -11,10 +13,11 @@ type PageProps = { params: Promise<{ id: string }> };
 export default async function CopyEditPage({ params }: PageProps) {
   await requireCopyDesk();
   const { id } = await params;
-  const [article, categories, topics] = await Promise.all([
+  const [article, categories, topics, locale] = await Promise.all([
     getCopyDeskItem(id),
     categoryOptions(),
     topicOptions(),
+    getLocale(),
   ]);
 
   const saveAction = copyEditSaveAction.bind(null, id);
@@ -24,13 +27,12 @@ export default async function CopyEditPage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
       <Link href="/dashboard/copydesk" className="font-mono text-xs text-primary hover:underline">
-        ← Copy desk
+        {t(locale, 'dpage.backCopyDesk')}
       </Link>
-      <h1 className="mt-3 font-heading text-2xl font-black tracking-tight text-text">Copy-edit</h1>
-      <p className="mt-1 font-body text-sm text-muted">
-        Fix the copy, then pass it to the editors or return it to the writer. Every save records a
-        revision.
-      </p>
+      <h1 className="mt-3 font-heading text-2xl font-black tracking-tight text-text">
+        {t(locale, 'dpage.copyEdit')}
+      </h1>
+      <p className="mt-1 font-body text-sm text-muted">{t(locale, 'dpage.copyEditSubtitle')}</p>
 
       <div className="mt-6">
         <DraftForm

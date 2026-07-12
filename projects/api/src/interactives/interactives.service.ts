@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { type Interactive, InteractiveProvider, MediaStatus, type Prisma } from '@prisma/client';
 import { slugify } from '../common/slug';
+import { textFilter } from '../common/prisma/text-filter';
 import { safeImageUrl, stripText } from '../content/blocks';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateInteractiveDto, UpdateInteractiveDto } from './dto/interactive.dto';
@@ -22,6 +23,22 @@ export class InteractivesService {
       take: Math.min(Math.max(limit, 1), 60),
     });
     return rows.map(toView);
+  }
+
+  /** Public: one page of published interactives, for the hub's pager (optional `q` filter). */
+  async listPage(
+    limit: number,
+    page: number,
+    q?: string,
+  ): Promise<{ items: InteractiveView[]; hasMore: boolean }> {
+    const take = Math.min(Math.max(limit, 1), 60);
+    const rows = await this.prisma.interactive.findMany({
+      where: { status: MediaStatus.published, deletedAt: null, ...textFilter(q) },
+      orderBy: { publishedAt: 'desc' },
+      skip: (Math.max(page, 1) - 1) * take,
+      take: take + 1, // one extra row answers "is there a next page?"
+    });
+    return { items: rows.slice(0, take).map(toView), hasMore: rows.length > take };
   }
 
   async getBySlug(slug: string): Promise<InteractiveView> {

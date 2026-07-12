@@ -67,6 +67,12 @@ async function authenticate(
       if (message === '2FA_INVALID') {
         return { twoFactorRequired: true, error: 'That code is not valid — try again.' };
       }
+      if (message === 'ACCOUNT_LOCKED') {
+        return {
+          error:
+            'This account is locked after too many failed sign-ins. Ask an administrator to unlock it.',
+        };
+      }
       return { error: 'Invalid email or password.' };
     }
     if (res.status === 409) return { error: 'That email is already registered.' };

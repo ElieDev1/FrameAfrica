@@ -1,3 +1,5 @@
+import { pageQuery } from './paging';
+
 const API_URL =
   process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/v1';
 
@@ -33,6 +35,27 @@ export async function fetchGalleries(limit = 24): Promise<PublicGalleryCard[]> {
     return json.data;
   } catch {
     return [];
+  }
+}
+
+/** One page of published galleries for the hub's pager (empty + no next page on error). */
+export async function fetchGalleriesPage(
+  limit: number,
+  page: number,
+  q?: string,
+): Promise<{ items: PublicGalleryCard[]; hasMore: boolean }> {
+  try {
+    const res = await fetch(`${API_URL}/galleries?${pageQuery(limit, page, q)}`, {
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return { items: [], hasMore: false };
+    const json = (await res.json()) as {
+      data: PublicGalleryCard[];
+      meta?: { pagination?: { hasMore: boolean } };
+    };
+    return { items: json.data, hasMore: Boolean(json.meta?.pagination?.hasMore) };
+  } catch {
+    return { items: [], hasMore: false };
   }
 }
 

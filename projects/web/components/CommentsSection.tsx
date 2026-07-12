@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import type { Comment } from '@/lib/api';
+import type { EngagementTarget } from '@/lib/engagement';
 import { formatDate } from '@/lib/format';
 import { CommentActions } from './CommentActions';
 import { CommentForm } from './CommentForm';
 import { CommentIcon } from './icons';
+import { type Locale, t } from '@/lib/i18n';
 
 /** First initial of a display name, for the avatar monogram. */
 function initial(name: string): string {
@@ -42,20 +44,40 @@ function CommentItem({ comment, signedIn }: { comment: Comment; signedIn: boolea
   );
 }
 
-function countComments(comments: Comment[]): number {
+export function countComments(comments: Comment[]): number {
   return comments.reduce((n, c) => n + 1 + c.replies.length, 0);
 }
 
+/** The threaded list of comments on its own — reused by the inline video surface. */
+export function CommentThread({ comments, signedIn }: { comments: Comment[]; signedIn: boolean }) {
+  if (comments.length === 0) return null;
+  return (
+    <ul className="flex flex-col gap-6">
+      {comments.map((comment) => (
+        <CommentItem key={comment.id} comment={comment} signedIn={signedIn} />
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * The conversation under any piece of content — an article, gallery, podcast
+ * episode, interactive or video. `path` is the page to revalidate after a post.
+ */
 export function CommentsSection({
-  articleId,
-  slug,
+  targetType,
+  targetId,
+  path,
   comments,
   signedIn,
+  locale,
 }: {
-  articleId: string;
-  slug: string;
+  targetType: EngagementTarget;
+  targetId: string;
+  path: string;
   comments: Comment[];
   signedIn: boolean;
+  locale: Locale;
 }) {
   const total = countComments(comments);
 
@@ -70,30 +92,27 @@ export function CommentsSection({
         className="mb-6 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] text-muted"
       >
         <CommentIcon size={14} />
-        Comments{total > 0 ? ` (${total})` : ''}
+        {t(locale, 'comments.title')}
+        {total > 0 ? ` (${total})` : ''}
       </h2>
 
       {signedIn ? (
         <div className="mb-8">
-          <CommentForm articleId={articleId} slug={slug} />
+          <CommentForm targetType={targetType} targetId={targetId} path={path} />
         </div>
       ) : (
         <p className="mb-8 font-body text-sm text-muted">
           <Link href="/login" className="text-primary hover:underline">
-            Sign in
-          </Link>{' '}
-          to join the conversation.
+            {t(locale, 'comments.signIn')}
+          </Link>
+          {t(locale, 'comments.toJoin')}
         </p>
       )}
 
       {comments.length > 0 ? (
-        <ul className="flex flex-col gap-6">
-          {comments.map((comment) => (
-            <CommentItem key={comment.id} comment={comment} signedIn={signedIn} />
-          ))}
-        </ul>
+        <CommentThread comments={comments} signedIn={signedIn} />
       ) : (
-        <p className="font-body text-sm text-muted">No comments yet — be the first to weigh in.</p>
+        <p className="font-body text-sm text-muted">{t(locale, 'comments.empty')}</p>
       )}
     </section>
   );

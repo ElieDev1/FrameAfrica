@@ -1,10 +1,14 @@
 'use client';
 
 import { useTransition } from 'react';
+import { useConfirm } from '@/components/ConfirmProvider';
+import { useT } from '@/components/LocaleProvider';
 import { adminArticleStatusAction, adminDeleteArticleAction } from '@/lib/cms-actions';
 
 /** Admin god-mode controls for a single article (edit page). */
 export function ArticleAdminActions({ id, status }: { id: string; status: string }) {
+  const t = useT();
+  const ask = useConfirm();
   const [pending, start] = useTransition();
 
   const setStatus = (action: 'publish' | 'unpublish' | 'archive') =>
@@ -12,8 +16,8 @@ export function ArticleAdminActions({ id, status }: { id: string; status: string
       await adminArticleStatusAction(id, action);
     });
 
-  const remove = () => {
-    if (!confirm('Delete this article? It moves to Trash and can be restored.')) return;
+  const remove = async () => {
+    if (!(await ask({ message: t('daa.deleteConfirm'), danger: true }))) return;
     start(async () => {
       await adminDeleteArticleAction(id);
     });
@@ -25,7 +29,7 @@ export function ArticleAdminActions({ id, status }: { id: string; status: string
   return (
     <div className="flex flex-wrap items-center gap-2 border-t border-border pt-4">
       <span className="mr-1 font-mono text-[11px] uppercase tracking-[0.14em] text-faint">
-        Admin
+        {t('daa.admin')}
       </span>
       {status !== 'published' && (
         <button
@@ -34,7 +38,7 @@ export function ArticleAdminActions({ id, status }: { id: string; status: string
           disabled={pending}
           className={`${btn} border-primary text-primary hover:bg-primary hover:text-black`}
         >
-          Publish now
+          {t('daa.publishNow')}
         </button>
       )}
       {status === 'published' && (
@@ -44,7 +48,7 @@ export function ArticleAdminActions({ id, status }: { id: string; status: string
           disabled={pending}
           className={`${btn} border-border text-muted hover:text-text`}
         >
-          Unpublish
+          {t('d.common.unpublish')}
         </button>
       )}
       <button
@@ -53,7 +57,7 @@ export function ArticleAdminActions({ id, status }: { id: string; status: string
         disabled={pending || status === 'archived'}
         className={`${btn} border-border text-muted hover:text-text`}
       >
-        Archive
+        {t('daa.archive')}
       </button>
       <button
         type="button"
@@ -61,7 +65,7 @@ export function ArticleAdminActions({ id, status }: { id: string; status: string
         disabled={pending}
         className={`${btn} border-accent-red/40 text-accent-red hover:bg-accent-red/10`}
       >
-        Delete
+        {t('d.common.delete')}
       </button>
     </div>
   );

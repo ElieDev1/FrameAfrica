@@ -2,15 +2,17 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { useT } from '@/components/LocaleProvider';
 import { removeIntegration, setIntegration } from '@/lib/settings-actions';
 import type { Integration } from '@/lib/settings-types';
 import { formatDate } from '@/lib/format';
 
 function StatusPill({ integration }: { integration: Integration }) {
+  const t = useT();
   if (!integration.isSet) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-faint">
-        <span className="h-1.5 w-1.5 rounded-full bg-faint" /> Not set
+        <span className="h-1.5 w-1.5 rounded-full bg-faint" /> {t('dset.notSet')}
       </span>
     );
   }
@@ -22,13 +24,14 @@ function StatusPill({ integration }: { integration: Integration }) {
       }`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${fromDb ? 'bg-accent-green' : 'bg-primary'}`} />
-      {fromDb ? 'Configured' : 'Environment'}
+      {fromDb ? t('dset.configured') : t('dset.environment')}
     </span>
   );
 }
 
 function IntegrationCard({ integration }: { integration: Integration }) {
   const router = useRouter();
+  const t = useT();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +78,10 @@ function IntegrationCard({ integration }: { integration: Integration }) {
         <p className="mt-3 font-mono text-xs text-text">
           {integration.maskedValue}
           {integration.updatedAt && (
-            <span className="text-faint"> · updated {formatDate(integration.updatedAt)}</span>
+            <span className="text-faint">
+              {' '}
+              · {t('dov.updated')} {formatDate(integration.updatedAt)}
+            </span>
           )}
         </p>
       )}
@@ -86,7 +92,7 @@ function IntegrationCard({ integration }: { integration: Integration }) {
           onClick={() => setEditing((e) => !e)}
           className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary"
         >
-          {integration.source === 'database' ? 'Update' : 'Set key'}
+          {integration.source === 'database' ? t('dset.update') : t('dset.setKey')}
         </button>
         {integration.source === 'database' && (
           <button
@@ -95,7 +101,7 @@ function IntegrationCard({ integration }: { integration: Integration }) {
             disabled={pending}
             className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-accent-red hover:text-accent-red disabled:opacity-50"
           >
-            Remove
+            {t('dset.remove')}
           </button>
         )}
       </div>
@@ -106,7 +112,7 @@ function IntegrationCard({ integration }: { integration: Integration }) {
             type="password"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder={`Paste ${integration.label} key…`}
+            placeholder={t('dset.pasteKey')}
             autoComplete="off"
             className="min-w-0 flex-1 rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-mono text-sm text-text outline-none focus:border-primary"
           />
@@ -116,7 +122,7 @@ function IntegrationCard({ integration }: { integration: Integration }) {
             disabled={pending}
             className="rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black hover:opacity-90 disabled:opacity-50"
           >
-            {pending ? 'Saving…' : 'Save'}
+            {pending ? t('d.common.saving') : t('d.common.save')}
           </button>
           {error && <span className="w-full font-mono text-[11px] text-accent-red">{error}</span>}
         </div>
@@ -127,6 +133,7 @@ function IntegrationCard({ integration }: { integration: Integration }) {
 
 function AddCustom() {
   const router = useRouter();
+  const t = useT();
   const [key, setKey] = useState('');
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -148,10 +155,8 @@ function AddCustom() {
 
   return (
     <section className="rounded-xl border border-border bg-surface p-5">
-      <h2 className="font-heading text-lg font-bold text-text">Add a custom key</h2>
-      <p className="mt-1 font-body text-sm text-muted">
-        For any integration not listed above. Use UPPER_SNAKE_CASE (e.g. <code>MAPBOX_TOKEN</code>).
-      </p>
+      <h2 className="font-heading text-lg font-bold text-text">{t('dset.addCustomKey')}</h2>
+      <p className="mt-1 font-body text-sm text-muted">{t('dset.addCustomDesc')}</p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <input
           type="text"
@@ -164,7 +169,7 @@ function AddCustom() {
           type="password"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="Value"
+          placeholder={t('dset.value')}
           autoComplete="off"
           className="w-64 max-w-full rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-mono text-sm text-text outline-none focus:border-primary"
         />
@@ -174,7 +179,7 @@ function AddCustom() {
           disabled={pending || !key.trim() || !value.trim()}
           className="rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black hover:opacity-90 disabled:opacity-50"
         >
-          Add
+          {t('d.common.add')}
         </button>
         {error && <span className="font-mono text-[11px] text-accent-red">{error}</span>}
       </div>
@@ -183,21 +188,20 @@ function AddCustom() {
 }
 
 export function SettingsAdmin({ integrations }: { integrations: Integration[] }) {
+  const t = useT();
   const configured = integrations.filter((i) => i.isSet).length;
 
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="font-heading text-3xl font-black tracking-tight text-text">Settings</h1>
-        <p className="mt-1 max-w-2xl font-body text-sm text-muted">
-          Integration keys and site configuration — admin-only, stored server-side. Keys are never
-          shown in full again, only a masked hint; a value set here overrides the matching
-          environment variable.
-        </p>
+        <h1 className="font-heading text-3xl font-black tracking-tight text-text">
+          {t('dash.settings')}
+        </h1>
+        <p className="mt-1 max-w-2xl font-body text-sm text-muted">{t('dset.subtitle')}</p>
         <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 font-mono text-[11px] text-muted">
-          <span className="font-bold text-text">{configured}</span> of {integrations.length}{' '}
-          integrations configured
+          <span className="font-bold text-text">{configured}</span> {t('dset.of')}{' '}
+          {integrations.length} {t('dset.integrationsConfigured')}
         </p>
       </div>
 

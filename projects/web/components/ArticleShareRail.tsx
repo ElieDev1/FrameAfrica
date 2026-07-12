@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { BrandIcon, CheckIcon, LinkIcon } from '@/components/icons';
+import { useLocale } from '@/components/LocaleProvider';
+import { t } from '@/lib/i18n';
 
 /**
  * Vertical share rail pinned beside the article on large screens — fills the
@@ -10,6 +12,7 @@ import { BrandIcon, CheckIcon, LinkIcon } from '@/components/icons';
  */
 export function ArticleShareRail({ title }: { title: string }) {
   const [copied, setCopied] = useState(false);
+  const locale = useLocale();
 
   const enc = (v: string) => encodeURIComponent(v);
   const here = () =>
@@ -46,7 +49,7 @@ export function ArticleShareRail({ title }: { title: string }) {
   return (
     <div className="flex flex-col items-center gap-2.5">
       <span className="mb-1 font-mono text-[9px] uppercase tracking-[0.18em] text-faint">
-        Share
+        {t(locale, 'share.label')}
       </span>
       {openers.map(({ kind, label, url }) => (
         <a
@@ -54,7 +57,7 @@ export function ArticleShareRail({ title }: { title: string }) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={`Share on ${label}`}
+          aria-label={`${t(locale, 'share.on')} ${label}`}
           className="grid h-10 w-10 place-items-center rounded-full border border-border text-muted transition hover:border-primary hover:text-primary"
         >
           <BrandIcon name={kind} size={16} />
@@ -63,7 +66,7 @@ export function ArticleShareRail({ title }: { title: string }) {
       <button
         type="button"
         onClick={copy}
-        aria-label="Copy link"
+        aria-label={t(locale, 'share.copyLink')}
         className="grid h-10 w-10 place-items-center rounded-full border border-border text-muted transition hover:border-primary hover:text-primary"
       >
         {copied ? <CheckIcon size={16} className="text-accent-green" /> : <LinkIcon size={16} />}

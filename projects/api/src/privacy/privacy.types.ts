@@ -11,10 +11,10 @@ export interface DataExport {
     createdAt: string;
     lastLoginAt: string | null;
   };
-  comments: { body: string; articleId: string; createdAt: string }[];
+  comments: { body: string; targetType: string; targetId: string; createdAt: string }[];
   bookmarks: { articleId: string; createdAt: string }[];
   follows: { categoryId: string | null; topicId: string | null; createdAt: string }[];
   readingHistory: { articleId: string; viewedAt: string }[];
-  likes: { articleId: string; createdAt: string }[];
+  likes: { targetType: string; targetId: string; createdAt: string }[];
   notifications: { type: string; title: string; createdAt: string }[];
 }

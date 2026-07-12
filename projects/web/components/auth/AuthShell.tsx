@@ -8,27 +8,32 @@ import {
   ShieldIcon,
   SparklesIcon,
 } from '@/components/icons';
+import { type Locale, type MessageKey, t } from '@/lib/i18n';
 
-const HIGHLIGHTS: { icon: (p: IconProps) => ReactNode; title: string; body: string }[] = [
+const HIGHLIGHTS: {
+  icon: (p: IconProps) => ReactNode;
+  titleKey: MessageKey;
+  bodyKey: MessageKey;
+}[] = [
   {
     icon: ShieldIcon,
-    title: 'Independent journalism',
-    body: 'Verified reporting from Rwanda and across the continent.',
+    titleKey: 'auth.independentJournalism',
+    bodyKey: 'auth.independentJournalismBody',
   },
   {
     icon: SparklesIcon,
-    title: 'A feed built for you',
-    body: 'Briefings tuned to the sections you follow.',
+    titleKey: 'auth.feedBuiltForYou',
+    bodyKey: 'auth.feedBuiltForYouBody',
   },
   {
     icon: BookmarkIcon,
-    title: 'Save & follow',
-    body: 'Bookmark stories and keep the threads you care about.',
+    titleKey: 'auth.saveAndFollow',
+    bodyKey: 'auth.saveAndFollowBody',
   },
   {
     icon: BarChartIcon,
-    title: 'Live across Africa',
-    body: 'Real-time markets and weather from four capitals.',
+    titleKey: 'auth.liveAcrossAfrica',
+    bodyKey: 'auth.liveAcrossAfricaBody',
   },
 ];
 
@@ -68,18 +73,32 @@ function AppleMark() {
  * provider credentials yet) — shown so the flow is ready and the choice is
  * visible, but honestly marked "soon" rather than pretending to work.
  */
-function SocialButton({ provider, icon }: { provider: string; icon: ReactNode }) {
+function SocialButton({
+  provider,
+  icon,
+  locale,
+}: {
+  provider: string;
+  icon: ReactNode;
+  locale: Locale;
+}) {
+  const label =
+    locale === 'rw'
+      ? `Komeza na ${provider}`
+      : locale === 'fr'
+        ? `Continuer avec ${provider}`
+        : `Continue with ${provider}`;
   return (
     <button
       type="button"
       disabled
-      aria-label={`Continue with ${provider} — coming soon`}
+      aria-label={`${t(locale, 'auth.continueWith').replace('{provider}', provider)}`}
       className="relative flex w-full items-center justify-center gap-3 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-text disabled:cursor-not-allowed disabled:opacity-70"
     >
       {icon}
-      Continue with {provider}
+      {label}
       <span className="absolute right-3 rounded-full bg-surface-2 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-faint">
-        Soon
+        {t(locale, 'auth.soon')}
       </span>
     </button>
   );
@@ -98,6 +117,8 @@ interface Props {
   footer?: ReactNode;
   /** Show the social sign-in buttons + legal consent (login/signup only). */
   showSocial?: boolean;
+  /** The active locale. */
+  locale: Locale;
 }
 
 /**
@@ -113,6 +134,7 @@ export function AuthShell({
   children,
   footer,
   showSocial = false,
+  locale,
 }: Props) {
   return (
     <div className="relative min-h-[calc(100vh-3.5rem)] overflow-hidden">
@@ -149,22 +171,24 @@ export function AuthShell({
               <Wordmark />
             </Link>
             <h2 className="font-heading text-[2.5rem] font-black leading-[1.05] tracking-tight text-text">
-              The stories shaping <span className="text-primary">a continent</span>.
+              {t(locale, 'auth.shapingContinent')}
+              <span className="text-primary">{t(locale, 'auth.shapingContinentBold')}</span>.
             </h2>
             <p className="mt-4 max-w-md font-body text-base leading-relaxed text-muted">
-              Join Frame Africa for independent reporting, live data, and a reading experience built
-              around what matters to you.
+              {t(locale, 'auth.joinFrameAfricaDescription')}
             </p>
 
             <ul className="mt-8 space-y-4">
-              {HIGHLIGHTS.map(({ icon: Icon, title: t, body }) => (
-                <li key={t} className="flex items-start gap-3.5">
+              {HIGHLIGHTS.map(({ icon: Icon, titleKey, bodyKey }) => (
+                <li key={titleKey} className="flex items-start gap-3.5">
                   <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/15">
                     <Icon size={17} />
                   </span>
                   <span>
-                    <span className="block text-sm font-semibold text-text">{t}</span>
-                    <span className="block text-sm text-muted">{body}</span>
+                    <span className="block text-sm font-semibold text-text">
+                      {t(locale, titleKey)}
+                    </span>
+                    <span className="block text-sm text-muted">{t(locale, bodyKey)}</span>
                   </span>
                 </li>
               ))}
@@ -172,11 +196,12 @@ export function AuthShell({
 
             <div className="mt-9 flex items-center gap-5 border-t border-border pt-5 text-[13px] text-faint">
               <span>
-                <span className="font-bold text-text">300+</span> stories published
+                <span className="font-bold text-text">300+</span>{' '}
+                {t(locale, 'auth.storiesPublished')}
               </span>
               <span className="h-3 w-px bg-border" />
               <span>
-                <span className="font-bold text-text">4</span> capitals, live
+                <span className="font-bold text-text">4</span> {t(locale, 'auth.capitalsLive')}
               </span>
             </div>
           </aside>
@@ -205,12 +230,12 @@ export function AuthShell({
           {showSocial && (
             <>
               <div className="mt-5 space-y-2">
-                <SocialButton provider="Google" icon={<GoogleMark />} />
-                <SocialButton provider="Apple" icon={<AppleMark />} />
+                <SocialButton provider="Google" icon={<GoogleMark />} locale={locale} />
+                <SocialButton provider="Apple" icon={<AppleMark />} locale={locale} />
               </div>
               <div className="my-3 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
                 <span className="h-px flex-1 bg-border" />
-                or continue with email
+                {t(locale, 'auth.orEmail')}
                 <span className="h-px flex-1 bg-border" />
               </div>
             </>
@@ -223,21 +248,61 @@ export function AuthShell({
           <div className="mt-4 border-t border-border pt-3.5">
             {showSocial && (
               <p className="text-center text-[11px] leading-relaxed text-faint">
-                By continuing, you agree to our{' '}
-                <Link
-                  href="/terms"
-                  className="text-muted underline decoration-border underline-offset-2 hover:text-primary"
-                >
-                  Terms of Use
-                </Link>{' '}
-                &amp;{' '}
-                <Link
-                  href="/privacy"
-                  className="text-muted underline decoration-border underline-offset-2 hover:text-primary"
-                >
-                  Privacy Policy
-                </Link>
-                . We may email you updates — opt out anytime.
+                {locale === 'rw' ? (
+                  <>
+                    Gukomeza bivuze ko wemera{' '}
+                    <Link
+                      href="/terms"
+                      className="text-muted underline decoration-border underline-offset-2 hover:text-primary"
+                    >
+                      Amabwiriza y’Imikoreshereze
+                    </Link>{' '}
+                    &amp;{' '}
+                    <Link
+                      href="/privacy"
+                      className="text-muted underline decoration-border underline-offset-2 hover:text-primary"
+                    >
+                      Ubuzima Bwite
+                    </Link>{' '}
+                    byacu. Twaguhereza amakuru kuri email — ushobora kubihagarika igihe cyose.
+                  </>
+                ) : locale === 'fr' ? (
+                  <>
+                    En continuant, vous acceptez nos{' '}
+                    <Link
+                      href="/terms"
+                      className="text-muted underline decoration-border underline-offset-2 hover:text-primary"
+                    >
+                      Conditions d’utilisation
+                    </Link>{' '}
+                    &amp;{' '}
+                    <Link
+                      href="/privacy"
+                      className="text-muted underline decoration-border underline-offset-2 hover:text-primary"
+                    >
+                      Politique de confidentialité
+                    </Link>
+                    . Nous pouvons vous envoyer des e-mails — désabonnez-vous à tout moment.
+                  </>
+                ) : (
+                  <>
+                    By continuing, you agree to our{' '}
+                    <Link
+                      href="/terms"
+                      className="text-muted underline decoration-border underline-offset-2 hover:text-primary"
+                    >
+                      Terms of Use
+                    </Link>{' '}
+                    &amp;{' '}
+                    <Link
+                      href="/privacy"
+                      className="text-muted underline decoration-border underline-offset-2 hover:text-primary"
+                    >
+                      Privacy Policy
+                    </Link>
+                    . We may email you updates — opt out anytime.
+                  </>
+                )}
               </p>
             )}
             <p
@@ -246,7 +311,7 @@ export function AuthShell({
               }`}
             >
               <ShieldIcon size={13} className="text-primary" />
-              Secured with encrypted sessions.
+              {t(locale, 'auth.securedWithEncrypted')}
             </p>
           </div>
         </div>

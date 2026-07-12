@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { StatusBadge } from '@/components/cms/StatusBadge';
 import { type DraftListItem, listAllArticles, requireEditor } from '@/lib/cms';
 import { formatDate } from '@/lib/format';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
 export const metadata: Metadata = { title: 'Pipeline — Frame Africa' };
 
@@ -42,13 +44,18 @@ function Card({ article }: { article: DraftListItem }) {
 
 export default async function PipelinePage() {
   await requireEditor();
-  const columns = await Promise.all(COLUMNS.map((c) => listAllArticles({ status: c.status })));
+  const [columns, locale] = await Promise.all([
+    Promise.all(COLUMNS.map((c) => listAllArticles({ status: c.status }))),
+    getLocale(),
+  ]);
 
   return (
     <div className="w-full">
-      <h1 className="font-heading text-3xl font-black tracking-tight text-text">Pipeline</h1>
+      <h1 className="font-heading text-3xl font-black tracking-tight text-text">
+        {t(locale, 'dash.pipeline')}
+      </h1>
       <p className="mt-1 max-w-2xl font-body text-sm text-muted">
-        The whole newsroom at a glance — every story by stage.
+        {t(locale, 'dpage.pipelineSubtitle')}
       </p>
 
       <div className="-mx-4 mt-6 flex gap-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
@@ -63,7 +70,9 @@ export default async function PipelinePage() {
             </div>
             <div className="flex flex-col gap-2 overflow-y-auto p-3">
               {columns[i].length === 0 ? (
-                <p className="px-1 py-2 font-body text-xs text-faint">Nothing here.</p>
+                <p className="px-1 py-2 font-body text-xs text-faint">
+                  {t(locale, 'dpage.nothingHere')}
+                </p>
               ) : (
                 columns[i].map((article) => <Card key={article.id} article={article} />)
               )}

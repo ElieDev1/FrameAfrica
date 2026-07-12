@@ -12,8 +12,11 @@ test('homepage loads and opens a story', async ({ page }) => {
   // The masthead brand and section nav render.
   await expect(page.getByRole('navigation', { name: /sections/i })).toBeVisible();
 
-  // Open the first article and confirm the article page renders.
-  const firstStory = page.locator('a[href^="/article/"]').first();
+  // Open the first article and confirm the article page renders. Scope to the
+  // page body and to visible links: the header's section menus each carry a
+  // featured-article link, but they are closed (hidden) until hovered, so a
+  // bare `.first()` would grab header chrome rather than a story.
+  const firstStory = page.locator('main a[href^="/article/"]:visible').first();
   await expect(firstStory).toBeVisible();
   await firstStory.click();
 

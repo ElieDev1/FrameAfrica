@@ -13,6 +13,8 @@ export interface AdminUserView {
   roles: string[];
   status: UserStatus;
   mustChangePassword: boolean;
+  /** Locked out after too many failed sign-ins; an admin must unlock. */
+  locked: boolean;
   lastLoginAt: string | null;
   createdAt: string;
 }
@@ -131,11 +133,14 @@ export class AdminUsersService {
   }
 
   /**
-   * Reset a returning user's password: generate a new temporary one, flag it
-   * for change at next login, and email it to the user (documents/05 §3.4 — the
-   * plaintext is emailed, never returned to the admin here).
+   * Reset a user's password: generate a new temporary one, flag it for change at
+   * next login, and both email it to the user AND return it once to the admin so
+   * they can hand it over directly (email may not be configured). The account is
+   * unusable with it beyond the forced change, so this is a one-time secret.
    */
-  async resetPassword(id: string): Promise<{ email: string; emailed: true }> {
+  async resetPassword(
+    id: string,
+  ): Promise<{ email: string; temporaryPassword: string; emailed: boolean }> {
     const user = await this.assertUser(id);
     const temporaryPassword = generateTemporaryPassword();
     const passwordHash = await this.passwords.hash(temporaryPassword);
@@ -144,7 +149,18 @@ export class AdminUsersService {
       data: { passwordHash, mustChangePassword: true },
     });
     await this.mailer.sendTemporaryPassword(user.email, temporaryPassword);
-    return { email: user.email, emailed: true };
+    return { email: user.email, temporaryPassword, emailed: true };
+  }
+
+  /** Clear a brute-force lockout: reset the failure counter and unlock. */
+  async unlock(id: string): Promise<AdminUserView> {
+    await this.assertUser(id);
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: { failedLoginAttempts: 0, lockedAt: null },
+      include: withRoles,
+    });
+    return toView(updated);
   }
 
   private async assertUser(id: string): Promise<{ email: string }> {
@@ -166,6 +182,7 @@ function toView(user: UserRow): AdminUserView {
     roles: user.roles.map((m) => m.role.name),
     status: user.status,
     mustChangePassword: user.mustChangePassword,
+    locked: user.lockedAt !== null,
     lastLoginAt: user.lastLoginAt?.toISOString() ?? null,
     createdAt: user.createdAt.toISOString(),
   };

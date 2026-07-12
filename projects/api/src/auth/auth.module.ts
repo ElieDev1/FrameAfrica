@@ -25,6 +25,9 @@ import { TwoFactorService } from './two-factor.service';
       }),
     }),
     MailModule,
+    // AuditModule (@Global) and NotificationsModule (@Global) provide their
+    // services app-wide — importing them here would create a module cycle
+    // (both import AuthModule for their guards).
   ],
   controllers: [AuthController],
   providers: [

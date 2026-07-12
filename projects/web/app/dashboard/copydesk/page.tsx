@@ -2,25 +2,30 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { listCopyDesk, requireCopyDesk } from '@/lib/cms';
 import { formatDate } from '@/lib/format';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
 export const metadata: Metadata = { title: 'Copy desk — Frame Africa' };
 
 export default async function CopyDeskPage() {
   await requireCopyDesk();
-  const items = await listCopyDesk();
+  const [items, locale] = await Promise.all([listCopyDesk(), getLocale()]);
 
   return (
     <div className="w-full">
-      <h1 className="font-heading text-3xl font-black tracking-tight text-text">Copy desk</h1>
+      <h1 className="font-heading text-3xl font-black tracking-tight text-text">
+        {t(locale, 'dash.copyDesk')}
+      </h1>
       <p className="mt-1 max-w-2xl font-body text-sm text-muted">
-        Submitted stories waiting for a copy-edit — {items.length} in the queue. Polish the copy,
-        then pass it to the editors or send it back to the writer.
+        {t(locale, 'dpage.copydeskSubtitle')} {items.length} {t(locale, 'dpage.copydeskSuffix')}
       </p>
 
       {items.length === 0 ? (
         <div className="mt-10 rounded-xl border border-dashed border-border px-6 py-16 text-center">
-          <p className="font-heading text-lg font-bold text-text">The copy desk is clear</p>
-          <p className="mt-1 font-body text-sm text-muted">Nothing is waiting for a copy-edit.</p>
+          <p className="font-heading text-lg font-bold text-text">
+            {t(locale, 'dpage.copyDeskClear')}
+          </p>
+          <p className="mt-1 font-body text-sm text-muted">{t(locale, 'dpage.nothingCopyEdit')}</p>
         </div>
       ) : (
         <ul className="mt-6 divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">

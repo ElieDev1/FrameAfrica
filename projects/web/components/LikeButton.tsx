@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { HeartFilledIcon, HeartIcon } from '@/components/icons';
 import { toggleLike } from '@/lib/likes-actions';
+import { useLocale } from '@/components/LocaleProvider';
+import { t } from '@/lib/i18n';
 
 /**
  * Reader "like" control on an article. Optimistically toggles and reconciles
@@ -23,6 +25,9 @@ export function LikeButton({
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
   const [pending, startTransition] = useTransition();
+  const locale = useLocale();
+
+  const label = count === 1 ? t(locale, 'article.like') : t(locale, 'article.likes');
 
   if (!signedIn) {
     return (
@@ -31,7 +36,7 @@ export function LikeButton({
         className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-1.5 font-mono text-xs text-muted transition hover:border-primary hover:text-primary"
       >
         <HeartIcon size={16} />
-        {count} {count === 1 ? 'like' : 'likes'} · Sign in to like
+        {count} {label} · {t(locale, 'article.signInToLike')}
       </Link>
     );
   }
@@ -67,7 +72,7 @@ export function LikeButton({
       }`}
     >
       {liked ? <HeartFilledIcon size={16} /> : <HeartIcon size={16} />}
-      {count} {count === 1 ? 'like' : 'likes'}
+      {count} {label}
     </button>
   );
 }

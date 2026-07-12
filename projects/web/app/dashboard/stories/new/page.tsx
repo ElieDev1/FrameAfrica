@@ -3,22 +3,28 @@ import Link from 'next/link';
 import { DraftForm } from '@/components/cms/DraftForm';
 import { categoryOptions, requireStaff, topicOptions } from '@/lib/cms';
 import { createDraftAction } from '@/lib/cms-actions';
+import { t } from '@/lib/i18n';
+import { getLocale } from '@/lib/i18n-server';
 
 export const metadata: Metadata = { title: 'New draft — Frame Africa' };
 
 export default async function NewDraftPage() {
   await requireStaff();
-  const [categories, topics] = await Promise.all([categoryOptions(), topicOptions()]);
+  const [categories, topics, locale] = await Promise.all([
+    categoryOptions(),
+    topicOptions(),
+    getLocale(),
+  ]);
 
   return (
     <div className="w-full">
       <Link href="/dashboard/stories" className="font-mono text-xs text-primary hover:underline">
-        ← Newsroom
+        {t(locale, 'dpage.backNewsroom')}
       </Link>
-      <h1 className="mt-3 font-heading text-3xl font-black tracking-tight text-text">New story</h1>
-      <p className="mt-1 font-body text-sm text-muted">
-        Write on the left; set the section, image and topics on the right, then publish.
-      </p>
+      <h1 className="mt-3 font-heading text-3xl font-black tracking-tight text-text">
+        {t(locale, 'dash.newStory')}
+      </h1>
+      <p className="mt-1 font-body text-sm text-muted">{t(locale, 'dpage.newStorySubtitle')}</p>
       <div className="mt-6">
         <DraftForm
           action={createDraftAction}

@@ -224,6 +224,13 @@ export interface AdminOverview {
   users: { total: number; active: number; suspended: number; newLast7Days: number };
   articles: { total: number; published: number; inPipeline: number };
   comments: { visible: number; flagged: number };
+  // Optional so the page degrades gracefully if the API hasn't been redeployed
+  // with the advanced-overview fields yet.
+  publishTrend?: { date: string; count: number }[];
+  articlesByStatus?: { status: string; count: number }[];
+  topCategories?: { name: string; count: number }[];
+  media?: { videos: number; galleries: number; episodes: number; interactives: number };
+  engagement?: { views: number; likes: number; comments: number; shares: number };
   recentArticles: {
     id: string;
     slug: string;
@@ -289,6 +296,13 @@ export interface AnalyticsOverview {
   totalToday: number;
   topToday: { views: number; article: { id: string; slug: string; title: string } }[];
   topReferrers: { host: string; views: number }[];
+  // Optional so the page degrades gracefully before the API ships these.
+  totals?: { views: number; likes: number; comments: number; shares: number };
+  byType?: { type: string; views: number; likes: number; comments: number; shares: number }[];
+  viewsTrend?: { date: string; count: number }[];
+  commentsTrend?: { date: string; count: number }[];
+  commentStatus?: { status: string; count: number }[];
+  topArticles?: { id: string; slug: string; title: string; views: number }[];
 }
 
 /** Real-time editor analytics overview (staff). */
@@ -619,19 +633,82 @@ export interface MediaAsset {
   mime: string;
   sizeBytes: number;
   originalName: string | null;
+  /** The event album this file is filed under; null = "Unfiled". */
+  albumId: string | null;
   createdAt: string;
 }
 
-/** The staff media library (newest first). */
-export async function listMedia(): Promise<MediaAsset[]> {
-  const res = await fetch(`${API_URL}/cms/media`, {
+/** An event album — the "folder" the explorer browses. */
+export interface MediaAlbum {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  eventDate: string | null;
+  coverUrl: string | null;
+  assetCount: number;
+  createdAt: string;
+}
+
+/** The file kinds the explorer can filter by. */
+export type MediaKind = 'image' | 'video' | 'audio';
+
+/**
+ * The staff media library (newest first). `album` narrows to one album's id or
+ * the literal `unfiled`; `kind` narrows to a file type.
+ */
+export async function listMedia(
+  album?: string,
+  kind?: MediaKind,
+  page = 1,
+  limit = 24,
+): Promise<{ items: MediaAsset[]; hasMore: boolean }> {
+  const query = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (album) query.set('album', album);
+  if (kind) query.set('kind', kind);
+
+  const res = await fetch(`${API_URL}/cms/media?${query.toString()}`, {
     headers: await authHeaders(),
     cache: 'no-store',
   });
   if (res.status === 401) redirect('/login');
   if (!res.ok) throw new Error(`Failed to load the media library (${res.status})`);
-  const json = (await res.json()) as { data: MediaAsset[] };
-  return json.data;
+  const json = (await res.json()) as {
+    data: MediaAsset[];
+    meta: { pagination?: { hasMore: boolean } };
+  };
+  return { items: json.data, hasMore: Boolean(json.meta.pagination?.hasMore) };
+}
+
+export interface MediaCounts {
+  total: number;
+  image: number;
+  video: number;
+  audio: number;
+}
+
+/** Albums (count + cover), the unfiled tally, and the library's by-kind totals. */
+export async function listAlbums(): Promise<{
+  albums: MediaAlbum[];
+  unfiled: number;
+  counts: MediaCounts;
+}> {
+  const empty = { albums: [], unfiled: 0, counts: { total: 0, image: 0, video: 0, audio: 0 } };
+  const res = await fetch(`${API_URL}/cms/media/albums`, {
+    headers: await authHeaders(),
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/login');
+  if (!res.ok) return empty;
+  const json = (await res.json()) as {
+    data: { albums?: MediaAlbum[]; unfiled?: number; counts?: MediaCounts };
+  };
+  // Tolerate an API that hasn't shipped `counts` yet rather than crashing.
+  return {
+    albums: json.data.albums ?? [],
+    unfiled: json.data.unfiled ?? 0,
+    counts: json.data.counts ?? empty.counts,
+  };
 }
 
 export function isEditable(status: DraftStatus): boolean {

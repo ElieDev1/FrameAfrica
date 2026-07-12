@@ -5,9 +5,11 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CloseIcon, LogOutIcon, MenuIcon, PlusIcon, SearchIcon } from '@/components/icons';
+import { useLocale, useT } from '@/components/LocaleProvider';
 import { logout } from '@/lib/auth-actions';
 import { DashboardNav } from './DashboardNav';
 import { NotificationsBell } from './NotificationsBell';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 import { ThemeToggle } from '../ThemeToggle';
 import { Wordmark } from '../Wordmark';
 
@@ -26,6 +28,8 @@ export function DashboardTopbar({
   roles: string[];
 }) {
   const pathname = usePathname();
+  const t = useT();
+  const locale = useLocale();
   const [drawer, setDrawer] = useState(false);
   const [menu, setMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -63,7 +67,7 @@ export function DashboardTopbar({
       <button
         type="button"
         onClick={() => setDrawer(true)}
-        aria-label="Open menu"
+        aria-label={t('dash.openMenu')}
         className="grid h-9 w-9 place-items-center rounded-lg border border-border text-muted hover:text-text md:hidden"
       >
         <MenuIcon size={18} />
@@ -81,7 +85,7 @@ export function DashboardTopbar({
           <input
             name="q"
             type="search"
-            placeholder="Search articles…"
+            placeholder={t('dash.searchArticles')}
             className="w-full rounded-lg border border-border bg-bg py-1.5 pl-9 pr-3 font-body text-sm text-text outline-none focus:border-primary"
           />
         </form>
@@ -92,8 +96,14 @@ export function DashboardTopbar({
           href="/dashboard/stories/new"
           className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black transition hover:opacity-90"
         >
-          <PlusIcon size={15} /> <span className="hidden sm:inline">New story</span>
+          <PlusIcon size={15} /> <span className="hidden sm:inline">{t('dash.newStory')}</span>
         </Link>
+
+        {/* Language: staff switch the dashboard between EN / RW / FR. */}
+        <div className="hidden items-center rounded-lg border border-border px-2 py-1 sm:flex">
+          <LanguageSwitcher current={locale} />
+        </div>
+
         <ThemeToggle />
 
         {/* Notifications */}
@@ -137,7 +147,7 @@ export function DashboardTopbar({
                 onClick={() => setMenu(false)}
                 className="block px-3 py-2 font-body text-sm text-text hover:bg-surface-2"
               >
-                My account
+                {t('dash.myAccount')}
               </Link>
               <Link
                 href="/"
@@ -145,14 +155,14 @@ export function DashboardTopbar({
                 onClick={() => setMenu(false)}
                 className="block px-3 py-2 font-body text-sm text-text hover:bg-surface-2"
               >
-                View site
+                {t('dash.viewSite')}
               </Link>
               <form action={logout} className="border-t border-border">
                 <button
                   type="submit"
                   className="flex w-full items-center gap-2 px-3 py-2 text-left font-body text-sm text-accent-red hover:bg-accent-red/10"
                 >
-                  <LogOutIcon size={15} /> Sign out
+                  <LogOutIcon size={15} /> {t('dash.signOut')}
                 </button>
               </form>
             </div>
@@ -174,13 +184,21 @@ export function DashboardTopbar({
                 <button
                   type="button"
                   onClick={() => setDrawer(false)}
-                  aria-label="Close menu"
+                  aria-label={t('dash.closeMenu')}
                   className="grid h-8 w-8 place-items-center rounded-lg border border-border text-text"
                 >
                   <CloseIcon size={16} />
                 </button>
               </div>
               <DashboardNav roles={roles} />
+
+              {/* Language switcher — the topbar one is desktop-only. */}
+              <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-4">
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-faint">
+                  {t('footer.language')}
+                </span>
+                <LanguageSwitcher current={locale} />
+              </div>
             </div>
           </div>,
           document.body,

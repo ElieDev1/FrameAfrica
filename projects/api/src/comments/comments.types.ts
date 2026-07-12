@@ -27,5 +27,6 @@ export interface FlaggedComment {
   reportCount: number;
   createdAt: string;
   author: CommentAuthor & { banned: boolean };
-  article: { slug: string; title: string };
+  /** What the comment was posted on — any content type, with its public URL. */
+  target: { type: string; title: string; url: string | null };
 }

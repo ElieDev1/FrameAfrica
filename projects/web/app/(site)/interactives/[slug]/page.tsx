@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { ContentEngagement } from '@/components/ContentEngagement';
 import { EmbedFrame } from '@/components/EmbedFrame';
 import { formatDate } from '@/lib/format';
 import { fetchInteractive } from '@/lib/interactives';
@@ -47,6 +48,8 @@ export default async function InteractiveDetailPage({
       <div className="pt-8">
         <EmbedFrame src={it.embedUrl} title={it.title} aspectRatio={it.aspectRatio} />
       </div>
+
+      <ContentEngagement type="interactive" id={it.id} path={`/interactives/${it.slug}`} />
     </article>
   );
 }

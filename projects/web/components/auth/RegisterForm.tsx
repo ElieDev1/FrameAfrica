@@ -3,16 +3,24 @@
 import { useActionState } from 'react';
 import { register } from '@/lib/auth-actions';
 import { AuthField, SubmitButton } from './form-controls';
+import { useT } from '@/components/LocaleProvider';
 
 export function RegisterForm() {
   const [state, action] = useActionState(register, {});
+  const t = useT();
 
   return (
     <form action={action} className="flex flex-col gap-3">
-      <AuthField label="Name" name="displayName" autoComplete="name" required minLength={2} />
-      <AuthField label="Email" name="email" type="email" autoComplete="email" required />
       <AuthField
-        label="Password"
+        label={t('auth.name')}
+        name="displayName"
+        autoComplete="name"
+        required
+        minLength={2}
+      />
+      <AuthField label={t('auth.email')} name="email" type="email" autoComplete="email" required />
+      <AuthField
+        label={t('auth.password')}
         name="password"
         type="password"
         autoComplete="new-password"
@@ -24,7 +32,7 @@ export function RegisterForm() {
           {state.error}
         </p>
       )}
-      <SubmitButton>Create account</SubmitButton>
+      <SubmitButton>{t('auth.signUp')}</SubmitButton>
     </form>
   );
 }

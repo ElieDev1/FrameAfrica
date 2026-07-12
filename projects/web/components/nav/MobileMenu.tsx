@@ -4,22 +4,35 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { CategoryNode } from '@/lib/api';
+import { type Locale, type MessageKey, t, translateCategory } from '@/lib/i18n';
 import { logout } from '@/lib/auth-actions';
 
 /** Hub pages shown under the taxonomy "Multimedia" section. */
-const MULTIMEDIA_HUBS = [
-  { name: 'Videos', href: '/videos' },
-  { name: 'Photo galleries', href: '/galleries' },
-  { name: 'Podcasts', href: '/podcasts' },
-  { name: 'Data & interactives', href: '/interactives' },
+const MULTIMEDIA_HUBS: { nameKey: MessageKey; href: string }[] = [
+  { nameKey: 'mm.videos', href: '/videos' },
+  { nameKey: 'mm.galleries', href: '/galleries' },
+  { nameKey: 'mm.podcasts', href: '/podcasts' },
+  { nameKey: 'mm.interactives', href: '/interactives' },
 ];
 
 /** Sub-links for a section: the multimedia hubs, else its taxonomy children. */
-function subLinks(section: CategoryNode): { key: string; name: string; href: string }[] {
+function subLinks(
+  section: CategoryNode,
+): { key: string; name: string; slug?: string; nameKey?: MessageKey; href: string }[] {
   if (section.slug === 'multimedia') {
-    return MULTIMEDIA_HUBS.map((h) => ({ key: h.href, name: h.name, href: h.href }));
+    return MULTIMEDIA_HUBS.map((h) => ({
+      key: h.href,
+      name: '',
+      nameKey: h.nameKey,
+      href: h.href,
+    }));
   }
-  return section.children.map((c) => ({ key: c.id, name: c.name, href: `/section/${c.slug}` }));
+  return section.children.map((c) => ({
+    key: c.id,
+    name: c.name,
+    slug: c.slug,
+    href: `/section/${c.slug}`,
+  }));
 }
 
 /**
@@ -33,6 +46,7 @@ export function MobileMenu({
   signedIn,
   isStaff,
   firstName,
+  locale,
 }: {
   sections: CategoryNode[];
   signedIn: boolean;
@@ -40,6 +54,7 @@ export function MobileMenu({
   isEditor: boolean;
   isAdmin: boolean;
   firstName: string | null;
+  locale: Locale;
 }) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -63,7 +78,7 @@ export function MobileMenu({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Open menu"
+        aria-label={t(locale, 'dash.openMenu')}
         aria-expanded={open}
         className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-text"
       >
@@ -74,17 +89,22 @@ export function MobileMenu({
 
       {open &&
         createPortal(
-          <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Menu">
+          <div
+            className="fixed inset-0 z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t(locale, 'nav.menu')}
+          >
             <div className="absolute inset-0 bg-black/50" onClick={close} />
             <div className="absolute right-0 top-0 flex h-full w-[85%] max-w-sm flex-col overflow-y-auto border-l border-border bg-bg p-5">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
-                  Menu
+                  {t(locale, 'nav.menu')}
                 </span>
                 <button
                   type="button"
                   onClick={close}
-                  aria-label="Close menu"
+                  aria-label={t(locale, 'common.close')}
                   className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-text"
                 >
                   ✕
@@ -95,15 +115,16 @@ export function MobileMenu({
                 <input
                   name="q"
                   type="search"
-                  placeholder="Search…"
-                  aria-label="Search articles"
+                  placeholder={t(locale, 'nav.searchPlaceholder')}
+                  aria-label={t(locale, 'nav.searchAria')}
                   className="w-full rounded-full border border-border bg-surface-2 px-4 py-2 font-body text-sm text-text outline-none focus:border-primary"
                 />
               </form>
 
-              <nav aria-label="Sections" className="mt-5 flex flex-col">
+              <nav aria-label={t(locale, 'nav.sections')} className="mt-5 flex flex-col">
                 {sections.map((section) => {
                   const subs = subLinks(section);
+                  const translatedName = translateCategory(locale, section.slug, section.name);
                   return (
                     <div key={section.id} className="border-b border-border">
                       <div className="flex items-center justify-between">
@@ -112,12 +133,18 @@ export function MobileMenu({
                           onClick={close}
                           className="flex-1 py-3 font-heading text-base font-semibold text-text"
                         >
-                          {section.name}
+                          {translatedName}
                         </Link>
                         {subs.length > 0 && (
                           <button
                             type="button"
-                            aria-label={`Toggle ${section.name} sub-sections`}
+                            aria-label={
+                              locale === 'rw'
+                                ? `Guhindura ibice bya ${translatedName}`
+                                : locale === 'fr'
+                                  ? `Afficher les sous-rubriques de ${translatedName}`
+                                  : `Toggle ${translatedName} sub-sections`
+                            }
                             onClick={() =>
                               setExpanded((cur) => (cur === section.id ? null : section.id))
                             }
@@ -136,7 +163,9 @@ export function MobileMenu({
                               onClick={close}
                               className="py-2 pl-3 font-body text-sm text-muted hover:text-primary"
                             >
-                              {sub.name}
+                              {sub.nameKey
+                                ? t(locale, sub.nameKey)
+                                : translateCategory(locale, sub.slug ?? '', sub.name)}
                             </Link>
                           ))}
                         </div>
@@ -159,14 +188,14 @@ export function MobileMenu({
                       onClick={close}
                       className="rounded-lg px-3 py-2 font-body text-sm text-text hover:text-primary"
                     >
-                      For you
+                      {t(locale, 'nav.forYou')}
                     </Link>
                     <Link
                       href="/account"
                       onClick={close}
                       className="rounded-lg px-3 py-2 font-body text-sm text-text hover:text-primary"
                     >
-                      My account
+                      {t(locale, 'nav.myAccount')}
                     </Link>
                     {isStaff && (
                       <Link
@@ -174,7 +203,7 @@ export function MobileMenu({
                         onClick={close}
                         className="rounded-lg px-3 py-2 font-body text-sm font-semibold text-primary"
                       >
-                        Newsroom dashboard
+                        {t(locale, 'nav.newsroomDashboard')}
                       </Link>
                     )}
                     <form action={logout}>
@@ -182,7 +211,7 @@ export function MobileMenu({
                         type="submit"
                         className="w-full rounded-lg px-3 py-2 text-left font-body text-sm text-muted hover:text-accent-red"
                       >
-                        Sign out
+                        {t(locale, 'nav.signOut')}
                       </button>
                     </form>
                   </>
@@ -193,14 +222,14 @@ export function MobileMenu({
                       onClick={close}
                       className="rounded-lg border border-border px-4 py-2 text-center font-mono text-xs uppercase tracking-[0.14em] text-text"
                     >
-                      Sign in
+                      {t(locale, 'nav.signIn')}
                     </Link>
                     <Link
                       href="/signup"
                       onClick={close}
                       className="rounded-lg bg-primary px-4 py-2 text-center font-mono text-xs font-semibold uppercase tracking-[0.14em] text-black"
                     >
-                      Subscribe
+                      {t(locale, 'nav.subscribe')}
                     </Link>
                   </>
                 )}

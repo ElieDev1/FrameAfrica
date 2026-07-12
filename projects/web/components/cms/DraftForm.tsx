@@ -3,6 +3,15 @@
 import type { ReactNode } from 'react';
 import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import {
+  CheckIcon,
+  ImageIcon,
+  type IconProps,
+  SettingsIcon,
+  TagIcon,
+  TrashIcon,
+} from '@/components/icons';
+import { useT } from '@/components/LocaleProvider';
 import type { Block } from '@/lib/api';
 import type { CategoryOption, TopicOption } from '@/lib/cms';
 import type { DraftFormState } from '@/lib/cms-actions';
@@ -33,37 +42,111 @@ export interface DraftInitial {
   featuredImageCredit: string;
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+const inputClass =
+  'w-full rounded-lg border border-border bg-surface-2 px-3 py-2 font-body text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15';
+
+/** Live character budget — turns red as the limit approaches. */
+function Counter({ value, max }: { value: number; max: number }) {
+  const tight = value > max * 0.9;
   return (
-    <label className="flex flex-col gap-1">
-      <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">{label}</span>
+    <span
+      className={`shrink-0 font-mono text-[10px] tabular-nums ${tight ? 'text-accent-red' : 'text-faint'}`}
+    >
+      {value}/{max}
+    </span>
+  );
+}
+
+function Field({
+  label,
+  counter,
+  hint,
+  children,
+}: {
+  label: string;
+  counter?: ReactNode;
+  hint?: string;
+  children: ReactNode;
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="flex items-baseline justify-between gap-2">
+        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+          {label}
+        </span>
+        {counter}
+      </span>
       {children}
+      {hint && <span className="font-mono text-[10px] leading-snug text-faint">{hint}</span>}
     </label>
   );
 }
 
 /** A titled settings card for the editor sidebar. */
-function Panel({ title, children }: { title: string; children: ReactNode }) {
+function Panel({
+  title,
+  icon: Icon,
+  badge,
+  children,
+}: {
+  title: string;
+  icon: (p: IconProps) => ReactNode;
+  badge?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <section className="rounded-xl border border-border bg-surface p-4">
-      <h2 className="mb-3 font-mono text-[11px] uppercase tracking-[0.16em] text-muted">{title}</h2>
-      <div className="flex flex-col gap-3">{children}</div>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h2 className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-muted">
+          <Icon size={13} className="text-faint" />
+          {title}
+        </h2>
+        {badge}
+      </div>
+      <div className="flex flex-col gap-3.5">{children}</div>
     </section>
   );
 }
 
-const inputClass =
-  'w-full rounded-lg border border-border bg-surface-2 px-3 py-2 font-body text-text outline-none focus:border-primary';
+/** An accessible on/off switch that still posts a plain checkbox value. */
+function Toggle({
+  name,
+  defaultChecked,
+  label,
+  hint,
+}: {
+  name: string;
+  defaultChecked?: boolean;
+  label: string;
+  hint?: string;
+}) {
+  return (
+    <label className="flex cursor-pointer items-start justify-between gap-3">
+      <span className="min-w-0">
+        <span className="block font-body text-sm font-semibold text-text">{label}</span>
+        {hint && (
+          <span className="mt-0.5 block font-mono text-[10px] leading-snug text-faint">{hint}</span>
+        )}
+      </span>
+      <input type="checkbox" name={name} defaultChecked={defaultChecked} className="peer sr-only" />
+      <span className="relative mt-0.5 h-5 w-9 shrink-0 rounded-full bg-surface-2 ring-1 ring-border transition peer-checked:bg-primary peer-checked:ring-primary peer-checked:[&>span]:translate-x-4">
+        <span className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform" />
+      </span>
+    </label>
+  );
+}
 
 function SaveButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
+  const t = useT();
   return (
     <button
       type="submit"
       disabled={pending}
-      className="rounded-lg bg-primary px-4 py-2 font-heading font-bold text-black transition disabled:opacity-60"
+      className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 font-heading text-sm font-bold text-black transition hover:opacity-90 disabled:opacity-60"
     >
-      {pending ? 'Saving…' : label}
+      <CheckIcon size={15} />
+      {pending ? t('d.common.saving') : label}
     </button>
   );
 }
@@ -81,71 +164,115 @@ export function DraftForm({
   initial?: DraftInitial;
   mode: 'create' | 'edit';
 }) {
+  const t = useT();
   const [state, formAction] = useActionState(action, {});
-  const selected = new Set(initial?.topicSlugs ?? []);
   const [featured, setFeatured] = useState({
     url: initial?.featuredImageUrl ?? '',
     alt: initial?.featuredImageAlt ?? '',
     credit: initial?.featuredImageCredit ?? '',
   });
+  // Live budgets for the headline / standfirst / excerpt.
+  const [title, setTitle] = useState(initial?.title ?? '');
+  const [subtitle, setSubtitle] = useState(initial?.subtitle ?? '');
+  const [excerpt, setExcerpt] = useState(initial?.excerpt ?? '');
+  const [picked, setPicked] = useState<Set<string>>(new Set(initial?.topicSlugs ?? []));
+
+  function toggleTopic(slug: string, on: boolean) {
+    setPicked((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(slug);
+      else next.delete(slug);
+      return next;
+    });
+  }
 
   return (
     <form
       action={formAction}
-      className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start"
+      className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
     >
       {/* ── Writing column ─────────────────────────────────────────── */}
       <div className="flex min-w-0 flex-col gap-5">
-        <label className="flex flex-col gap-1">
-          <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">Headline</span>
+        {/* Headline — the hero of the editor */}
+        <div className="rounded-xl border border-border bg-surface p-5">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+              {t('ddf.headline')}
+            </span>
+            <Counter value={title.length} max={200} />
+          </div>
           <input
             name="title"
-            defaultValue={initial?.title}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             required
             minLength={3}
             maxLength={200}
-            placeholder="Write the headline…"
-            className="rounded-lg border border-border bg-surface-2 px-4 py-3 font-heading text-2xl font-black tracking-tight text-text outline-none placeholder:font-normal placeholder:text-faint focus:border-primary"
+            placeholder={t('ddf.writeHeadline')}
+            className="mt-1 w-full bg-transparent font-heading text-3xl font-black leading-tight tracking-tight text-text outline-none placeholder:font-normal placeholder:text-faint"
           />
-        </label>
-
-        <Field label="Standfirst (subtitle)">
+          <div className="mt-4 flex items-baseline justify-between gap-2 border-t border-border pt-3">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+              {t('ddf.standfirst')}
+            </span>
+            <Counter value={subtitle.length} max={300} />
+          </div>
           <input
             name="subtitle"
-            defaultValue={initial?.subtitle}
+            value={subtitle}
+            onChange={(e) => setSubtitle(e.target.value)}
             maxLength={300}
-            className={inputClass}
+            className="mt-1 w-full bg-transparent font-body text-base leading-relaxed text-muted outline-none placeholder:text-faint"
           />
-        </Field>
+        </div>
 
-        <div className="flex flex-col gap-2">
-          <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">
-            Article body
+        {/* Body */}
+        <div className="rounded-xl border border-border bg-surface p-5">
+          <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+            {t('ddf.articleBody')}
           </span>
           <BlockEditor initialBlocks={initial?.blocks} initialBody={initial?.body ?? ''} />
         </div>
 
         {mode === 'edit' && (
-          <Field label="Change note (optional)">
-            <input name="changeNote" maxLength={300} className={inputClass} />
-          </Field>
+          <div className="rounded-xl border border-border bg-surface p-4">
+            <Field label={t('ddf.changeNote')}>
+              <input name="changeNote" maxLength={300} className={inputClass} />
+            </Field>
+          </div>
         )}
       </div>
 
       {/* ── Settings sidebar ───────────────────────────────────────── */}
-      <aside className="flex flex-col gap-5 lg:sticky lg:top-20">
-        <Panel title="Publish">
+      <aside className="flex flex-col gap-4 lg:sticky lg:top-20">
+        {/* Publish — always in reach */}
+        <section className="rounded-xl border border-border bg-surface p-4">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted">
+              {t('ddf.publish')}
+            </h2>
+            <span className="flex items-center gap-1.5 font-mono text-[10px]">
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${state.savedAt ? 'bg-accent-green' : 'bg-faint'}`}
+              />
+              <span className={state.savedAt ? 'text-accent-green' : 'text-faint'}>
+                {state.savedAt ? t('ddf.saved') : t('ddf.unsaved')}
+              </span>
+            </span>
+          </div>
           {state.error && (
-            <p role="alert" className="font-mono text-xs text-accent-red">
+            <p
+              role="alert"
+              className="mb-3 rounded-lg border border-accent-red/30 bg-accent-red/10 px-3 py-2 font-mono text-[11px] leading-snug text-accent-red"
+            >
               {state.error}
             </p>
           )}
-          {state.savedAt && <p className="font-mono text-xs text-accent-green">Saved ✓</p>}
-          <SaveButton label={mode === 'create' ? 'Create draft' : 'Save changes'} />
-        </Panel>
+          <SaveButton label={mode === 'create' ? t('ddf.createDraft') : t('ddf.saveChanges')} />
+        </section>
 
-        <Panel title="Details">
-          <Field label="Section">
+        <Panel title={t('ddf.details')} icon={SettingsIcon}>
+          <Field label={t('ddf.section')}>
             <select
               name="categoryId"
               defaultValue={initial?.categoryId ?? ''}
@@ -153,7 +280,7 @@ export function DraftForm({
               className={inputClass}
             >
               <option value="" disabled>
-                Choose a section…
+                {t('ddf.chooseSection')}
               </option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -162,7 +289,7 @@ export function DraftForm({
               ))}
             </select>
           </Field>
-          <Field label="Language">
+          <Field label={t('ddf.language')}>
             <select name="language" defaultValue={initial?.language ?? 'en'} className={inputClass}>
               {LANGUAGES.map(([value, label]) => (
                 <option key={value} value={value}>
@@ -171,33 +298,59 @@ export function DraftForm({
               ))}
             </select>
           </Field>
-          <label className="flex items-center gap-2 font-body text-sm text-muted">
-            <input type="checkbox" name="isPremium" defaultChecked={initial?.isPremium} />
-            Premium (subscribers only)
-          </label>
-          <Field label="Excerpt">
+          <Field label={t('ddf.excerpt')} counter={<Counter value={excerpt.length} max={500} />}>
             <textarea
               name="excerpt"
-              defaultValue={initial?.excerpt}
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
               maxLength={500}
               rows={3}
-              className={inputClass}
+              className={`${inputClass} resize-y leading-relaxed`}
             />
           </Field>
+          <div className="border-t border-border pt-3">
+            <Toggle
+              name="isPremium"
+              defaultChecked={initial?.isPremium}
+              label={t('ddf.premium')}
+              hint={t('ddf.premiumHint')}
+            />
+          </div>
         </Panel>
 
-        <Panel title="Featured image">
-          {featured.url && (
-            // eslint-disable-next-line @next/next/no-img-element -- preview, arbitrary host
-            <img
-              src={featured.url}
-              alt=""
-              className="aspect-[16/9] w-full rounded-lg object-cover ring-1 ring-border"
-            />
+        <Panel title={t('ddf.featuredImage')} icon={ImageIcon}>
+          {featured.url ? (
+            <div className="relative">
+              {/* eslint-disable-next-line @next/next/no-img-element -- preview, arbitrary host */}
+              <img
+                src={featured.url}
+                alt=""
+                className="aspect-[16/9] w-full rounded-lg object-cover ring-1 ring-border"
+              />
+              <button
+                type="button"
+                onClick={() => setFeatured({ url: '', alt: '', credit: '' })}
+                aria-label={t('ddf.removeImage')}
+                title={t('ddf.removeImage')}
+                className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-lg bg-black/60 text-white backdrop-blur transition hover:bg-accent-red"
+              >
+                <TrashIcon size={13} />
+              </button>
+            </div>
+          ) : (
+            <div className="grid aspect-[16/9] place-items-center rounded-lg border border-dashed border-border bg-surface-2 text-faint">
+              <div className="text-center">
+                <ImageIcon size={22} className="mx-auto" />
+                <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wide">
+                  {t('ddf.noImage')}
+                </p>
+              </div>
+            </div>
           )}
+
           <div className="flex items-end gap-2">
             <div className="min-w-0 flex-1">
-              <Field label="Image URL">
+              <Field label={t('ddf.imageUrl')}>
                 <input
                   name="featuredImageUrl"
                   value={featured.url}
@@ -214,7 +367,7 @@ export function DraftForm({
               }
             />
           </div>
-          <Field label="Alt text (for accessibility)">
+          <Field label={t('ddf.altAccessibility')}>
             <input
               name="featuredImageAlt"
               value={featured.alt}
@@ -223,7 +376,7 @@ export function DraftForm({
               className={inputClass}
             />
           </Field>
-          <Field label="Credit">
+          <Field label={t('ddf.credit')}>
             <input
               name="featuredImageCredit"
               value={featured.credit}
@@ -235,19 +388,30 @@ export function DraftForm({
         </Panel>
 
         {topics.length > 0 && (
-          <Panel title="Topics">
-            <div className="flex flex-wrap gap-2">
+          <Panel
+            title={t('ddf.topics')}
+            icon={TagIcon}
+            badge={
+              picked.size > 0 ? (
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[10px] font-bold text-primary">
+                  {picked.size} {t('ddf.selected')}
+                </span>
+              ) : undefined
+            }
+          >
+            <div className="flex flex-wrap gap-1.5">
               {topics.map((topic) => (
                 <label
                   key={topic.slug}
-                  className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border px-3 py-1 font-mono text-[11px] text-muted has-[:checked]:border-primary has-[:checked]:text-primary"
+                  className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border px-2.5 py-1 font-mono text-[11px] text-muted transition hover:border-primary/60 has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary"
                 >
                   <input
                     type="checkbox"
                     name="topics"
                     value={topic.slug}
-                    defaultChecked={selected.has(topic.slug)}
-                    className="accent-primary"
+                    defaultChecked={picked.has(topic.slug)}
+                    onChange={(e) => toggleTopic(topic.slug, e.target.checked)}
+                    className="sr-only"
                   />
                   {topic.name}
                 </label>

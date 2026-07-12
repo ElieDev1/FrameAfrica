@@ -1,6 +1,8 @@
 import { TrendingDownIcon, TrendingUpIcon } from '@/components/icons';
 import { LiveBadge } from '@/components/LiveBadge';
 import { fetchMarkets } from '@/lib/widgets';
+import { getLocale } from '@/lib/i18n-server';
+import { t } from '@/lib/i18n';
 
 /**
  * Live markets — FX (USD/EUR/GBP → RWF) + crypto (BTC/ETH), refreshed every
@@ -8,12 +10,13 @@ import { fetchMarkets } from '@/lib/widgets';
  */
 export async function MarketsWidget() {
   const rows = await fetchMarkets();
+  const locale = await getLocale();
 
   return (
     <section aria-labelledby="markets" className="rounded-xl border border-border bg-surface p-4">
       <div className="mb-3 flex items-baseline justify-between">
         <h2 id="markets" className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
-          Markets
+          {t(locale, 'home.markets')}
         </h2>
         <LiveBadge live={rows.length > 0} />
       </div>
@@ -42,7 +45,7 @@ export async function MarketsWidget() {
           })}
         </ul>
       ) : (
-        <p className="font-body text-sm text-muted">Markets are unavailable right now.</p>
+        <p className="font-body text-sm text-muted">{t(locale, 'widgets.marketsUnavailable')}</p>
       )}
     </section>
   );

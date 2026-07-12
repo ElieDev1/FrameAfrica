@@ -17,6 +17,7 @@ import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { Roles } from '../common/auth/roles.decorator';
 import { RolesGuard } from '../common/auth/roles.guard';
 import { apiResponse } from '../common/http/api-response';
+import { pagination, readPaging } from '../common/http/paging';
 import { CreateGalleryDto } from './dto/create-gallery.dto';
 import { UpdateGalleryDto } from './dto/update-gallery.dto';
 import { GalleriesService } from './galleries.service';
@@ -27,9 +28,10 @@ export class GalleriesController {
 
   /** Public: the published gallery hub. */
   @Get('galleries')
-  async list(@Query('limit') limit?: string) {
-    const n = Number(limit);
-    return apiResponse(await this.galleries.listPublished(Number.isFinite(n) && n > 0 ? n : 24));
+  async list(@Query('limit') limit?: string, @Query('page') page?: string, @Query('q') q?: string) {
+    const paging = readPaging(limit, page, 24);
+    const { items, hasMore } = await this.galleries.listPage(paging.limit, paging.page, q);
+    return apiResponse(items, pagination(paging.page, hasMore));
   }
 
   /** Public: a single published gallery. */

@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { type Gallery, MediaStatus, type Prisma } from '@prisma/client';
 import { safeImageUrl, stripText } from '../content/blocks';
 import { slugify } from '../common/slug';
+import { textFilter } from '../common/prisma/text-filter';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateGalleryDto } from './dto/create-gallery.dto';
 import type { UpdateGalleryDto } from './dto/update-gallery.dto';
@@ -27,6 +28,22 @@ export class GalleriesService {
       take: Math.min(Math.max(limit, 1), 60),
     });
     return rows.map(toListItem);
+  }
+
+  /** Public: one page of published galleries, for the hub's pager (optional `q` filter). */
+  async listPage(
+    limit: number,
+    page: number,
+    q?: string,
+  ): Promise<{ items: GalleryListItem[]; hasMore: boolean }> {
+    const take = Math.min(Math.max(limit, 1), 60);
+    const rows = await this.prisma.gallery.findMany({
+      where: { status: MediaStatus.published, deletedAt: null, ...textFilter(q) },
+      orderBy: { publishedAt: 'desc' },
+      skip: (Math.max(page, 1) - 1) * take,
+      take: take + 1, // one extra row answers "is there a next page?"
+    });
+    return { items: rows.slice(0, take).map(toListItem), hasMore: rows.length > take };
   }
 
   /** Public: a single published gallery by slug, with its photos. */

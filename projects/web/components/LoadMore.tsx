@@ -5,6 +5,7 @@ import type { ArticleSummary } from '@/lib/api';
 import { fetchMoreArticles } from '@/lib/articles-actions';
 import { fetchFeed } from '@/lib/feed-actions';
 import { ArticleCard } from './ArticleCard';
+import { useT, useLocale } from '@/components/LocaleProvider';
 
 /**
  * A story grid that grows on demand. Renders the first (server-fetched) page,
@@ -31,6 +32,8 @@ export function LoadMore({
   const [cursor, setCursor] = useState(initialCursor);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const t = useT();
+  const locale = useLocale();
 
   async function loadMore() {
     if (!cursor || loading) return;
@@ -53,7 +56,7 @@ export function LoadMore({
     <>
       <div className="grid grid-cols-1 gap-10 pt-8 sm:grid-cols-2 lg:grid-cols-3">
         {articles.map((article) => (
-          <ArticleCard key={article.id} article={article} />
+          <ArticleCard key={article.id} article={article} locale={locale} />
         ))}
       </div>
 
@@ -65,11 +68,11 @@ export function LoadMore({
             disabled={loading}
             className="rounded-lg border border-border px-6 py-2.5 font-mono text-xs uppercase tracking-[0.14em] text-muted transition hover:border-primary hover:text-primary disabled:opacity-50"
           >
-            {loading ? 'Loading…' : 'Load more stories'}
+            {loading ? t('common.loading') : t('common.loadMoreStories')}
           </button>
           {error && (
             <p role="alert" className="font-mono text-[11px] text-accent-red">
-              Couldn&apos;t load more — try again.
+              {t('common.loadMoreError')}
             </p>
           )}
         </div>

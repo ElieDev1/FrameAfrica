@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useT } from '@/components/LocaleProvider';
 
 /**
  * Frame Africa Flyer Studio — an advanced in-app flyer / social-card maker
@@ -423,6 +424,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function ColorField({ value, onChange }: { value: string; onChange: (c: string) => void }) {
+  const t = useT();
   return (
     <div className="flex flex-wrap items-center gap-2">
       {SWATCHES.map((c) => (
@@ -441,7 +443,7 @@ function ColorField({ value, onChange }: { value: string; onChange: (c: string) 
         type="color"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        aria-label="custom colour"
+        aria-label={t('dsc.customColour')}
         className="h-6 w-8 cursor-pointer rounded border border-border bg-transparent"
       />
     </div>
@@ -476,6 +478,7 @@ function Seg<T extends string>({
 }
 
 export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
+  const t = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const photoRef = useRef<HTMLImageElement | null>(null);
   const logoDarkRef = useRef<HTMLImageElement | null>(null);
@@ -647,13 +650,13 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
         <Section title="Content">
           {articles.length > 0 && (
             <label className="flex flex-col gap-1">
-              <span className={label}>Start from a story</span>
+              <span className={label}>{t('dsc.startFromStory')}</span>
               <select
                 defaultValue=""
                 onChange={(e) => e.target.value !== '' && prefill(Number(e.target.value))}
                 className={input}
               >
-                <option value="">Choose a published story…</option>
+                <option value="">{t('dsc.choosePublished')}</option>
                 {articles.map((a, i) => (
                   <option key={i} value={i}>
                     {a.title}
@@ -663,7 +666,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
             </label>
           )}
           <label className="flex flex-col gap-1">
-            <span className={label}>Kicker</span>
+            <span className={label}>{t('dsc.kicker')}</span>
             <input
               value={design.kicker}
               onChange={(e) => set({ kicker: e.target.value })}
@@ -672,7 +675,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className={label}>Headline</span>
+            <span className={label}>{t('dsc.headline')}</span>
             <textarea
               value={design.headline}
               onChange={(e) => set({ headline: e.target.value })}
@@ -683,7 +686,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
           </label>
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1">
-              <span className={label}>Source</span>
+              <span className={label}>{t('dsc.source')}</span>
               <input
                 value={design.source}
                 onChange={(e) => set({ source: e.target.value })}
@@ -692,12 +695,12 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className={label}>CTA pill</span>
+              <span className={label}>{t('dsc.ctaPill')}</span>
               <input
                 value={design.cta}
                 onChange={(e) => set({ cta: e.target.value })}
                 maxLength={30}
-                placeholder="e.g. Read more"
+                placeholder={t('dsc.ctaPlaceholder')}
                 className={input}
               />
             </label>
@@ -708,7 +711,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
               checked={design.quotes}
               onChange={(e) => set({ quotes: e.target.checked })}
             />
-            Wrap the headline in quote marks
+            {t('dsc.wrapQuotes')}
           </label>
         </Section>
 
@@ -726,14 +729,14 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
                 onClick={removeImage}
                 className="shrink-0 rounded border border-border px-2 py-1 font-mono text-[11px] text-muted hover:border-accent-red hover:text-accent-red"
               >
-                Remove
+                {t('dsc.remove')}
               </button>
             )}
           </div>
           {hasPhoto ? (
             <>
               <div className="flex flex-col gap-1">
-                <span className={label}>Overlay style</span>
+                <span className={label}>{t('dsc.overlayStyle')}</span>
                 <Seg
                   value={design.overlayStyle}
                   onChange={(v) => set({ overlayStyle: v })}
@@ -758,7 +761,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
             </>
           ) : (
             <div className="flex flex-col gap-1.5">
-              <span className={label}>Background colour</span>
+              <span className={label}>{t('dsc.backgroundColour')}</span>
               <ColorField value={design.bgColor} onChange={(c) => set({ bgColor: c })} />
             </div>
           )}
@@ -767,7 +770,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
         <Section title="Text style & position">
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <span className={label}>Align</span>
+              <span className={label}>{t('dsc.align')}</span>
               <Seg
                 value={design.align}
                 onChange={(v) => set({ align: v })}
@@ -778,7 +781,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <span className={label}>Position</span>
+              <span className={label}>{t('dsc.position')}</span>
               <Seg
                 value={design.vPosition}
                 onChange={(v) => set({ vPosition: v })}
@@ -815,7 +818,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
           </label>
           {design.scrim > 0 && (
             <div className="flex flex-col gap-1.5">
-              <span className={label}>Backdrop colour</span>
+              <span className={label}>{t('dsc.backdropColour')}</span>
               <ColorField value={design.scrimColor} onChange={(c) => set({ scrimColor: c })} />
             </div>
           )}
@@ -826,7 +829,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
                 checked={design.textShadow}
                 onChange={(e) => set({ textShadow: e.target.checked })}
               />
-              Drop shadow behind text
+              {t('dsc.dropShadow')}
             </label>
             <label className="flex items-center gap-2 font-body text-xs text-muted">
               <input
@@ -841,18 +844,18 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
 
         <Section title="Colours">
           <div className="flex flex-col gap-1.5">
-            <span className={label}>Text</span>
+            <span className={label}>{t('dsc.text')}</span>
             <ColorField value={design.textColor} onChange={(c) => set({ textColor: c })} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <span className={label}>Accent</span>
+            <span className={label}>{t('dsc.accent')}</span>
             <ColorField value={design.accentColor} onChange={(c) => set({ accentColor: c })} />
           </div>
         </Section>
 
         <Section title="Socials & footer">
           <label className="flex flex-col gap-1">
-            <span className={label}>Handle</span>
+            <span className={label}>{t('dsc.handle')}</span>
             <input
               value={design.handle}
               onChange={(e) => set({ handle: e.target.value })}
@@ -862,7 +865,7 @@ export function StudioCanvas({ articles }: { articles: StudioArticle[] }) {
             />
           </label>
           <div className="flex flex-col gap-1.5">
-            <span className={label}>Show platforms</span>
+            <span className={label}>{t('dsc.showPlatforms')}</span>
             <div className="flex flex-wrap gap-2">
               {PLATFORMS.map((p) => (
                 <button

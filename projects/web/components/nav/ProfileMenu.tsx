@@ -13,7 +13,7 @@ import {
   UsersIcon,
 } from '@/components/icons';
 import { logout } from '@/lib/auth-actions';
-import type { Locale } from '@/lib/i18n';
+import { type Locale, type MessageKey, t } from '@/lib/i18n';
 import type { NavUser } from './HeaderClient';
 
 function initials(name: string): string {
@@ -23,21 +23,21 @@ function initials(name: string): string {
   return (first + last).toUpperCase() || 'FA';
 }
 
-function roleLabel(user: NavUser): string {
-  if (user.isAdmin) return 'Admin';
-  if (user.isEditor) return 'Editor';
-  if (user.isStaff) return 'Journalist';
-  return 'Reader';
+function roleLabel(user: NavUser, locale: Locale): string {
+  if (user.isAdmin) return t(locale, 'role.admin');
+  if (user.isEditor) return t(locale, 'role.editor');
+  if (user.isStaff) return t(locale, 'role.journalist');
+  return t(locale, 'role.reader');
 }
 
-type Item = { href: string; label: string; icon: (p: IconProps) => React.ReactNode };
+type Item = { href: string; labelKey: MessageKey; icon: (p: IconProps) => React.ReactNode };
 
 /**
  * Signed-in profile menu: an avatar button that opens a dropdown with the
  * reader's quick links (For you, account, settings), the newsroom dashboard for
  * staff, and a sign-out action. Replaces the loose For-you/name/Newsroom links.
  */
-export function ProfileMenu({ user }: { user: NavUser; locale: Locale }) {
+export function ProfileMenu({ user, locale }: { user: NavUser; locale: Locale }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -56,10 +56,10 @@ export function ProfileMenu({ user }: { user: NavUser; locale: Locale }) {
   }, [open]);
 
   const items: Item[] = [
-    { href: '/for-you', label: 'For you', icon: SparklesIcon },
-    { href: '/account', label: 'My account', icon: UsersIcon },
-    { href: '/account#saved', label: 'Saved stories', icon: BookmarkIcon },
-    { href: '/account/security', label: 'Account & security', icon: SettingsIcon },
+    { href: '/for-you', labelKey: 'nav.forYou', icon: SparklesIcon },
+    { href: '/account', labelKey: 'nav.myAccount', icon: UsersIcon },
+    { href: '/account#saved', labelKey: 'nav.savedStories', icon: BookmarkIcon },
+    { href: '/account/security', labelKey: 'nav.accountSecurity', icon: SettingsIcon },
   ];
 
   return (
@@ -69,7 +69,7 @@ export function ProfileMenu({ user }: { user: NavUser; locale: Locale }) {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label="Open profile menu"
+        aria-label={t(locale, 'dash.openMenu')}
         className="flex items-center gap-1.5 rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-surface-2"
       >
         <Avatar user={user} />
@@ -93,21 +93,21 @@ export function ProfileMenu({ user }: { user: NavUser; locale: Locale }) {
               <p className="truncate text-xs text-muted">{user.email}</p>
             </div>
             <span className="ml-auto shrink-0 self-start rounded-full bg-primary/12 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
-              {roleLabel(user)}
+              {roleLabel(user, locale)}
             </span>
           </div>
 
           <div className="py-1.5">
-            {items.map(({ href, label, icon: Icon }) => (
+            {items.map(({ href, labelKey, icon: Icon }) => (
               <Link
-                key={label}
+                key={labelKey}
                 href={href}
                 role="menuitem"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 px-3 py-2 text-sm text-text transition-colors hover:bg-surface-2 hover:text-primary"
               >
                 <Icon size={16} className="text-muted" />
-                {label}
+                {t(locale, labelKey)}
               </Link>
             ))}
           </div>
@@ -121,7 +121,7 @@ export function ProfileMenu({ user }: { user: NavUser; locale: Locale }) {
                 className="flex items-center gap-2.5 px-3 py-2 text-sm font-semibold text-text transition-colors hover:bg-surface-2 hover:text-primary"
               >
                 <GridIcon size={16} className="text-primary" />
-                Newsroom dashboard
+                {t(locale, 'nav.newsroomDashboard')}
               </Link>
             </div>
           )}
@@ -134,7 +134,7 @@ export function ProfileMenu({ user }: { user: NavUser; locale: Locale }) {
                 className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-text transition-colors hover:bg-accent-red/10 hover:text-accent-red"
               >
                 <LogOutIcon size={16} className="text-muted" />
-                Sign out
+                {t(locale, 'nav.signOut')}
               </button>
             </form>
           </div>

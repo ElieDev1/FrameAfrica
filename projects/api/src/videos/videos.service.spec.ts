@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import type { AdminSettingsService } from '../admin/admin-settings.service';
 import type { PrismaService } from '../prisma/prisma.service';
 import { parseYoutubeId, VideosService } from './videos.service';
@@ -7,6 +7,7 @@ function build() {
   const prisma = {
     video: {
       findMany: jest.fn(),
+      findFirst: jest.fn(),
       findUnique: jest.fn(),
       upsert: jest.fn(),
       update: jest.fn(),
@@ -61,6 +62,51 @@ describe('VideosService', () => {
       )[0];
       expect(arg.where).toEqual({ isHidden: false });
       expect(arg.orderBy).toEqual([{ isFeatured: 'desc' }, { publishedAt: 'desc' }]);
+    });
+  });
+
+  describe('listPage', () => {
+    const row = (id: string) => ({
+      id,
+      youtubeId: 'abc',
+      title: id,
+      description: null,
+      thumbnailUrl: null,
+      publishedAt: new Date('2026-02-01T00:00:00Z'),
+    });
+
+    it('skips to the page and reports a next page when an extra row comes back', async () => {
+      const { service, prisma } = build();
+      // Asked for 2 → the service reads 3; the third row means "there's more".
+      prisma.video.findMany.mockResolvedValue([row('v1'), row('v2'), row('v3')]);
+
+      const res = await service.listPage(2, 2);
+
+      expect(res.items.map((v) => v.id)).toEqual(['v1', 'v2']);
+      expect(res.hasMore).toBe(true);
+      const arg = (prisma.video.findMany.mock.calls[0] as [{ skip: number; take: number }])[0];
+      expect(arg).toMatchObject({ skip: 2, take: 3 });
+    });
+
+    it('reports no next page on the last page', async () => {
+      const { service, prisma } = build();
+      prisma.video.findMany.mockResolvedValue([row('v1')]);
+
+      const res = await service.listPage(2, 1);
+
+      expect(res.items).toHaveLength(1);
+      expect(res.hasMore).toBe(false);
+    });
+  });
+
+  describe('getPublic', () => {
+    it('404s on a hidden or missing clip', async () => {
+      const { service, prisma } = build();
+      prisma.video.findFirst = jest.fn().mockResolvedValue(null);
+      await expect(service.getPublic('v9')).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.video.findFirst).toHaveBeenCalledWith({
+        where: { id: 'v9', isHidden: false },
+      });
     });
   });
 

@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { RoleName } from '@prisma/client';
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { Roles } from '../common/auth/roles.decorator';
 import { RolesGuard } from '../common/auth/roles.guard';
 import { apiResponse } from '../common/http/api-response';
+import { pagination, readPaging } from '../common/http/paging';
 import { CreateInteractiveDto, UpdateInteractiveDto } from './dto/interactive.dto';
 import { InteractivesService } from './interactives.service';
 
@@ -24,8 +26,10 @@ export class InteractivesController {
   constructor(private readonly interactives: InteractivesService) {}
 
   @Get('interactives')
-  async list() {
-    return apiResponse(await this.interactives.listPublished());
+  async list(@Query('limit') limit?: string, @Query('page') page?: string, @Query('q') q?: string) {
+    const paging = readPaging(limit, page, 24);
+    const { items, hasMore } = await this.interactives.listPage(paging.limit, paging.page, q);
+    return apiResponse(items, pagination(paging.page, hasMore));
   }
 
   @Get('interactives/:slug')

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { deleteMyAccount } from '@/lib/privacy-actions';
+import { useT } from '@/components/LocaleProvider';
 
 /**
  * Two-step account deletion: a button that reveals a password-confirmed form.
@@ -12,6 +13,7 @@ export function DeleteAccountForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const t = useT();
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,7 +31,7 @@ export function DeleteAccountForm() {
         onClick={() => setOpen(true)}
         className="rounded-lg border border-accent-red/50 px-4 py-2 font-mono text-xs uppercase tracking-wide text-accent-red transition hover:bg-accent-red/10"
       >
-        Delete my account
+        {t('account.deleteAccount')}
       </button>
     );
   }
@@ -39,14 +41,10 @@ export function DeleteAccountForm() {
       onSubmit={onSubmit}
       className="rounded-xl border border-accent-red/40 bg-accent-red/5 p-4"
     >
-      <p className="font-body text-sm text-text">
-        This <strong>permanently</strong> deletes your account and personal data (saved stories,
-        follows, reading history). Published comments are kept but anonymised. This can&apos;t be
-        undone.
-      </p>
+      <p className="font-body text-sm text-text">{t('account.deleteAccountWarning')}</p>
       <label className="mt-3 block">
         <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
-          Confirm your password
+          {t('auth.confirmPassword')}
         </span>
         <input
           type="password"
@@ -68,7 +66,7 @@ export function DeleteAccountForm() {
           disabled={pending || password.length === 0}
           className="rounded-lg bg-accent-red px-4 py-2 font-mono text-xs uppercase tracking-wide text-white transition hover:opacity-90 disabled:opacity-50"
         >
-          {pending ? 'Deleting…' : 'Permanently delete'}
+          {pending ? t('account.deleting') : t('account.permanentlyDelete')}
         </button>
         <button
           type="button"
@@ -79,7 +77,7 @@ export function DeleteAccountForm() {
           }}
           className="font-mono text-xs uppercase tracking-wide text-muted hover:text-text"
         >
-          Cancel
+          {t('common.cancel')}
         </button>
       </div>
     </form>

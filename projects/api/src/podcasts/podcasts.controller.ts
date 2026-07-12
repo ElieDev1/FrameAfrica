@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { RoleName } from '@prisma/client';
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { Roles } from '../common/auth/roles.decorator';
 import { RolesGuard } from '../common/auth/roles.guard';
 import { apiResponse } from '../common/http/api-response';
+import { pagination, readPaging } from '../common/http/paging';
 import { CreateEpisodeDto, UpdateEpisodeDto } from './dto/episode.dto';
 import { CreateShowDto, UpdateShowDto } from './dto/show.dto';
 import { PodcastsService } from './podcasts.service';
@@ -27,8 +29,14 @@ export class PodcastsController {
   // --- Public ---
 
   @Get('podcasts')
-  async listShows() {
-    return apiResponse(await this.podcasts.listShows());
+  async listShows(
+    @Query('limit') limit?: string,
+    @Query('page') page?: string,
+    @Query('q') q?: string,
+  ) {
+    const paging = readPaging(limit, page, 24);
+    const { items, hasMore } = await this.podcasts.listShowsPage(paging.limit, paging.page, q);
+    return apiResponse(items, pagination(paging.page, hasMore));
   }
 
   @Get('podcasts/:slug')

@@ -240,6 +240,32 @@ export async function searchArticles(params: {
   return { results: envelope.data, hasMore: Boolean(envelope.meta.pagination?.hasMore) };
 }
 
+/** A search hit outside the article archive — multimedia (documents/14 §3). */
+export interface MediaSearchResult {
+  kind: 'gallery' | 'episode' | 'video' | 'interactive';
+  id: string;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  url: string;
+  publishedAt: string | null;
+}
+
+/** Search the multimedia library, so search covers the whole site. */
+export async function searchMedia(q: string): Promise<MediaSearchResult[]> {
+  try {
+    const res = await fetch(`${API_URL}/search/media?q=${encodeURIComponent(q)}`, {
+      headers: { accept: 'application/json' },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const envelope = (await res.json()) as ApiEnvelope<MediaSearchResult[]>;
+    return envelope.data;
+  } catch {
+    return [];
+  }
+}
+
 /** Who is reading — drives the premium/metered paywall (documents/04 §7). */
 export interface ReaderContext {
   /** Opaque per-device id from the `fa_reader` cookie. */

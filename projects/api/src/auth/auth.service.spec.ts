@@ -1,5 +1,7 @@
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import type { AuditService } from '../audit/audit.service';
+import type { NotificationsService } from '../notifications/notifications.service';
 import type { PrismaService } from '../prisma/prisma.service';
 import type { AccountService } from './account.service';
 import { AuthService } from './auth.service';
@@ -15,6 +17,8 @@ const userWithRoles = (over: Record<string, unknown> = {}) => ({
   passwordHash: 'hashed',
   status: 'active',
   deletedAt: null,
+  failedLoginAttempts: 0,
+  lockedAt: null,
   roles: [{ role: { name: 'reader' } }],
   ...over,
 });
@@ -39,14 +43,18 @@ function build() {
   };
   const account = { sendVerification: jest.fn().mockResolvedValue(undefined) };
   const twoFactor = { verify: jest.fn().mockReturnValue(true) };
+  const audit = { record: jest.fn().mockResolvedValue(undefined) };
+  const notifications = { notifyRoles: jest.fn().mockResolvedValue(undefined) };
   const service = new AuthService(
     prisma as unknown as PrismaService,
     passwords as unknown as PasswordService,
     tokens as unknown as TokenService,
     account as unknown as AccountService,
     twoFactor as unknown as TwoFactorService,
+    audit as unknown as AuditService,
+    notifications as unknown as NotificationsService,
   );
-  return { service, prisma, passwords, tokens, account, twoFactor };
+  return { service, prisma, passwords, tokens, account, twoFactor, audit, notifications };
 }
 
 describe('AuthService', () => {
@@ -149,6 +157,41 @@ describe('AuthService', () => {
       await expect(
         service.login({ email: 'reader@frameafrica.rw', password: 'bad' }),
       ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('locks the account on the 5th failure, audits it and notifies admins', async () => {
+      const { service, prisma, passwords, audit, notifications } = build();
+      prisma.user.findFirst.mockResolvedValue(userWithRoles({ failedLoginAttempts: 4 }));
+      passwords.verify.mockResolvedValue(false);
+      prisma.user.update.mockResolvedValue({});
+
+      // The locking attempt itself reports the lock, not a generic "invalid".
+      await expect(
+        service.login({ email: 'reader@frameafrica.rw', password: 'bad' }),
+      ).rejects.toThrow('ACCOUNT_LOCKED');
+
+      const { data } = (prisma.user.update.mock.calls[0] as [{ data: Record<string, unknown> }])[0];
+      expect(data.failedLoginAttempts).toBe(5);
+      expect(data.lockedAt).toBeInstanceOf(Date);
+      expect(audit.record).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'user.locked', targetId: 'u1' }),
+      );
+      expect(notifications.notifyRoles).toHaveBeenCalledWith(
+        ['admin'],
+        expect.objectContaining({ type: 'account_locked' }),
+      );
+    });
+
+    it('rejects a locked account even with the correct password', async () => {
+      const { service, prisma, passwords } = build();
+      prisma.user.findFirst.mockResolvedValue(userWithRoles({ lockedAt: new Date() }));
+      passwords.verify.mockResolvedValue(true);
+
+      await expect(
+        service.login({ email: 'reader@frameafrica.rw', password: 'pw' }),
+      ).rejects.toThrow('ACCOUNT_LOCKED');
+      // A locked account is never issued a session.
+      expect(prisma.user.update).not.toHaveBeenCalled();
     });
 
     it('rejects a suspended account', async () => {
