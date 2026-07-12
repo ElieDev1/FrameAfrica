@@ -81,10 +81,13 @@ function Thumb({
 export function ArticleCard({
   article,
   featured = false,
+  compact = false,
   locale,
 }: {
   article: ArticleSummary;
   featured?: boolean;
+  /** Dense variant for the multi-up section bands: no excerpt, smaller headline. */
+  compact?: boolean;
   locale?: Locale;
 }) {
   const href = `/article/${article.slug}`;
@@ -92,8 +95,14 @@ export function ArticleCard({
     ? translateCategory(locale, article.category.slug, article.category.name)
     : article.category.name;
 
+  const headingSize = featured
+    ? 'text-2xl md:text-3xl'
+    : compact
+      ? 'text-[15px] leading-snug'
+      : 'text-lg';
+
   return (
-    <article className="group flex flex-col gap-3">
+    <article className={`group flex flex-col ${compact ? 'gap-2' : 'gap-3'}`}>
       <Link
         href={href}
         className="block overflow-hidden ring-1 ring-border transition-all duration-300 group-hover:ring-border-2"
@@ -102,18 +111,19 @@ export function ArticleCard({
           <Thumb featured={featured} kicker={kicker} image={article.featuredImage} />
         </div>
       </Link>
-      <div className="flex flex-col gap-2">
+      <div className={`flex flex-col ${compact ? 'gap-1' : 'gap-2'}`}>
         <Badges article={article} locale={locale} />
         <h3
-          className={`font-heading font-bold leading-[1.14] tracking-tight text-text ${
-            featured ? 'text-2xl md:text-3xl' : 'text-lg'
-          }`}
+          className={`font-heading font-bold leading-[1.14] tracking-tight text-text ${headingSize}`}
         >
-          <Link href={href} className="transition-colors group-hover:text-primary">
+          <Link
+            href={href}
+            className={`transition-colors group-hover:text-primary ${compact ? 'line-clamp-3' : ''}`}
+          >
             {article.title}
           </Link>
         </h3>
-        {article.excerpt && (
+        {!compact && article.excerpt && (
           <p className={`font-body text-muted ${featured ? 'text-base' : 'text-[0.95rem]'}`}>
             {article.excerpt}
           </p>

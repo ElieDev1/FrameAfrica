@@ -19,9 +19,10 @@ export function SectionBlock({
   return (
     <section aria-label={name}>
       <SectionHeading title={name} href={`/section/${slug}`} />
-      <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Dense multi-up row: small cards, up to five across on wide screens. */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
         {articles.map((article) => (
-          <ArticleCard key={article.id} article={article} locale={locale} />
+          <ArticleCard key={article.id} article={article} compact locale={locale} />
         ))}
       </div>
     </section>

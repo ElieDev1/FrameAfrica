@@ -71,7 +71,7 @@ export default async function Home() {
         categories.map(async (category) => ({
           name: translateCategory(locale, category.slug, category.name),
           slug: category.slug,
-          articles: (await fetchArticles({ category: category.slug, limit: 3 })).articles,
+          articles: (await fetchArticles({ category: category.slug, limit: 5 })).articles,
         })),
       )
     ).filter((s) => s.articles.length > 0);
