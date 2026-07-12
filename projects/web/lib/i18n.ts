@@ -99,6 +99,11 @@ const dict = {
     rw: 'Imibare n’ibikoresho',
     fr: 'Données et interactifs',
   },
+  // Singular forms, used in breadcrumb trails for a single item's detail page.
+  'mm.videoSingular': { en: 'Video', rw: 'Ishusho', fr: 'Vidéo' },
+  'mm.gallerySingular': { en: 'Gallery', rw: 'Ifoto', fr: 'Galerie' },
+  'mm.podcastSingular': { en: 'Podcast', rw: 'Podcast', fr: 'Podcast' },
+  'mm.interactiveSingular': { en: 'Interactive', rw: 'Igikoresho', fr: 'Interactif' },
   'mm.videosSub': {
     en: 'Reporting, explainers and interviews from the Frame Africa newsroom.',
     rw: 'Raporo, ibisobanuro n’ibiganiro biva mu bwanditsi bwa Frame Africa.',
@@ -1670,6 +1675,7 @@ const dict = {
 
   // — Keys referenced by public auth/article pages (added to unblock build) —
   'nav.home': { en: 'Home', rw: 'Ahabanza', fr: 'Accueil' },
+  'nav.breadcrumb': { en: 'Breadcrumb', rw: 'Inzira', fr: 'Fil d’Ariane' },
   'auth.account': { en: 'Account', rw: 'Konti', fr: 'Compte' },
   'auth.forgotPasswordSubtitle': {
     en: 'Enter your email and we’ll send you a reset link.',
