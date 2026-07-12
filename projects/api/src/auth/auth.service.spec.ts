@@ -159,9 +159,10 @@ describe('AuthService', () => {
       passwords.verify.mockResolvedValue(false);
       prisma.user.update.mockResolvedValue({});
 
+      // The locking attempt itself reports the lock, not a generic "invalid".
       await expect(
         service.login({ email: 'reader@frameafrica.rw', password: 'bad' }),
-      ).rejects.toBeInstanceOf(UnauthorizedException);
+      ).rejects.toThrow('ACCOUNT_LOCKED');
 
       const { data } = (prisma.user.update.mock.calls[0] as [{ data: Record<string, unknown> }])[0];
       expect(data.failedLoginAttempts).toBe(5);

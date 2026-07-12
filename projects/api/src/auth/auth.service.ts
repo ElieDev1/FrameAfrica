@@ -108,7 +108,12 @@ export class AuthService {
     }
 
     if (!user || !user.passwordHash || !passwordOk) {
-      if (user) await this.registerFailedLogin(user.id, user.failedLoginAttempts);
+      // If this failure is the one that trips the lock, say so on this attempt —
+      // don't make the reader guess after a 6th try.
+      if (user) {
+        const nowLocked = await this.registerFailedLogin(user.id, user.failedLoginAttempts);
+        if (nowLocked) throw new UnauthorizedException('ACCOUNT_LOCKED');
+      }
       throw new UnauthorizedException('Invalid email or password');
     }
     if (user.status !== UserStatus.active) {
@@ -140,13 +145,14 @@ export class AuthService {
    * Count a failed sign-in. Once the threshold is reached the account is locked
    * and only an admin can clear it (documents/05 §3.2 — brute-force lockout).
    */
-  private async registerFailedLogin(userId: string, current: number): Promise<void> {
+  private async registerFailedLogin(userId: string, current: number): Promise<boolean> {
     const attempts = current + 1;
     const locked = attempts >= AuthService.MAX_FAILED_ATTEMPTS;
     await this.prisma.user.update({
       where: { id: userId },
       data: { failedLoginAttempts: attempts, lockedAt: locked ? new Date() : null },
     });
+    return locked;
   }
 
   async refresh(rawRefreshToken: string): Promise<AuthResult> {
