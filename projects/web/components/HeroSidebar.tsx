@@ -68,7 +68,7 @@ export function HeroSidebar({ articles, locale }: { articles: ArticleSummary[]; 
       <article className="group border-b border-border py-4">
         <Link
           href={`/article/${top.slug}`}
-          className="relative block aspect-[16/9] w-full overflow-hidden rounded-xl ring-1 ring-border"
+          className="relative block aspect-[16/9] w-full overflow-hidden ring-1 ring-border"
         >
           {top.featuredImage ? (
             <Image
@@ -102,7 +102,7 @@ export function HeroSidebar({ articles, locale }: { articles: ArticleSummary[]; 
           <article key={article.id} className="group flex gap-4 py-4">
             <Link
               href={`/article/${article.slug}`}
-              className="relative aspect-square w-[4.5rem] shrink-0 overflow-hidden rounded-lg ring-1 ring-border"
+              className="relative aspect-square w-[4.5rem] shrink-0 overflow-hidden ring-1 ring-border"
             >
               {article.featuredImage ? (
                 <Image

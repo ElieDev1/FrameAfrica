@@ -57,7 +57,7 @@ function Thumb({
   const aspect = featured ? 'aspect-[2/1]' : 'aspect-[16/10]';
   if (image) {
     return (
-      <div className={`relative w-full overflow-hidden rounded-xl ${aspect}`}>
+      <div className={`relative w-full overflow-hidden ${aspect}`}>
         <Image
           src={image.url}
           alt={image.alt ?? ''}
@@ -69,7 +69,7 @@ function Thumb({
     );
   }
   return (
-    <div className={`media-fill w-full rounded-xl ${aspect}`} aria-hidden>
+    <div className={`media-fill w-full ${aspect}`} aria-hidden>
       <span className="absolute left-4 top-4 font-mono text-[10px] uppercase tracking-[0.18em] text-text/70">
         {kicker}
       </span>
@@ -95,7 +95,7 @@ export function ArticleCard({
     <article className="group flex flex-col gap-3">
       <Link
         href={href}
-        className="block overflow-hidden rounded-xl ring-1 ring-border transition-all duration-300 group-hover:ring-border-2"
+        className="block overflow-hidden ring-1 ring-border transition-all duration-300 group-hover:ring-border-2"
       >
         <div className="transition-transform duration-500 group-hover:scale-[1.03]">
           <Thumb featured={featured} kicker={kicker} image={article.featuredImage} />

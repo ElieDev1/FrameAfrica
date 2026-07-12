@@ -57,7 +57,7 @@ export default async function PodcastsPage({
           <div className="grid grid-cols-2 gap-x-6 gap-y-9 pt-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {shows.map((s) => (
               <Link key={s.id} href={`/podcasts/${s.slug}`} className="group min-w-0">
-                <div className="relative aspect-square overflow-hidden rounded-xl bg-surface-2 ring-1 ring-border">
+                <div className="relative aspect-square overflow-hidden bg-surface-2 ring-1 ring-border">
                   {s.coverUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

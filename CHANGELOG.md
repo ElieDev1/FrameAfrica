@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Content cards are now square-cornered rectangles.** The article cards (homepage hero, latest river, section/topic lists, related news) and the multimedia cards (video hub stage/rail/grid, video strip, gallery/podcast/interactive hubs, homepage sidebar) drop their rounded corners for a cleaner, more editorial look. Round elements that should stay round — play buttons, avatars, badges/pills, toggle dots — are untouched.
+
 ### Security
 - **The brute-force lockout can no longer trap an admin out of a live system.** The lock was permanent until an admin cleared it — but if the locked-out person *is* the only admin, there was no way back in short of editing the database. The lock is now **temporary**: it still rejects every attempt (correct password included) while active, but lifts itself after a cooldown (`AUTH_LOCKOUT_MINUTES`, default 15 min), so no one is ever permanently stranded. An admin can still clear it instantly from the dashboard, and the login page now says the lock is temporary. Added a **break-glass CLI** — `pnpm --filter api admin:recover <email>` (unlock, or reset to a forced-change temp password; `--list-admins` to see who can help) — as the ops safety net for the forgot-password-and-sole-admin case. Documented in `documents/05-Security-Design.md §3.4`.
 

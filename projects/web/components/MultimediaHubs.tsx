@@ -27,7 +27,7 @@ export function MultimediaHubs({ locale }: { locale: Locale }) {
           <Link
             key={hub.href}
             href={hub.href}
-            className="group rounded-xl border border-border bg-surface p-5 transition hover:border-primary/40"
+            className="group border border-border bg-surface p-5 transition hover:border-primary/40"
           >
             <div className="flex items-start justify-between gap-3">
               <span className="grid h-10 w-10 place-items-center rounded-lg bg-primary/12 text-primary ring-1 ring-primary/15">

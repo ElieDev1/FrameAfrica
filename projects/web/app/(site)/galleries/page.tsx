@@ -69,7 +69,7 @@ export default async function GalleriesPage({
           {/* Lead gallery — full-bleed cover with the copy overlaid */}
           {lead && (
             <Link href={`/galleries/${lead.slug}`} className="group mt-5 block">
-              <div className="relative aspect-[21/9] overflow-hidden rounded-2xl bg-surface-2 ring-1 ring-border">
+              <div className="relative aspect-[21/9] overflow-hidden bg-surface-2 ring-1 ring-border">
                 {lead.coverUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -101,7 +101,7 @@ export default async function GalleriesPage({
             <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {tiles.map((g) => (
                 <Link key={g.id} href={`/galleries/${g.slug}`} className="group min-w-0">
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-surface-2 ring-1 ring-border">
+                  <div className="relative aspect-[4/3] overflow-hidden bg-surface-2 ring-1 ring-border">
                     {g.coverUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img

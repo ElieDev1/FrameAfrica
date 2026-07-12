@@ -99,7 +99,7 @@ export default async function InteractivesPage({
               <div className="grid grid-cols-1 gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {tiles.map((it) => (
                   <Link key={it.id} href={`/interactives/${it.slug}`} className="group min-w-0">
-                    <div className="relative aspect-video overflow-hidden rounded-xl bg-surface-2 ring-1 ring-border">
+                    <div className="relative aspect-video overflow-hidden bg-surface-2 ring-1 ring-border">
                       {it.coverUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
