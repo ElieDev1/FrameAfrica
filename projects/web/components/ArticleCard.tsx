@@ -54,12 +54,11 @@ function Thumb({
   kicker: string;
   image: FeaturedImage | null;
 }) {
-  // The featured lead spans two columns, so a raw 2:1 grows tall enough to push
-  // the headline below the fold — cap its height (it crops) so the title shows.
-  const box = featured ? 'aspect-[2/1] max-h-[46vh]' : 'aspect-[16/10]';
+  // A shorter 21:9 on the lead keeps the hero from eating the whole viewport.
+  const aspect = featured ? 'aspect-[21/9]' : 'aspect-[16/10]';
   if (image) {
     return (
-      <div className={`relative w-full overflow-hidden ${box}`}>
+      <div className={`relative w-full overflow-hidden ${aspect}`}>
         <Image
           src={image.url}
           alt={image.alt ?? ''}
@@ -71,7 +70,7 @@ function Thumb({
     );
   }
   return (
-    <div className={`media-fill w-full ${box}`} aria-hidden>
+    <div className={`media-fill w-full ${aspect}`} aria-hidden>
       <span className="absolute left-4 top-4 font-mono text-[10px] uppercase tracking-[0.18em] text-text/70">
         {kicker}
       </span>

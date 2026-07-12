@@ -88,7 +88,7 @@ export default async function Home() {
         {/* Hero: lead + secondary rail */}
         <section
           aria-label={t(locale, 'home.topStories')}
-          className="grid gap-8 border-b border-border pb-10 lg:grid-cols-3"
+          className="grid gap-8 border-b border-border pb-8 lg:grid-cols-3"
         >
           <div className="lg:col-span-2">
             <ArticleCard article={lead} featured locale={locale} />

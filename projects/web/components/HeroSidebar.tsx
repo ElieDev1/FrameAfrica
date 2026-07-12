@@ -60,16 +60,16 @@ export function HeroSidebar({ articles, locale }: { articles: ArticleSummary[]; 
 
   return (
     <div className="lg:border-l lg:border-border lg:pl-8">
-      <h2 className="flex items-center gap-2 border-b border-border pb-3 font-mono text-xs uppercase tracking-[0.18em] text-muted">
+      <h2 className="flex items-center gap-2 border-b border-border pb-2.5 font-mono text-xs uppercase tracking-[0.18em] text-muted">
         <span className="h-3.5 w-1 rounded-full bg-primary" />
         {locale ? t(locale, 'home.topStories') : 'Top stories'}
       </h2>
 
-      {/* Lead secondary story — image on top */}
-      <article className="group border-b border-border py-4">
+      {/* Lead secondary story — image on top (kept shallow so the column stays compact) */}
+      <article className="group border-b border-border py-3">
         <Link
           href={`/article/${top.slug}`}
-          className="relative block aspect-[16/9] w-full overflow-hidden ring-1 ring-border"
+          className="relative block aspect-[2/1] w-full overflow-hidden ring-1 ring-border"
         >
           {top.featuredImage ? (
             <Image
@@ -83,9 +83,9 @@ export function HeroSidebar({ articles, locale }: { articles: ArticleSummary[]; 
             <span className="media-fill absolute inset-0" aria-hidden />
           )}
         </Link>
-        <div className="mt-3 flex flex-col gap-1.5">
+        <div className="mt-2.5 flex flex-col gap-1">
           <Kicker article={top} locale={locale} />
-          <h3 className="font-heading text-xl font-bold leading-tight tracking-tight text-text">
+          <h3 className="font-heading text-lg font-bold leading-tight tracking-tight text-text">
             <Link
               href={`/article/${top.slug}`}
               className="transition-colors group-hover:text-primary"
@@ -100,7 +100,7 @@ export function HeroSidebar({ articles, locale }: { articles: ArticleSummary[]; 
       {/* Remaining stories — headline-only, no photo */}
       <div className="divide-y divide-border">
         {rows.map((article) => (
-          <article key={article.id} className="group py-3.5">
+          <article key={article.id} className="group py-3">
             <Kicker article={article} small locale={locale} />
             <h3 className="mt-1 font-heading text-[15px] font-bold leading-snug text-text">
               <Link
