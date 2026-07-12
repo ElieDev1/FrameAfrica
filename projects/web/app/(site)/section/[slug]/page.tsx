@@ -3,12 +3,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { FollowButton } from '@/components/FollowButton';
 import { LoadMore } from '@/components/LoadMore';
+import { MultimediaHubs } from '@/components/MultimediaHubs';
 import { fetchArticles, fetchCategory } from '@/lib/api';
 import { getFollowStatus } from '@/lib/follows-actions';
 import { getSession } from '@/lib/session';
 import { absoluteUrl } from '@/lib/site';
 import { getLocale } from '@/lib/i18n-server';
 import { t, translateCategory } from '@/lib/i18n';
+import { MULTIMEDIA_HUBS, MULTIMEDIA_SLUG } from '@/lib/multimedia';
 
 export const revalidate = 60;
 
@@ -47,6 +49,8 @@ export default async function SectionPage({ params }: PageProps) {
   ]);
 
   const categoryName = translateCategory(locale, category.slug, category.name);
+  // "Multimedia" holds no articles — it's a container for the standalone hubs.
+  const isMultimedia = category.slug === MULTIMEDIA_SLUG;
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-8">
@@ -82,29 +86,50 @@ export default async function SectionPage({ params }: PageProps) {
           <p className="mt-2 max-w-2xl font-body text-muted">{category.description}</p>
         )}
 
-        {category.children.length > 0 && (
+        {isMultimedia ? (
+          // Send readers to the hubs, not the (empty) child article sections.
           <nav aria-label="Sub-sections" className="mt-4 flex flex-wrap gap-2">
-            {category.children.map((child) => (
+            {MULTIMEDIA_HUBS.map((hub) => (
               <Link
-                key={child.id}
-                href={`/section/${child.slug}`}
+                key={hub.href}
+                href={hub.href}
                 className="rounded-full border border-border px-3 py-1 font-mono text-[11px] uppercase tracking-wide text-muted transition hover:border-primary hover:text-primary"
               >
-                {translateCategory(locale, child.slug, child.name)}
+                {t(locale, hub.nameKey)}
               </Link>
             ))}
           </nav>
+        ) : (
+          category.children.length > 0 && (
+            <nav aria-label="Sub-sections" className="mt-4 flex flex-wrap gap-2">
+              {category.children.map((child) => (
+                <Link
+                  key={child.id}
+                  href={`/section/${child.slug}`}
+                  className="rounded-full border border-border px-3 py-1 font-mono text-[11px] uppercase tracking-wide text-muted transition hover:border-primary hover:text-primary"
+                >
+                  {translateCategory(locale, child.slug, child.name)}
+                </Link>
+              ))}
+            </nav>
+          )
         )}
       </header>
 
+      {isMultimedia && <MultimediaHubs locale={locale} />}
+
       {articles.length === 0 ? (
-        <p className="py-16 text-center font-body text-muted">{t(locale, 'section.empty')}</p>
+        !isMultimedia && (
+          <p className="py-16 text-center font-body text-muted">{t(locale, 'section.empty')}</p>
+        )
       ) : (
-        <LoadMore
-          initialArticles={articles}
-          initialCursor={pagination?.nextCursor ?? null}
-          category={slug}
-        />
+        <div className={isMultimedia ? 'mt-12' : undefined}>
+          <LoadMore
+            initialArticles={articles}
+            initialCursor={pagination?.nextCursor ?? null}
+            category={slug}
+          />
+        </div>
       )}
     </div>
   );
