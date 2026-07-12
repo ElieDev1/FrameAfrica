@@ -248,7 +248,7 @@ const dict = {
   },
   'home.watch': { en: 'Watch', rw: 'Reba', fr: 'À regarder' },
   'home.listen': { en: 'Listen', rw: 'Umva', fr: 'À écouter' },
-  'home.breaking': { en: 'Breaking', rw: 'Inkuru ihuse', fr: 'Dernière minute' },
+  'home.breaking': { en: 'Breaking', rw: 'Inkuru ishyushye', fr: 'Dernière minute' },
   'home.weather': { en: 'Weather', rw: 'Ikirere', fr: 'Météo' },
   'home.markets': { en: 'Markets', rw: 'Isoko', fr: 'Marchés' },
   'home.latest': { en: 'Latest', rw: 'Ibiheruka', fr: 'À la une' },
@@ -258,7 +258,7 @@ const dict = {
     rw: 'Izindi nkuru ziraza vuba.',
     fr: 'D’autres articles à venir.',
   },
-  'home.breakingNews': { en: 'Breaking news', rw: 'Amakuru ahuse', fr: 'Info dernière minute' },
+  'home.breakingNews': { en: 'Breaking news', rw: 'Inkuru ishyushye', fr: 'Info dernière minute' },
   'home.viewAll': { en: 'View all', rw: 'Reba byose', fr: 'Voir tout' },
   'home.errTitle': {
     en: 'News is taking a short break',
