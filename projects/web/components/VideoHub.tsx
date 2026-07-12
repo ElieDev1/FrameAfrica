@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { PlayIcon } from '@/components/icons';
+import { InlineVideoEngagement } from '@/components/InlineVideoEngagement';
 import { useT } from '@/components/LocaleProvider';
 import { formatDate } from '@/lib/format';
 import type { VideoItem } from '@/lib/videos';
@@ -71,6 +72,9 @@ export function VideoHub({ videos }: { videos: VideoItem[] }) {
               {current.description}
             </p>
           )}
+
+          {/* Like / share / comment for the clip on the stage, in place. */}
+          <InlineVideoEngagement type="video" id={current.id} path="/videos" />
         </div>
 
         {/* ── Up next ── */}

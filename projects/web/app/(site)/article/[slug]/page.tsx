@@ -345,8 +345,9 @@ export default async function ArticlePage({ params }: PageProps) {
           )}
 
           <CommentsSection
-            articleId={article.id}
-            slug={article.slug}
+            targetType="article"
+            targetId={article.id}
+            path={`/article/${article.slug}`}
             comments={comments}
             signedIn={Boolean(user)}
             locale={locale}

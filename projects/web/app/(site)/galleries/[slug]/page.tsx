@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { ContentEngagement } from '@/components/ContentEngagement';
 import { GalleryViewer } from '@/components/GalleryViewer';
 import { formatDate } from '@/lib/format';
 import { t } from '@/lib/i18n';
@@ -61,6 +62,8 @@ export default async function GalleryDetailPage({ params }: { params: Promise<{ 
           <GalleryViewer images={gallery.images} />
         )}
       </div>
+
+      <ContentEngagement type="gallery" id={gallery.id} path={`/galleries/${gallery.slug}`} />
     </article>
   );
 }

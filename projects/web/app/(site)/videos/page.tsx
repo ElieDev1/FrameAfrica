@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
+import { HubSearch } from '@/components/HubSearch';
+import { Pager } from '@/components/Pager';
 import { VideoHub } from '@/components/VideoHub';
 import { t } from '@/lib/i18n';
 import { getLocale } from '@/lib/i18n-server';
-import { fetchVideos } from '@/lib/videos';
+import { PAGE_SIZE, readPage } from '@/lib/paging';
+import { fetchVideosPage } from '@/lib/videos';
 
 export const metadata: Metadata = {
   title: 'Video',
@@ -11,8 +14,18 @@ export const metadata: Metadata = {
 
 export const revalidate = 300;
 
-export default async function VideosPage() {
-  const [videos, locale] = await Promise.all([fetchVideos(24), getLocale()]);
+export default async function VideosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; q?: string }>;
+}) {
+  const sp = await searchParams;
+  const page = readPage(sp.page);
+  const q = (sp.q ?? '').trim();
+  const [{ items: videos, hasMore }, locale] = await Promise.all([
+    fetchVideosPage(PAGE_SIZE, page, q),
+    getLocale(),
+  ]);
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-8">
@@ -24,15 +37,33 @@ export default async function VideosPage() {
           {t(locale, 'mm.videos')}
         </h1>
         <p className="mt-2 max-w-2xl font-body text-muted">{t(locale, 'mm.videosSub')}</p>
+        <HubSearch basePath="/videos" q={q} locale={locale} placeholderKey="mm.searchVideos" />
       </header>
 
       {videos.length === 0 ? (
         <div className="mt-8 rounded-xl border border-dashed border-border p-10">
-          <p className="font-heading text-lg font-bold text-text">{t(locale, 'mm.empty')}</p>
-          <p className="mt-1 font-body text-sm text-muted">{t(locale, 'mm.emptyHint')}</p>
+          <p className="font-heading text-lg font-bold text-text">
+            {q ? t(locale, 'mm.searchNoResults') : t(locale, 'mm.empty')}
+          </p>
+          {!q && <p className="mt-1 font-body text-sm text-muted">{t(locale, 'mm.emptyHint')}</p>}
         </div>
       ) : (
-        <VideoHub videos={videos} />
+        <>
+          {q && (
+            <p className="mt-6 font-mono text-xs uppercase tracking-[0.12em] text-muted">
+              {t(locale, 'mm.searchResults')} “{q}”
+            </p>
+          )}
+          {/* Keyed on page + query so the stage resets to the first hit on a new search. */}
+          <VideoHub key={`${page}:${q}`} videos={videos} />
+          <Pager
+            locale={locale}
+            basePath="/videos"
+            page={page}
+            hasMore={hasMore}
+            query={q ? { q } : undefined}
+          />
+        </>
       )}
     </div>
   );

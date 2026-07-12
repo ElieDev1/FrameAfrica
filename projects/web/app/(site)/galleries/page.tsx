@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ImageIcon } from '@/components/icons';
+import { HubSearch } from '@/components/HubSearch';
+import { Pager } from '@/components/Pager';
 import { formatDate } from '@/lib/format';
 import { t } from '@/lib/i18n';
 import { getLocale } from '@/lib/i18n-server';
-import { fetchGalleries } from '@/lib/galleries';
+import { fetchGalleriesPage } from '@/lib/galleries';
+import { PAGE_SIZE, readPage } from '@/lib/paging';
 
 export const metadata: Metadata = {
   title: 'Photo galleries',
@@ -13,11 +16,24 @@ export const metadata: Metadata = {
 
 export const revalidate = 300;
 
-export default async function GalleriesPage() {
-  const [galleries, locale] = await Promise.all([fetchGalleries(48), getLocale()]);
+export default async function GalleriesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; q?: string }>;
+}) {
+  const sp = await searchParams;
+  const page = readPage(sp.page);
+  const q = (sp.q ?? '').trim();
+  const [{ items: galleries, hasMore }, locale] = await Promise.all([
+    fetchGalleriesPage(PAGE_SIZE, page, q),
+    getLocale(),
+  ]);
 
   // Photography deserves scale: the newest gallery runs wide, the rest tile.
-  const [lead, ...rest] = galleries;
+  // Past page one — and while searching — there's no lead; every gallery tiles.
+  const showLead = page === 1 && !q;
+  const [lead, ...rest] = showLead ? galleries : [];
+  const tiles = showLead ? rest : galleries;
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-8">
@@ -29,47 +45,62 @@ export default async function GalleriesPage() {
           {t(locale, 'mm.galleries')}
         </h1>
         <p className="mt-2 max-w-2xl font-body text-muted">{t(locale, 'mm.galleriesSub')}</p>
+        <HubSearch
+          basePath="/galleries"
+          q={q}
+          locale={locale}
+          placeholderKey="mm.searchGalleries"
+        />
       </header>
 
-      {!lead ? (
+      {galleries.length === 0 ? (
         <div className="mt-8 rounded-xl border border-dashed border-border p-10">
-          <p className="font-heading text-lg font-bold text-text">{t(locale, 'mm.empty')}</p>
-          <p className="mt-1 font-body text-sm text-muted">{t(locale, 'mm.emptyHint')}</p>
+          <p className="font-heading text-lg font-bold text-text">
+            {q ? t(locale, 'mm.searchNoResults') : t(locale, 'mm.empty')}
+          </p>
+          {!q && <p className="mt-1 font-body text-sm text-muted">{t(locale, 'mm.emptyHint')}</p>}
         </div>
       ) : (
         <>
+          {q && (
+            <p className="mt-6 font-mono text-xs uppercase tracking-[0.12em] text-muted">
+              {t(locale, 'mm.searchResults')} “{q}”
+            </p>
+          )}
           {/* Lead gallery — full-bleed cover with the copy overlaid */}
-          <Link href={`/galleries/${lead.slug}`} className="group mt-8 block">
-            <div className="relative aspect-[21/9] overflow-hidden rounded-2xl bg-surface-2 ring-1 ring-border">
-              {lead.coverUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={lead.coverUrl}
-                  alt={lead.coverAlt ?? ''}
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur">
-                  <ImageIcon size={12} />
-                  {lead.imageCount} {t(locale, 'gal.photos')}
-                </span>
-                <h2 className="mt-2 max-w-3xl font-heading text-2xl font-black leading-tight tracking-tight text-white sm:text-4xl">
-                  {lead.title}
-                </h2>
-                {lead.description && (
-                  <p className="mt-2 line-clamp-2 max-w-2xl font-body text-sm text-white/80 sm:text-base">
-                    {lead.description}
-                  </p>
+          {lead && (
+            <Link href={`/galleries/${lead.slug}`} className="group mt-8 block">
+              <div className="relative aspect-[21/9] overflow-hidden rounded-2xl bg-surface-2 ring-1 ring-border">
+                {lead.coverUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={lead.coverUrl}
+                    alt={lead.coverAlt ?? ''}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                  />
                 )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur">
+                    <ImageIcon size={12} />
+                    {lead.imageCount} {t(locale, 'gal.photos')}
+                  </span>
+                  <h2 className="mt-2 max-w-3xl font-heading text-2xl font-black leading-tight tracking-tight text-white sm:text-4xl">
+                    {lead.title}
+                  </h2>
+                  {lead.description && (
+                    <p className="mt-2 line-clamp-2 max-w-2xl font-body text-sm text-white/80 sm:text-base">
+                      {lead.description}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          )}
 
-          {rest.length > 0 && (
+          {tiles.length > 0 && (
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {rest.map((g) => (
+              {tiles.map((g) => (
                 <Link key={g.id} href={`/galleries/${g.slug}`} className="group min-w-0">
                   <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-surface-2 ring-1 ring-border">
                     {g.coverUrl && (
@@ -102,6 +133,14 @@ export default async function GalleriesPage() {
               ))}
             </div>
           )}
+
+          <Pager
+            locale={locale}
+            basePath="/galleries"
+            page={page}
+            hasMore={hasMore}
+            query={q ? { q } : undefined}
+          />
         </>
       )}
     </div>

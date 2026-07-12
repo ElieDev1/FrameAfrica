@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { EpisodePlayer } from '@/components/EpisodePlayer';
 import { ActivityIcon } from '@/components/icons';
@@ -125,7 +126,12 @@ export default async function ShowPage({ params }: { params: Promise<{ slug: str
                   {ep.publishedAt && <span>{formatDate(ep.publishedAt)}</span>}
                 </div>
                 <h3 className="mt-1 font-heading text-lg font-bold leading-snug text-text">
-                  {ep.title}
+                  <Link
+                    href={`/podcasts/${show.slug}/${ep.slug}`}
+                    className="transition-colors hover:text-primary"
+                  >
+                    {ep.title}
+                  </Link>
                 </h3>
                 {ep.description && (
                   <p className="mt-1 line-clamp-3 font-body text-sm leading-relaxed text-muted">

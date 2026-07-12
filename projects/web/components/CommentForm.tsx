@@ -2,8 +2,9 @@
 
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { postComment } from '@/lib/comments-actions';
 import { useT } from '@/components/LocaleProvider';
+import type { EngagementTarget } from '@/lib/engagement';
+import { postContentComment } from '@/lib/engagement-actions';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -19,8 +20,17 @@ function SubmitButton() {
   );
 }
 
-export function CommentForm({ articleId, slug }: { articleId: string; slug: string }) {
-  const action = postComment.bind(null, articleId, slug);
+/** Comment composer for any content type — the target and the page to revalidate. */
+export function CommentForm({
+  targetType,
+  targetId,
+  path,
+}: {
+  targetType: EngagementTarget;
+  targetId: string;
+  path: string;
+}) {
+  const action = postContentComment.bind(null, targetType, targetId, path);
   const [state, formAction] = useActionState(action, {});
   const t = useT();
 

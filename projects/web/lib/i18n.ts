@@ -134,6 +134,57 @@ const dict = {
   'mm.upNext': { en: 'Up next', rw: 'Ibikurikira', fr: 'À suivre' },
   'mm.nowPlaying': { en: 'Now playing', rw: 'Birimo gukina', fr: 'En lecture' },
   'mm.play': { en: 'Play', rw: 'Kina', fr: 'Lire' },
+
+  // Hub search
+  'mm.searchVideos': { en: 'Search videos', rw: 'Shakisha amashusho', fr: 'Rechercher des vidéos' },
+  'mm.searchGalleries': {
+    en: 'Search galleries',
+    rw: 'Shakisha amafoto',
+    fr: 'Rechercher des galeries',
+  },
+  'mm.searchPodcasts': {
+    en: 'Search podcasts',
+    rw: 'Shakisha podcasts',
+    fr: 'Rechercher des podcasts',
+  },
+  'mm.searchInteractives': {
+    en: 'Search data & interactives',
+    rw: 'Shakisha imibare',
+    fr: 'Rechercher données & interactifs',
+  },
+  'mm.searchGo': { en: 'Search', rw: 'Shakisha', fr: 'Rechercher' },
+  'mm.searchClear': { en: 'Clear', rw: 'Siba', fr: 'Effacer' },
+  'mm.searchResults': {
+    en: 'Results for',
+    rw: 'Ibisubizo bya',
+    fr: 'Résultats pour',
+  },
+  'mm.searchNoResults': {
+    en: 'Nothing matched your search.',
+    rw: 'Nta kintu gihuye n’ubushakashatsi bwawe.',
+    fr: 'Aucun résultat pour votre recherche.',
+  },
+
+  // Pagination
+  'pg.label': { en: 'Pagination', rw: 'Amapaji', fr: 'Pagination' },
+  'pg.page': { en: 'Page', rw: 'Ipaji', fr: 'Page' },
+  'pg.prev': { en: 'Previous', rw: 'Ibanza', fr: 'Précédent' },
+  'pg.next': { en: 'Next', rw: 'Ibikurikira', fr: 'Suivant' },
+  'eng.like': { en: 'Like', rw: 'Kunda', fr: 'J’aime' },
+  'eng.liked': { en: 'Liked', rw: 'Wakunze', fr: 'Aimé' },
+  'eng.share': { en: 'Share', rw: 'Sangiza', fr: 'Partager' },
+  'eng.copied': { en: 'Link copied', rw: 'Umuyoboro wakoporowe', fr: 'Lien copié' },
+  'eng.comments': { en: 'Comments', rw: 'Ibitekerezo', fr: 'Commentaires' },
+  'eng.signInToLike': {
+    en: 'Sign in to like',
+    rw: 'Injira kugira ngo ukunde',
+    fr: 'Connectez-vous pour aimer',
+  },
+  'eng.discuss': {
+    en: 'Like, share & discuss',
+    rw: 'Kunda, sangiza & uganire',
+    fr: 'Aimer, partager & discuter',
+  },
   'pod.kicker': { en: 'Podcast', rw: 'Podcast', fr: 'Podcast' },
   'pod.episodes': { en: 'Episodes', rw: 'Ibice', fr: 'Épisodes' },
   'pod.episode': { en: 'episode', rw: 'igice', fr: 'épisode' },

@@ -95,9 +95,16 @@ export function ModerationQueue({ initial }: { initial: FlaggedComment[] }) {
               </span>
             )}
             <span>{t('dmod.on')}</span>
-            <Link href={`/article/${c.article.slug}`} className="text-primary hover:underline">
-              {c.article.title}
-            </Link>
+            <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted">
+              {c.target.type}
+            </span>
+            {c.target.url ? (
+              <Link href={c.target.url} className="text-primary hover:underline">
+                {c.target.title}
+              </Link>
+            ) : (
+              <span className="text-faint">{c.target.title}</span>
+            )}
             <span className="ml-auto flex items-center gap-3">
               <span className="uppercase tracking-[0.14em]">
                 {CSTAT[c.status] ? t(CSTAT[c.status]) : c.status}

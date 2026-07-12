@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Comment } from '@/lib/api';
+import type { EngagementTarget } from '@/lib/engagement';
 import { formatDate } from '@/lib/format';
 import { CommentActions } from './CommentActions';
 import { CommentForm } from './CommentForm';
@@ -43,19 +44,37 @@ function CommentItem({ comment, signedIn }: { comment: Comment; signedIn: boolea
   );
 }
 
-function countComments(comments: Comment[]): number {
+export function countComments(comments: Comment[]): number {
   return comments.reduce((n, c) => n + 1 + c.replies.length, 0);
 }
 
+/** The threaded list of comments on its own — reused by the inline video surface. */
+export function CommentThread({ comments, signedIn }: { comments: Comment[]; signedIn: boolean }) {
+  if (comments.length === 0) return null;
+  return (
+    <ul className="flex flex-col gap-6">
+      {comments.map((comment) => (
+        <CommentItem key={comment.id} comment={comment} signedIn={signedIn} />
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * The conversation under any piece of content — an article, gallery, podcast
+ * episode, interactive or video. `path` is the page to revalidate after a post.
+ */
 export function CommentsSection({
-  articleId,
-  slug,
+  targetType,
+  targetId,
+  path,
   comments,
   signedIn,
   locale,
 }: {
-  articleId: string;
-  slug: string;
+  targetType: EngagementTarget;
+  targetId: string;
+  path: string;
   comments: Comment[];
   signedIn: boolean;
   locale: Locale;
@@ -79,7 +98,7 @@ export function CommentsSection({
 
       {signedIn ? (
         <div className="mb-8">
-          <CommentForm articleId={articleId} slug={slug} />
+          <CommentForm targetType={targetType} targetId={targetId} path={path} />
         </div>
       ) : (
         <p className="mb-8 font-body text-sm text-muted">
@@ -91,11 +110,7 @@ export function CommentsSection({
       )}
 
       {comments.length > 0 ? (
-        <ul className="flex flex-col gap-6">
-          {comments.map((comment) => (
-            <CommentItem key={comment.id} comment={comment} signedIn={signedIn} />
-          ))}
-        </ul>
+        <CommentThread comments={comments} signedIn={signedIn} />
       ) : (
         <p className="font-body text-sm text-muted">{t(locale, 'comments.empty')}</p>
       )}

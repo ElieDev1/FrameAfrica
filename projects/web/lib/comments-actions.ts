@@ -87,7 +87,8 @@ export interface FlaggedComment {
   reportCount: number;
   createdAt: string;
   author: { id: string; displayName: string; avatarUrl: string | null; banned: boolean };
-  article: { slug: string; title: string };
+  /** What was commented on — an article, gallery, episode, interactive or video. */
+  target: { type: string; title: string; url: string | null };
 }
 
 /** Moderator/admin: the moderation queue (empty on any error). */
