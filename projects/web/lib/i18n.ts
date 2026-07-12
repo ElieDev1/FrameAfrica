@@ -229,6 +229,15 @@ const dict = {
     rw: 'Media Ltd · Kigali, u Rwanda',
     fr: 'Media Ltd · Kigali, Rwanda',
   },
+  'footer.follow': { en: 'Follow us', rw: 'Dukurikire', fr: 'Suivez-nous' },
+  'footer.getInTouch': { en: 'Get in touch', rw: 'Twandikire', fr: 'Nous contacter' },
+  'footer.newsroom': { en: 'Newsroom', rw: 'Icyumba cy’amakuru', fr: 'Rédaction' },
+  'footer.builtIn': {
+    en: 'Made in Kigali',
+    rw: 'Byakorewe i Kigali',
+    fr: 'Réalisé à Kigali',
+  },
+  'footer.backToTop': { en: 'Back to top', rw: 'Subira hejuru', fr: 'Haut de page' },
 
   // — Homepage sections —
   'home.mostRead': { en: 'Most read', rw: 'Bisomwa cyane', fr: 'Les plus lus' },
@@ -1722,6 +1731,78 @@ const dict = {
     en: 'integrations configured',
     rw: 'ibyifashishwa byashyizweho',
     fr: 'intégrations configurées',
+  },
+  'dset.setValue': { en: 'Set value', rw: 'Shyiraho agaciro', fr: 'Définir la valeur' },
+  'dset.enterValue': { en: 'Enter a value…', rw: 'Andika agaciro…', fr: 'Saisissez une valeur…' },
+  'dset.secretHint': {
+    en: 'Stored encrypted at rest and never shown again — only the last 4 characters.',
+    rw: 'Bibikwa mu ibanga, ntibigaragazwa ukundi — inyuguti 4 zisoza gusa.',
+    fr: 'Stocké de façon confidentielle et jamais réaffiché — seuls les 4 derniers caractères.',
+  },
+  // Groups
+  'dset.g.social': { en: 'Social profiles', rw: 'Imbuga nkoranyambaga', fr: 'Réseaux sociaux' },
+  'dset.g.socialDesc': {
+    en: 'These appear in the site footer. Leave one empty to hide its icon.',
+    rw: 'Bigaragara hasi ku rubuga. Usige ubusa kugira ngo ikimenyetso kihishwe.',
+    fr: 'Affichés dans le pied de page. Laissez vide pour masquer l’icône.',
+  },
+  'dset.g.media': { en: 'Media', rw: 'Itangazamakuru', fr: 'Médias' },
+  'dset.g.mediaDesc': {
+    en: 'Video and audio sources.',
+    rw: 'Inkomoko ya videwo n’amajwi.',
+    fr: 'Sources vidéo et audio.',
+  },
+  'dset.g.email': { en: 'Email delivery', rw: 'Kohereza imeyili', fr: 'Envoi d’e-mails' },
+  'dset.g.emailDesc': {
+    en: 'Password resets and newsletters need a working mail host.',
+    rw: 'Guhindura ijambobanga n’amakuru bisaba seriveri y’imeyili ikora.',
+    fr: 'Réinitialisations et newsletters nécessitent un hôte mail fonctionnel.',
+  },
+  'dset.g.storage': { en: 'Storage & CDN', rw: 'Ububiko na CDN', fr: 'Stockage & CDN' },
+  'dset.g.storageDesc': {
+    en: 'Where uploaded media lives and how it is served.',
+    rw: 'Aho amashusho yashyizweho abikwa n’uko atangwa.',
+    fr: 'Où vivent les médias téléversés et comment ils sont servis.',
+  },
+  'dset.g.search': { en: 'Search', rw: 'Gushakisha', fr: 'Recherche' },
+  'dset.g.searchDesc': {
+    en: 'Full-text search cluster. Optional — Postgres search is the fallback.',
+    rw: 'Gushakisha mu nyandiko zose. Si ngombwa — Postgres ni yo ikoreshwa.',
+    fr: 'Cluster de recherche plein-texte. Optionnel — Postgres sert de repli.',
+  },
+  'dset.g.payments': { en: 'Payments', rw: 'Kwishyura', fr: 'Paiements' },
+  'dset.g.paymentsDesc': {
+    en: 'Subscriptions: mobile money and cards.',
+    rw: 'Kwiyandikisha: amafaranga kuri telefoni n’amakarita.',
+    fr: 'Abonnements : mobile money et cartes.',
+  },
+  'dset.g.ai': { en: 'AI assist', rw: 'Ubufasha bwa AI', fr: 'Assistance IA' },
+  'dset.g.aiDesc': {
+    en: 'Summaries, tagging, and the newsroom writing tools.',
+    rw: 'Incamake, ibimenyetso, n’ibikoresho byo kwandika.',
+    fr: 'Résumés, étiquetage et outils de rédaction.',
+  },
+  'dset.g.analytics': {
+    en: 'Analytics & anti-abuse',
+    rw: 'Isesengura n’umutekano',
+    fr: 'Analytique & anti-abus',
+  },
+  'dset.g.analyticsDesc': {
+    en: 'Audience measurement, error monitoring, and bot protection.',
+    rw: 'Gupima abasomyi, gukurikirana amakosa, no kurinda ba robo.',
+    fr: 'Mesure d’audience, monitoring d’erreurs et protection anti-bot.',
+  },
+  'dset.g.site': { en: 'Site details', rw: 'Ibisobanuro by’urubuga', fr: 'Détails du site' },
+  'dset.g.siteDesc': {
+    en: 'Public URL and the contact details shown to readers.',
+    rw: 'Aderesi rusange n’aho abasomyi batwandikira.',
+    fr: 'URL publique et coordonnées affichées aux lecteurs.',
+  },
+  'dset.g.custom': { en: 'Custom keys', rw: 'Impfunguzo zihariye', fr: 'Clés personnalisées' },
+  'dset.g.customDesc': {
+    en: 'Keys you added yourself.',
+    rw: 'Impfunguzo wiyongereye.',
+    fr: 'Clés que vous avez ajoutées.',
   },
 
   // — Article admin actions —

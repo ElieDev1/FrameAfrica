@@ -164,8 +164,25 @@ Paywall check happens server-side on `/articles/{slug}`: premium content returns
 | PATCH | `/admin/users/{id}/roles` | Assign roles | admin |
 | GET | `/admin/analytics/overview` | Dashboard metrics | admin/editor |
 | GET | `/admin/audit-logs` | Query audit trail | admin |
-| PATCH | `/admin/settings` | System settings / feature flags | admin |
+| GET | `/admin/settings/integrations` | List every integration key, grouped, with its set-state | admin |
+| PUT | `/admin/settings/integrations/{key}` | Set an integration value | admin |
+| DELETE | `/admin/settings/integrations/{key}` | Clear a stored value (falls back to env) | admin |
 | POST | `/admin/backups` | Trigger backup | admin |
+
+### 8.1 Integration settings
+
+Every key in the catalogue maps 1:1 to an env var; a value stored in the DB **overrides** `process.env`. Keys are grouped (`social`, `site`, `email`, `storage`, `search`, `payments`, `ai`, `analytics`, `media`) and each is flagged `secret`:
+
+- **`secret: true`** (API keys, passwords) — **write-only**. The list endpoint returns `maskedValue` (`••••1234`) and `value: null`. The raw value is only ever resolved server-side by the service that consumes it.
+- **`secret: false`** (social URLs, hostnames, contact details) — returned in the clear so the dashboard can pre-fill the field for editing.
+
+**Public read.** The footer needs the social links, which are public by definition:
+
+| Method | Path | Description | Role |
+|---|---|---|---|
+| GET | `/site/settings` | Configured social profiles + contact details | Public |
+
+This route reads a **fixed allow-list** of non-secret keys (`SOCIAL_*`, `CONTACT_EMAIL`, `CONTACT_PHONE`) — it cannot return anything else, whatever is stored. Unset keys are omitted (the footer then hides that icon), and a social value is rejected on write and dropped on read unless it is a plain `http(s)` URL, so no `javascript:`/`data:` URI can reach an `href`.
 
 ## 9. AI Endpoints (advisory)
 

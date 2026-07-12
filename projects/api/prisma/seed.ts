@@ -1651,6 +1651,28 @@ async function main(): Promise<void> {
     });
   }
 
+  // ── Site settings: the footer's social profiles and contact details ────────
+  // Non-secret, admin-editable from Settings → Social profiles. Seeded so a
+  // fresh environment renders a complete footer instead of an empty rail.
+  const siteSettings: Record<string, string> = {
+    SOCIAL_X_URL: 'https://x.com/frameafrica',
+    SOCIAL_FACEBOOK_URL: 'https://facebook.com/frameafrica',
+    SOCIAL_INSTAGRAM_URL: 'https://instagram.com/frameafrica',
+    SOCIAL_YOUTUBE_URL: 'https://youtube.com/@frameafrica',
+    SOCIAL_LINKEDIN_URL: 'https://linkedin.com/company/frameafrica',
+    SOCIAL_TIKTOK_URL: 'https://tiktok.com/@frameafrica',
+    SOCIAL_WHATSAPP_URL: 'https://wa.me/250788000000',
+    CONTACT_EMAIL: 'hello@frameafrica.rw',
+    CONTACT_PHONE: '+250 788 000 000',
+  };
+  for (const [key, value] of Object.entries(siteSettings)) {
+    await prisma.appSetting.upsert({
+      where: { key },
+      update: {}, // never overwrite what an admin has already set
+      create: { key, value, isSecret: false },
+    });
+  }
+
   const [categories, published] = await Promise.all([
     prisma.category.count(),
     prisma.article.count({ where: { status: ArticleStatus.published } }),

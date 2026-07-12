@@ -74,4 +74,66 @@ describe('AdminSettingsService', () => {
     prisma.appSetting.findUnique.mockResolvedValue(null);
     expect(await service.getValue('YOUTUBE_API_KEY')).toBe('from-env');
   });
+
+  describe('social links', () => {
+    it('returns a non-secret value in the clear so the form can pre-fill it', async () => {
+      const { service, prisma } = build();
+      prisma.appSetting.findMany.mockResolvedValue([
+        {
+          key: 'SOCIAL_X_URL',
+          value: 'https://x.com/frameafrica',
+          isSecret: false,
+          updatedAt: new Date(),
+        },
+      ]);
+      const x = (await service.listIntegrations()).find((i) => i.key === 'SOCIAL_X_URL')!;
+      expect(x.group).toBe('social');
+      expect(x.secret).toBe(false);
+      expect(x.value).toBe('https://x.com/frameafrica');
+    });
+
+    it('rejects a social link that is not an http(s) URL', async () => {
+      const { service } = build();
+      await expect(
+        service.setIntegration('SOCIAL_X_URL', 'javascript:alert(1)'),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      await expect(service.setIntegration('SOCIAL_X_URL', 'x.com/frame')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+    });
+  });
+
+  describe('publicSettings', () => {
+    it('lists only the socials that are set, and never a secret', async () => {
+      const { service, prisma } = build({ SOCIAL_YOUTUBE_URL: 'https://youtube.com/@frameafrica' });
+      prisma.appSetting.findMany.mockResolvedValue([
+        {
+          key: 'SOCIAL_X_URL',
+          value: 'https://x.com/frameafrica',
+          isSecret: false,
+          updatedAt: new Date(),
+        },
+        { key: 'CONTACT_EMAIL', value: 'hello@frameafrica.rw', isSecret: false, updatedAt: null },
+      ]);
+
+      const res = await service.publicSettings();
+
+      expect(res.social.map((s) => s.key)).toEqual(['SOCIAL_X_URL', 'SOCIAL_YOUTUBE_URL']);
+      expect(res.contactEmail).toBe('hello@frameafrica.rw');
+      expect(res.contactPhone).toBeNull();
+      // The query is scoped to the public allow-list, so no key can leak.
+      const where = (
+        prisma.appSetting.findMany.mock.calls[0] as [{ where: { key: { in: [] } } }]
+      )[0].where;
+      expect(where.key.in).not.toContain('STRIPE_SECRET_KEY');
+    });
+
+    it('drops a stored link that is not http(s)', async () => {
+      const { service, prisma } = build();
+      prisma.appSetting.findMany.mockResolvedValue([
+        { key: 'SOCIAL_X_URL', value: 'javascript:alert(1)', isSecret: false, updatedAt: null },
+      ]);
+      expect((await service.publicSettings()).social).toEqual([]);
+    });
+  });
 });
