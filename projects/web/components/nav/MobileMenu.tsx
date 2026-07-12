@@ -122,6 +122,13 @@ export function MobileMenu({
               </form>
 
               <nav aria-label={t(locale, 'nav.sections')} className="mt-5 flex flex-col">
+                <Link
+                  href="/"
+                  onClick={close}
+                  className="border-b border-border py-3 font-heading text-base font-semibold text-text"
+                >
+                  {t(locale, 'nav.home')}
+                </Link>
                 {sections.map((section) => {
                   const subs = subLinks(section);
                   const translatedName = translateCategory(locale, section.slug, section.name);
