@@ -993,6 +993,11 @@ const dict = {
   'dash.copyDesk': { en: 'Copy desk', rw: 'Ibiro byo gukosora', fr: 'Secrétariat de rédaction' },
   'dash.reviewQueue': { en: 'Review queue', rw: 'Urutonde rwo gusuzuma', fr: 'File de relecture' },
   'dash.pipeline': { en: 'Pipeline', rw: 'Umurongo w’akazi', fr: 'Flux de production' },
+  // Grouped sidebar entries — each opens a set of tabbed views (lib/dash-tabs).
+  'dash.stories': { en: 'Stories', rw: 'Inkuru', fr: 'Articles' },
+  'dash.workflow': { en: 'Workflow', rw: 'Uko akazi kagenda', fr: 'Flux éditorial' },
+  'dash.multimedia': { en: 'Multimedia', rw: 'Amashusho n’amajwi', fr: 'Multimédia' },
+  'dash.audience': { en: 'Audience', rw: 'Abasomyi', fr: 'Audience' },
   'dash.moderation': { en: 'Moderation', rw: 'Ugenzura', fr: 'Modération' },
   'dash.tipsInbox': { en: 'Tips inbox', rw: 'Ububiko bw’amakuru', fr: 'Boîte à infos' },
   'dash.mediaLibrary': { en: 'Media library', rw: 'Ububiko bw’amashusho', fr: 'Médiathèque' },

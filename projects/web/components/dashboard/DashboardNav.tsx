@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import {
-  ActivityIcon,
   BarChartIcon,
   ChevronDownIcon,
   ColumnsIcon,
@@ -15,12 +14,8 @@ import {
   GridIcon,
   type IconProps,
   ImageIcon,
-  LayersIcon,
-  MailIcon,
   MegaphoneIcon,
-  PenIcon,
   PlayIcon,
-  PlusIcon,
   SettingsIcon,
   ShieldIcon,
   SparklesIcon,
@@ -39,6 +34,12 @@ interface NavItem {
   labelKey: MessageKey;
   Icon: IconCmp;
   exact?: boolean;
+  /**
+   * Extra routes this entry owns. A grouped entry (Workflow, Multimedia…) links
+   * to one of its tabs but must stay highlighted while the reader is on any of
+   * them — these are the sibling routes its tab strip switches between.
+   */
+  match?: string[];
 }
 interface NavGroup {
   sectionKey: MessageKey;
@@ -47,9 +48,19 @@ interface NavGroup {
 
 /**
  * Build the dashboard nav for a set of roles, grouped by what the work *is*:
- * Newsroom (your desk), Editorial (the workflow queues), Media (the library +
- * every multimedia type), Audience (reader-facing ops) and Administration.
- * Each group is only shown when the user has at least one item in it.
+ * Newsroom (your desk), Editorial (the queues), Media, Audience and
+ * Administration. Each group is only shown when the user has an item in it.
+ *
+ * Several pages are really one job seen from a different angle, so they share a
+ * single entry here and switch views with a tab strip on the page itself
+ * (lib/dash-tabs):
+ *   Stories     → My stories | All articles (admin)
+ *   Workflow    → Pipeline board | Copy desk | Review queue
+ *   Multimedia  → Videos | Galleries | Podcasts | Data
+ *   Analytics   → Report | Monitor (admin)
+ *   Audience    → Inquiries | Newsletter
+ * "New story" is an action, not a destination — it's the button in the topbar
+ * and on the Stories page, so it isn't a nav item.
  */
 function groupsFor(roles: string[]): NavGroup[] {
   const has = (...r: string[]) => r.some((x) => roles.includes(x));
@@ -62,27 +73,27 @@ function groupsFor(roles: string[]): NavGroup[] {
   // 1. Newsroom — your own work.
   push('dash.sec.newsroom', [
     { href: '/dashboard', labelKey: 'dash.overview', Icon: GridIcon, exact: true },
-    { href: '/dashboard/stories', labelKey: 'dash.myStories', Icon: FileTextIcon },
-    { href: '/dashboard/stories/new', labelKey: 'dash.newStory', Icon: PlusIcon, exact: true },
-    { href: '/dashboard/analytics', labelKey: 'dash.analytics', Icon: BarChartIcon },
+    {
+      href: '/dashboard/stories',
+      labelKey: 'dash.stories',
+      Icon: FileTextIcon,
+      match: ['/dashboard/articles'],
+    },
+    {
+      href: '/dashboard/analytics',
+      labelKey: 'dash.analytics',
+      Icon: BarChartIcon,
+      match: ['/dashboard/monitor'],
+    },
   ]);
 
   // 2. Editorial desk — the review/moderation workflow.
   push('dash.sec.editorial', [
     has('sub_editor', 'editor', 'admin') && {
-      href: '/dashboard/copydesk',
-      labelKey: 'dash.copyDesk',
-      Icon: PenIcon,
-    },
-    has('editor', 'admin') && {
-      href: '/dashboard/review',
-      labelKey: 'dash.reviewQueue',
-      Icon: ClipboardCheckIcon,
-    },
-    has('editor', 'admin') && {
-      href: '/dashboard/pipeline',
-      labelKey: 'dash.pipeline',
+      href: has('editor', 'admin') ? '/dashboard/pipeline' : '/dashboard/copydesk',
+      labelKey: 'dash.workflow',
       Icon: ColumnsIcon,
+      match: ['/dashboard/pipeline', '/dashboard/copydesk', '/dashboard/review'],
     },
     has('moderator', 'editor', 'admin') && {
       href: '/dashboard/moderation',
@@ -96,45 +107,38 @@ function groupsFor(roles: string[]): NavGroup[] {
     },
   ]);
 
-  // 3. Media — the library, the studio, and every multimedia content type.
+  // 3. Media — the library, the studio, and the multimedia types.
   push('dash.sec.media', [
     { href: '/dashboard/media', labelKey: 'dash.mediaLibrary', Icon: ImageIcon },
     { href: '/dashboard/studio', labelKey: 'dash.studio', Icon: SparklesIcon },
-    has('editor', 'admin') && { href: '/dashboard/videos', labelKey: 'mm.videos', Icon: PlayIcon },
     has('photographer', 'editor', 'admin') && {
-      href: '/dashboard/galleries',
-      labelKey: 'mm.galleries',
-      Icon: ImageIcon,
-    },
-    has('editor', 'admin') && {
-      href: '/dashboard/podcasts',
-      labelKey: 'mm.podcasts',
-      Icon: MailIcon,
-    },
-    has('editor', 'admin') && {
-      href: '/dashboard/interactives',
-      labelKey: 'mm.interactives',
-      Icon: BarChartIcon,
+      href: has('editor', 'admin') ? '/dashboard/videos' : '/dashboard/galleries',
+      labelKey: 'dash.multimedia',
+      Icon: PlayIcon,
+      match: [
+        '/dashboard/videos',
+        '/dashboard/galleries',
+        '/dashboard/podcasts',
+        '/dashboard/interactives',
+      ],
     },
   ]);
 
   // 4. Audience — reader-facing operations.
   push('dash.sec.audience', [
-    has('admin') && { href: '/dashboard/inquiries', labelKey: 'dash.inquiries', Icon: CommentIcon },
     has('editor', 'admin') && {
-      href: '/dashboard/newsletter',
-      labelKey: 'dash.newsletter',
-      Icon: MailIcon,
+      href: has('admin') ? '/dashboard/inquiries' : '/dashboard/newsletter',
+      labelKey: 'dash.audience',
+      Icon: CommentIcon,
+      match: ['/dashboard/inquiries', '/dashboard/newsletter'],
     },
   ]);
 
   // 5. Administration — system + settings.
   push('dash.sec.admin', [
-    has('admin') && { href: '/dashboard/articles', labelKey: 'dash.allArticles', Icon: LayersIcon },
     has('admin') && { href: '/dashboard/taxonomy', labelKey: 'dash.taxonomy', Icon: TagIcon },
     has('admin') && { href: '/dashboard/ads', labelKey: 'dash.houseAds', Icon: MegaphoneIcon },
     has('admin') && { href: '/dashboard/users', labelKey: 'dash.users', Icon: UsersIcon },
-    has('admin') && { href: '/dashboard/monitor', labelKey: 'dash.monitor', Icon: ActivityIcon },
     has('admin') && {
       href: '/dashboard/audit',
       labelKey: 'dash.auditLog',
@@ -158,10 +162,11 @@ export function DashboardNav({
   const groups = groupsFor(roles);
   const [closed, setClosed] = useState<Record<string, boolean>>({});
 
-  const isActive = (item: NavItem) =>
-    item.exact
-      ? pathname === item.href
-      : pathname === item.href || pathname.startsWith(`${item.href}/`);
+  const isActive = (item: NavItem) => {
+    if (item.exact) return pathname === item.href;
+    const owns = (base: string) => pathname === base || pathname.startsWith(`${base}/`);
+    return owns(item.href) || (item.match?.some(owns) ?? false);
+  };
 
   // Icons-only rail (collapsed sidebar).
   if (collapsed) {

@@ -9,7 +9,9 @@ import {
   SparklesIcon,
   UsersIcon,
 } from '@/components/icons';
+import { DashTabs } from '@/components/dashboard/DashTabs';
 import { fetchOverview, requireAdmin } from '@/lib/cms';
+import { insightsTabs } from '@/lib/dash-tabs';
 import { formatDate } from '@/lib/format';
 import { t } from '@/lib/i18n';
 import { getLocale } from '@/lib/i18n-server';
@@ -67,17 +69,19 @@ function Panel({
 }
 
 export default async function MonitorPage() {
-  await requireAdmin();
+  const user = await requireAdmin();
   const [o, locale] = await Promise.all([fetchOverview(), getLocale()]);
 
   return (
     <div className="w-full">
       <h1 className="font-heading text-3xl font-black tracking-tight text-text">
-        {t(locale, 'dash.monitor')}
+        {t(locale, 'dash.analytics')}
       </h1>
       <p className="mt-1 max-w-2xl font-body text-sm text-muted">
         {t(locale, 'dpage.monitorSubtitle')}
       </p>
+
+      <DashTabs tabs={insightsTabs(user.roles)} />
 
       {/* KPI cards */}
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
