@@ -8,6 +8,10 @@ export interface UserProfile {
   email: string;
   displayName: string;
   avatarUrl: string | null;
+  /** Public byline identity — the author page a reader reaches from a story. */
+  authorSlug: string | null;
+  bio: string | null;
+  jobTitle: string | null;
   roles: string[];
   emailVerified: boolean;
   mustChangePassword: boolean;
@@ -36,7 +40,7 @@ export class UsersService {
     return this.toProfile(user);
   }
 
-  /** Update the caller's own display name and/or avatar. */
+  /** Update the caller's own display name, avatar, and public byline bio. */
   async updateProfile(userId: string, input: UpdateProfileDto): Promise<UserProfile> {
     const data: Prisma.UserUpdateInput = {};
 
@@ -59,6 +63,11 @@ export class UsersService {
       }
     }
 
+    // The byline bio is the writer's own words about themselves; an empty value
+    // clears it rather than storing a blank line.
+    if (input.bio !== undefined) data.bio = input.bio.trim() || null;
+    if (input.jobTitle !== undefined) data.jobTitle = input.jobTitle.trim() || null;
+
     const user = await this.prisma.user.update({
       where: { id: userId },
       data,
@@ -73,6 +82,9 @@ export class UsersService {
       email: user.email,
       displayName: user.displayName,
       avatarUrl: user.avatarUrl,
+      authorSlug: user.authorSlug,
+      bio: user.bio,
+      jobTitle: user.jobTitle,
       roles: user.roles.map((membership) => membership.role.name),
       emailVerified: user.emailVerifiedAt !== null,
       mustChangePassword: user.mustChangePassword,

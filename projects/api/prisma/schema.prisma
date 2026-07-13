@@ -143,6 +143,12 @@ model User {
   passwordHash        String?    @map("password_hash")
   displayName         String     @map("display_name")
   avatarUrl           String?    @map("avatar_url")
+  /// Public byline identity. `authorSlug` is the /author/<slug> URL; `bio` and
+  /// `jobTitle` are what a reader sees on that page and under a story. Set for
+  /// every user, but only reachable for one who has published (documents/14 §2).
+  authorSlug          String?    @unique @map("author_slug")
+  bio                 String?
+  jobTitle            String?    @map("job_title")
   status              UserStatus @default(active)
   emailVerifiedAt     DateTime?  @map("email_verified_at")
   twoFactorEnabled    Boolean    @default(false) @map("two_factor_enabled")

@@ -13,6 +13,19 @@ export interface AuthorSummary {
   id: string;
   displayName: string;
   avatarUrl: string | null;
+  /** The byline's /author/<slug> page. Null only for a legacy row without one. */
+  slug: string | null;
+}
+
+/** An author's public page: who they are, and what they have published. */
+export interface AuthorProfile {
+  slug: string;
+  displayName: string;
+  avatarUrl: string | null;
+  bio: string | null;
+  jobTitle: string | null;
+  articleCount: number;
+  lastPublishedAt: string | null;
 }
 
 export interface CategoryRef {
@@ -161,6 +174,8 @@ export interface TopicDetail {
 export interface ListArticlesParams {
   category?: string;
   topic?: string;
+  /** Everything one byline has published. */
+  author?: string;
   featured?: boolean;
   language?: ArticleLanguage;
   q?: string;
@@ -175,6 +190,7 @@ export async function fetchArticles(
   const search = new URLSearchParams();
   if (params.category) search.set('category', params.category);
   if (params.topic) search.set('topic', params.topic);
+  if (params.author) search.set('author', params.author);
   if (params.featured) search.set('featured', 'true');
   if (params.language) search.set('language', params.language);
   if (params.q) search.set('q', params.q);
@@ -413,6 +429,25 @@ export async function fetchTopics(): Promise<TopicDetail[]> {
 }
 
 /** Returns the topic, or `null` if the API responds 404. */
+/** One author's public profile. Null when nobody has published under that slug. */
+export async function fetchAuthor(slug: string): Promise<AuthorProfile | null> {
+  try {
+    const envelope = await apiGet<AuthorProfile>(`/authors/${encodeURIComponent(slug)}`);
+    return envelope.data;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+/** Everyone who has published — the newsroom, as readers see it. */
+export async function fetchAuthors(): Promise<AuthorProfile[]> {
+  const envelope = await apiGet<AuthorProfile[]>('/authors');
+  return envelope.data;
+}
+
 export async function fetchTopic(slug: string): Promise<TopicDetail | null> {
   try {
     const envelope = await apiGet<TopicDetail>(`/topics/${encodeURIComponent(slug)}`);

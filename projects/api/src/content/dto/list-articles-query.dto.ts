@@ -43,6 +43,12 @@ export class ListArticlesQueryDto {
   @IsString()
   topic?: string;
 
+  /** Filter by author slug — everything one byline has published. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  author?: string;
+
   /** Only editor-featured (homepage-pinned) articles, newest pin first. */
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)

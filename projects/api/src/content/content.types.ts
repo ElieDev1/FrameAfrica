@@ -11,6 +11,20 @@ export interface AuthorSummary {
   id: string;
   displayName: string;
   avatarUrl: string | null;
+  /** The byline's /author/<slug> page. Null only for a legacy row without one. */
+  slug: string | null;
+}
+
+/** An author's public page: who they are, and what they have published. */
+export interface AuthorProfile {
+  slug: string;
+  displayName: string;
+  avatarUrl: string | null;
+  bio: string | null;
+  jobTitle: string | null;
+  articleCount: number;
+  /** When they last published — the page shows "Last story <date>". */
+  lastPublishedAt: string | null;
 }
 
 export interface CategoryRef {

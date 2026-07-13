@@ -21,7 +21,7 @@ const DEFAULT_LIMIT = 20;
  */
 const articleInclude = {
   category: { select: { id: true, name: true, slug: true } },
-  author: { select: { id: true, displayName: true, avatarUrl: true } },
+  author: { select: { id: true, displayName: true, avatarUrl: true, authorSlug: true } },
   topics: {
     include: { topic: { select: { id: true, name: true, slug: true } } },
     orderBy: { topic: { name: 'asc' } },
@@ -67,6 +67,7 @@ export class ContentService {
       deletedAt: null,
       ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
       ...(query.topic ? { topics: { some: { topic: { slug: query.topic } } } } : {}),
+      ...(query.author ? { author: { authorSlug: query.author } } : {}),
       ...(query.featured ? { isFeatured: true } : {}),
       ...(query.language ? { language: query.language } : {}),
       ...(query.q
@@ -442,7 +443,12 @@ function toArticleSummary(article: ArticleWithRelations): ArticleSummary {
         }
       : null,
     category: article.category,
-    author: article.author,
+    author: {
+      id: article.author.id,
+      displayName: article.author.displayName,
+      avatarUrl: article.author.avatarUrl,
+      slug: article.author.authorSlug,
+    },
     topics: article.topics.map((t) => t.topic),
   };
 }

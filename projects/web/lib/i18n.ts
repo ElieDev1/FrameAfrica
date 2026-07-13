@@ -1294,6 +1294,19 @@ const dict = {
   'common.section': { en: 'Section', rw: 'Igice', fr: 'Section' },
   'common.min': { en: 'min', rw: 'iminota', fr: 'min' },
   'common.topic': { en: 'Topic', rw: 'Insanganyamatsiko', fr: 'Sujet' },
+
+  // ── Author pages ──────────────────────────────────────────────────────────
+  'author.kicker': { en: 'Journalist', rw: 'Umunyamakuru', fr: 'Journaliste' },
+  'author.stories': { en: 'stories', rw: 'inkuru', fr: 'articles' },
+  'author.lastStory': { en: 'last story', rw: 'inkuru iheruka', fr: 'dernier article' },
+  'author.byline': { en: 'Their stories', rw: 'Inkuru ze', fr: 'Ses articles' },
+  'author.empty': {
+    en: 'No published stories yet.',
+    rw: 'Nta nkuru zatangajwe kugeza ubu.',
+    fr: 'Aucun article publié pour le moment.',
+  },
+  'author.more': { en: 'More from', rw: 'Izindi nkuru za', fr: 'Plus de' },
+  'article.writtenBy': { en: 'Written by', rw: 'Yanditswe na', fr: 'Écrit par' },
   'topic.empty': {
     en: 'No stories tagged with this topic yet.',
     rw: 'Nta nkuru zifite iyi nsanganyamatsiko kugeza ubu.',

@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { AdminModule } from '../admin/admin.module';
 import { AuthModule } from '../auth/auth.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { AuthorsController } from './authors.controller';
+import { AuthorsService } from './authors.service';
 import { CmsAdminController } from './cms/cms-admin.controller';
 import { CmsController } from './cms/cms.controller';
 import { CmsCopydeskController } from './cms/cms-copydesk.controller';
@@ -18,12 +20,13 @@ import { ContentService } from './content.service';
   imports: [AuthModule, NotificationsModule, AdminModule],
   controllers: [
     ContentController,
+    AuthorsController,
     CmsController,
     CmsEditorController,
     CmsAdminController,
     CmsCopydeskController,
   ],
-  providers: [ContentService, CmsDraftService, CmsEditorService, SchedulerService],
+  providers: [ContentService, AuthorsService, CmsDraftService, CmsEditorService, SchedulerService],
   exports: [ContentService],
 })
 export class ContentModule {}

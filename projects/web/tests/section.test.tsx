@@ -46,7 +46,7 @@ function article(id: string, title: string): ArticleSummary {
     publishedAt: '2026-01-01T00:00:00.000Z',
     featuredImage: null,
     category: { id: 'c1', name: 'Business', slug: 'business' },
-    author: { id: 'u1', displayName: 'Jane', avatarUrl: null },
+    author: { id: 'u1', displayName: 'Jane', avatarUrl: null, slug: 'jane' },
     topics: [],
   };
 }

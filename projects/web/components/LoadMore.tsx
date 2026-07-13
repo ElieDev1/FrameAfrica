@@ -17,6 +17,7 @@ export function LoadMore({
   initialCursor,
   category,
   topic,
+  author,
   feed = false,
   pageSize = 12,
   compact = false,
@@ -25,6 +26,8 @@ export function LoadMore({
   initialCursor: string | null;
   category?: string;
   topic?: string;
+  /** An author's slug — everything that byline has published. */
+  author?: string;
   /** When true, paginate the signed-in reader's personalised feed instead. */
   feed?: boolean;
   pageSize?: number;
@@ -45,7 +48,7 @@ export function LoadMore({
     try {
       const res = feed
         ? await fetchFeed({ cursor, limit: pageSize })
-        : await fetchMoreArticles({ category, topic, cursor, limit: pageSize });
+        : await fetchMoreArticles({ category, topic, author, cursor, limit: pageSize });
       setArticles((prev) => [...prev, ...res.articles]);
       setCursor(res.nextCursor);
     } catch {

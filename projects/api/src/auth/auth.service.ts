@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { NotificationType, Prisma, RoleName, UserStatus } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
+import { uniqueAuthorSlug } from '../common/author-slug';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AccountService } from './account.service';
@@ -65,6 +66,9 @@ export class AuthService {
           email: input.email,
           displayName: input.displayName,
           passwordHash,
+          // Every account carries a byline handle from day one — a reader who is
+          // later hired should not need a data fix to get an author page.
+          authorSlug: await uniqueAuthorSlug(this.prisma, input.displayName),
           roles: {
             create: [
               {

@@ -42,7 +42,7 @@ function sampleArticle(id: string, title: string): ArticleSummary {
     publishedAt: '2026-01-01T00:00:00.000Z',
     featuredImage: null,
     category: { id: 'c1', name: 'Rwanda', slug: 'rwanda' },
-    author: { id: 'u1', displayName: 'Jane Uwase', avatarUrl: null },
+    author: { id: 'u1', displayName: 'Jane Uwase', avatarUrl: null, slug: 'jane-uwase' },
     topics: [],
   };
 }
