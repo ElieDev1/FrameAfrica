@@ -396,3 +396,43 @@ export const PhoneIcon = (p: IconProps) => (
     <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.6 2.8a2 2 0 0 1-.4 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.8.6a2 2 0 0 1 1.7 2Z" />
   </Stroke>
 );
+
+// ── Locale flags (inline SVG — reliable where emoji flags don't render) ───────
+
+/**
+ * National flag for a UI locale: 🇬🇧 English, 🇷🇼 Kinyarwanda, 🇫🇷 French — drawn
+ * inline so they render everywhere (Windows shows emoji flags as letters).
+ * Decorative: callers keep a text label, so these are aria-hidden.
+ */
+export function LocaleFlag({ code, className = '' }: { code: string; className?: string }) {
+  const cls = `h-3.5 w-auto shrink-0 rounded-[2px] ring-1 ring-black/10 ${className}`;
+  if (code === 'fr') {
+    return (
+      <svg viewBox="0 0 3 2" className={cls} aria-hidden>
+        <rect width="3" height="2" fill="#fff" />
+        <rect width="1" height="2" fill="#0055A4" />
+        <rect x="2" width="1" height="2" fill="#EF4135" />
+      </svg>
+    );
+  }
+  if (code === 'rw') {
+    return (
+      <svg viewBox="0 0 3 2" className={cls} aria-hidden>
+        <rect width="3" height="1" fill="#00A1DE" />
+        <rect y="1" width="3" height="0.5" fill="#FAD201" />
+        <rect y="1.5" width="3" height="0.5" fill="#20603D" />
+        <circle cx="2.45" cy="0.5" r="0.24" fill="#E5BE01" />
+      </svg>
+    );
+  }
+  // English — Union Jack.
+  return (
+    <svg viewBox="0 0 60 30" className={cls} aria-hidden>
+      <rect width="60" height="30" fill="#012169" />
+      <path d="M0,0 60,30 M60,0 0,30" stroke="#fff" strokeWidth="6" />
+      <path d="M0,0 60,30 M60,0 0,30" stroke="#C8102E" strokeWidth="2.5" />
+      <path d="M30,0 V30 M0,15 H60" stroke="#fff" strokeWidth="10" />
+      <path d="M30,0 V30 M0,15 H60" stroke="#C8102E" strokeWidth="6" />
+    </svg>
+  );
+}

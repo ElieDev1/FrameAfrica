@@ -54,9 +54,10 @@ export const viewport: Viewport = {
   ],
 };
 
-// Resolves the theme before first paint (stored choice → system preference →
-// dark) so the page never flashes the wrong palette.
-const themeScript = `(function(){try{var t=localStorage.getItem('fa-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
+// Resolves the theme before first paint so the page never flashes the wrong
+// palette. Light is the default (the brand's white mode); the reader's saved
+// choice always wins once they've toggled.
+const themeScript = `(function(){try{var t=localStorage.getItem('fa-theme')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
 
 // Injected raw so the ::-webkit-scrollbar rules survive (Tailwind/Lightning CSS
 // strips them from the stylesheet). Slim bars everywhere; `.no-scrollbar` hides
@@ -80,7 +81,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      data-theme="dark"
+      data-theme="light"
       suppressHydrationWarning
       className={`${roboto.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >

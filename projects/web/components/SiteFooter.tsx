@@ -199,7 +199,7 @@ export async function SiteFooter() {
             </span>
             <span className="flex items-center gap-2">
               <span className="uppercase tracking-[0.14em]">{t(locale, 'footer.language')}</span>
-              <LanguageSwitcher current={locale} />
+              <LanguageSwitcher current={locale} dropUp />
             </span>
           </div>
         </div>
