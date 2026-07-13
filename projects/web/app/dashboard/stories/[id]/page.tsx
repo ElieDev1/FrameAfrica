@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CorrectionForm } from '@/components/cms/CorrectionForm';
 import { DraftForm } from '@/components/cms/DraftForm';
+import { fetchAiStatus } from '@/lib/ai-actions';
 import { LiveComposer } from '@/components/cms/LiveComposer';
 import { StatusBadge } from '@/components/cms/StatusBadge';
 import {
@@ -28,11 +29,12 @@ type PageProps = { params: Promise<{ id: string }> };
 export default async function EditDraftPage({ params }: PageProps) {
   const user = await requireStaff();
   const { id } = await params;
-  const [draft, categories, topics, locale] = await Promise.all([
+  const [draft, categories, topics, locale, ai] = await Promise.all([
     getDraft(id),
     categoryOptions(),
     topicOptions(),
     getLocale(),
+    fetchAiStatus(),
   ]);
   const editable = isEditable(draft.status);
 
@@ -68,6 +70,7 @@ export default async function EditDraftPage({ params }: PageProps) {
               categories={categories}
               topics={topics}
               mode="edit"
+              aiEnabled={ai.configured}
               initial={{
                 title: draft.title,
                 categoryId: draft.category.id,

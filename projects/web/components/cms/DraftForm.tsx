@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useActionState, useState } from 'react';
+import { useActionState, useCallback, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import {
   CheckIcon,
@@ -12,9 +12,11 @@ import {
   TrashIcon,
 } from '@/components/icons';
 import { useT } from '@/components/LocaleProvider';
+import { blocksToText } from '@/lib/ai-types';
 import type { Block } from '@/lib/api';
 import type { CategoryOption, TopicOption } from '@/lib/cms';
 import type { DraftFormState } from '@/lib/cms-actions';
+import { AiAssist } from './AiAssist';
 import { BlockEditor } from './BlockEditor';
 import { MediaPicker } from './MediaPicker';
 
@@ -157,15 +159,19 @@ export function DraftForm({
   topics,
   initial,
   mode,
+  aiEnabled = false,
 }: {
   action: Action;
   categories: CategoryOption[];
   topics: TopicOption[];
   initial?: DraftInitial;
   mode: 'create' | 'edit';
+  /** True when an Anthropic key is configured — otherwise the assist panel is not shown. */
+  aiEnabled?: boolean;
 }) {
   const t = useT();
   const [state, formAction] = useActionState(action, {});
+  const formRef = useRef<HTMLFormElement>(null);
   const [featured, setFeatured] = useState({
     url: initial?.featuredImageUrl ?? '',
     alt: initial?.featuredImageAlt ?? '',
@@ -175,6 +181,8 @@ export function DraftForm({
   const [title, setTitle] = useState(initial?.title ?? '');
   const [subtitle, setSubtitle] = useState(initial?.subtitle ?? '');
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? '');
+  const [categoryId, setCategoryId] = useState(initial?.categoryId ?? '');
+  const [language, setLanguage] = useState(initial?.language ?? 'en');
   const [picked, setPicked] = useState<Set<string>>(new Set(initial?.topicSlugs ?? []));
 
   function toggleTopic(slug: string, on: boolean) {
@@ -186,8 +194,31 @@ export function DraftForm({
     });
   }
 
+  /**
+   * The story as it stands. The body lives inside the block editor's own state
+   * and reaches the form as serialised JSON, so the assist reads that hidden
+   * field rather than duplicating the editor's state up here.
+   */
+  const currentText = useCallback((): string => {
+    const field = formRef.current?.elements.namedItem('blocks');
+    const raw = field instanceof HTMLInputElement ? field.value : '';
+    try {
+      return blocksToText(JSON.parse(raw) as Block[]);
+    } catch {
+      return '';
+    }
+  }, []);
+
+  /** Tick the topics the assist suggested that the newsroom actually has. */
+  function selectSuggestedTopics(names: string[]) {
+    const wanted = new Set(names.map((n) => n.toLowerCase()));
+    const slugs = topics.filter((t) => wanted.has(t.name.toLowerCase())).map((t) => t.slug);
+    setPicked((prev) => new Set([...prev, ...slugs]));
+  }
+
   return (
     <form
+      ref={formRef}
       action={formAction}
       className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
     >
@@ -271,11 +302,28 @@ export function DraftForm({
           <SaveButton label={mode === 'create' ? t('ddf.createDraft') : t('ddf.saveChanges')} />
         </section>
 
+        {aiEnabled && (
+          <AiAssist
+            getText={currentText}
+            getTitle={() => title}
+            language={language}
+            onHeadline={setTitle}
+            onStandfirst={setSubtitle}
+            onExcerpt={setExcerpt}
+            onCategory={(name) => {
+              const match = categories.find((c) => c.name.toLowerCase() === name.toLowerCase());
+              if (match) setCategoryId(match.id);
+            }}
+            onTags={selectSuggestedTopics}
+          />
+        )}
+
         <Panel title={t('ddf.details')} icon={SettingsIcon}>
           <Field label={t('ddf.section')}>
             <select
               name="categoryId"
-              defaultValue={initial?.categoryId ?? ''}
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
               required
               className={inputClass}
             >
@@ -290,7 +338,12 @@ export function DraftForm({
             </select>
           </Field>
           <Field label={t('ddf.language')}>
-            <select name="language" defaultValue={initial?.language ?? 'en'} className={inputClass}>
+            <select
+              name="language"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className={inputClass}
+            >
               {LANGUAGES.map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
@@ -409,7 +462,7 @@ export function DraftForm({
                     type="checkbox"
                     name="topics"
                     value={topic.slug}
-                    defaultChecked={picked.has(topic.slug)}
+                    checked={picked.has(topic.slug)}
                     onChange={(e) => toggleTopic(topic.slug, e.target.checked)}
                     className="sr-only"
                   />

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { DraftForm } from '@/components/cms/DraftForm';
+import { fetchAiStatus } from '@/lib/ai-actions';
 import { categoryOptions, getCopyDeskItem, requireCopyDesk, topicOptions } from '@/lib/cms';
 import { copyEditSaveAction, passCopyEditAction, returnCopyEditAction } from '@/lib/cms-actions';
 import { t } from '@/lib/i18n';
@@ -13,11 +14,12 @@ type PageProps = { params: Promise<{ id: string }> };
 export default async function CopyEditPage({ params }: PageProps) {
   await requireCopyDesk();
   const { id } = await params;
-  const [article, categories, topics, locale] = await Promise.all([
+  const [article, categories, topics, locale, ai] = await Promise.all([
     getCopyDeskItem(id),
     categoryOptions(),
     topicOptions(),
     getLocale(),
+    fetchAiStatus(),
   ]);
 
   const saveAction = copyEditSaveAction.bind(null, id);
@@ -40,6 +42,7 @@ export default async function CopyEditPage({ params }: PageProps) {
           categories={categories}
           topics={topics}
           mode="edit"
+          aiEnabled={ai.configured}
           initial={{
             title: article.title,
             categoryId: article.category.id,

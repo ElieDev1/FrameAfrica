@@ -261,6 +261,14 @@ export const INTEGRATION_CATALOGUE: IntegrationDef[] = [
     group: 'ai',
   },
   {
+    key: 'ANTHROPIC_MODEL',
+    label: 'Claude model',
+    description: 'Which Claude model the newsroom assist runs on. Leave blank for the default.',
+    secret: false,
+    group: 'ai',
+    placeholder: 'claude-opus-4-8',
+  },
+  {
     key: 'OPENAI_API_KEY',
     label: 'OpenAI',
     description: 'Alternate AI provider for the same assist features.',
