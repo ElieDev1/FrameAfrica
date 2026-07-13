@@ -276,6 +276,30 @@ export const INTEGRATION_CATALOGUE: IntegrationDef[] = [
     group: 'ai',
   },
 
+  // ── Push notifications ────────────────────────────────────────────────────
+  {
+    key: 'VAPID_PUBLIC_KEY',
+    label: 'Web push public key',
+    description: 'Identifies us to the browser’s push service. Generate the pair in Settings.',
+    secret: false,
+    group: 'site',
+  },
+  {
+    key: 'VAPID_PRIVATE_KEY',
+    label: 'Web push private key',
+    description: 'Signs every alert we send. Never leaves the server.',
+    secret: true,
+    group: 'site',
+  },
+  {
+    key: 'VAPID_SUBJECT',
+    label: 'Web push contact',
+    description: 'How a push service reaches us about a problem — a mailto: or https: URL.',
+    secret: false,
+    group: 'site',
+    placeholder: 'mailto:newsroom@frameafrica.rw',
+  },
+
   // ── Analytics & anti-abuse ────────────────────────────────────────────────
   {
     key: 'GA_MEASUREMENT_ID',

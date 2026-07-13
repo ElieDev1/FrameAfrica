@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import type { PrismaService } from '../../prisma/prisma.service';
 import type { NotificationsService } from '../../notifications/notifications.service';
+import type { PushService } from '../../push/push.service';
 import { CmsEditorService } from './cms-editor.service';
 
 const row = (over: Record<string, unknown> = {}) => ({
@@ -26,13 +27,16 @@ function build() {
     articleCorrection: { create: jest.fn() },
   };
   const notifications = { create: jest.fn().mockResolvedValue(undefined) };
+  const push = { broadcast: jest.fn().mockResolvedValue({ sent: 0, failed: 0, pruned: 0 }) };
   return {
     service: new CmsEditorService(
       prisma as unknown as PrismaService,
       notifications as unknown as NotificationsService,
+      push as unknown as PushService,
     ),
     prisma,
     notifications,
+    push,
   };
 }
 
@@ -67,6 +71,43 @@ describe('CmsEditorService', () => {
       expect(notifications.create).toHaveBeenCalledWith(
         expect.objectContaining({ userId: 'u1', type: 'article_published' }),
       );
+    });
+
+    it('alerts subscribed readers when the story is breaking', async () => {
+      const { service, prisma, push } = build();
+      prisma.article.findFirst.mockResolvedValue(row({ status: 'ready' }));
+      prisma.article.update.mockResolvedValue(
+        row({ status: 'published', isBreaking: true, subtitle: 'The lede.' }),
+      );
+
+      await service.publish('a1');
+
+      expect(push.broadcast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'A submitted story',
+          body: 'The lede.',
+          url: '/article/s1',
+        }),
+      );
+    });
+
+    it('does not interrupt readers for an ordinary story', async () => {
+      const { service, prisma, push } = build();
+      prisma.article.findFirst.mockResolvedValue(row({ status: 'ready' }));
+      prisma.article.update.mockResolvedValue(row({ status: 'published', isBreaking: false }));
+
+      await service.publish('a1');
+
+      expect(push.broadcast).not.toHaveBeenCalled();
+    });
+
+    it('still publishes when the alert cannot be sent — the story is out either way', async () => {
+      const { service, prisma, push } = build();
+      prisma.article.findFirst.mockResolvedValue(row({ status: 'ready' }));
+      prisma.article.update.mockResolvedValue(row({ status: 'published', isBreaking: true }));
+      push.broadcast.mockRejectedValue(new Error('push service down'));
+
+      await expect(service.publish('a1')).resolves.toMatchObject({ status: 'published' });
     });
 
     it('refuses to publish an article that is not in review', async () => {

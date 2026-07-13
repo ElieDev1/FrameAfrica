@@ -6,6 +6,9 @@ import type { PublicSiteSettings } from '@/lib/settings-types';
 
 jest.mock('@/lib/api', () => ({ fetchCategories: jest.fn() }));
 jest.mock('@/lib/settings', () => ({ fetchPublicSiteSettings: jest.fn() }));
+// The alerts opt-in is its own async server component (it asks the API whether
+// web push is configured); the footer's own rendering is what's under test here.
+jest.mock('@/components/BreakingAlerts', () => ({ BreakingAlerts: () => null }));
 jest.mock('next/headers', () => ({
   cookies: jest.fn().mockResolvedValue({ get: () => undefined }),
   headers: jest.fn().mockResolvedValue({ get: () => undefined }),

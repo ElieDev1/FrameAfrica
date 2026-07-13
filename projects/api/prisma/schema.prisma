@@ -189,8 +189,31 @@ model User {
   galleries      Gallery[]
   subscriptions  Subscription[]
   payments       Payment[]
+  pushSubscriptions PushSubscription[]
 
   @@map("user")
+}
+
+/// A browser that has agreed to receive breaking-news alerts (documents/14 §6).
+/// `userId` is null for a reader who never signed in — the alert is a promise to
+/// a browser, not to an account. `endpoint` is the push service's URL for that
+/// browser and is the identity of the subscription.
+model PushSubscription {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  endpoint   String    @unique
+  /// The browser's public key and auth secret — the payload is encrypted to
+  /// these, so even the push service cannot read the headline we send.
+  p256dh     String
+  auth       String
+  userId     String?   @map("user_id") @db.Uuid
+  userAgent  String?   @map("user_agent")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  lastSentAt DateTime? @map("last_sent_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscription")
 }
 
 /// A reader's saved article (one per user per article). Surfaced in the reader's

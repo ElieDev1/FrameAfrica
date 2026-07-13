@@ -2,11 +2,13 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ArticleStatus, NotificationType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../../notifications/notifications.service';
+import { PushService } from '../../push/push.service';
 import { stripText } from '../blocks';
 
 const reviewInclude = {
@@ -38,9 +40,12 @@ export interface CorrectionItem {
  */
 @Injectable()
 export class CmsEditorService {
+  private readonly logger = new Logger(CmsEditorService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly push: PushService,
   ) {}
 
   /** Articles submitted for review (status `ready`), oldest first. */
@@ -133,6 +138,22 @@ export class CmsEditorService {
       title: `Your story is live: “${updated.title}”`,
       link: `/article/${updated.slug}`,
     });
+
+    // Breaking news is the one thing worth interrupting a reader for. A failure
+    // to reach the push service must not fail the publish — the story is out.
+    if (updated.isBreaking) {
+      try {
+        await this.push.broadcast({
+          title: updated.title,
+          body: updated.subtitle ?? updated.excerpt ?? undefined,
+          url: `/article/${updated.slug}`,
+          tag: `article-${updated.id}`,
+        });
+      } catch (error) {
+        this.logger.error('Breaking-news alert failed to send', error as Error);
+      }
+    }
+
     return toReviewItem(updated);
   }
 

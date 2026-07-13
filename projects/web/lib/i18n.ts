@@ -1306,6 +1306,21 @@ const dict = {
     fr: 'Aucun article publié pour le moment.',
   },
   'author.more': { en: 'More from', rw: 'Izindi nkuru za', fr: 'Plus de' },
+
+  // ── Breaking-news alerts (web push) ───────────────────────────────────────
+  'push.title': { en: 'Breaking news alerts', rw: 'Inkuru ishyushye', fr: 'Alertes info' },
+  'push.blurb': {
+    en: 'Get a notification the moment a big story breaks — even when this site is closed.',
+    rw: 'Menyeshwa ako kanya inkuru ikomeye ivutse, n’ubwo uba udafunguye uru rubuga.',
+    fr: 'Soyez alerté dès qu’une information majeure tombe, même site fermé.',
+  },
+  'push.off': { en: 'Alert me', rw: 'Menyesha', fr: 'M’alerter' },
+  'push.on': { en: 'Alerts on', rw: 'Ubutumwa burafunguye', fr: 'Alertes activées' },
+  'push.blocked': {
+    en: 'Notifications are blocked for this site in your browser settings.',
+    rw: 'Ubutumwa bwahagaritswe kuri uru rubuga muri mushakisha yawe.',
+    fr: 'Les notifications sont bloquées pour ce site dans votre navigateur.',
+  },
   'article.writtenBy': { en: 'Written by', rw: 'Yanditswe na', fr: 'Écrit par' },
   'topic.empty': {
     en: 'No stories tagged with this topic yet.',

@@ -4,6 +4,7 @@ import { type MessageKey, t, translateCategory } from '@/lib/i18n';
 import { getLocale } from '@/lib/i18n-server';
 import { fetchPublicSiteSettings } from '@/lib/settings';
 import type { SocialLink } from '@/lib/settings-types';
+import { BreakingAlerts } from './BreakingAlerts';
 import { BrandIcon, MailIcon, PhoneIcon, type BrandName } from './icons';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { NewsletterBox } from './NewsletterBox';
@@ -155,6 +156,8 @@ export async function SiteFooter() {
 
           <div className="lg:w-full lg:justify-self-end">
             <NewsletterBox />
+            {/* Email for the daily; a push alert for the story that cannot wait. */}
+            <BreakingAlerts />
           </div>
         </div>
 

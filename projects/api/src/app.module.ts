@@ -33,6 +33,7 @@ import { InteractivesModule } from './interactives/interactives.module';
 import { EngagementModule } from './engagement/engagement.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AiModule } from './ai/ai.module';
+import { PushModule } from './push/push.module';
 import { AdminModule } from './admin/admin.module';
 
 @Module({
@@ -70,6 +71,7 @@ import { AdminModule } from './admin/admin.module';
     EngagementModule,
     AnalyticsModule,
     AiModule,
+    PushModule,
     AdminModule,
   ],
   controllers: [AppController],
