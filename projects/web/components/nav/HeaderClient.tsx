@@ -89,13 +89,17 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
         condensed ? 'shadow-sm' : ''
       }`}
     >
+      {/* Row 1 — brand + actions. The section nav gets its own row below, the
+          way a newspaper masthead runs: cramming brand + nine sections + the
+          actions cluster into one row needed ~1390px and scrolled the page
+          sideways on any laptop. */}
       <div
-        className={`mx-auto flex max-w-[1440px] items-center gap-3 px-4 transition-[padding] duration-300 sm:px-6 ${
+        className={`mx-auto flex max-w-[1440px] items-center gap-2 px-3 transition-[padding] duration-300 sm:gap-3 sm:px-6 ${
           condensed ? 'py-2' : 'py-3'
         }`}
       >
         {/* Brand */}
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex min-w-0 shrink items-center gap-2">
           <div className="flex items-center lg:hidden">
             <MobileMenu
               sections={allSections}
@@ -107,18 +111,60 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
               locale={locale}
             />
           </div>
-          <Link href="/" aria-label="Frame Africa — home" className="shrink-0">
+          <Link href="/" aria-label="Frame Africa — home" className="min-w-0 shrink">
             <Wordmark />
           </Link>
         </div>
 
-        {/* Section nav (single, centered) — full nav from lg; hamburger below */}
-        {sections.length > 0 && (
-          <nav aria-label="Sections" className="mx-auto hidden shrink-0 lg:block">
+        {/* Actions */}
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+          {/* An international, trilingual site keeps its language choice in the
+              masthead — not buried in the footer. */}
+          <span className="hidden font-mono text-[11px] md:inline-flex">
+            <LanguageSwitcher current={locale} />
+          </span>
+          <SearchForm locale={locale} />
+          <Link
+            href="/search"
+            aria-label={t(locale, 'nav.searchAria')}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-primary lg:hidden"
+          >
+            <SearchIcon size={16} />
+          </Link>
+          <ThemeToggle />
+          {user ? (
+            <ProfileMenu user={user} locale={locale} />
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="hidden whitespace-nowrap text-[13px] font-medium text-muted transition-colors hover:text-primary sm:inline"
+              >
+                {t(locale, 'nav.signIn')}
+              </Link>
+              <Link
+                href="/signup"
+                className="whitespace-nowrap rounded-full bg-primary px-2.5 py-1.5 text-[13px] font-semibold text-black transition-transform hover:-translate-y-px sm:px-3"
+              >
+                {t(locale, 'nav.subscribe')}
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Row 2 — the section bar. Full width to itself, so it always fits; it
+          folds away once the reader scrolls, keeping the sticky bar slim. */}
+      {sections.length > 0 && !condensed && (
+        <div className="hidden border-t border-border lg:block">
+          <nav aria-label="Sections" className="mx-auto max-w-[1440px] px-6">
             <ul className="flex items-center">
-              {sections.map((section) => {
+              {sections.map((section, index) => {
                 const active = sectionActive(section);
                 const feat = featured[section.slug];
+                // The last few menus are anchored to their right edge, or a
+                // 36rem panel hanging off the final section would run off-screen.
+                const alignRight = index >= sections.length - 3;
                 return (
                   <li key={section.id} className="group relative">
                     <Link
@@ -144,6 +190,7 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
                         featured={feat}
                         activeSlug={pathname}
                         locale={locale}
+                        alignRight={alignRight}
                       />
                     )}
                   </li>
@@ -151,44 +198,8 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
               })}
             </ul>
           </nav>
-        )}
-
-        {/* Actions */}
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          {/* An international, trilingual site keeps its language choice in the
-              masthead — not buried in the footer. */}
-          <span className="hidden font-mono text-[11px] md:inline-flex">
-            <LanguageSwitcher current={locale} />
-          </span>
-          <SearchForm locale={locale} />
-          <Link
-            href="/search"
-            aria-label={t(locale, 'nav.searchAria')}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-primary lg:hidden"
-          >
-            <SearchIcon size={16} />
-          </Link>
-          <ThemeToggle />
-          {user ? (
-            <ProfileMenu user={user} locale={locale} />
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="hidden whitespace-nowrap text-[13px] font-medium text-muted transition-colors hover:text-primary sm:inline"
-              >
-                {t(locale, 'nav.signIn')}
-              </Link>
-              <Link
-                href="/signup"
-                className="whitespace-nowrap rounded-full bg-primary px-3 py-1.5 text-[13px] font-semibold text-black transition-transform hover:-translate-y-px"
-              >
-                {t(locale, 'nav.subscribe')}
-              </Link>
-            </>
-          )}
         </div>
-      </div>
+      )}
     </header>
   );
 }
@@ -215,18 +226,21 @@ function MegaMenu({
   featured,
   activeSlug,
   locale,
+  alignRight = false,
 }: {
   section: CategoryNode;
   featured?: FeaturedStory;
   activeSlug: string;
   locale: Locale;
+  /** Anchor the panel to its right edge — for sections near the end of the bar. */
+  alignRight?: boolean;
 }) {
   const wide = Boolean(featured);
   return (
     <div
-      className={`invisible absolute left-0 top-full z-30 translate-y-1 rounded-2xl border border-border bg-surface/95 p-3 opacity-0 shadow-2xl backdrop-blur-xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 ${
-        wide ? 'w-[36rem]' : 'w-max min-w-[15rem] max-w-[34rem]'
-      }`}
+      className={`invisible absolute top-full z-30 translate-y-1 rounded-2xl border border-border bg-surface/95 p-3 opacity-0 shadow-2xl backdrop-blur-xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 ${
+        alignRight ? 'right-0' : 'left-0'
+      } ${wide ? 'w-[36rem]' : 'w-max min-w-[15rem] max-w-[34rem]'}`}
     >
       <div className="mb-2 flex items-center justify-between gap-8 border-b border-border pb-2">
         <span className="font-heading text-sm font-bold text-text">
