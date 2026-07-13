@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import type { CategoryNode } from '@/lib/api';
 import { type Locale, type MessageKey, t, translateCategory } from '@/lib/i18n';
 import { logout } from '@/lib/auth-actions';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 
 /** Hub pages shown under the taxonomy "Multimedia" section. */
 const MULTIMEDIA_HUBS: { nameKey: MessageKey; href: string }[] = [
@@ -181,6 +182,13 @@ export function MobileMenu({
                   );
                 })}
               </nav>
+
+              <div className="mt-5 flex items-center justify-between border-b border-border pb-4 font-mono text-xs">
+                <span className="uppercase tracking-[0.14em] text-faint">
+                  {t(locale, 'footer.language')}
+                </span>
+                <LanguageSwitcher current={locale} />
+              </div>
 
               <div className="mt-6 flex flex-col gap-2">
                 {signedIn ? (

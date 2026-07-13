@@ -2,8 +2,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ClockIcon } from '@/components/icons';
 import type { ArticleSummary, FeaturedImage } from '@/lib/api';
-import { formatDate } from '@/lib/format';
+import { newsTime } from '@/lib/format';
 import { type Locale, t, translateCategory } from '@/lib/i18n';
+
+/** The pulsing LIVE flag — the strongest signal on any news front. */
+export function LiveBadge({ locale }: { locale?: Locale }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded bg-accent-red px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-white">
+      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" aria-hidden />
+      {locale ? t(locale, 'article.live') : 'Live'}
+    </span>
+  );
+}
 
 function Badges({ article, locale }: { article: ArticleSummary; locale?: Locale }) {
   return (
@@ -16,7 +26,8 @@ function Badges({ article, locale }: { article: ArticleSummary; locale?: Locale 
           ? translateCategory(locale, article.category.slug, article.category.name)
           : article.category.name}
       </Link>
-      {article.isBreaking && (
+      {article.isLive && <LiveBadge locale={locale} />}
+      {article.isBreaking && !article.isLive && (
         <span className="rounded bg-accent-red px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-white">
           {locale ? t(locale, 'home.breaking') : 'Breaking'}
         </span>
@@ -30,12 +41,26 @@ function Badges({ article, locale }: { article: ArticleSummary; locale?: Locale 
   );
 }
 
-function Meta({ article, locale }: { article: ArticleSummary; locale?: Locale }) {
+function Meta({
+  article,
+  locale,
+  compact = false,
+}: {
+  article: ArticleSummary;
+  locale?: Locale;
+  compact?: boolean;
+}) {
+  // Small cards carry only the freshness signal; the byline is for full cards.
   return (
     <p className="flex flex-wrap items-center gap-x-1.5 font-mono text-xs text-muted">
-      <span className="text-text/80">{article.author.displayName}</span>
-      {article.publishedAt && <span>· {formatDate(article.publishedAt)}</span>}
-      {article.readTimeMin && (
+      {!compact && <span className="text-text/80">{article.author.displayName}</span>}
+      {article.publishedAt && (
+        <span>
+          {compact ? '' : '· '}
+          {newsTime(article.publishedAt, locale)}
+        </span>
+      )}
+      {!compact && article.readTimeMin && (
         <span className="inline-flex items-center gap-1">
           · <ClockIcon size={12} /> {article.readTimeMin} {locale ? t(locale, 'common.min') : 'min'}
         </span>
@@ -140,7 +165,7 @@ export function ArticleCard({
           {article.excerpt}
         </p>
       )}
-      <Meta article={article} locale={locale} />
+      <Meta article={article} locale={locale} compact={compact} />
     </div>
   );
 

@@ -1,11 +1,28 @@
-/** Format an ISO timestamp as e.g. "6 Jul 2026"; empty string when null. */
-export function formatDate(iso: string | null): string {
+/** BCP-47 tags for our UI locales (dates render in the reader's language). */
+const DATE_LOCALE: Record<string, string> = { en: 'en-GB', rw: 'rw-RW', fr: 'fr-FR' };
+
+/** Format an ISO timestamp as e.g. "6 Jul 2026" / "6 juil. 2026"; '' when null. */
+export function formatDate(iso: string | null, locale = 'en'): string {
   if (!iso) return '';
-  return new Date(iso).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
+  const options = { day: 'numeric', month: 'short', year: 'numeric' } as const;
+  try {
+    return new Date(iso).toLocaleDateString(DATE_LOCALE[locale] ?? locale, options);
+  } catch {
+    return new Date(iso).toLocaleDateString('en-GB', options);
+  }
+}
+
+/**
+ * The timestamp a news card wants: relative while the story is fresh
+ * ("3 hours ago"), the plain date once it's older than a day. This is the
+ * signal that distinguishes a news front from a catalogue — always prefer it
+ * over `formatDate` on reader-facing story lists.
+ */
+export function newsTime(iso: string | null, locale = 'en'): string {
+  if (!iso) return '';
+  const ageMs = Date.now() - new Date(iso).getTime();
+  if (ageMs < 24 * 3_600_000) return timeAgo(iso, locale);
+  return formatDate(iso, locale);
 }
 
 const JUST_NOW: Record<string, string> = {

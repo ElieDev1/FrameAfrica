@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import type { CategoryNode } from '@/lib/api';
 import { type Locale, type MessageKey, t, translateCategory } from '@/lib/i18n';
 import { ChevronDownIcon, ChevronRightIcon, SearchIcon } from '../icons';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 import { ThemeToggle } from '../ThemeToggle';
 import { Wordmark } from '../Wordmark';
 import { MobileMenu } from './MobileMenu';
@@ -154,6 +155,11 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
 
         {/* Actions */}
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          {/* An international, trilingual site keeps its language choice in the
+              masthead — not buried in the footer. */}
+          <span className="hidden font-mono text-[11px] md:inline-flex">
+            <LanguageSwitcher current={locale} />
+          </span>
           <SearchForm locale={locale} />
           <Link
             href="/search"

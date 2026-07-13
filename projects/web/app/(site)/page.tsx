@@ -124,17 +124,22 @@ export default async function Home() {
           </aside>
         </div>
 
-        {/* Section bands */}
+        {/* Section bands — shapes alternate (feature / cards) so the front reads
+            like a paper, with a standard mid-page banner between bands two
+            and three. */}
         {sections.length > 0 && (
           <div className="mt-14 flex flex-col gap-14">
-            {sections.map((section) => (
-              <SectionBlock
-                key={section.slug}
-                name={section.name}
-                slug={section.slug}
-                articles={section.articles}
-                locale={locale}
-              />
+            {sections.map((section, index) => (
+              <div key={section.slug} className="flex flex-col gap-14">
+                <SectionBlock
+                  name={section.name}
+                  slug={section.slug}
+                  articles={section.articles}
+                  locale={locale}
+                  variant={index % 2 === 0 ? 'feature' : 'cards'}
+                />
+                {index === 1 && <AdSlot variant="leaderboard" />}
+              </div>
             ))}
           </div>
         )}

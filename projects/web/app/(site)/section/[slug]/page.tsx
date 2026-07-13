@@ -135,6 +135,9 @@ export default async function SectionPage({ params }: PageProps) {
         )}
       </header>
 
+      {/* Standard top-banner position: directly under the section masthead. */}
+      {!isMultimedia && <AdSlot variant="leaderboard" className="mt-6" />}
+
       {isMultimedia && <MultimediaHubs locale={locale} />}
 
       {articles.length === 0

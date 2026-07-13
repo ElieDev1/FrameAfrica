@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ArticleSummary } from '@/lib/api';
+import { newsTime } from '@/lib/format';
 import { RailHeading } from './SectionHeading';
 import { type Locale, t, translateCategory } from '@/lib/i18n';
 
@@ -25,14 +26,21 @@ export function HeadlineItem({
         </span>
       )}
       <div className="min-w-0">
-        <Link
-          href={`/section/${article.category.slug}`}
-          className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary hover:underline"
-        >
-          {locale
-            ? translateCategory(locale, article.category.slug, article.category.name)
-            : article.category.name}
-        </Link>
+        <span className="flex items-baseline gap-2">
+          <Link
+            href={`/section/${article.category.slug}`}
+            className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary hover:underline"
+          >
+            {locale
+              ? translateCategory(locale, article.category.slug, article.category.name)
+              : article.category.name}
+          </Link>
+          {article.publishedAt && (
+            <time dateTime={article.publishedAt} className="font-mono text-[10px] text-faint">
+              {newsTime(article.publishedAt, locale)}
+            </time>
+          )}
+        </span>
         <h3 className="mt-0.5 font-heading text-[15px] font-bold leading-snug text-text">
           <Link
             href={`/article/${article.slug}`}

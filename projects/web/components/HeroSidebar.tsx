@@ -1,8 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { LiveBadge } from '@/components/ArticleCard';
 import { ClockIcon } from '@/components/icons';
 import type { ArticleSummary } from '@/lib/api';
-import { formatDate } from '@/lib/format';
+import { newsTime } from '@/lib/format';
 import { type Locale, t, translateCategory } from '@/lib/i18n';
 
 function Kicker({
@@ -26,9 +27,15 @@ function Kicker({
           ? translateCategory(locale, article.category.slug, article.category.name)
           : article.category.name}
       </Link>
-      {article.isBreaking && (
+      {article.isLive && <LiveBadge locale={locale} />}
+      {article.isBreaking && !article.isLive && (
         <span className="rounded bg-accent-red px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wide text-white">
           {locale ? t(locale, 'home.breaking') : 'Breaking'}
+        </span>
+      )}
+      {small && article.publishedAt && (
+        <span className="font-mono text-[10px] normal-case tracking-normal text-faint">
+          {newsTime(article.publishedAt, locale)}
         </span>
       )}
     </span>
@@ -38,7 +45,7 @@ function Kicker({
 function Meta({ article, locale }: { article: ArticleSummary; locale?: Locale }) {
   return (
     <p className="flex flex-wrap items-center gap-x-1.5 font-mono text-[11px] text-muted">
-      {article.publishedAt && <span>{formatDate(article.publishedAt)}</span>}
+      {article.publishedAt && <span>{newsTime(article.publishedAt, locale)}</span>}
       {article.readTimeMin && (
         <span className="inline-flex items-center gap-1">
           · <ClockIcon size={11} /> {article.readTimeMin} {locale ? t(locale, 'common.min') : 'min'}
