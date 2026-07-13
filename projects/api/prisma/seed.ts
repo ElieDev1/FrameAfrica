@@ -1673,6 +1673,35 @@ async function main(): Promise<void> {
     });
   }
 
+  // ── Subscription plans ────────────────────────────────────────────────────
+  // What the paywall sells. Prices are in minor units; RWF has none, so the
+  // figures below are francs.
+  const plans = [
+    {
+      code: 'digital-monthly',
+      name: 'Digital monthly',
+      description: 'Unlimited access to every story, cancel any time.',
+      priceCents: 5_000,
+      interval: 'month' as const,
+      sortOrder: 1,
+    },
+    {
+      code: 'digital-annual',
+      name: 'Digital annual',
+      description: 'Two months free versus paying monthly.',
+      priceCents: 50_000,
+      interval: 'year' as const,
+      sortOrder: 2,
+    },
+  ];
+  for (const plan of plans) {
+    await prisma.plan.upsert({
+      where: { code: plan.code },
+      update: {}, // never overwrite prices an admin has set
+      create: { ...plan, currency: 'RWF' },
+    });
+  }
+
   const [categories, published] = await Promise.all([
     prisma.category.count(),
     prisma.article.count({ where: { status: ArticleStatus.published } }),

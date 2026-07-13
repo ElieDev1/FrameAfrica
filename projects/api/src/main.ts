@@ -24,7 +24,10 @@ function toValidationDetails(errors: ValidationError[]): ErrorDetail[] {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // `rawBody` keeps the untouched request body around, which payment webhooks
+  // need: a Stripe signature is an HMAC over the exact bytes sent, so verifying
+  // it against the re-serialised JSON would always fail (documents/05 §8).
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true });
 
   // Security headers (documents/05 §7). The API serves JSON to the BFF, so the
   // strict defaults are safe; CSP is disabled here because content security is
