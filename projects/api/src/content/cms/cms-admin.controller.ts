@@ -35,11 +35,17 @@ export class CmsAdminController {
   constructor(private readonly drafts: CmsDraftService) {}
 
   @Get()
-  async list(@Query('status') status?: string, @Query('q') q?: string) {
+  async list(
+    @Query('status') status?: string,
+    @Query('q') q?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const parsed = Number(limit);
     return apiResponse(
       await this.drafts.listAll({
         status: isStatus(status) ? status : undefined,
         q: q?.trim() || undefined,
+        limit: Number.isFinite(parsed) && parsed > 0 ? parsed : undefined,
       }),
     );
   }
