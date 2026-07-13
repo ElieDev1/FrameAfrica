@@ -15,8 +15,11 @@ test('homepage loads and opens a story', async ({ page }) => {
   // Open the first article and confirm the article page renders. Scope to the
   // page body and to visible links: the header's section menus each carry a
   // featured-article link, but they are closed (hidden) until hovered, so a
-  // bare `.first()` would grab header chrome rather than a story.
-  const firstStory = page.locator('main a[href^="/article/"]:visible').first();
+  // bare `.first()` would grab header chrome rather than a story. The breaking
+  // ticker is excluded too — its headlines scroll, so a click races the animation.
+  const firstStory = page
+    .locator('main a[href^="/article/"]:visible:not(.fa-breaking-item)')
+    .first();
   await expect(firstStory).toBeVisible();
   await firstStory.click();
 

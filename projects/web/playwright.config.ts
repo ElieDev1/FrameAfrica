@@ -8,8 +8,11 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
-  timeout: 30_000,
-  expect: { timeout: 10_000 },
+  // Generous: these run against a real Next server, which compiles a route the
+  // first time it is asked for. A tight timeout here fails the build for a slow
+  // first paint, not for a broken product.
+  timeout: 60_000,
+  expect: { timeout: 15_000 },
   fullyParallel: true,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
