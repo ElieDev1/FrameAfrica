@@ -96,11 +96,18 @@ export default async function Home() {
           <HeroSidebar articles={secondary} locale={locale} />
         </section>
 
-        <AdSlot variant="leaderboard" className="mt-10" />
+        <AdSlot variant="leaderboard" className="mt-10" desktopOnly />
 
-        {/* Main river + sticky rail */}
+        {/* Main river + rail. On a phone this collapses to one column, so the
+            order matters: "Just in" comes before the long river (fresh headlines
+            first), and the rail's desktop furniture — weather, markets, the tall
+            half-page ad — is dropped rather than dumped below the fold. */}
         <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <main>
+          <aside className="order-1 lg:col-start-2 lg:row-start-1">
+            <JustIn articles={rest.slice(0, 7)} locale={locale} />
+          </aside>
+
+          <main className="order-2 lg:col-start-1 lg:row-start-1 lg:row-span-2">
             <SectionHeading title={t(locale, 'home.latest')} id="latest" />
             {river.length > 0 ? (
               <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
@@ -111,16 +118,22 @@ export default async function Home() {
             ) : (
               <p className="font-body text-muted">{t(locale, 'home.moreSoon')}</p>
             )}
+            {/* The one in-feed ad a phone reader sees. */}
             <AdSlot variant="native" className="mt-10" />
           </main>
 
-          <aside className="flex flex-col gap-8">
-            <JustIn articles={rest.slice(0, 7)} locale={locale} />
+          <aside className="order-3 flex flex-col gap-8 lg:col-start-2 lg:row-start-2">
             <EditorsPicks articles={picks} />
-            <WeatherWidget />
-            <MarketsWidget />
+            {/* Weather and markets are desk furniture — not what a phone reader
+                came for, and they'd sit far below the fold. Desktop only. */}
+            <div className="hidden lg:block">
+              <WeatherWidget />
+            </div>
+            <div className="hidden lg:block">
+              <MarketsWidget />
+            </div>
             <NewsletterBox />
-            <AdSlot variant="halfpage" sticky />
+            <AdSlot variant="halfpage" sticky desktopOnly />
           </aside>
         </div>
 
@@ -138,7 +151,7 @@ export default async function Home() {
                   locale={locale}
                   variant={index % 2 === 0 ? 'feature' : 'cards'}
                 />
-                {index === 1 && <AdSlot variant="leaderboard" />}
+                {index === 1 && <AdSlot variant="leaderboard" desktopOnly />}
               </div>
             ))}
           </div>

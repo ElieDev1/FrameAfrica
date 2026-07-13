@@ -23,17 +23,26 @@ export async function AdSlot({
   variant = 'leaderboard',
   className = '',
   sticky = false,
+  desktopOnly = false,
 }: {
   variant?: AdPlacement;
   className?: string;
   sticky?: boolean;
+  /**
+   * Hide this slot on phones. A mobile reader scrolls one narrow column, so the
+   * desktop ad load (leaderboards, a tall half-page in the rail) turns the page
+   * into an ad break — we keep only the in-feed slots on small screens.
+   */
+  desktopOnly?: boolean;
 }) {
   const ad = await fetchHouseAd(variant);
 
   return (
     <aside
       aria-label="Advertisement"
-      className={`flex flex-col gap-1 ${sticky ? 'lg:sticky lg:top-24' : ''} ${className}`}
+      className={`flex-col gap-1 ${desktopOnly ? 'hidden lg:flex' : 'flex'} ${
+        sticky ? 'lg:sticky lg:top-24' : ''
+      } ${className}`}
     >
       <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-faint">
         Advertisement

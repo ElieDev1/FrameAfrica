@@ -169,7 +169,7 @@ export default async function SectionPage({ params }: PageProps) {
               </div>
               <aside className="flex flex-col gap-8">
                 <JustIn articles={articles.slice(0, 7)} locale={locale} />
-                <AdSlot variant="halfpage" sticky />
+                <AdSlot variant="halfpage" sticky desktopOnly />
                 <NewsletterBox />
               </aside>
             </div>
