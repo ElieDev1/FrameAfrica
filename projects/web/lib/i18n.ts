@@ -993,6 +993,32 @@ const dict = {
   'dash.copyDesk': { en: 'Copy desk', rw: 'Ibiro byo gukosora', fr: 'Secrétariat de rédaction' },
   'dash.reviewQueue': { en: 'Review queue', rw: 'Urutonde rwo gusuzuma', fr: 'File de relecture' },
   'dash.pipeline': { en: 'Pipeline', rw: 'Umurongo w’akazi', fr: 'Flux de production' },
+  // Review-queue actions (buttons + modals).
+  'drev.publish': { en: 'Publish now', rw: 'Tangaza nonaha', fr: 'Publier maintenant' },
+  'drev.publishConfirm': {
+    en: 'Publish this story immediately? It goes live to readers straight away.',
+    rw: 'Gutangaza iyi nkuru ako kanya? Izahita igera ku basomyi.',
+    fr: 'Publier cet article immédiatement ? Il sera visible des lecteurs aussitôt.',
+  },
+  'drev.schedule': { en: 'Schedule', rw: 'Gena igihe', fr: 'Programmer' },
+  'drev.scheduleTitle': {
+    en: 'Schedule publication',
+    rw: 'Gena igihe cyo gutangaza',
+    fr: 'Programmer la publication',
+  },
+  'drev.scheduleWhen': { en: 'Publish at', rw: 'Gutangaza ku', fr: 'Publier le' },
+  'drev.return': { en: 'Return', rw: 'Gusubiza', fr: 'Renvoyer' },
+  'drev.returnTitle': {
+    en: 'Return to the author',
+    rw: 'Gusubiza umwanditsi',
+    fr: 'Renvoyer à l’auteur',
+  },
+  'drev.returnNote': {
+    en: 'What should the author fix? (optional)',
+    rw: 'Ni iki umwanditsi agomba gukosora? (si ngombwa)',
+    fr: 'Que doit corriger l’auteur ? (facultatif)',
+  },
+
   // Grouped sidebar entries — each opens a set of tabbed views (lib/dash-tabs).
   'dash.stories': { en: 'Stories', rw: 'Inkuru', fr: 'Articles' },
   'dash.workflow': { en: 'Workflow', rw: 'Uko akazi kagenda', fr: 'Flux éditorial' },

@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **The dashboard nav went from 21 entries to 14 — overlapping pages now share one entry and switch with tabs.** Several pages were the same job seen from a different angle, so each group gets a single sidebar entry and an on-page tab strip: **Stories** (My stories | All articles), **Workflow** (Pipeline board | Copy desk | Review queue — the same stories at different stages), **Multimedia** (Videos | Galleries | Podcasts | Data), **Analytics** (Report | Monitor), and **Audience** (Inquiries | Newsletter). Every route, guard and deep link is unchanged; the tab sets are role-aware, and a grouped entry stays highlighted across all its views. "New story" left the nav — it's an action, and already a button in the topbar and on Stories.
+- **The review queue's decisions are buttons with popups, not inline forms.** Each row carried three forms at once (a bare Publish, a date field, a note box). Now it's three buttons: **Publish** asks for confirmation first (it goes live immediately — previously one stray click published a story), while **Schedule** and **Return** open a modal with just the field they need. Backed by a new reusable `Modal`.
+
 ### Fixed
 - **The dashboard "All articles" list no longer stops at 200 stories.** The admin listing was hard-capped at 200 rows, so any newsroom with more than that (the seed alone has 323) silently lost the rest. The cap is now a configurable `limit` (default 2000, ceiling 5000) — the admin table's client-side tabs, search and pagination keep working over the full set.
 

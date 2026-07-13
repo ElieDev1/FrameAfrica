@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { StatusBadge } from '@/components/cms/StatusBadge';
 import { DashTabs } from '@/components/dashboard/DashTabs';
+import { ReviewActions } from '@/components/dashboard/ReviewActions';
 import { listReviewQueue, requireEditor } from '@/lib/cms';
-import { publishAction, rejectAction, scheduleAction } from '@/lib/cms-actions';
 import { workflowTabs } from '@/lib/dash-tabs';
 import { formatDate } from '@/lib/format';
 import { t } from '@/lib/i18n';
@@ -59,50 +59,8 @@ export default async function ReviewPage() {
                 </div>
                 <StatusBadge status={item.status} />
               </div>
-              <div className="mt-4 flex flex-wrap items-start gap-3">
-                <form action={publishAction.bind(null, item.id)}>
-                  <button
-                    type="submit"
-                    className="rounded-lg bg-primary px-3 py-1.5 font-mono text-xs uppercase tracking-wide text-black hover:opacity-90"
-                  >
-                    Publish now
-                  </button>
-                </form>
-                <form
-                  action={scheduleAction.bind(null, item.id)}
-                  className="flex items-center gap-2"
-                >
-                  <input
-                    type="datetime-local"
-                    name="scheduledAt"
-                    required
-                    className="rounded-lg border border-border bg-surface-2 px-2 py-1.5 font-mono text-xs text-text outline-none focus:border-primary"
-                  />
-                  <button
-                    type="submit"
-                    className="rounded-lg border border-primary px-3 py-1.5 font-mono text-xs uppercase tracking-wide text-primary hover:bg-primary hover:text-black"
-                  >
-                    Schedule
-                  </button>
-                </form>
-                <form
-                  action={rejectAction.bind(null, item.id)}
-                  className="flex flex-1 flex-wrap items-start gap-2"
-                >
-                  <textarea
-                    name="note"
-                    rows={1}
-                    maxLength={1000}
-                    placeholder="Return note (optional) — what should the author fix?"
-                    className="min-w-[14rem] flex-1 rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-body text-sm text-text outline-none focus:border-primary"
-                  />
-                  <button
-                    type="submit"
-                    className="rounded-lg border border-accent-red px-3 py-1.5 font-mono text-xs uppercase tracking-wide text-accent-red hover:bg-accent-red hover:text-white"
-                  >
-                    Return
-                  </button>
-                </form>
+              <div className="mt-4">
+                <ReviewActions id={item.id} title={item.title} />
               </div>
             </li>
           ))}
