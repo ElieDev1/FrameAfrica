@@ -14,6 +14,7 @@ const COLUMNS: { titleKey: MessageKey; items: { key: MessageKey; href: string }[
     titleKey: 'footer.company',
     items: [
       { key: 'footer.aboutUs', href: '/about' },
+      { key: 'pay.kicker', href: '/pricing' },
       { key: 'footer.advertise', href: '/advertise' },
       { key: 'footer.contact', href: '/contact' },
       { key: 'footer.sendTip', href: '/tips' },

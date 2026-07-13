@@ -993,6 +993,116 @@ const dict = {
   'dash.copyDesk': { en: 'Copy desk', rw: 'Ibiro byo gukosora', fr: 'Secrétariat de rédaction' },
   'dash.reviewQueue': { en: 'Review queue', rw: 'Urutonde rwo gusuzuma', fr: 'File de relecture' },
   'dash.pipeline': { en: 'Pipeline', rw: 'Umurongo w’akazi', fr: 'Flux de production' },
+  // — Subscriptions / billing —
+  'pay.kicker': { en: 'Subscribe', rw: 'Iyandikishe', fr: 'Abonnement' },
+  'pay.title': {
+    en: 'Back independent African journalism',
+    rw: 'Shyigikira itangazamakuru ryigenga rya Afurika',
+    fr: 'Soutenez un journalisme africain indépendant',
+  },
+  'pay.subtitle': {
+    en: 'Unlimited access to every story, and reporting that stays free of political and commercial pressure.',
+    rw: 'Soma inkuru zose udahagarikwa, kandi ufashe ubwanditsi butagira aho bubogamiye.',
+    fr: 'Un accès illimité à tous les articles, et un journalisme libre de toute pression.',
+  },
+  'pay.benefit1': {
+    en: 'Every premium story, unlimited',
+    rw: 'Inkuru zose zihariye, nta mipaka',
+    fr: 'Tous les articles premium, sans limite',
+  },
+  'pay.benefit2': {
+    en: 'No metered paywall',
+    rw: 'Nta mubare ntarengwa w’inkuru',
+    fr: 'Aucun compteur d’articles',
+  },
+  'pay.benefit3': {
+    en: 'Cancel any time',
+    rw: 'Ushobora guhagarika igihe cyose',
+    fr: 'Résiliable à tout moment',
+  },
+  'pay.benefit4': {
+    en: 'You fund the reporting',
+    rw: 'Uba ushyigikiye itangazamakuru',
+    fr: 'Vous financez les reportages',
+  },
+  'pay.method': { en: 'Payment method', rw: 'Uburyo bwo kwishyura', fr: 'Moyen de paiement' },
+  'pay.momo': { en: 'MTN MoMo', rw: 'MTN MoMo', fr: 'MTN MoMo' },
+  'pay.airtel': { en: 'Airtel Money', rw: 'Airtel Money', fr: 'Airtel Money' },
+  'pay.card': { en: 'Card', rw: 'Ikarita', fr: 'Carte' },
+  'pay.phone': {
+    en: 'Mobile-money number',
+    rw: 'Nimero ya mobile money',
+    fr: 'Numéro mobile money',
+  },
+  'pay.phoneHint': {
+    en: 'We’ll push a payment prompt to this phone.',
+    rw: 'Tuzohereza ubutumwa bwo kwishyura kuri iyi telefoni.',
+    fr: 'Une demande de paiement sera envoyée à ce téléphone.',
+  },
+  'pay.subscribe': { en: 'Subscribe', rw: 'Iyandikishe', fr: 'S’abonner' },
+  'pay.month': { en: 'month', rw: 'ukwezi', fr: 'mois' },
+  'pay.year': { en: 'year', rw: 'umwaka', fr: 'an' },
+  'pay.cardNote': {
+    en: 'Card payments are handled by our payment provider — your card details never reach our servers.',
+    rw: 'Kwishyura ku ikarita bikorwa n’uwo dukorana — amakuru y’ikarita yawe ntagera kuri seriveri zacu.',
+    fr: 'Les paiements par carte sont traités par notre prestataire — vos données bancaires ne transitent jamais par nos serveurs.',
+  },
+  'pay.noPlans': {
+    en: 'No subscription plans are on offer yet.',
+    rw: 'Nta gahunda yo kwiyandikisha irahari.',
+    fr: 'Aucune formule d’abonnement n’est encore proposée.',
+  },
+  'pay.alreadyTitle': {
+    en: 'You’re a subscriber — thank you',
+    rw: 'Uri umufatabuguzi — urakoze',
+    fr: 'Vous êtes abonné — merci',
+  },
+  'pay.alreadyBody': {
+    en: 'Your access runs to',
+    rw: 'Uburenganzira bwawe bugeza ku wa',
+    fr: 'Votre accès court jusqu’au',
+  },
+  'pay.manage': {
+    en: 'Manage subscription',
+    rw: 'Genzura ubufatabuguzi',
+    fr: 'Gérer l’abonnement',
+  },
+  'pay.billing': { en: 'Billing', rw: 'Kwishyura', fr: 'Facturation' },
+  'pay.active': { en: 'Active', rw: 'Bikora', fr: 'Actif' },
+  'pay.renewsOn': { en: 'Renews on', rw: 'Byongera ku wa', fr: 'Renouvellement le' },
+  'pay.endsOn': {
+    en: 'Cancelled — access ends on',
+    rw: 'Byahagaritswe — birangira ku wa',
+    fr: 'Résilié — accès jusqu’au',
+  },
+  'pay.cancel': { en: 'Cancel renewal', rw: 'Hagarika kwiyongera', fr: 'Résilier' },
+  'pay.cancelTitle': {
+    en: 'Cancel renewal',
+    rw: 'Hagarika kwiyongera',
+    fr: 'Résilier l’abonnement',
+  },
+  'pay.cancelConfirm': {
+    en: 'Your subscription won’t renew. You keep full access until',
+    rw: 'Ubufatabuguzi ntibuzongerwa. Ukomeza kugira uburenganzira kugeza ku wa',
+    fr: 'Votre abonnement ne sera pas renouvelé. Vous gardez l’accès jusqu’au',
+  },
+  'pay.cancelConfirmBtn': { en: 'Cancel renewal', rw: 'Hagarika', fr: 'Résilier' },
+  'pay.noneTitle': {
+    en: 'No active subscription',
+    rw: 'Nta bufatabuguzi bukora',
+    fr: 'Aucun abonnement actif',
+  },
+  'pay.noneBody': {
+    en: 'Subscribe to read every premium story.',
+    rw: 'Iyandikishe usome inkuru zose zihariye.',
+    fr: 'Abonnez-vous pour lire tous les articles premium.',
+  },
+  'pay.seePlans': { en: 'See plans', rw: 'Reba gahunda', fr: 'Voir les formules' },
+  'pay.receipts': { en: 'Receipts', rw: 'Inyemezabwishyu', fr: 'Reçus' },
+  'pay.date': { en: 'Date', rw: 'Itariki', fr: 'Date' },
+  'pay.amount': { en: 'Amount', rw: 'Amafaranga', fr: 'Montant' },
+  'pay.status': { en: 'Status', rw: 'Imimerere', fr: 'Statut' },
+
   // Review-queue actions (buttons + modals).
   'drev.publish': { en: 'Publish now', rw: 'Tangaza nonaha', fr: 'Publier maintenant' },
   'drev.publishConfirm': {

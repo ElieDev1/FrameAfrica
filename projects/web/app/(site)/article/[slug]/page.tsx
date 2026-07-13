@@ -327,6 +327,13 @@ export default async function ArticlePage({ params }: PageProps) {
               <p className="max-w-sm font-body text-sm text-muted">
                 {t(locale, 'article.lockedBody')}
               </p>
+              {/* The paywall finally has a way through it. */}
+              <Link
+                href="/pricing"
+                className="mt-2 rounded-lg bg-primary px-5 py-2.5 font-heading font-bold text-black transition hover:opacity-90"
+              >
+                {t(locale, 'pay.seePlans')}
+              </Link>
             </div>
           )}
 

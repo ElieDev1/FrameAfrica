@@ -142,8 +142,9 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
               >
                 {t(locale, 'nav.signIn')}
               </Link>
+              {/* "Subscribe" now means subscribe — it used to just open signup. */}
               <Link
-                href="/signup"
+                href="/pricing"
                 className="whitespace-nowrap rounded-full bg-primary px-2.5 py-1.5 text-[13px] font-semibold text-black transition-transform hover:-translate-y-px sm:px-3"
               >
                 {t(locale, 'nav.subscribe')}

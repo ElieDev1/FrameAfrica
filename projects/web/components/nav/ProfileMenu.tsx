@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   BookmarkIcon,
   ChevronDownIcon,
+  CreditCardIcon,
   GridIcon,
   type IconProps,
   LogOutIcon,
@@ -59,6 +60,7 @@ export function ProfileMenu({ user, locale }: { user: NavUser; locale: Locale })
     { href: '/for-you', labelKey: 'nav.forYou', icon: SparklesIcon },
     { href: '/account', labelKey: 'nav.myAccount', icon: UsersIcon },
     { href: '/account#saved', labelKey: 'nav.savedStories', icon: BookmarkIcon },
+    { href: '/account/billing', labelKey: 'pay.billing', icon: CreditCardIcon },
     { href: '/account/security', labelKey: 'nav.accountSecurity', icon: SettingsIcon },
   ];
 
