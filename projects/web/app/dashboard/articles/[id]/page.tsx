@@ -25,7 +25,7 @@ export default async function AdminEditArticlePage({ params }: PageProps) {
   const updateAction = updateAnyArticleAction.bind(null, id);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <div className="w-full">
       <Link href="/dashboard/articles" className="font-mono text-xs text-primary hover:underline">
         {t(locale, 'dpage.backAllArticles')}
       </Link>

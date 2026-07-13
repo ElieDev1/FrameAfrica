@@ -25,7 +25,7 @@ export default async function CopyEditPage({ params }: PageProps) {
   const returnAction = returnCopyEditAction.bind(null, id);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <div className="w-full">
       <Link href="/dashboard/copydesk" className="font-mono text-xs text-primary hover:underline">
         {t(locale, 'dpage.backCopyDesk')}
       </Link>
