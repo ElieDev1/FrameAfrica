@@ -1,4 +1,10 @@
-import type { PaymentRecord, Plan, Receipt, Subscription } from './billing-types';
+import type {
+  PaymentRecord,
+  Plan,
+  Receipt,
+  ReceiptVerification,
+  Subscription,
+} from './billing-types';
 import { getAccessToken } from './session';
 
 const API_URL =
@@ -66,6 +72,23 @@ export async function fetchReceipt(paymentId: string): Promise<Receipt | null> {
     );
     if (!res.ok) return null;
     const json = (await res.json()) as { data: Receipt };
+    return json.data;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Public receipt verification — no session. Anyone who scans a receipt's QR can
+ * confirm the payment is genuine without signing in.
+ */
+export async function fetchVerification(paymentId: string): Promise<ReceiptVerification | null> {
+  try {
+    const res = await fetch(`${API_URL}/billing/verify/${encodeURIComponent(paymentId)}`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { data: ReceiptVerification };
     return json.data;
   } catch {
     return null;

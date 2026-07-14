@@ -1150,6 +1150,30 @@ const dict = {
     fr: 'Abonnement d’un(e) {interval}',
   },
   'pay.covers': { en: 'Covers', rw: 'Ryuzuza', fr: 'Période' },
+  'pay.plan': { en: 'Plan', rw: 'Gahunda', fr: 'Formule' },
+
+  // Public receipt verification page.
+  'verify.title': {
+    en: 'Receipt verification',
+    rw: 'Kugenzura inyemezabwishyu',
+    fr: 'Vérification du reçu',
+  },
+  'verify.genuine': { en: 'Payment verified', rw: 'Ubwishyu bwemejwe', fr: 'Paiement vérifié' },
+  'verify.genuineBody': {
+    en: 'This is a genuine payment to Frame Africa.',
+    rw: 'Ubu ni ubwishyu nyakuri kuri Frame Africa.',
+    fr: 'Ceci est un paiement authentique à Frame Africa.',
+  },
+  'verify.notFound': {
+    en: 'Could not verify',
+    rw: 'Ntibyashobotse kugenzurwa',
+    fr: 'Vérification impossible',
+  },
+  'verify.notFoundBody': {
+    en: 'We couldn’t find a genuine payment for this code. Check the link, or ask for a fresh receipt.',
+    rw: 'Ntitwabonye ubwishyu nyakuri bujyanye na iyi kode. Reba link, cyangwa usabe indi nyemezabwishyu.',
+    fr: 'Aucun paiement authentique ne correspond à ce code. Vérifiez le lien ou demandez un nouveau reçu.',
+  },
   'pay.totalPaid': { en: 'Total paid', rw: 'Igiteranyo cyishyuwe', fr: 'Total payé' },
   'pay.scanToVerify': {
     en: 'Scan to verify',

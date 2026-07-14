@@ -39,9 +39,27 @@ export interface ReceiptView {
   billedTo: { name: string; email: string };
   /** The access period this payment covers, when it maps to a subscription. */
   period: { start: string; end: string } | null;
-  /** A link back to this receipt, and that link as a scannable QR (a data: URI). */
+  /** The public verify page for this payment, and that link as a scannable QR. */
   verifyUrl: string;
   qrDataUrl: string;
+  /** The receipt number as a Code128 barcode (a data: URI). */
+  barcodeDataUrl: string;
+}
+
+/**
+ * The public, non-sensitive confirmation a third party sees when they scan a
+ * receipt's QR. It proves the payment is genuine without exposing the private
+ * receipt — no email, no payment reference, no period, just enough to trust it.
+ */
+export interface ReceiptVerification {
+  valid: boolean;
+  number: string;
+  issuedAt: string;
+  amountCents: number;
+  currency: string;
+  planName: string;
+  /** The payer's name, so a verifier can match the person showing the receipt. */
+  payerName: string;
 }
 
 /** What a checkout returns: either a redirect (card) or a pending push (mobile money). */

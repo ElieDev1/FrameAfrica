@@ -7,10 +7,17 @@ import {
   Prisma,
   SubscriptionStatus,
 } from '@prisma/client';
+import * as bwipjs from 'bwip-js';
 import * as QRCode from 'qrcode';
 import { AdminSettingsService } from '../admin/admin-settings.service';
 import { PrismaService } from '../prisma/prisma.service';
-import type { CheckoutResult, PlanView, ReceiptView, SubscriptionView } from './billing.types';
+import type {
+  CheckoutResult,
+  PlanView,
+  ReceiptVerification,
+  ReceiptView,
+  SubscriptionView,
+} from './billing.types';
 
 /** Advance an instant by one billing interval. */
 function addInterval(from: Date, interval: PlanInterval): Date {
@@ -32,6 +39,20 @@ function receiptNumber(paymentId: string, issuedAt: Date): string {
     .slice(0, 6)
     .toUpperCase();
   return `FA-${day}-${suffix}`;
+}
+
+/** The receipt number as a Code128 barcode, PNG data URI. */
+async function barcode(text: string): Promise<string> {
+  const png = await bwipjs.toBuffer({
+    bcid: 'code128',
+    text,
+    scale: 3,
+    height: 9,
+    includetext: false,
+    paddingwidth: 0,
+    paddingheight: 0,
+  });
+  return `data:image/png;base64,${png.toString('base64')}`;
 }
 
 function toPlanView(plan: Plan): PlanView {
@@ -132,15 +153,20 @@ export class BillingService {
     if (!payment) throw new NotFoundException('Receipt not found');
 
     const issuedAt = payment.paidAt ?? payment.createdAt;
+    const number = receiptNumber(payment.id, issuedAt);
 
-    // A link back to this exact receipt, printed as a QR so it can be scanned off
-    // paper to pull the receipt up (and confirm it's genuine) rather than typed.
+    // The QR points at the *public* verify page, not this private receipt — so
+    // someone who needs to check the payment is genuine can, without being handed
+    // the full receipt. The barcode carries the receipt number for manual entry.
     const appUrl = (await this.settings.getValue('APP_URL')) ?? 'http://localhost:3000';
-    const verifyUrl = `${appUrl.replace(/\/$/, '')}/receipts/${payment.id}`;
-    const qrDataUrl = await QRCode.toDataURL(verifyUrl, { margin: 1, width: 240 });
+    const verifyUrl = `${appUrl.replace(/\/$/, '')}/verify/${payment.id}`;
+    const [qrDataUrl, barcodeDataUrl] = await Promise.all([
+      QRCode.toDataURL(verifyUrl, { margin: 1, width: 240 }),
+      barcode(number),
+    ]);
 
     return {
-      number: receiptNumber(payment.id, issuedAt),
+      number,
       issuedAt: issuedAt.toISOString(),
       amountCents: payment.amountCents,
       currency: payment.currency,
@@ -158,6 +184,35 @@ export class BillingService {
         : null,
       verifyUrl,
       qrDataUrl,
+      barcodeDataUrl,
+    };
+  }
+
+  /**
+   * Public confirmation that a payment is genuine — what a scanned QR resolves
+   * to. Deliberately minimal: it proves the payment happened without exposing
+   * the private receipt (no email, reference or period). The payment id is an
+   * unguessable UUID, so it doubles as the verification token.
+   */
+  async verify(paymentId: string): Promise<ReceiptVerification> {
+    const payment = await this.prisma.payment.findFirst({
+      where: { id: paymentId, status: PaymentStatus.succeeded },
+      include: {
+        user: { select: { displayName: true } },
+        subscription: { include: { plan: { select: { name: true } } } },
+      },
+    });
+    if (!payment) throw new NotFoundException('No genuine payment found for this code');
+
+    const issuedAt = payment.paidAt ?? payment.createdAt;
+    return {
+      valid: true,
+      number: receiptNumber(payment.id, issuedAt),
+      issuedAt: issuedAt.toISOString(),
+      amountCents: payment.amountCents,
+      currency: payment.currency,
+      planName: payment.subscription?.plan.name ?? 'Subscription',
+      payerName: payment.user.displayName,
     };
   }
 

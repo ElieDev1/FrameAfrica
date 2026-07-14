@@ -130,6 +130,19 @@ export default async function ReceiptPage({ params }: PageProps) {
             <span className="font-heading text-2xl font-black text-neutral-900">{amount}</span>
           </section>
 
+          {/* Barcode of the receipt number */}
+          <section className="flex flex-col items-center border-t border-black/10 py-5">
+            {/* eslint-disable-next-line @next/next/no-img-element -- inline data: barcode, no host */}
+            <img
+              src={receipt.barcodeDataUrl}
+              alt={receipt.number}
+              className="h-12 w-auto max-w-full"
+            />
+            <span className="mt-1 font-mono text-[11px] tracking-[0.2em] text-neutral-500">
+              {receipt.number}
+            </span>
+          </section>
+
           {/* QR + verification */}
           <footer className="flex items-center gap-5 border-t border-black/10 pt-6">
             {/* eslint-disable-next-line @next/next/no-img-element -- inline data: QR, no host */}

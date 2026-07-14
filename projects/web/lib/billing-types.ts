@@ -53,6 +53,18 @@ export interface Receipt {
   period: { start: string; end: string } | null;
   verifyUrl: string;
   qrDataUrl: string;
+  barcodeDataUrl: string;
+}
+
+/** The public, non-sensitive confirmation shown on the verify page. */
+export interface ReceiptVerification {
+  valid: boolean;
+  number: string;
+  issuedAt: string;
+  amountCents: number;
+  currency: string;
+  planName: string;
+  payerName: string;
 }
 
 /** Currencies with no minor unit — the stored "cents" are already whole units. */

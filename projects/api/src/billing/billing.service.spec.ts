@@ -259,9 +259,11 @@ describe('BillingService', () => {
         start: '2026-07-14T09:00:00.000Z',
         end: '2026-08-14T09:00:00.000Z',
       });
-      // The QR encodes a link back to this exact receipt.
-      expect(receipt.verifyUrl).toBe('https://frameafrica.rw/receipts/a1b2c3d4e5f6');
+      // The QR points at the *public* verify page, not the private receipt.
+      expect(receipt.verifyUrl).toBe('https://frameafrica.rw/verify/a1b2c3d4e5f6');
       expect(receipt.qrDataUrl).toMatch(/^data:image\/png;base64,/);
+      // And the receipt number is carried as a scannable barcode.
+      expect(receipt.barcodeDataUrl).toMatch(/^data:image\/png;base64,/);
     });
 
     it('only queries the caller’s own succeeded payments — the id is not a capability', async () => {
@@ -280,6 +282,62 @@ describe('BillingService', () => {
       prisma.payment.findFirst.mockResolvedValue(null);
 
       await expect(service.receipt('u1', 'nope')).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
+  describe('verify (public)', () => {
+    it('confirms a genuine payment without exposing private detail', async () => {
+      const { service, prisma } = build();
+      prisma.payment.findFirst.mockResolvedValue({
+        id: 'a1b2c3d4e5f6',
+        amountCents: 5000,
+        currency: 'RWF',
+        paidAt: new Date('2026-07-14T09:00:00Z'),
+        createdAt: new Date('2026-07-14T08:59:00Z'),
+        user: { displayName: 'Jane Uwase' },
+        subscription: { plan: { name: 'Digital monthly' } },
+      });
+
+      const v = await service.verify('a1b2c3d4e5f6');
+
+      expect(v).toEqual({
+        valid: true,
+        number: 'FA-20260714-A1B2C3',
+        issuedAt: '2026-07-14T09:00:00.000Z',
+        amountCents: 5000,
+        currency: 'RWF',
+        planName: 'Digital monthly',
+        payerName: 'Jane Uwase',
+      });
+      // No email, reference or period leak through verification.
+      expect(v).not.toHaveProperty('billedTo');
+      expect(v).not.toHaveProperty('reference');
+    });
+
+    it('looks up any succeeded payment by id — verification is not user-scoped', async () => {
+      const { service, prisma } = build();
+      prisma.payment.findFirst.mockResolvedValue({
+        id: 'x',
+        amountCents: 5000,
+        currency: 'RWF',
+        paidAt: new Date('2026-07-14T09:00:00Z'),
+        createdAt: new Date('2026-07-14T09:00:00Z'),
+        user: { displayName: 'Jane' },
+        subscription: null,
+      });
+
+      await service.verify('x');
+
+      const calls = prisma.payment.findFirst.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { where: Record<string, unknown> };
+      expect(arg.where).toEqual({ id: 'x', status: 'succeeded' }); // no userId — anyone can verify
+    });
+
+    it('404s an unknown or unsettled code', async () => {
+      const { service, prisma } = build();
+      prisma.payment.findFirst.mockResolvedValue(null);
+
+      await expect(service.verify('nope')).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 });

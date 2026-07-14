@@ -24,6 +24,16 @@ export class BillingController {
   async plans() {
     return apiResponse(await this.billing.listPlans());
   }
+
+  /**
+   * Public receipt verification — no session. A third party who scans a receipt's
+   * QR lands here to confirm the payment is genuine, without being handed the
+   * private receipt. The id is an unguessable UUID, so it acts as the token.
+   */
+  @Get('verify/:id')
+  async verify(@Param('id') id: string) {
+    return apiResponse(await this.billing.verify(id));
+  }
 }
 
 /** The reader's own billing — always scoped to the caller, never to an id. */
