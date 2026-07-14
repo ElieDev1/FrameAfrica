@@ -20,6 +20,8 @@ export interface NavUser {
   isStaff: boolean;
   isEditor: boolean;
   isAdmin: boolean;
+  /** An active subscription — drives the member badge on the avatar. */
+  isSubscriber: boolean;
 }
 
 export interface FeaturedStory {
