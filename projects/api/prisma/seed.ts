@@ -993,6 +993,9 @@ async function main(): Promise<void> {
     create: {
       email: 'jane.uwase@frameafrica.rw',
       displayName: 'Jane Uwase',
+      // The public byline handle. Without it a freshly seeded database gives every
+      // author a null slug, and /author/<slug> doesn't exist at all.
+      authorSlug: 'jane-uwase',
       emailVerifiedAt: new Date(),
       passwordHash,
     },
@@ -1016,6 +1019,9 @@ async function main(): Promise<void> {
     create: {
       email: 'eric.mugisha@frameafrica.rw',
       displayName: 'Eric Mugisha',
+      // The public byline handle. Without it a freshly seeded database gives every
+      // author a null slug, and /author/<slug> doesn't exist at all.
+      authorSlug: 'eric-mugisha',
       emailVerifiedAt: new Date(),
       passwordHash,
     },
@@ -1038,6 +1044,9 @@ async function main(): Promise<void> {
     create: {
       email: 'admin@frameafrica.rw',
       displayName: 'Site Admin',
+      // The public byline handle. Without it a freshly seeded database gives every
+      // author a null slug, and /author/<slug> doesn't exist at all.
+      authorSlug: 'site-admin',
       emailVerifiedAt: new Date(),
       passwordHash,
     },
@@ -1055,6 +1064,9 @@ async function main(): Promise<void> {
     create: {
       email: 'newsroom.admin@frameafrica.rw',
       displayName: 'Newsroom Admin',
+      // The public byline handle. Without it a freshly seeded database gives every
+      // author a null slug, and /author/<slug> doesn't exist at all.
+      authorSlug: 'newsroom-admin',
       emailVerifiedAt: new Date(),
       passwordHash,
     },
@@ -1614,6 +1626,9 @@ async function main(): Promise<void> {
     create: {
       email: 'aline.dev@frameafrica.rw',
       displayName: 'Aline U.',
+      // The public byline handle. Without it a freshly seeded database gives every
+      // author a null slug, and /author/<slug> doesn't exist at all.
+      authorSlug: 'aline-u',
       emailVerifiedAt: new Date(),
       passwordHash,
     },
