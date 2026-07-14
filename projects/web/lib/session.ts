@@ -26,6 +26,10 @@ export interface SessionUser {
   mustChangePassword?: boolean;
   /** True when TOTP two-factor is enabled on the account. */
   twoFactorEnabled?: boolean;
+  /** An active, unexpired subscription — the truth the UI shows as "Member". */
+  isSubscriber?: boolean;
+  /** When paid access runs out (ISO), or null. */
+  subscribedUntil?: string | null;
 }
 
 /** The current user (via `/me`), or `null` when signed out / token expired. */

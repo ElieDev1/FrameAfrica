@@ -31,7 +31,35 @@ describe('UsersService', () => {
       roles: ['reader'],
       emailVerified: true,
       createdAt: '2026-01-01T00:00:00.000Z',
+      // A reader with no subscription date is not a member.
+      subscribedUntil: null,
+      isSubscriber: false,
     });
+  });
+
+  it('reads a future subscription date as a member, and a past one as lapsed', async () => {
+    const { service, prisma } = build();
+    const base = {
+      id: 'u1',
+      email: 'r@frameafrica.rw',
+      displayName: 'R',
+      avatarUrl: null,
+      emailVerifiedAt: new Date(),
+      createdAt: new Date(),
+      roles: [{ role: { name: 'reader' } }],
+    };
+
+    prisma.user.findFirst.mockResolvedValue({
+      ...base,
+      subscribedUntil: new Date(Date.now() + 30 * 24 * 3600_000),
+    });
+    expect((await service.getProfile('u1')).isSubscriber).toBe(true);
+
+    prisma.user.findFirst.mockResolvedValue({
+      ...base,
+      subscribedUntil: new Date(Date.now() - 1000),
+    });
+    expect((await service.getProfile('u1')).isSubscriber).toBe(false);
   });
 
   it('throws NotFound for an unknown or deleted user', async () => {

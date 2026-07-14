@@ -677,6 +677,20 @@ const dict = {
     rw: 'Ifoto yawe igaragara ku bitekerezo no kuri konti yawe. Shyiramo aderesi y’ifoto, cg uyihorere ukoreshe inyuguti z’izina ryawe.',
     fr: 'Votre photo apparaît sur les commentaires et votre compte. Collez l’URL d’une image, ou laissez vide pour utiliser vos initiales.',
   },
+  'account.member': { en: 'Member', rw: 'Umunyamuryango', fr: 'Abonné' },
+  'account.membership': { en: 'Membership', rw: 'Ubwiyunge', fr: 'Abonnement' },
+  'account.memberActive': {
+    en: 'Active subscription',
+    rw: 'Ifatabuguzi rikora',
+    fr: 'Abonnement actif',
+  },
+  'account.notMember': {
+    en: 'No active subscription',
+    rw: 'Nta fatabuguzi rikora',
+    fr: 'Aucun abonnement actif',
+  },
+  'account.renewsOn': { en: 'Renews', rw: 'Byongera', fr: 'Renouvellement le' },
+  'account.manage': { en: 'Manage', rw: 'Genzura', fr: 'Gérer' },
   'account.byline': { en: 'Byline', rw: 'Umukono w’umwanditsi', fr: 'Signature' },
   'account.jobTitle': { en: 'Job title', rw: 'Umwanya', fr: 'Fonction' },
   'account.jobTitlePlaceholder': {

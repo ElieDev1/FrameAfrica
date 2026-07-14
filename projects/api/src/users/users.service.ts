@@ -17,6 +17,10 @@ export interface UserProfile {
   mustChangePassword: boolean;
   twoFactorEnabled: boolean;
   createdAt: string;
+  /** Paid access through this instant (ISO), or null. `isSubscriber` is the
+   *  derived truth the UI should read — it accounts for a lapsed date. */
+  subscribedUntil: string | null;
+  isSubscriber: boolean;
 }
 
 const withRoles = {
@@ -90,6 +94,9 @@ export class UsersService {
       mustChangePassword: user.mustChangePassword,
       twoFactorEnabled: user.twoFactorEnabled,
       createdAt: user.createdAt.toISOString(),
+      subscribedUntil: user.subscribedUntil?.toISOString() ?? null,
+      // The one truth the UI reads: a date in the past is not a subscriber.
+      isSubscriber: user.subscribedUntil !== null && user.subscribedUntil > new Date(),
     };
   }
 }
