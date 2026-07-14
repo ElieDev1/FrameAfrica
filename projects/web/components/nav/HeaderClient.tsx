@@ -118,6 +118,50 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
           </Link>
         </div>
 
+        {/* Section nav — on the main bar, between brand and actions (desktop). */}
+        {sections.length > 0 && (
+          <nav aria-label="Sections" className="hidden min-w-0 flex-1 items-center lg:flex">
+            <ul className="flex items-center">
+              {sections.map((section, index) => {
+                const active = sectionActive(section);
+                const feat = featured[section.slug];
+                // The last few menus anchor to their right edge, or a wide panel
+                // hanging off the final section would run off-screen.
+                const alignRight = index >= sections.length - 3;
+                return (
+                  <li key={section.id} className="group relative">
+                    <Link
+                      href={`/section/${section.slug}`}
+                      aria-current={active ? 'page' : undefined}
+                      className={`relative inline-flex items-center gap-0.5 px-1.5 py-2 text-[13px] font-semibold transition-colors after:absolute after:inset-x-1.5 after:bottom-0 after:h-0.5 after:origin-left after:rounded-full after:bg-primary after:transition-transform after:duration-200 group-hover:text-text group-focus-within:text-text group-hover:after:scale-x-100 group-focus-within:after:scale-x-100 ${
+                        active ? 'text-text after:scale-x-100' : 'text-muted after:scale-x-0'
+                      }`}
+                    >
+                      {shortLabel(translateCategory(locale, section.slug, section.name))}
+                      {hasMenu(section) && (
+                        <ChevronDownIcon
+                          size={12}
+                          aria-hidden
+                          className="opacity-60 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
+                        />
+                      )}
+                    </Link>
+                    {hasMenu(section) && (
+                      <MegaMenu
+                        section={section}
+                        featured={feat}
+                        activeSlug={pathname}
+                        locale={locale}
+                        alignRight={alignRight}
+                      />
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        )}
+
         {/* Actions */}
         <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
           {/* An international, trilingual site keeps its language choice in the
@@ -125,11 +169,12 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
           <span className="hidden font-mono text-[11px] md:inline-flex">
             <LanguageSwitcher current={locale} />
           </span>
-          <SearchForm locale={locale} />
+          {/* Search is an icon in the actions cluster now, so the section nav can
+              share the top row rather than sit on a line of its own. */}
           <Link
             href="/search"
             aria-label={t(locale, 'nav.searchAria')}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-primary lg:hidden"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-primary"
           >
             <SearchIcon size={16} />
           </Link>
@@ -155,72 +200,7 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
           )}
         </div>
       </div>
-
-      {/* Row 2 — the section bar. Full width to itself, so it always fits; it
-          folds away once the reader scrolls, keeping the sticky bar slim. */}
-      {sections.length > 0 && !condensed && (
-        <div className="hidden border-t border-border lg:block">
-          <nav aria-label="Sections" className="mx-auto max-w-[1440px] px-6">
-            <ul className="flex items-center">
-              {sections.map((section, index) => {
-                const active = sectionActive(section);
-                const feat = featured[section.slug];
-                // The last few menus are anchored to their right edge, or a
-                // 36rem panel hanging off the final section would run off-screen.
-                const alignRight = index >= sections.length - 3;
-                return (
-                  <li key={section.id} className="group relative">
-                    <Link
-                      href={`/section/${section.slug}`}
-                      aria-current={active ? 'page' : undefined}
-                      className={`relative inline-flex items-center gap-0.5 px-2 py-2.5 text-[13px] font-semibold transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:origin-left after:rounded-full after:bg-primary after:transition-transform after:duration-200 group-hover:text-text group-focus-within:text-text group-hover:after:scale-x-100 group-focus-within:after:scale-x-100 ${
-                        active ? 'text-text after:scale-x-100' : 'text-muted after:scale-x-0'
-                      }`}
-                    >
-                      {shortLabel(translateCategory(locale, section.slug, section.name))}
-                      {hasMenu(section) && (
-                        <ChevronDownIcon
-                          size={12}
-                          aria-hidden
-                          className="opacity-60 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
-                        />
-                      )}
-                    </Link>
-
-                    {hasMenu(section) && (
-                      <MegaMenu
-                        section={section}
-                        featured={feat}
-                        activeSlug={pathname}
-                        locale={locale}
-                        alignRight={alignRight}
-                      />
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-        </div>
-      )}
     </header>
-  );
-}
-
-function SearchForm({ locale }: { locale: Locale }) {
-  return (
-    <form action="/search" className="relative hidden lg:block">
-      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint">
-        <SearchIcon size={15} />
-      </span>
-      <input
-        name="q"
-        type="search"
-        placeholder={t(locale, 'nav.searchPlaceholder')}
-        aria-label={t(locale, 'nav.searchAria')}
-        className="w-36 rounded-full border border-border bg-surface-2 py-1.5 pl-9 pr-4 text-sm text-text outline-none transition-[width,border-color] focus:w-52 focus:border-primary xl:w-44"
-      />
-    </form>
   );
 }
 

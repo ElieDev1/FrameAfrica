@@ -97,7 +97,8 @@ export function MobileMenu({
             aria-label={t(locale, 'nav.menu')}
           >
             <div className="absolute inset-0 bg-black/50" onClick={close} />
-            <div className="absolute right-0 top-0 flex h-full w-[85%] max-w-sm flex-col overflow-y-auto border-l border-border bg-bg p-5">
+            {/* The drawer opens from the left — the same side as its trigger. */}
+            <div className="absolute left-0 top-0 flex h-full w-[85%] max-w-sm flex-col overflow-y-auto border-r border-border bg-bg p-5">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
                   {t(locale, 'nav.menu')}
