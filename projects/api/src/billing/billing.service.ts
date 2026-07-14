@@ -7,9 +7,10 @@ import {
   Prisma,
   SubscriptionStatus,
 } from '@prisma/client';
+import * as QRCode from 'qrcode';
 import { AdminSettingsService } from '../admin/admin-settings.service';
 import { PrismaService } from '../prisma/prisma.service';
-import type { CheckoutResult, PlanView, SubscriptionView } from './billing.types';
+import type { CheckoutResult, PlanView, ReceiptView, SubscriptionView } from './billing.types';
 
 /** Advance an instant by one billing interval. */
 function addInterval(from: Date, interval: PlanInterval): Date {
@@ -17,6 +18,20 @@ function addInterval(from: Date, interval: PlanInterval): Date {
   if (interval === 'year') to.setUTCFullYear(to.getUTCFullYear() + 1);
   else to.setUTCMonth(to.getUTCMonth() + 1);
   return to;
+}
+
+/**
+ * A stable, human-facing receipt number: `FA-<YYYYMMDD>-<6 hex>`. Derived from
+ * the payment id and its date, so the same payment always prints the same number
+ * without a separate sequence to store.
+ */
+function receiptNumber(paymentId: string, issuedAt: Date): string {
+  const day = issuedAt.toISOString().slice(0, 10).replace(/-/g, '');
+  const suffix = paymentId
+    .replace(/[^a-f0-9]/gi, '')
+    .slice(0, 6)
+    .toUpperCase();
+  return `FA-${day}-${suffix}`;
 }
 
 function toPlanView(plan: Plan): PlanView {
@@ -96,6 +111,54 @@ export class BillingService {
       paidAt: p.paidAt?.toISOString() ?? null,
       createdAt: p.createdAt.toISOString(),
     }));
+  }
+
+  /**
+   * A receipt for one of the caller's own settled payments. Scoped to `userId`,
+   * so a reader can only ever fetch their own — the payment id in the URL is not
+   * a capability. Only a succeeded payment has a receipt; a pending or failed one
+   * is not proof of anything, so asking for its receipt is a 404.
+   */
+  async receipt(userId: string, paymentId: string): Promise<ReceiptView> {
+    const payment = await this.prisma.payment.findFirst({
+      where: { id: paymentId, userId, status: PaymentStatus.succeeded },
+      include: {
+        user: { select: { displayName: true, email: true } },
+        subscription: {
+          include: { plan: { select: { name: true, interval: true } } },
+        },
+      },
+    });
+    if (!payment) throw new NotFoundException('Receipt not found');
+
+    const issuedAt = payment.paidAt ?? payment.createdAt;
+
+    // A link back to this exact receipt, printed as a QR so it can be scanned off
+    // paper to pull the receipt up (and confirm it's genuine) rather than typed.
+    const appUrl = (await this.settings.getValue('APP_URL')) ?? 'http://localhost:3000';
+    const verifyUrl = `${appUrl.replace(/\/$/, '')}/receipts/${payment.id}`;
+    const qrDataUrl = await QRCode.toDataURL(verifyUrl, { margin: 1, width: 240 });
+
+    return {
+      number: receiptNumber(payment.id, issuedAt),
+      issuedAt: issuedAt.toISOString(),
+      amountCents: payment.amountCents,
+      currency: payment.currency,
+      provider: payment.provider,
+      reference: payment.providerRef ?? null,
+      plan: payment.subscription
+        ? { name: payment.subscription.plan.name, interval: payment.subscription.plan.interval }
+        : { name: 'Subscription', interval: 'month' },
+      billedTo: { name: payment.user.displayName, email: payment.user.email },
+      period: payment.subscription
+        ? {
+            start: payment.subscription.currentPeriodStart.toISOString(),
+            end: payment.subscription.currentPeriodEnd.toISOString(),
+          }
+        : null,
+      verifyUrl,
+      qrDataUrl,
+    };
   }
 
   /**

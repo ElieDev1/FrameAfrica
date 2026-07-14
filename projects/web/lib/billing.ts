@@ -1,4 +1,4 @@
-import type { PaymentRecord, Plan, Subscription } from './billing-types';
+import type { PaymentRecord, Plan, Receipt, Subscription } from './billing-types';
 import { getAccessToken } from './session';
 
 const API_URL =
@@ -52,5 +52,22 @@ export async function fetchMyPayments(): Promise<PaymentRecord[]> {
     return json.data ?? [];
   } catch {
     return [];
+  }
+}
+
+/** The receipt for one settled payment, or null (not found / not the caller's). */
+export async function fetchReceipt(paymentId: string): Promise<Receipt | null> {
+  const token = await getAccessToken();
+  if (!token) return null;
+  try {
+    const res = await fetch(
+      `${API_URL}/billing/me/payments/${encodeURIComponent(paymentId)}/receipt`,
+      { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' },
+    );
+    if (!res.ok) return null;
+    const json = (await res.json()) as { data: Receipt };
+    return json.data;
+  } catch {
+    return null;
   }
 }

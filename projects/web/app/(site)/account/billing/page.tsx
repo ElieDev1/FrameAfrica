@@ -87,6 +87,7 @@ export default async function BillingPage() {
                   <th className="px-4 py-2 font-medium">{t(locale, 'pay.amount')}</th>
                   <th className="px-4 py-2 font-medium">{t(locale, 'pay.method')}</th>
                   <th className="px-4 py-2 font-medium">{t(locale, 'pay.status')}</th>
+                  <th className="px-4 py-2 font-medium" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -105,6 +106,17 @@ export default async function BillingPage() {
                       className={`px-4 py-2.5 font-mono text-xs uppercase ${STATUS_TONE[p.status] ?? 'text-muted'}`}
                     >
                       {p.status}
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      {/* A receipt only exists for a settled payment. */}
+                      {p.status === 'succeeded' && (
+                        <Link
+                          href={`/receipts/${p.id}`}
+                          className="font-mono text-[11px] text-primary transition hover:underline"
+                        >
+                          {t(locale, 'pay.receipt')}
+                        </Link>
+                      )}
                     </td>
                   </tr>
                 ))}

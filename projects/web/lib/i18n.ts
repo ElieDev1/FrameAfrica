@@ -1134,6 +1134,33 @@ const dict = {
   'pay.date': { en: 'Date', rw: 'Itariki', fr: 'Date' },
   'pay.amount': { en: 'Amount', rw: 'Amafaranga', fr: 'Montant' },
   'pay.status': { en: 'Status', rw: 'Imimerere', fr: 'Statut' },
+  'pay.receipt': { en: 'Receipt', rw: 'Inyemezabwishyu', fr: 'Reçu' },
+  'pay.downloadReceipt': {
+    en: 'Download receipt',
+    rw: 'Kuramo inyemezabwishyu',
+    fr: 'Télécharger le reçu',
+  },
+  'pay.paid': { en: 'Paid', rw: 'Byishyuwe', fr: 'Payé' },
+  'pay.receiptNo': { en: 'Receipt no.', rw: 'Nomero', fr: 'Reçu n°' },
+  'pay.billedTo': { en: 'Billed to', rw: 'Byishyuwe na', fr: 'Facturé à' },
+  'pay.description': { en: 'Description', rw: 'Ibisobanuro', fr: 'Description' },
+  'pay.oneInterval': {
+    en: 'One {interval} subscription',
+    rw: 'Ifatabuguzi rya {interval} imwe',
+    fr: 'Abonnement d’un(e) {interval}',
+  },
+  'pay.covers': { en: 'Covers', rw: 'Ryuzuza', fr: 'Période' },
+  'pay.totalPaid': { en: 'Total paid', rw: 'Igiteranyo cyishyuwe', fr: 'Total payé' },
+  'pay.scanToVerify': {
+    en: 'Scan to verify',
+    rw: 'Sikana kugenzura',
+    fr: 'Scannez pour vérifier',
+  },
+  'pay.receiptFooter': {
+    en: 'This receipt confirms a payment to Frame Africa. Scan the code to open it online and confirm it is genuine.',
+    rw: 'Iyi nyemezabwishyu yemeza ubwishyu kuri Frame Africa. Sikana kode kugira ngo uyifungure kuri interineti wemeze ko ari iy’ukuri.',
+    fr: 'Ce reçu confirme un paiement à Frame Africa. Scannez le code pour l’ouvrir en ligne et confirmer son authenticité.',
+  },
 
   // Review-queue actions (buttons + modals).
   'drev.publish': { en: 'Publish now', rw: 'Tangaza nonaha', fr: 'Publier maintenant' },

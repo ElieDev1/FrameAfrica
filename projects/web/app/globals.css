@@ -381,3 +381,30 @@ body::after {
   background-repeat: no-repeat, repeat;
   background-attachment: fixed;
 }
+
+/* ── Print: a receipt should print as a clean document ─────────────────────
+   The receipt renders on its own chrome-free page (/receipts/[id]), so there is
+   no header, footer or ticker to strip — only the on-screen action buttons
+   (`.no-print`). We flatten the sheet's card styling so it prints as plain paper
+   edge to edge, rather than a floating card. */
+@media print {
+  /* margin:0 removes the browser's own URL/date/page-number header & footer in
+     Chromium; the sheet supplies its own margins so content isn't at the edge. */
+  @page {
+    margin: 0;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  [data-print-sheet] {
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 14mm !important;
+    max-width: none !important;
+  }
+}

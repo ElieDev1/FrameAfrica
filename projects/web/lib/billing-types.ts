@@ -40,6 +40,21 @@ export interface PaymentRecord {
   createdAt: string;
 }
 
+/** A downloadable receipt for one settled payment. */
+export interface Receipt {
+  number: string;
+  issuedAt: string;
+  amountCents: number;
+  currency: string;
+  provider: PaymentProvider;
+  reference: string | null;
+  plan: { name: string; interval: PlanInterval };
+  billedTo: { name: string; email: string };
+  period: { start: string; end: string } | null;
+  verifyUrl: string;
+  qrDataUrl: string;
+}
+
 /** Currencies with no minor unit — the stored "cents" are already whole units. */
 const ZERO_DECIMAL = ['RWF', 'JPY', 'KRW', 'UGX', 'XOF', 'XAF'];
 

@@ -31,6 +31,7 @@ function build(settings: Record<string, string> = {}) {
     payment: {
       create: jest.fn(),
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       findMany: jest.fn(),
       update: jest.fn(),
     },
@@ -222,6 +223,63 @@ describe('BillingService', () => {
       await service.expireLapsed();
 
       expect(prisma.user.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('receipt', () => {
+    const settledPayment = {
+      id: 'a1b2c3d4e5f6',
+      userId: 'u1',
+      amountCents: 5000,
+      currency: 'RWF',
+      provider: 'momo',
+      providerRef: 'MOMO-REF-9',
+      status: 'succeeded',
+      paidAt: new Date('2026-07-14T09:00:00Z'),
+      createdAt: new Date('2026-07-14T08:59:00Z'),
+      user: { displayName: 'Jane Uwase', email: 'jane@frameafrica.rw' },
+      subscription: {
+        currentPeriodStart: new Date('2026-07-14T09:00:00Z'),
+        currentPeriodEnd: new Date('2026-08-14T09:00:00Z'),
+        plan: { name: 'Digital monthly', interval: 'month' },
+      },
+    };
+
+    it('builds a receipt for a settled payment, made out to the reader', async () => {
+      const { service, prisma } = build({ APP_URL: 'https://frameafrica.rw' });
+      prisma.payment.findFirst.mockResolvedValue(settledPayment);
+
+      const receipt = await service.receipt('u1', 'a1b2c3d4e5f6');
+
+      expect(receipt.number).toBe('FA-20260714-A1B2C3'); // stable, date + id
+      expect(receipt.amountCents).toBe(5000);
+      expect(receipt.billedTo).toEqual({ name: 'Jane Uwase', email: 'jane@frameafrica.rw' });
+      expect(receipt.plan.name).toBe('Digital monthly');
+      expect(receipt.period).toEqual({
+        start: '2026-07-14T09:00:00.000Z',
+        end: '2026-08-14T09:00:00.000Z',
+      });
+      // The QR encodes a link back to this exact receipt.
+      expect(receipt.verifyUrl).toBe('https://frameafrica.rw/receipts/a1b2c3d4e5f6');
+      expect(receipt.qrDataUrl).toMatch(/^data:image\/png;base64,/);
+    });
+
+    it('only queries the caller’s own succeeded payments — the id is not a capability', async () => {
+      const { service, prisma } = build();
+      prisma.payment.findFirst.mockResolvedValue(settledPayment);
+
+      await service.receipt('u1', 'a1b2c3d4e5f6');
+
+      const calls = prisma.payment.findFirst.mock.calls as unknown[][];
+      const arg = calls[0]?.[0] as { where: { id: string; userId: string; status: string } };
+      expect(arg.where).toMatchObject({ id: 'a1b2c3d4e5f6', userId: 'u1', status: 'succeeded' });
+    });
+
+    it('404s a payment that is not the caller’s, or not settled', async () => {
+      const { service, prisma } = build();
+      prisma.payment.findFirst.mockResolvedValue(null);
+
+      await expect(service.receipt('u1', 'nope')).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 });

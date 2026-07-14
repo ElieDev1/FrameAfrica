@@ -42,6 +42,12 @@ export class BillingMeController {
     return apiResponse(await this.billing.myPayments(user.id));
   }
 
+  /** The receipt for one settled payment — scoped to the caller. */
+  @Get('payments/:id/receipt')
+  async receipt(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return apiResponse(await this.billing.receipt(user.id, id));
+  }
+
   @Post('checkout')
   @HttpCode(200)
   async checkout(@CurrentUser() user: AuthenticatedUser, @Body() dto: CheckoutDto) {
