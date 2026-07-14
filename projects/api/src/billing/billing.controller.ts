@@ -182,6 +182,17 @@ export class BillingAdminController {
     return apiResponse(await this.billing.grantManual(dto.userId, dto.planCode));
   }
 
+  @Get('subscriptions')
+  async subscriptions() {
+    return apiResponse(await this.billing.listSubscriptions());
+  }
+
+  @Post('subscriptions/:id/revoke')
+  @HttpCode(200)
+  async revoke(@Param('id') id: string) {
+    return apiResponse(await this.billing.revoke(id));
+  }
+
   @Post('expire-lapsed')
   @HttpCode(200)
   async expire() {

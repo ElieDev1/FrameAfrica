@@ -25,6 +25,7 @@ function build(settings: Record<string, string> = {}) {
     subscription: {
       create: jest.fn(),
       findFirst: jest.fn().mockResolvedValue(null),
+      findUnique: jest.fn(),
       findMany: jest.fn().mockResolvedValue([]),
       update: jest.fn(),
     },
@@ -282,6 +283,70 @@ describe('BillingService', () => {
       prisma.payment.findFirst.mockResolvedValue(null);
 
       await expect(service.receipt('u1', 'nope')).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
+  describe('listSubscriptions (admin)', () => {
+    it('lists subscribers with user + plan, excluding never-settled ones', async () => {
+      const { service, prisma } = build();
+      prisma.subscription.findMany.mockResolvedValue([
+        {
+          id: 'sub-1',
+          status: 'active',
+          provider: 'momo',
+          currentPeriodEnd: new Date('2026-08-14T00:00:00Z'),
+          cancelAtPeriodEnd: false,
+          user: { id: 'u1', displayName: 'Jane Uwase', email: 'jane@frameafrica.rw' },
+          plan: { name: 'Digital monthly' },
+        },
+      ]);
+
+      const list = await service.listSubscriptions();
+
+      expect(list[0]).toMatchObject({
+        id: 'sub-1',
+        user: { name: 'Jane Uwase', email: 'jane@frameafrica.rw' },
+        planName: 'Digital monthly',
+        isActive: true,
+      });
+      const findManyCalls = prisma.subscription.findMany.mock.calls as unknown[][];
+      const findManyArg = findManyCalls[0]?.[0] as { where: { status: unknown } };
+      expect(findManyArg.where.status).toEqual({ not: 'incomplete' }); // never-settled left out
+    });
+  });
+
+  describe('revoke (admin)', () => {
+    it('ends the subscription now and clears entitlement when nothing else covers', async () => {
+      const { service, prisma } = build();
+      prisma.subscription.findUnique.mockResolvedValue({ id: 'sub-1', userId: 'u1' });
+      prisma.subscription.findFirst.mockResolvedValue(null); // no other coverage
+
+      const res = await service.revoke('sub-1');
+
+      expect(res).toEqual({ revoked: true });
+      const updateCalls = prisma.subscription.update.mock.calls as unknown[][];
+      const upd = (updateCalls[0]?.[0] as { data: { status: string } }).data;
+      expect(upd.status).toBe('canceled');
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'u1' },
+        data: { subscribedUntil: null },
+      });
+    });
+
+    it('keeps entitlement when another subscription still covers the reader', async () => {
+      const { service, prisma } = build();
+      prisma.subscription.findUnique.mockResolvedValue({ id: 'sub-1', userId: 'u1' });
+      prisma.subscription.findFirst.mockResolvedValue({ id: 'sub-2' });
+
+      await service.revoke('sub-1');
+
+      expect(prisma.user.update).not.toHaveBeenCalled();
+    });
+
+    it('404s an unknown subscription', async () => {
+      const { service, prisma } = build();
+      prisma.subscription.findUnique.mockResolvedValue(null);
+      await expect(service.revoke('nope')).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 

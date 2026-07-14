@@ -12,6 +12,7 @@ import * as QRCode from 'qrcode';
 import { AdminSettingsService } from '../admin/admin-settings.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type {
+  AdminSubscriptionView,
   CheckoutResult,
   PlanView,
   ReceiptVerification,
@@ -439,6 +440,64 @@ export class BillingService {
       }
     }
     return { expired: lapsed.length };
+  }
+
+  /**
+   * Admin: every subscriber and where they stand — the "who is subscribed"
+   * view. Newest first; incomplete (never-settled) subscriptions are left out,
+   * since they never granted access.
+   */
+  async listSubscriptions(): Promise<AdminSubscriptionView[]> {
+    const now = new Date();
+    const rows = await this.prisma.subscription.findMany({
+      where: { status: { not: SubscriptionStatus.incomplete } },
+      orderBy: { currentPeriodEnd: 'desc' },
+      take: 500,
+      include: {
+        user: { select: { id: true, displayName: true, email: true } },
+        plan: { select: { name: true } },
+      },
+    });
+    return rows.map((s) => ({
+      id: s.id,
+      user: { id: s.user.id, name: s.user.displayName, email: s.user.email },
+      planName: s.plan.name,
+      status: s.status,
+      provider: s.provider,
+      currentPeriodEnd: s.currentPeriodEnd.toISOString(),
+      cancelAtPeriodEnd: s.cancelAtPeriodEnd,
+      isActive: s.status === SubscriptionStatus.active && s.currentPeriodEnd > now,
+    }));
+  }
+
+  /**
+   * Admin: end a subscription now (a refund, a chargeback, an abuse case). Unlike
+   * a reader's cancel — which lets paid days run out — this revokes access
+   * immediately, and clears the reader's entitlement unless another subscription
+   * still covers them.
+   */
+  async revoke(subscriptionId: string): Promise<{ revoked: boolean }> {
+    const sub = await this.prisma.subscription.findUnique({ where: { id: subscriptionId } });
+    if (!sub) throw new NotFoundException('Subscription not found');
+
+    const now = new Date();
+    await this.prisma.subscription.update({
+      where: { id: sub.id },
+      data: { status: SubscriptionStatus.canceled, canceledAt: now, currentPeriodEnd: now },
+    });
+
+    const stillCovered = await this.prisma.subscription.findFirst({
+      where: {
+        userId: sub.userId,
+        id: { not: sub.id },
+        status: SubscriptionStatus.active,
+        currentPeriodEnd: { gt: now },
+      },
+    });
+    if (!stillCovered) {
+      await this.prisma.user.update({ where: { id: sub.userId }, data: { subscribedUntil: null } });
+    }
+    return { revoked: true };
   }
 
   // ── Providers ─────────────────────────────────────────────────────────────

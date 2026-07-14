@@ -1,8 +1,9 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { getAccessToken } from './session';
 import { fetchPlans } from './billing';
-import type { Plan } from './billing-types';
+import type { AdminSubscription, Plan } from './billing-types';
 
 /**
  * Admin: comp a subscription (corporate deal, cash payment, a giveaway) without
@@ -69,5 +70,41 @@ export async function grantSubscription(
     return { error: 'Could not reach the API.' };
   }
 
+  revalidatePath('/dashboard/billing');
   return { ok: true, message: `Granted ${planCode} to ${email}.` };
+}
+
+/** Every subscriber and where they stand. */
+export async function fetchSubscribers(): Promise<AdminSubscription[]> {
+  const token = await getAccessToken();
+  if (!token) return [];
+  try {
+    const res = await fetch(`${API_URL}/admin/billing/subscriptions`, {
+      headers: { authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as { data: AdminSubscription[] };
+    return json.data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** End a subscription immediately (refund, chargeback, abuse). */
+export async function revokeSubscription(id: string): Promise<{ ok: boolean; error?: string }> {
+  const token = await getAccessToken();
+  if (!token) return { ok: false, error: 'Sign in again.' };
+  try {
+    const res = await fetch(`${API_URL}/admin/billing/subscriptions/${id}/revoke`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return { ok: false, error: 'Could not revoke the subscription.' };
+    revalidatePath('/dashboard/billing');
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'Could not reach the API.' };
+  }
 }

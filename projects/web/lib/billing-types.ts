@@ -56,6 +56,18 @@ export interface Receipt {
   barcodeDataUrl: string;
 }
 
+/** A subscriber as the admin billing page sees them. */
+export interface AdminSubscription {
+  id: string;
+  user: { id: string; name: string; email: string };
+  planName: string;
+  status: SubscriptionStatus;
+  provider: PaymentProvider;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  isActive: boolean;
+}
+
 /** The public, non-sensitive confirmation shown on the verify page. */
 export interface ReceiptVerification {
   valid: boolean;

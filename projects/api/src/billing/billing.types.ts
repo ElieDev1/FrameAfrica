@@ -62,6 +62,18 @@ export interface ReceiptVerification {
   payerName: string;
 }
 
+/** A subscriber as the admin billing page sees them. */
+export interface AdminSubscriptionView {
+  id: string;
+  user: { id: string; name: string; email: string };
+  planName: string;
+  status: SubscriptionStatus;
+  provider: PaymentProvider;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  isActive: boolean;
+}
+
 /** What a checkout returns: either a redirect (card) or a pending push (mobile money). */
 export interface CheckoutResult {
   paymentId: string;
