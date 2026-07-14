@@ -497,16 +497,6 @@ const dict = {
     rw: 'Iyandikishe kuri Frame Africa',
     fr: 'Rejoindre Frame Africa',
   },
-  'auth.storiesPublished': {
-    en: 'stories published',
-    rw: 'inkuru zashizwe hanze',
-    fr: 'articles publiés',
-  },
-  'auth.capitalsLive': {
-    en: 'capitals, live',
-    rw: 'imijyi mikuru, live',
-    fr: 'capitales, en direct',
-  },
   'auth.independentJournalism': {
     en: 'Independent journalism',
     rw: 'Itangazamakuru ryigenga',

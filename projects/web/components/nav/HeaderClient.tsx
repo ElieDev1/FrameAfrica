@@ -122,6 +122,19 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
         {sections.length > 0 && (
           <nav aria-label="Sections" className="hidden min-w-0 flex-1 items-center lg:flex">
             <ul className="flex items-center">
+              {/* Home leads the nav — a reader always has a way back to the front page. */}
+              <li className="group relative">
+                <Link
+                  href="/"
+                  aria-current={pathname === '/' ? 'page' : undefined}
+                  className={`relative inline-flex items-center px-1.5 py-2 text-[13px] font-semibold transition-colors after:absolute after:inset-x-1.5 after:bottom-0 after:h-0.5 after:origin-left after:rounded-full after:bg-primary after:transition-transform after:duration-200 group-hover:text-text group-hover:after:scale-x-100 ${
+                    pathname === '/' ? 'text-text after:scale-x-100' : 'text-muted after:scale-x-0'
+                  }`}
+                >
+                  {t(locale, 'nav.home')}
+                </Link>
+              </li>
+
               {sections.map((section, index) => {
                 const active = sectionActive(section);
                 const feat = featured[section.slug];
