@@ -12,6 +12,9 @@ const SHAPE: Record<AdPlacement, string> = {
   rectangle: 'aspect-[6/5]',
   halfpage: 'aspect-[1/2]',
   native: 'aspect-[16/9]',
+  // Wide and shallow: prominent at the top of the homepage, without shoving the
+  // news below the fold.
+  flyer: 'h-36 sm:h-44 md:h-56',
 };
 
 /** A video creative (animated/motion ad) vs a static image. */

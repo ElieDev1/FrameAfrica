@@ -2,6 +2,7 @@ import { AdSlot } from '@/components/AdSlot';
 import { ArticleCard } from '@/components/ArticleCard';
 import { BreakingTicker } from '@/components/BreakingTicker';
 import { EditorsPicks } from '@/components/EditorsPicks';
+import { FlyerBanner } from '@/components/FlyerBanner';
 import { HeroSidebar } from '@/components/HeroSidebar';
 import { JustIn } from '@/components/JustIn';
 import { MarketsWidget } from '@/components/MarketsWidget';
@@ -82,6 +83,9 @@ export default async function Home() {
   return (
     <>
       <BreakingTicker articles={breaking} locale={locale} />
+      {/* The flyer leads the page — the most saleable slot on the site. Breaking
+          news still comes first: a headline outranks an advertiser. */}
+      <FlyerBanner />
       <div className="mx-auto max-w-[1440px] px-6 py-8">
         <h1 className="sr-only">Frame Africa — latest news</h1>
 

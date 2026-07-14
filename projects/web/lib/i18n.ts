@@ -217,6 +217,20 @@ const dict = {
   'footer.legal': { en: 'Legal', rw: 'Amategeko', fr: 'Mentions légales' },
   'footer.aboutUs': { en: 'About us', rw: 'Abo turi bo', fr: 'À propos' },
   'footer.advertise': { en: 'Advertise', rw: 'Kwamamaza', fr: 'Publicité' },
+
+  // Homepage flyer banner (a `flyer`-placement house ad).
+  'flyer.label': { en: 'Advertisement', rw: 'Kwamamaza', fr: 'Publicité' },
+  'flyer.availableAria': {
+    en: 'Advertising space available',
+    rw: 'Umwanya wo kwamamaza urahari',
+    fr: 'Espace publicitaire disponible',
+  },
+  'flyer.pitch': {
+    en: 'Put your flyer here — the first thing every reader sees.',
+    rw: 'Shyira icyapa cyawe hano — icya mbere buri musomyi abona.',
+    fr: 'Placez votre affiche ici — la première chose que voit chaque lecteur.',
+  },
+  'flyer.cta': { en: 'Advertise', rw: 'Kwamamaza', fr: 'Annoncer' },
   'footer.contact': { en: 'Contact', rw: 'Twandikire', fr: 'Contact' },
   'footer.sendTip': { en: 'Send a tip', rw: 'Ohereza inkuru', fr: 'Proposer une info' },
   'footer.latest': { en: 'Latest', rw: 'Bishya', fr: 'À la une' },

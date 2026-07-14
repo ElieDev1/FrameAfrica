@@ -5,7 +5,14 @@ const API_URL =
 export const PUBLIC_API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? process.env.API_URL ?? 'http://localhost:4000/v1';
 
-export type AdPlacement = 'leaderboard' | 'billboard' | 'rectangle' | 'halfpage' | 'native';
+export type AdPlacement =
+  | 'leaderboard'
+  | 'billboard'
+  | 'rectangle'
+  | 'halfpage'
+  | 'native'
+  /** The wide promotional flyer across the very top of the homepage. */
+  | 'flyer';
 
 /** Cache tag for every house-ad fetch, so admin changes invalidate the site. */
 export const HOUSE_ADS_TAG = 'house-ads';

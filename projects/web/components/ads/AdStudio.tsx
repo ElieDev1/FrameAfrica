@@ -8,6 +8,7 @@ import { createHouseAd } from '@/lib/ads-actions';
 
 /** IAB canvas sizes per placement (px). */
 const SIZES = {
+  flyer: { w: 1600, h: 400, label: 'Homepage flyer', dim: '1600×400' },
   leaderboard: { w: 970, h: 90, label: 'Leaderboard', dim: '970×90' },
   billboard: { w: 970, h: 250, label: 'Billboard', dim: '970×250' },
   rectangle: { w: 300, h: 250, label: 'Rectangle', dim: '300×250' },

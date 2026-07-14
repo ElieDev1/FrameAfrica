@@ -100,6 +100,9 @@ enum AdPlacement {
   rectangle
   halfpage
   native
+  /// A wide promotional flyer across the very top of the homepage — the first
+  /// thing a reader sees. Sold, not editorial (documents/06 §4.1).
+  flyer
 }
 
 enum InquiryType {

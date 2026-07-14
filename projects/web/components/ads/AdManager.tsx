@@ -6,7 +6,14 @@ import { useT } from '@/components/LocaleProvider';
 import { createHouseAd, deleteHouseAd, toggleHouseAd } from '@/lib/ads-actions';
 import type { HouseAdAdmin } from '@/lib/cms';
 
-const PLACEMENTS = ['leaderboard', 'billboard', 'rectangle', 'halfpage', 'native'] as const;
+const PLACEMENTS = [
+  'flyer',
+  'leaderboard',
+  'billboard',
+  'rectangle',
+  'halfpage',
+  'native',
+] as const;
 
 function isVideo(url: string): boolean {
   return /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);

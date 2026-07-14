@@ -18,6 +18,11 @@ jest.mock('@/components/WeatherWidget', () => ({ WeatherWidget: () => <h2>Weathe
 jest.mock('@/components/MarketsWidget', () => ({ MarketsWidget: () => <h2>Markets</h2> }));
 // AdSlot is also async (serves a house ad from the API) — stub it too.
 jest.mock('@/components/AdSlot', () => ({ AdSlot: () => <aside aria-label="Advertisement" /> }));
+// The homepage flyer is its own async server component (it asks the API which
+// creative is booked); the page's own rendering is what's under test here.
+jest.mock('@/components/FlyerBanner', () => ({
+  FlyerBanner: () => <aside aria-label="Advertisement" />,
+}));
 // VideoStrip is async (reads the cached YouTube uploads).
 jest.mock('@/components/VideoStrip', () => ({ VideoStrip: () => <h2>Watch</h2> }));
 
