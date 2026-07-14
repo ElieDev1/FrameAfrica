@@ -9,6 +9,7 @@ import { AdminTaxonomyController } from './admin-taxonomy.controller';
 import { AdminTaxonomyService } from './admin-taxonomy.service';
 import { AdminUsersController } from './admin-users.controller';
 import { AdminUsersService } from './admin-users.service';
+import { SiteSettingsController } from './site-settings.controller';
 
 @Module({
   imports: [AuthModule, MailModule], // TokenService (guard) + PasswordService + MailerService
@@ -17,6 +18,7 @@ import { AdminUsersService } from './admin-users.service';
     AdminSettingsController,
     AdminOverviewController,
     AdminTaxonomyController,
+    SiteSettingsController, // public: footer socials + contacts
   ],
   providers: [AdminUsersService, AdminSettingsService, AdminOverviewService, AdminTaxonomyService],
   exports: [AdminSettingsService], // raw values read by integration consumers

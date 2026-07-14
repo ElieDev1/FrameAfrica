@@ -64,7 +64,7 @@ function sampleArticle(): ArticleDetail {
     publishedAt: '2026-01-01T00:00:00.000Z',
     featuredImage: null,
     category: { id: 'c1', name: 'Business', slug: 'business' },
-    author: { id: 'u1', displayName: 'Jane Uwase', avatarUrl: null },
+    author: { id: 'u1', displayName: 'Jane Uwase', avatarUrl: null, slug: 'jane-uwase' },
     topics: [],
     body: 'First paragraph.\n\nSecond paragraph.',
     blocks: [
@@ -90,7 +90,11 @@ describe('ArticlePage', () => {
     render(await ArticlePage({ params: Promise.resolve({ slug: 'rwanda-coffee' }) }));
 
     expect(screen.getByRole('heading', { level: 1, name: /rwanda coffee/i })).toBeInTheDocument();
-    expect(screen.getByText('Jane Uwase')).toBeInTheDocument();
+    // The byline leads to the author's page — it appears in the header and again
+    // in the "written by" card under the story.
+    const bylines = screen.getAllByRole('link', { name: 'Jane Uwase' });
+    expect(bylines.length).toBeGreaterThan(0);
+    expect(bylines[0]).toHaveAttribute('href', '/author/jane-uwase');
     expect(screen.getByText('First paragraph.')).toBeInTheDocument();
     expect(screen.getByText('Second paragraph.')).toBeInTheDocument();
   });

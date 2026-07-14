@@ -194,6 +194,26 @@ describe('AuthService', () => {
       expect(prisma.user.update).not.toHaveBeenCalled();
     });
 
+    it('auto-lifts an expired lock and lets a correct password through', async () => {
+      const { service, prisma, passwords } = build();
+      // Locked 16 minutes ago — past the 15-minute cooldown.
+      const staleLock = new Date(Date.now() - 16 * 60_000);
+      prisma.user.findFirst.mockResolvedValue(
+        userWithRoles({ lockedAt: staleLock, failedLoginAttempts: 5 }),
+      );
+      passwords.verify.mockResolvedValue(true);
+      prisma.user.update.mockResolvedValue({});
+
+      const res = await service.login({ email: 'reader@frameafrica.rw', password: 'pw' });
+
+      // Session issued, and the stale lock was cleared before the success update.
+      expect(res.accessToken).toBe('access.jwt');
+      const firstUpdate = (
+        prisma.user.update.mock.calls[0] as [{ data: Record<string, unknown> }]
+      )[0];
+      expect(firstUpdate.data).toMatchObject({ lockedAt: null, failedLoginAttempts: 0 });
+    });
+
     it('rejects a suspended account', async () => {
       const { service, prisma, passwords } = build();
       prisma.user.findFirst.mockResolvedValue(userWithRoles({ status: 'suspended' }));

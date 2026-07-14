@@ -209,7 +209,17 @@ export default async function ArticlePage({ params }: PageProps) {
           )}
 
           <div className="mt-5 flex flex-wrap items-center gap-x-2 font-mono text-xs text-muted">
-            <span className="text-text">{article.author.displayName}</span>
+            {/* A byline should lead to the person who stands behind the story. */}
+            {article.author.slug ? (
+              <Link
+                href={`/author/${article.author.slug}`}
+                className="text-text underline-offset-2 hover:text-primary hover:underline"
+              >
+                {article.author.displayName}
+              </Link>
+            ) : (
+              <span className="text-text">{article.author.displayName}</span>
+            )}
             {article.publishedAt && <span>· {formatDate(article.publishedAt)}</span>}
             {article.readTimeMin && (
               <span className="inline-flex items-center gap-1">
@@ -327,7 +337,42 @@ export default async function ArticlePage({ params }: PageProps) {
               <p className="max-w-sm font-body text-sm text-muted">
                 {t(locale, 'article.lockedBody')}
               </p>
+              {/* The paywall finally has a way through it. */}
+              <Link
+                href="/pricing"
+                className="mt-2 rounded-lg bg-primary px-5 py-2.5 font-heading font-bold text-black transition hover:opacity-90"
+              >
+                {t(locale, 'pay.seePlans')}
+              </Link>
             </div>
+          )}
+
+          {article.author.slug && (
+            <aside className="mt-10 flex items-center gap-4 rounded-xl border border-border bg-surface p-4">
+              <span
+                aria-hidden
+                className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-surface-2 font-heading text-lg font-black text-muted ring-1 ring-border"
+              >
+                {article.author.displayName.trim().charAt(0).toUpperCase()}
+              </span>
+              <div className="min-w-0">
+                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-faint">
+                  {t(locale, 'article.writtenBy')}
+                </p>
+                <Link
+                  href={`/author/${article.author.slug}`}
+                  className="font-heading text-lg font-bold text-text transition hover:text-primary"
+                >
+                  {article.author.displayName}
+                </Link>
+              </div>
+              <Link
+                href={`/author/${article.author.slug}`}
+                className="ml-auto shrink-0 rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-muted transition hover:border-primary hover:text-primary"
+              >
+                {t(locale, 'author.more')} {article.author.displayName.split(' ')[0]}
+              </Link>
+            </aside>
           )}
 
           {related.length > 0 && (

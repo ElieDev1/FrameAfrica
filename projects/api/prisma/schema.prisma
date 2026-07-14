@@ -137,30 +137,36 @@ enum InteractiveProvider {
 }
 
 model User {
-  id                 String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  email              String     @unique @db.Citext
-  phone              String?    @unique
-  passwordHash       String?    @map("password_hash")
-  displayName        String     @map("display_name")
-  avatarUrl          String?    @map("avatar_url")
-  status             UserStatus @default(active)
-  emailVerifiedAt    DateTime?  @map("email_verified_at")
-  twoFactorEnabled   Boolean    @default(false) @map("two_factor_enabled")
-  twoFactorSecret    String?    @map("two_factor_secret")
-  mustChangePassword Boolean    @default(false) @map("must_change_password")
+  id                  String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email               String     @unique @db.Citext
+  phone               String?    @unique
+  passwordHash        String?    @map("password_hash")
+  displayName         String     @map("display_name")
+  avatarUrl           String?    @map("avatar_url")
+  /// Public byline identity. `authorSlug` is the /author/<slug> URL; `bio` and
+  /// `jobTitle` are what a reader sees on that page and under a story. Set for
+  /// every user, but only reachable for one who has published (documents/14 §2).
+  authorSlug          String?    @unique @map("author_slug")
+  bio                 String?
+  jobTitle            String?    @map("job_title")
+  status              UserStatus @default(active)
+  emailVerifiedAt     DateTime?  @map("email_verified_at")
+  twoFactorEnabled    Boolean    @default(false) @map("two_factor_enabled")
+  twoFactorSecret     String?    @map("two_factor_secret")
+  mustChangePassword  Boolean    @default(false) @map("must_change_password")
   /// Brute-force lockout: consecutive failed sign-ins, and when the account was
   /// locked (non-null = locked; only an admin can clear it).
-  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
-  lockedAt           DateTime?  @map("locked_at")
-  commentsBannedAt   DateTime?  @map("comments_banned_at")
+  failedLoginAttempts Int        @default(0) @map("failed_login_attempts")
+  lockedAt            DateTime?  @map("locked_at")
+  commentsBannedAt    DateTime?  @map("comments_banned_at")
   /// Paid access through this instant; null/past = not a subscriber. Granted by
   /// an admin today; self-serve payments (MoMo/Airtel) land with billing.
-  subscribedUntil    DateTime?  @map("subscribed_until")
-  preferences        Json       @default("{}")
-  lastLoginAt        DateTime?  @map("last_login_at")
-  createdAt          DateTime   @default(now()) @map("created_at")
-  updatedAt          DateTime   @updatedAt @map("updated_at")
-  deletedAt          DateTime?  @map("deleted_at")
+  subscribedUntil     DateTime?  @map("subscribed_until")
+  preferences         Json       @default("{}")
+  lastLoginAt         DateTime?  @map("last_login_at")
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
+  deletedAt           DateTime?  @map("deleted_at")
 
   roles          UserRole[]
   articles       Article[]
@@ -181,8 +187,33 @@ model User {
   notifications  Notification[]
   auditLogs      AuditLog[]          @relation("UserAuditLogs")
   galleries      Gallery[]
+  subscriptions  Subscription[]
+  payments       Payment[]
+  pushSubscriptions PushSubscription[]
 
   @@map("user")
+}
+
+/// A browser that has agreed to receive breaking-news alerts (documents/14 §6).
+/// `userId` is null for a reader who never signed in — the alert is a promise to
+/// a browser, not to an account. `endpoint` is the push service's URL for that
+/// browser and is the identity of the subscription.
+model PushSubscription {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  endpoint   String    @unique
+  /// The browser's public key and auth secret — the payload is encrypted to
+  /// these, so even the push service cannot read the headline we send.
+  p256dh     String
+  auth       String
+  userId     String?   @map("user_id") @db.Uuid
+  userAgent  String?   @map("user_agent")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  lastSentAt DateTime? @map("last_sent_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscription")
 }
 
 /// A reader's saved article (one per user per article). Surfaced in the reader's
@@ -871,4 +902,111 @@ model ArticleRevision {
 
   @@index([articleId, createdAt])
   @@map("article_revision")
+}
+
+// ─── Billing ──────────────────────────────────────────────────────────────────
+// The paywall gates premium stories on `User.subscribedUntil`. These models are
+// what actually *sets* it: a reader picks a Plan, pays through a provider, and a
+// succeeded Payment activates a Subscription which extends `subscribedUntil`
+// (documents/01 FR-SUB-1..3, documents/05 §8).
+
+enum PlanInterval {
+  month
+  year
+}
+
+enum SubscriptionStatus {
+  /// Awaiting first successful payment.
+  incomplete
+  active
+  /// Payment failed but access hasn't lapsed yet — retry window.
+  past_due
+  canceled
+  expired
+}
+
+enum PaymentProvider {
+  stripe
+  momo
+  airtel
+  /// Granted by an admin (comped, corporate, cash) — no gateway involved.
+  manual
+}
+
+enum PaymentStatus {
+  pending
+  succeeded
+  failed
+  refunded
+}
+
+/// A subscription offer. Prices are held in minor units (RWF has none, so cents
+/// == francs) to avoid floating-point money.
+model Plan {
+  id          String       @id @default(uuid()) @db.Uuid
+  code        String       @unique
+  name        String
+  description String?
+  priceCents  Int          @map("price_cents")
+  currency    String       @default("RWF")
+  interval    PlanInterval
+  /// Free trial length, in days; 0 = none.
+  trialDays   Int          @default(0) @map("trial_days")
+  isActive    Boolean      @default(true) @map("is_active")
+  sortOrder   Int          @default(0) @map("sort_order")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  subscriptions Subscription[]
+
+  @@map("plan")
+}
+
+/// A reader's paid access to a plan. The active one is what keeps
+/// `User.subscribedUntil` in the future.
+model Subscription {
+  id                 String             @id @default(uuid()) @db.Uuid
+  userId             String             @map("user_id") @db.Uuid
+  planId             String             @map("plan_id") @db.Uuid
+  status             SubscriptionStatus @default(incomplete)
+  provider           PaymentProvider
+  /// The gateway's own id for this subscription (Stripe sub id, MoMo ref…).
+  providerRef        String?            @map("provider_ref")
+  currentPeriodStart DateTime           @map("current_period_start")
+  currentPeriodEnd   DateTime           @map("current_period_end")
+  cancelAtPeriodEnd  Boolean            @default(false) @map("cancel_at_period_end")
+  canceledAt         DateTime?          @map("canceled_at")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan     Plan      @relation(fields: [planId], references: [id])
+  payments Payment[]
+
+  @@index([userId, status])
+  @@index([status, currentPeriodEnd])
+  @@map("subscription")
+}
+
+/// One attempt to take money. `providerRef` is unique so a webhook replay can't
+/// double-credit a reader (documents/05 §8 — idempotent webhooks).
+model Payment {
+  id             String          @id @default(uuid()) @db.Uuid
+  userId         String          @map("user_id") @db.Uuid
+  subscriptionId String?         @map("subscription_id") @db.Uuid
+  amountCents    Int             @map("amount_cents")
+  currency       String          @default("RWF")
+  provider       PaymentProvider
+  providerRef    String?         @unique @map("provider_ref")
+  status         PaymentStatus   @default(pending)
+  failureReason  String?         @map("failure_reason")
+  paidAt         DateTime?       @map("paid_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@map("payment")
 }

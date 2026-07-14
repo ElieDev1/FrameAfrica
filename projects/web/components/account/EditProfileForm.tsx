@@ -30,23 +30,38 @@ function SaveButton() {
  * Bound to the `updateProfile` server action; the page revalidates on success
  * so the new name/photo appear across the account page and header.
  */
+/** The public-byline part of a staff member's profile. */
+export interface Byline {
+  bio: string;
+  jobTitle: string;
+  /** Their /author/<slug> page, once they have published (else null). */
+  slug: string | null;
+}
+
 export function EditProfileForm({
   displayName,
   avatarUrl,
+  byline,
 }: {
   displayName: string;
   avatarUrl: string | null;
+  /** Present for staff only — a plain reader has no byline. */
+  byline?: Byline;
 }) {
   const [open, setOpen] = useState(false);
   const [state, action] = useActionState<ProfileFormState, FormData>(updateProfile, {});
   const [name, setName] = useState(displayName);
   const [avatar, setAvatar] = useState(avatarUrl ?? '');
+  const [bio, setBio] = useState(byline?.bio ?? '');
+  const [jobTitle, setJobTitle] = useState(byline?.jobTitle ?? '');
   const closedOnSuccess = useRef(false);
   const t = useT();
 
   const openModal = () => {
     setName(displayName);
     setAvatar(avatarUrl ?? '');
+    setBio(byline?.bio ?? '');
+    setJobTitle(byline?.jobTitle ?? '');
     closedOnSuccess.current = false;
     setOpen(true);
   };
@@ -147,6 +162,56 @@ export function EditProfileForm({
                   className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-text outline-none focus:border-primary"
                 />
               </label>
+
+              {/* Byline — staff only. This is what a reader sees on the author page
+                  a story links to, so it is worth filling in. */}
+              {byline && (
+                <fieldset className="space-y-4 border-t border-border pt-4">
+                  <legend className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                    {t('account.byline')}
+                  </legend>
+
+                  <label className="block">
+                    <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                      {t('account.jobTitle')}
+                    </span>
+                    <input
+                      name="jobTitle"
+                      value={jobTitle}
+                      onChange={(e) => setJobTitle(e.target.value)}
+                      placeholder={t('account.jobTitlePlaceholder')}
+                      maxLength={120}
+                      className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-text outline-none focus:border-primary"
+                    />
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                      {t('account.bio')}
+                    </span>
+                    <textarea
+                      name="bio"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      rows={3}
+                      maxLength={600}
+                      placeholder={t('account.bioPlaceholder')}
+                      className="w-full resize-y rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm leading-relaxed text-text outline-none focus:border-primary"
+                    />
+                  </label>
+
+                  {byline.slug && (
+                    <a
+                      href={`/author/${byline.slug}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-block font-mono text-[11px] text-primary hover:underline"
+                    >
+                      {t('account.viewAuthorPage')} →
+                    </a>
+                  )}
+                </fieldset>
+              )}
 
               {state.error && (
                 <p role="alert" className="text-sm text-accent-red">

@@ -29,14 +29,9 @@ export default async function PodcastsPage({
   ]);
 
   return (
-    <div className="mx-auto max-w-[1440px] px-6 pb-8 pt-4">
-      <header className="border-b border-border pb-4">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
-          {t(locale, 'home.listen')}
-        </p>
-        <h1 className="mt-0.5 font-heading text-3xl font-black tracking-tight text-text">
-          {t(locale, 'mm.podcasts')}
-        </h1>
+    <div className="mx-auto max-w-[1440px] px-6 pb-8 pt-1">
+      <header className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <h1 className="sr-only">{t(locale, 'mm.podcasts')}</h1>
         <HubSearch basePath="/podcasts" q={q} locale={locale} placeholderKey="mm.searchPodcasts" />
       </header>
 
@@ -57,7 +52,7 @@ export default async function PodcastsPage({
           <div className="grid grid-cols-2 gap-x-6 gap-y-9 pt-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {shows.map((s) => (
               <Link key={s.id} href={`/podcasts/${s.slug}`} className="group min-w-0">
-                <div className="relative aspect-square overflow-hidden rounded-xl bg-surface-2 ring-1 ring-border">
+                <div className="relative aspect-square overflow-hidden bg-surface-2 ring-1 ring-border">
                   {s.coverUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

@@ -2,8 +2,8 @@ import { AdSlot } from '@/components/AdSlot';
 import { ArticleCard } from '@/components/ArticleCard';
 import { BreakingTicker } from '@/components/BreakingTicker';
 import { EditorsPicks } from '@/components/EditorsPicks';
-import { MostRead } from '@/components/HeadlineList';
 import { HeroSidebar } from '@/components/HeroSidebar';
+import { JustIn } from '@/components/JustIn';
 import { MarketsWidget } from '@/components/MarketsWidget';
 import { NewsletterBox } from '@/components/NewsletterBox';
 import { SectionBlock } from '@/components/SectionBlock';
@@ -25,18 +25,15 @@ interface SectionData {
 export default async function Home() {
   const locale = await getLocale();
   let latest: ArticleSummary[] = [];
-  let popular: ArticleSummary[] = [];
   let featured: ArticleSummary[] = [];
   let failed = false;
 
   try {
-    const [latestRes, popularRes, featuredRes] = await Promise.all([
+    const [latestRes, featuredRes] = await Promise.all([
       fetchArticles({ limit: 19 }),
-      fetchArticles({ sort: 'popular', limit: 6 }),
       fetchArticles({ featured: true, limit: 5 }),
     ]);
     latest = latestRes.articles;
-    popular = popularRes.articles;
     featured = featuredRes.articles;
   } catch {
     failed = true;
@@ -58,8 +55,10 @@ export default async function Home() {
   // The front-page lead is the newest editor-featured story (fallback: newest).
   const lead = featured[0] ?? latest[0];
   const rest = latest.filter((a) => a.id !== lead.id);
-  const secondary = rest.slice(0, 4);
-  const river = rest.slice(4);
+  // The secondary "Top stories" column: one leads with a photo, the rest are
+  // headline-only, so it can carry a few more without crowding.
+  const secondary = rest.slice(0, 5);
+  const river = rest.slice(5);
   const featuredPicks = featured.filter((a) => a.id !== lead.id);
   const picks = (featuredPicks.length > 0 ? featuredPicks : rest).slice(0, 4);
   const breaking = latest.filter((a) => a.isBreaking);
@@ -72,7 +71,7 @@ export default async function Home() {
         categories.map(async (category) => ({
           name: translateCategory(locale, category.slug, category.name),
           slug: category.slug,
-          articles: (await fetchArticles({ category: category.slug, limit: 3 })).articles,
+          articles: (await fetchArticles({ category: category.slug, limit: 5 })).articles,
         })),
       )
     ).filter((s) => s.articles.length > 0);
@@ -89,7 +88,7 @@ export default async function Home() {
         {/* Hero: lead + secondary rail */}
         <section
           aria-label={t(locale, 'home.topStories')}
-          className="grid gap-8 border-b border-border pb-10 lg:grid-cols-3"
+          className="grid gap-8 border-b border-border pb-8 lg:grid-cols-3"
         >
           <div className="lg:col-span-2">
             <ArticleCard article={lead} featured locale={locale} />
@@ -97,11 +96,18 @@ export default async function Home() {
           <HeroSidebar articles={secondary} locale={locale} />
         </section>
 
-        <AdSlot variant="leaderboard" className="mt-10" />
+        <AdSlot variant="leaderboard" className="mt-10" desktopOnly />
 
-        {/* Main river + sticky rail */}
+        {/* Main river + rail. On a phone this collapses to one column, so the
+            order matters: "Just in" comes before the long river (fresh headlines
+            first), and the rail's desktop furniture — weather, markets, the tall
+            half-page ad — is dropped rather than dumped below the fold. */}
         <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <main>
+          <aside className="order-1 lg:col-start-2 lg:row-start-1">
+            <JustIn articles={rest.slice(0, 7)} locale={locale} />
+          </aside>
+
+          <main className="order-2 lg:col-start-1 lg:row-start-1 lg:row-span-2">
             <SectionHeading title={t(locale, 'home.latest')} id="latest" />
             {river.length > 0 ? (
               <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
@@ -112,30 +118,41 @@ export default async function Home() {
             ) : (
               <p className="font-body text-muted">{t(locale, 'home.moreSoon')}</p>
             )}
+            {/* The one in-feed ad a phone reader sees. */}
             <AdSlot variant="native" className="mt-10" />
           </main>
 
-          <aside className="flex flex-col gap-8">
-            <MostRead articles={popular} locale={locale} />
+          <aside className="order-3 flex flex-col gap-8 lg:col-start-2 lg:row-start-2">
             <EditorsPicks articles={picks} />
-            <WeatherWidget />
-            <MarketsWidget />
+            {/* Weather and markets are desk furniture — not what a phone reader
+                came for, and they'd sit far below the fold. Desktop only. */}
+            <div className="hidden lg:block">
+              <WeatherWidget />
+            </div>
+            <div className="hidden lg:block">
+              <MarketsWidget />
+            </div>
             <NewsletterBox />
-            <AdSlot variant="halfpage" sticky />
+            <AdSlot variant="halfpage" sticky desktopOnly />
           </aside>
         </div>
 
-        {/* Section bands */}
+        {/* Section bands — shapes alternate (feature / cards) so the front reads
+            like a paper, with a standard mid-page banner between bands two
+            and three. */}
         {sections.length > 0 && (
           <div className="mt-14 flex flex-col gap-14">
-            {sections.map((section) => (
-              <SectionBlock
-                key={section.slug}
-                name={section.name}
-                slug={section.slug}
-                articles={section.articles}
-                locale={locale}
-              />
+            {sections.map((section, index) => (
+              <div key={section.slug} className="flex flex-col gap-14">
+                <SectionBlock
+                  name={section.name}
+                  slug={section.slug}
+                  articles={section.articles}
+                  locale={locale}
+                  variant={index % 2 === 0 ? 'feature' : 'cards'}
+                />
+                {index === 1 && <AdSlot variant="leaderboard" desktopOnly />}
+              </div>
             ))}
           </div>
         )}

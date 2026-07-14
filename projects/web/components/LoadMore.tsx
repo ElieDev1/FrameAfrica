@@ -17,16 +17,22 @@ export function LoadMore({
   initialCursor,
   category,
   topic,
+  author,
   feed = false,
   pageSize = 12,
+  compact = false,
 }: {
   initialArticles: ArticleSummary[];
   initialCursor: string | null;
   category?: string;
   topic?: string;
+  /** An author's slug — everything that byline has published. */
+  author?: string;
   /** When true, paginate the signed-in reader's personalised feed instead. */
   feed?: boolean;
   pageSize?: number;
+  /** Dense small-card grid (used on section pages beside a sidebar). */
+  compact?: boolean;
 }) {
   const [articles, setArticles] = useState(initialArticles);
   const [cursor, setCursor] = useState(initialCursor);
@@ -42,7 +48,7 @@ export function LoadMore({
     try {
       const res = feed
         ? await fetchFeed({ cursor, limit: pageSize })
-        : await fetchMoreArticles({ category, topic, cursor, limit: pageSize });
+        : await fetchMoreArticles({ category, topic, author, cursor, limit: pageSize });
       setArticles((prev) => [...prev, ...res.articles]);
       setCursor(res.nextCursor);
     } catch {
@@ -54,9 +60,15 @@ export function LoadMore({
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-10 pt-8 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        className={
+          compact
+            ? 'grid grid-cols-2 gap-x-5 gap-y-8 pt-6 sm:grid-cols-2 lg:grid-cols-3'
+            : 'grid grid-cols-1 gap-10 pt-8 sm:grid-cols-2 lg:grid-cols-3'
+        }
+      >
         {articles.map((article) => (
-          <ArticleCard key={article.id} article={article} locale={locale} />
+          <ArticleCard key={article.id} article={article} compact={compact} locale={locale} />
         ))}
       </div>
 

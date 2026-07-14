@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { DraftForm } from '@/components/cms/DraftForm';
+import { fetchAiStatus } from '@/lib/ai-actions';
 import { categoryOptions, requireStaff, topicOptions } from '@/lib/cms';
 import { createDraftAction } from '@/lib/cms-actions';
 import { t } from '@/lib/i18n';
@@ -10,10 +11,11 @@ export const metadata: Metadata = { title: 'New draft — Frame Africa' };
 
 export default async function NewDraftPage() {
   await requireStaff();
-  const [categories, topics, locale] = await Promise.all([
+  const [categories, topics, locale, ai] = await Promise.all([
     categoryOptions(),
     topicOptions(),
     getLocale(),
+    fetchAiStatus(),
   ]);
 
   return (
@@ -31,6 +33,7 @@ export default async function NewDraftPage() {
           categories={categories}
           topics={topics}
           mode="create"
+          aiEnabled={ai.configured}
         />
       </div>
     </div>

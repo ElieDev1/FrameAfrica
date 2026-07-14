@@ -176,8 +176,16 @@ export class CmsDraftService {
 
   // ── Admin: edit any article, regardless of author or status ──────────────
 
-  /** All articles (any author, any status), newest first, optionally filtered. */
-  async listAll(filter: { status?: ArticleStatus; q?: string } = {}): Promise<DraftListItem[]> {
+  /**
+   * All articles (any author, any status), newest first, optionally filtered.
+   * The admin table filters/searches/paginates client-side, so it needs the
+   * whole list — not a clipped page. `limit` defaults high enough for a real
+   * newsroom's back-catalogue, with a hard ceiling so a runaway request can't
+   * pull the entire table.
+   */
+  async listAll(
+    filter: { status?: ArticleStatus; q?: string; limit?: number } = {},
+  ): Promise<DraftListItem[]> {
     const where: Prisma.ArticleWhereInput = { deletedAt: null };
     if (filter.status) where.status = filter.status;
     if (filter.q) {
@@ -186,11 +194,12 @@ export class CmsDraftService {
         { slug: { contains: filter.q, mode: 'insensitive' } },
       ];
     }
+    const take = Math.min(Math.max(filter.limit ?? 2000, 1), 5000);
     const rows = await this.prisma.article.findMany({
       where,
       include: draftInclude,
       orderBy: { updatedAt: 'desc' },
-      take: 200,
+      take,
     });
     return rows.map(toDraftListItem);
   }

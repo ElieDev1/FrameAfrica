@@ -25,6 +25,8 @@ function build() {
     user: {
       findMany: jest.fn(),
       findFirst: jest.fn(),
+      // The byline-slug lookup: nothing taken, so the first candidate wins.
+      findUnique: jest.fn().mockResolvedValue(null),
       create: jest.fn(),
       update: jest.fn(),
     },

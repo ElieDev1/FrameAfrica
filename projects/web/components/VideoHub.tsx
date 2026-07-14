@@ -47,15 +47,15 @@ export function VideoHub({ videos, initialId }: { videos: VideoItem[]; initialId
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               // Cap to the viewport (minus navbar + header) so the whole player
-              // is visible without scrolling; it centres and keeps 16:9.
-              className="mx-auto aspect-video max-h-[calc(100dvh_-_13rem)] w-full max-w-[calc((100dvh_-_13rem)_*_16/9)] rounded-xl ring-1 ring-border"
+              // is visible without scrolling; left-aligned to the content edge.
+              className="aspect-video max-h-[calc(100dvh_-_13rem)] w-full max-w-[calc((100dvh_-_13rem)_*_16/9)] ring-1 ring-border"
             />
           ) : (
             <button
               type="button"
               onClick={() => setPlaying(true)}
               aria-label={`${t('mm.play')}: ${current.title}`}
-              className="media-fill relative mx-auto block aspect-video max-h-[calc(100dvh_-_13rem)] w-full max-w-[calc((100dvh_-_13rem)_*_16/9)] overflow-hidden rounded-xl ring-1 ring-border"
+              className="media-fill relative block aspect-video max-h-[calc(100dvh_-_13rem)] w-full max-w-[calc((100dvh_-_13rem)_*_16/9)] overflow-hidden ring-1 ring-border"
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- YouTube thumbnail host */}
               <img src={thumb(current)} alt="" className="h-full w-full object-cover" />
@@ -98,7 +98,7 @@ export function VideoHub({ videos, initialId }: { videos: VideoItem[]; initialId
                     onClick={() => select(video)}
                     className="group flex w-full gap-3 rounded-lg p-1 text-left transition-colors hover:bg-surface-2"
                   >
-                    <span className="media-fill relative aspect-video w-36 shrink-0 overflow-hidden rounded-lg ring-1 ring-border">
+                    <span className="media-fill relative aspect-video w-36 shrink-0 overflow-hidden ring-1 ring-border">
                       {/* eslint-disable-next-line @next/next/no-img-element -- YouTube thumbnail host */}
                       <img
                         src={thumb(video)}
@@ -145,7 +145,7 @@ export function VideoHub({ videos, initialId }: { videos: VideoItem[]; initialId
                   onClick={() => select(video)}
                   className="group min-w-0 text-left"
                 >
-                  <span className="media-fill relative block aspect-video overflow-hidden rounded-xl ring-1 ring-border">
+                  <span className="media-fill relative block aspect-video overflow-hidden ring-1 ring-border">
                     {/* eslint-disable-next-line @next/next/no-img-element -- YouTube thumbnail host */}
                     <img
                       src={thumb(video)}

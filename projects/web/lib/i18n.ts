@@ -99,6 +99,11 @@ const dict = {
     rw: 'Imibare n’ibikoresho',
     fr: 'Données et interactifs',
   },
+  // Singular forms, used in breadcrumb trails for a single item's detail page.
+  'mm.videoSingular': { en: 'Video', rw: 'Ishusho', fr: 'Vidéo' },
+  'mm.gallerySingular': { en: 'Gallery', rw: 'Ifoto', fr: 'Galerie' },
+  'mm.podcastSingular': { en: 'Podcast', rw: 'Podcast', fr: 'Podcast' },
+  'mm.interactiveSingular': { en: 'Interactive', rw: 'Igikoresho', fr: 'Interactif' },
   'mm.videosSub': {
     en: 'Reporting, explainers and interviews from the Frame Africa newsroom.',
     rw: 'Raporo, ibisobanuro n’ibiganiro biva mu bwanditsi bwa Frame Africa.',
@@ -229,9 +234,19 @@ const dict = {
     rw: 'Media Ltd · Kigali, u Rwanda',
     fr: 'Media Ltd · Kigali, Rwanda',
   },
+  'footer.follow': { en: 'Follow us', rw: 'Dukurikire', fr: 'Suivez-nous' },
+  'footer.getInTouch': { en: 'Get in touch', rw: 'Twandikire', fr: 'Nous contacter' },
+  'footer.newsroom': { en: 'Newsroom', rw: 'Icyumba cy’amakuru', fr: 'Rédaction' },
+  'footer.builtIn': {
+    en: 'Made in Kigali',
+    rw: 'Byakorewe i Kigali',
+    fr: 'Réalisé à Kigali',
+  },
+  'footer.backToTop': { en: 'Back to top', rw: 'Subira hejuru', fr: 'Haut de page' },
 
   // — Homepage sections —
   'home.mostRead': { en: 'Most read', rw: 'Bisomwa cyane', fr: 'Les plus lus' },
+  'home.justIn': { en: 'Just in', rw: 'Bimaze kugera', fr: 'Dernières infos' },
   'home.editorsPicks': {
     en: "Editor's picks",
     rw: 'Ibyatoranyijwe',
@@ -239,7 +254,7 @@ const dict = {
   },
   'home.watch': { en: 'Watch', rw: 'Reba', fr: 'À regarder' },
   'home.listen': { en: 'Listen', rw: 'Umva', fr: 'À écouter' },
-  'home.breaking': { en: 'Breaking', rw: 'Inkuru ihuse', fr: 'Dernière minute' },
+  'home.breaking': { en: 'Breaking', rw: 'Inkuru ishyushye', fr: 'Dernière minute' },
   'home.weather': { en: 'Weather', rw: 'Ikirere', fr: 'Météo' },
   'home.markets': { en: 'Markets', rw: 'Isoko', fr: 'Marchés' },
   'home.latest': { en: 'Latest', rw: 'Ibiheruka', fr: 'À la une' },
@@ -249,7 +264,7 @@ const dict = {
     rw: 'Izindi nkuru ziraza vuba.',
     fr: 'D’autres articles à venir.',
   },
-  'home.breakingNews': { en: 'Breaking news', rw: 'Amakuru ahuse', fr: 'Info dernière minute' },
+  'home.breakingNews': { en: 'Breaking news', rw: 'Inkuru ishyushye', fr: 'Info dernière minute' },
   'home.viewAll': { en: 'View all', rw: 'Reba byose', fr: 'Voir tout' },
   'home.errTitle': {
     en: 'News is taking a short break',
@@ -482,16 +497,6 @@ const dict = {
     rw: 'Iyandikishe kuri Frame Africa',
     fr: 'Rejoindre Frame Africa',
   },
-  'auth.storiesPublished': {
-    en: 'stories published',
-    rw: 'inkuru zashizwe hanze',
-    fr: 'articles publiés',
-  },
-  'auth.capitalsLive': {
-    en: 'capitals, live',
-    rw: 'imijyi mikuru, live',
-    fr: 'capitales, en direct',
-  },
   'auth.independentJournalism': {
     en: 'Independent journalism',
     rw: 'Itangazamakuru ryigenga',
@@ -661,6 +666,38 @@ const dict = {
     en: 'Your photo shows on comments and your account. Paste an image URL, or leave it blank to use your initials.',
     rw: 'Ifoto yawe igaragara ku bitekerezo no kuri konti yawe. Shyiramo aderesi y’ifoto, cg uyihorere ukoreshe inyuguti z’izina ryawe.',
     fr: 'Votre photo apparaît sur les commentaires et votre compte. Collez l’URL d’une image, ou laissez vide pour utiliser vos initiales.',
+  },
+  'account.member': { en: 'Member', rw: 'Umunyamuryango', fr: 'Abonné' },
+  'account.membership': { en: 'Membership', rw: 'Ubwiyunge', fr: 'Abonnement' },
+  'account.memberActive': {
+    en: 'Active subscription',
+    rw: 'Ifatabuguzi rikora',
+    fr: 'Abonnement actif',
+  },
+  'account.notMember': {
+    en: 'No active subscription',
+    rw: 'Nta fatabuguzi rikora',
+    fr: 'Aucun abonnement actif',
+  },
+  'account.renewsOn': { en: 'Renews', rw: 'Byongera', fr: 'Renouvellement le' },
+  'account.manage': { en: 'Manage', rw: 'Genzura', fr: 'Gérer' },
+  'account.byline': { en: 'Byline', rw: 'Umukono w’umwanditsi', fr: 'Signature' },
+  'account.jobTitle': { en: 'Job title', rw: 'Umwanya', fr: 'Fonction' },
+  'account.jobTitlePlaceholder': {
+    en: 'Senior reporter, Business',
+    rw: 'Umunyamakuru mukuru, Ubucuruzi',
+    fr: 'Grand reporter, Économie',
+  },
+  'account.bio': { en: 'Short bio', rw: 'Amakuru magufi', fr: 'Courte bio' },
+  'account.bioPlaceholder': {
+    en: 'A line or two about what you cover — shown on your author page.',
+    rw: 'Interuro imwe cg ebyiri ku byo ukurikirana — bigaragara ku rupapuro rwawe.',
+    fr: 'Une ligne ou deux sur ce que vous couvrez — affichée sur votre page auteur.',
+  },
+  'account.viewAuthorPage': {
+    en: 'View your author page',
+    rw: 'Reba urupapuro rwawe',
+    fr: 'Voir votre page auteur',
   },
   'account.security': { en: 'Security', rw: 'Umutekano', fr: 'Sécurité' },
   'account.twoFactorOn': { en: 'On', rw: 'Bikora', fr: 'Activé' },
@@ -978,6 +1015,198 @@ const dict = {
   'dash.copyDesk': { en: 'Copy desk', rw: 'Ibiro byo gukosora', fr: 'Secrétariat de rédaction' },
   'dash.reviewQueue': { en: 'Review queue', rw: 'Urutonde rwo gusuzuma', fr: 'File de relecture' },
   'dash.pipeline': { en: 'Pipeline', rw: 'Umurongo w’akazi', fr: 'Flux de production' },
+  // — Subscriptions / billing —
+  'pay.kicker': { en: 'Subscribe', rw: 'Iyandikishe', fr: 'Abonnement' },
+  'pay.title': {
+    en: 'Back independent African journalism',
+    rw: 'Shyigikira itangazamakuru ryigenga rya Afurika',
+    fr: 'Soutenez un journalisme africain indépendant',
+  },
+  'pay.subtitle': {
+    en: 'Unlimited access to every story, and reporting that stays free of political and commercial pressure.',
+    rw: 'Soma inkuru zose udahagarikwa, kandi ufashe ubwanditsi butagira aho bubogamiye.',
+    fr: 'Un accès illimité à tous les articles, et un journalisme libre de toute pression.',
+  },
+  'pay.benefit1': {
+    en: 'Every premium story, unlimited',
+    rw: 'Inkuru zose zihariye, nta mipaka',
+    fr: 'Tous les articles premium, sans limite',
+  },
+  'pay.benefit2': {
+    en: 'No metered paywall',
+    rw: 'Nta mubare ntarengwa w’inkuru',
+    fr: 'Aucun compteur d’articles',
+  },
+  'pay.benefit3': {
+    en: 'Cancel any time',
+    rw: 'Ushobora guhagarika igihe cyose',
+    fr: 'Résiliable à tout moment',
+  },
+  'pay.benefit4': {
+    en: 'You fund the reporting',
+    rw: 'Uba ushyigikiye itangazamakuru',
+    fr: 'Vous financez les reportages',
+  },
+  'pay.method': { en: 'Payment method', rw: 'Uburyo bwo kwishyura', fr: 'Moyen de paiement' },
+  'pay.momo': { en: 'MTN MoMo', rw: 'MTN MoMo', fr: 'MTN MoMo' },
+  'pay.airtel': { en: 'Airtel Money', rw: 'Airtel Money', fr: 'Airtel Money' },
+  'pay.card': { en: 'Card', rw: 'Ikarita', fr: 'Carte' },
+  'pay.phone': {
+    en: 'Mobile-money number',
+    rw: 'Nimero ya mobile money',
+    fr: 'Numéro mobile money',
+  },
+  'pay.phoneHint': {
+    en: 'We’ll push a payment prompt to this phone.',
+    rw: 'Tuzohereza ubutumwa bwo kwishyura kuri iyi telefoni.',
+    fr: 'Une demande de paiement sera envoyée à ce téléphone.',
+  },
+  'pay.subscribe': { en: 'Subscribe', rw: 'Iyandikishe', fr: 'S’abonner' },
+  'pay.month': { en: 'month', rw: 'ukwezi', fr: 'mois' },
+  'pay.year': { en: 'year', rw: 'umwaka', fr: 'an' },
+  'pay.cardNote': {
+    en: 'Card payments are handled by our payment provider — your card details never reach our servers.',
+    rw: 'Kwishyura ku ikarita bikorwa n’uwo dukorana — amakuru y’ikarita yawe ntagera kuri seriveri zacu.',
+    fr: 'Les paiements par carte sont traités par notre prestataire — vos données bancaires ne transitent jamais par nos serveurs.',
+  },
+  'pay.noPlans': {
+    en: 'No subscription plans are on offer yet.',
+    rw: 'Nta gahunda yo kwiyandikisha irahari.',
+    fr: 'Aucune formule d’abonnement n’est encore proposée.',
+  },
+  'pay.alreadyTitle': {
+    en: 'You’re a subscriber — thank you',
+    rw: 'Uri umufatabuguzi — urakoze',
+    fr: 'Vous êtes abonné — merci',
+  },
+  'pay.alreadyBody': {
+    en: 'Your access runs to',
+    rw: 'Uburenganzira bwawe bugeza ku wa',
+    fr: 'Votre accès court jusqu’au',
+  },
+  'pay.manage': {
+    en: 'Manage subscription',
+    rw: 'Genzura ubufatabuguzi',
+    fr: 'Gérer l’abonnement',
+  },
+  'pay.billing': { en: 'Billing', rw: 'Kwishyura', fr: 'Facturation' },
+  'pay.active': { en: 'Active', rw: 'Bikora', fr: 'Actif' },
+  'pay.renewsOn': { en: 'Renews on', rw: 'Byongera ku wa', fr: 'Renouvellement le' },
+  'pay.endsOn': {
+    en: 'Cancelled — access ends on',
+    rw: 'Byahagaritswe — birangira ku wa',
+    fr: 'Résilié — accès jusqu’au',
+  },
+  'pay.cancel': { en: 'Cancel renewal', rw: 'Hagarika kwiyongera', fr: 'Résilier' },
+  'pay.cancelTitle': {
+    en: 'Cancel renewal',
+    rw: 'Hagarika kwiyongera',
+    fr: 'Résilier l’abonnement',
+  },
+  'pay.cancelConfirm': {
+    en: 'Your subscription won’t renew. You keep full access until',
+    rw: 'Ubufatabuguzi ntibuzongerwa. Ukomeza kugira uburenganzira kugeza ku wa',
+    fr: 'Votre abonnement ne sera pas renouvelé. Vous gardez l’accès jusqu’au',
+  },
+  'pay.cancelConfirmBtn': { en: 'Cancel renewal', rw: 'Hagarika', fr: 'Résilier' },
+  'pay.noneTitle': {
+    en: 'No active subscription',
+    rw: 'Nta bufatabuguzi bukora',
+    fr: 'Aucun abonnement actif',
+  },
+  'pay.noneBody': {
+    en: 'Subscribe to read every premium story.',
+    rw: 'Iyandikishe usome inkuru zose zihariye.',
+    fr: 'Abonnez-vous pour lire tous les articles premium.',
+  },
+  'pay.seePlans': { en: 'See plans', rw: 'Reba gahunda', fr: 'Voir les formules' },
+  'pay.receipts': { en: 'Receipts', rw: 'Inyemezabwishyu', fr: 'Reçus' },
+  'pay.date': { en: 'Date', rw: 'Itariki', fr: 'Date' },
+  'pay.amount': { en: 'Amount', rw: 'Amafaranga', fr: 'Montant' },
+  'pay.status': { en: 'Status', rw: 'Imimerere', fr: 'Statut' },
+  'pay.receipt': { en: 'Receipt', rw: 'Inyemezabwishyu', fr: 'Reçu' },
+  'pay.downloadReceipt': {
+    en: 'Download receipt',
+    rw: 'Kuramo inyemezabwishyu',
+    fr: 'Télécharger le reçu',
+  },
+  'pay.paid': { en: 'Paid', rw: 'Byishyuwe', fr: 'Payé' },
+  'pay.receiptNo': { en: 'Receipt no.', rw: 'Nomero', fr: 'Reçu n°' },
+  'pay.billedTo': { en: 'Billed to', rw: 'Byishyuwe na', fr: 'Facturé à' },
+  'pay.description': { en: 'Description', rw: 'Ibisobanuro', fr: 'Description' },
+  'pay.oneInterval': {
+    en: 'One {interval} subscription',
+    rw: 'Ifatabuguzi rya {interval} imwe',
+    fr: 'Abonnement d’un(e) {interval}',
+  },
+  'pay.covers': { en: 'Covers', rw: 'Ryuzuza', fr: 'Période' },
+  'pay.plan': { en: 'Plan', rw: 'Gahunda', fr: 'Formule' },
+
+  // Public receipt verification page.
+  'verify.title': {
+    en: 'Receipt verification',
+    rw: 'Kugenzura inyemezabwishyu',
+    fr: 'Vérification du reçu',
+  },
+  'verify.genuine': { en: 'Payment verified', rw: 'Ubwishyu bwemejwe', fr: 'Paiement vérifié' },
+  'verify.genuineBody': {
+    en: 'This is a genuine payment to Frame Africa.',
+    rw: 'Ubu ni ubwishyu nyakuri kuri Frame Africa.',
+    fr: 'Ceci est un paiement authentique à Frame Africa.',
+  },
+  'verify.notFound': {
+    en: 'Could not verify',
+    rw: 'Ntibyashobotse kugenzurwa',
+    fr: 'Vérification impossible',
+  },
+  'verify.notFoundBody': {
+    en: 'We couldn’t find a genuine payment for this code. Check the link, or ask for a fresh receipt.',
+    rw: 'Ntitwabonye ubwishyu nyakuri bujyanye na iyi kode. Reba link, cyangwa usabe indi nyemezabwishyu.',
+    fr: 'Aucun paiement authentique ne correspond à ce code. Vérifiez le lien ou demandez un nouveau reçu.',
+  },
+  'pay.totalPaid': { en: 'Total paid', rw: 'Igiteranyo cyishyuwe', fr: 'Total payé' },
+  'pay.scanToVerify': {
+    en: 'Scan to verify',
+    rw: 'Sikana kugenzura',
+    fr: 'Scannez pour vérifier',
+  },
+  'pay.receiptFooter': {
+    en: 'This receipt confirms a payment to Frame Africa. Scan the code to open it online and confirm it is genuine.',
+    rw: 'Iyi nyemezabwishyu yemeza ubwishyu kuri Frame Africa. Sikana kode kugira ngo uyifungure kuri interineti wemeze ko ari iy’ukuri.',
+    fr: 'Ce reçu confirme un paiement à Frame Africa. Scannez le code pour l’ouvrir en ligne et confirmer son authenticité.',
+  },
+
+  // Review-queue actions (buttons + modals).
+  'drev.publish': { en: 'Publish now', rw: 'Tangaza nonaha', fr: 'Publier maintenant' },
+  'drev.publishConfirm': {
+    en: 'Publish this story immediately? It goes live to readers straight away.',
+    rw: 'Gutangaza iyi nkuru ako kanya? Izahita igera ku basomyi.',
+    fr: 'Publier cet article immédiatement ? Il sera visible des lecteurs aussitôt.',
+  },
+  'drev.schedule': { en: 'Schedule', rw: 'Gena igihe', fr: 'Programmer' },
+  'drev.scheduleTitle': {
+    en: 'Schedule publication',
+    rw: 'Gena igihe cyo gutangaza',
+    fr: 'Programmer la publication',
+  },
+  'drev.scheduleWhen': { en: 'Publish at', rw: 'Gutangaza ku', fr: 'Publier le' },
+  'drev.return': { en: 'Return', rw: 'Gusubiza', fr: 'Renvoyer' },
+  'drev.returnTitle': {
+    en: 'Return to the author',
+    rw: 'Gusubiza umwanditsi',
+    fr: 'Renvoyer à l’auteur',
+  },
+  'drev.returnNote': {
+    en: 'What should the author fix? (optional)',
+    rw: 'Ni iki umwanditsi agomba gukosora? (si ngombwa)',
+    fr: 'Que doit corriger l’auteur ? (facultatif)',
+  },
+
+  // Grouped sidebar entries — each opens a set of tabbed views (lib/dash-tabs).
+  'dash.stories': { en: 'Stories', rw: 'Inkuru', fr: 'Articles' },
+  'dash.workflow': { en: 'Workflow', rw: 'Uko akazi kagenda', fr: 'Flux éditorial' },
+  'dash.multimedia': { en: 'Multimedia', rw: 'Amashusho n’amajwi', fr: 'Multimédia' },
+  'dash.audience': { en: 'Audience', rw: 'Abasomyi', fr: 'Audience' },
   'dash.moderation': { en: 'Moderation', rw: 'Ugenzura', fr: 'Modération' },
   'dash.tipsInbox': { en: 'Tips inbox', rw: 'Ububiko bw’amakuru', fr: 'Boîte à infos' },
   'dash.mediaLibrary': { en: 'Media library', rw: 'Ububiko bw’amashusho', fr: 'Médiathèque' },
@@ -987,6 +1216,7 @@ const dict = {
   'dash.allArticles': { en: 'All articles', rw: 'Inkuru zose', fr: 'Tous les articles' },
   'dash.taxonomy': { en: 'Taxonomy', rw: 'Ibyiciro', fr: 'Taxonomie' },
   'dash.houseAds': { en: 'House ads', rw: 'Kwamamaza', fr: 'Publicités maison' },
+  'dash.billing': { en: 'Billing', rw: 'Kwishyura', fr: 'Facturation' },
   'dash.users': { en: 'Users & roles', rw: 'Abakoresha n’inshingano', fr: 'Utilisateurs et rôles' },
   'dash.monitor': { en: 'Monitor', rw: 'Ugukurikirana', fr: 'Supervision' },
   'dash.auditLog': { en: 'Audit log', rw: 'Ibyakozwe', fr: 'Journal d’audit' },
@@ -1138,6 +1368,34 @@ const dict = {
   'common.section': { en: 'Section', rw: 'Igice', fr: 'Section' },
   'common.min': { en: 'min', rw: 'iminota', fr: 'min' },
   'common.topic': { en: 'Topic', rw: 'Insanganyamatsiko', fr: 'Sujet' },
+
+  // ── Author pages ──────────────────────────────────────────────────────────
+  'author.kicker': { en: 'Journalist', rw: 'Umunyamakuru', fr: 'Journaliste' },
+  'author.stories': { en: 'stories', rw: 'inkuru', fr: 'articles' },
+  'author.lastStory': { en: 'last story', rw: 'inkuru iheruka', fr: 'dernier article' },
+  'author.byline': { en: 'Their stories', rw: 'Inkuru ze', fr: 'Ses articles' },
+  'author.empty': {
+    en: 'No published stories yet.',
+    rw: 'Nta nkuru zatangajwe kugeza ubu.',
+    fr: 'Aucun article publié pour le moment.',
+  },
+  'author.more': { en: 'More from', rw: 'Izindi nkuru za', fr: 'Plus de' },
+
+  // ── Breaking-news alerts (web push) ───────────────────────────────────────
+  'push.title': { en: 'Breaking news alerts', rw: 'Inkuru ishyushye', fr: 'Alertes info' },
+  'push.blurb': {
+    en: 'Get a notification the moment a big story breaks — even when this site is closed.',
+    rw: 'Menyeshwa ako kanya inkuru ikomeye ivutse, n’ubwo uba udafunguye uru rubuga.',
+    fr: 'Soyez alerté dès qu’une information majeure tombe, même site fermé.',
+  },
+  'push.off': { en: 'Alert me', rw: 'Menyesha', fr: 'M’alerter' },
+  'push.on': { en: 'Alerts on', rw: 'Ubutumwa burafunguye', fr: 'Alertes activées' },
+  'push.blocked': {
+    en: 'Notifications are blocked for this site in your browser settings.',
+    rw: 'Ubutumwa bwahagaritswe kuri uru rubuga muri mushakisha yawe.',
+    fr: 'Les notifications sont bloquées pour ce site dans votre navigateur.',
+  },
+  'article.writtenBy': { en: 'Written by', rw: 'Yanditswe na', fr: 'Écrit par' },
   'topic.empty': {
     en: 'No stories tagged with this topic yet.',
     rw: 'Nta nkuru zifite iyi nsanganyamatsiko kugeza ubu.',
@@ -1661,6 +1919,7 @@ const dict = {
 
   // — Keys referenced by public auth/article pages (added to unblock build) —
   'nav.home': { en: 'Home', rw: 'Ahabanza', fr: 'Accueil' },
+  'nav.breadcrumb': { en: 'Breadcrumb', rw: 'Inzira', fr: 'Fil d’Ariane' },
   'auth.account': { en: 'Account', rw: 'Konti', fr: 'Compte' },
   'auth.forgotPasswordSubtitle': {
     en: 'Enter your email and we’ll send you a reset link.',
@@ -1722,6 +1981,78 @@ const dict = {
     en: 'integrations configured',
     rw: 'ibyifashishwa byashyizweho',
     fr: 'intégrations configurées',
+  },
+  'dset.setValue': { en: 'Set value', rw: 'Shyiraho agaciro', fr: 'Définir la valeur' },
+  'dset.enterValue': { en: 'Enter a value…', rw: 'Andika agaciro…', fr: 'Saisissez une valeur…' },
+  'dset.secretHint': {
+    en: 'Stored encrypted at rest and never shown again — only the last 4 characters.',
+    rw: 'Bibikwa mu ibanga, ntibigaragazwa ukundi — inyuguti 4 zisoza gusa.',
+    fr: 'Stocké de façon confidentielle et jamais réaffiché — seuls les 4 derniers caractères.',
+  },
+  // Groups
+  'dset.g.social': { en: 'Social profiles', rw: 'Imbuga nkoranyambaga', fr: 'Réseaux sociaux' },
+  'dset.g.socialDesc': {
+    en: 'These appear in the site footer. Leave one empty to hide its icon.',
+    rw: 'Bigaragara hasi ku rubuga. Usige ubusa kugira ngo ikimenyetso kihishwe.',
+    fr: 'Affichés dans le pied de page. Laissez vide pour masquer l’icône.',
+  },
+  'dset.g.media': { en: 'Media', rw: 'Itangazamakuru', fr: 'Médias' },
+  'dset.g.mediaDesc': {
+    en: 'Video and audio sources.',
+    rw: 'Inkomoko ya videwo n’amajwi.',
+    fr: 'Sources vidéo et audio.',
+  },
+  'dset.g.email': { en: 'Email delivery', rw: 'Kohereza imeyili', fr: 'Envoi d’e-mails' },
+  'dset.g.emailDesc': {
+    en: 'Password resets and newsletters need a working mail host.',
+    rw: 'Guhindura ijambobanga n’amakuru bisaba seriveri y’imeyili ikora.',
+    fr: 'Réinitialisations et newsletters nécessitent un hôte mail fonctionnel.',
+  },
+  'dset.g.storage': { en: 'Storage & CDN', rw: 'Ububiko na CDN', fr: 'Stockage & CDN' },
+  'dset.g.storageDesc': {
+    en: 'Where uploaded media lives and how it is served.',
+    rw: 'Aho amashusho yashyizweho abikwa n’uko atangwa.',
+    fr: 'Où vivent les médias téléversés et comment ils sont servis.',
+  },
+  'dset.g.search': { en: 'Search', rw: 'Gushakisha', fr: 'Recherche' },
+  'dset.g.searchDesc': {
+    en: 'Full-text search cluster. Optional — Postgres search is the fallback.',
+    rw: 'Gushakisha mu nyandiko zose. Si ngombwa — Postgres ni yo ikoreshwa.',
+    fr: 'Cluster de recherche plein-texte. Optionnel — Postgres sert de repli.',
+  },
+  'dset.g.payments': { en: 'Payments', rw: 'Kwishyura', fr: 'Paiements' },
+  'dset.g.paymentsDesc': {
+    en: 'Subscriptions: mobile money and cards.',
+    rw: 'Kwiyandikisha: amafaranga kuri telefoni n’amakarita.',
+    fr: 'Abonnements : mobile money et cartes.',
+  },
+  'dset.g.ai': { en: 'AI assist', rw: 'Ubufasha bwa AI', fr: 'Assistance IA' },
+  'dset.g.aiDesc': {
+    en: 'Summaries, tagging, and the newsroom writing tools.',
+    rw: 'Incamake, ibimenyetso, n’ibikoresho byo kwandika.',
+    fr: 'Résumés, étiquetage et outils de rédaction.',
+  },
+  'dset.g.analytics': {
+    en: 'Analytics & anti-abuse',
+    rw: 'Isesengura n’umutekano',
+    fr: 'Analytique & anti-abus',
+  },
+  'dset.g.analyticsDesc': {
+    en: 'Audience measurement, error monitoring, and bot protection.',
+    rw: 'Gupima abasomyi, gukurikirana amakosa, no kurinda ba robo.',
+    fr: 'Mesure d’audience, monitoring d’erreurs et protection anti-bot.',
+  },
+  'dset.g.site': { en: 'Site details', rw: 'Ibisobanuro by’urubuga', fr: 'Détails du site' },
+  'dset.g.siteDesc': {
+    en: 'Public URL and the contact details shown to readers.',
+    rw: 'Aderesi rusange n’aho abasomyi batwandikira.',
+    fr: 'URL publique et coordonnées affichées aux lecteurs.',
+  },
+  'dset.g.custom': { en: 'Custom keys', rw: 'Impfunguzo zihariye', fr: 'Clés personnalisées' },
+  'dset.g.customDesc': {
+    en: 'Keys you added yourself.',
+    rw: 'Impfunguzo wiyongereye.',
+    fr: 'Clés que vous avez ajoutées.',
   },
 
   // — Article admin actions —

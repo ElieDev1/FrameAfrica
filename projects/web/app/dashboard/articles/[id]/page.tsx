@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArticleAdminActions } from '@/components/dashboard/ArticleAdminActions';
 import { DraftForm } from '@/components/cms/DraftForm';
+import { fetchAiStatus } from '@/lib/ai-actions';
 import { StatusBadge } from '@/components/cms/StatusBadge';
 import { categoryOptions, getAnyArticle, requireAdmin, topicOptions } from '@/lib/cms';
 import { updateAnyArticleAction } from '@/lib/cms-actions';
@@ -15,17 +16,18 @@ type PageProps = { params: Promise<{ id: string }> };
 export default async function AdminEditArticlePage({ params }: PageProps) {
   await requireAdmin();
   const { id } = await params;
-  const [article, categories, topics, locale] = await Promise.all([
+  const [article, categories, topics, locale, ai] = await Promise.all([
     getAnyArticle(id),
     categoryOptions(),
     topicOptions(),
     getLocale(),
+    fetchAiStatus(),
   ]);
 
   const updateAction = updateAnyArticleAction.bind(null, id);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <div className="w-full">
       <Link href="/dashboard/articles" className="font-mono text-xs text-primary hover:underline">
         {t(locale, 'dpage.backAllArticles')}
       </Link>
@@ -55,6 +57,7 @@ export default async function AdminEditArticlePage({ params }: PageProps) {
           categories={categories}
           topics={topics}
           mode="edit"
+          aiEnabled={ai.configured}
           initial={{
             title: article.title,
             categoryId: article.category.id,

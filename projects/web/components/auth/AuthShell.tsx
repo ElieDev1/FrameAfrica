@@ -193,17 +193,6 @@ export function AuthShell({
                 </li>
               ))}
             </ul>
-
-            <div className="mt-9 flex items-center gap-5 border-t border-border pt-5 text-[13px] text-faint">
-              <span>
-                <span className="font-bold text-text">300+</span>{' '}
-                {t(locale, 'auth.storiesPublished')}
-              </span>
-              <span className="h-3 w-px bg-border" />
-              <span>
-                <span className="font-bold text-text">4</span> {t(locale, 'auth.capitalsLive')}
-              </span>
-            </div>
           </aside>
         )}
 

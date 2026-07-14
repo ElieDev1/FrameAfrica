@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { StatusBadge } from '@/components/cms/StatusBadge';
+import { DashTabs } from '@/components/dashboard/DashTabs';
 import { type DraftListItem, listAllArticles, requireEditor } from '@/lib/cms';
+import { workflowTabs } from '@/lib/dash-tabs';
 import { formatDate } from '@/lib/format';
 import { t } from '@/lib/i18n';
 import { getLocale } from '@/lib/i18n-server';
@@ -43,7 +45,7 @@ function Card({ article }: { article: DraftListItem }) {
 }
 
 export default async function PipelinePage() {
-  await requireEditor();
+  const user = await requireEditor();
   const [columns, locale] = await Promise.all([
     Promise.all(COLUMNS.map((c) => listAllArticles({ status: c.status }))),
     getLocale(),
@@ -52,11 +54,13 @@ export default async function PipelinePage() {
   return (
     <div className="w-full">
       <h1 className="font-heading text-3xl font-black tracking-tight text-text">
-        {t(locale, 'dash.pipeline')}
+        {t(locale, 'dash.workflow')}
       </h1>
       <p className="mt-1 max-w-2xl font-body text-sm text-muted">
         {t(locale, 'dpage.pipelineSubtitle')}
       </p>
+
+      <DashTabs tabs={workflowTabs(user.roles)} />
 
       <div className="-mx-4 mt-6 flex gap-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         {COLUMNS.map((col, i) => (

@@ -30,11 +30,17 @@ export async function updateProfile(
     return { error: 'Display name must be at least 2 characters.' };
   }
 
+  // Byline fields — only sent for staff, whose form renders them. `has()` lets us
+  // tell "left blank on purpose" (clear it) from "not on this form" (leave it).
+  const body: Record<string, string> = { displayName, avatarUrl };
+  if (formData.has('bio')) body.bio = String(formData.get('bio') ?? '').trim();
+  if (formData.has('jobTitle')) body.jobTitle = String(formData.get('jobTitle') ?? '').trim();
+
   try {
     const res = await fetch(`${API_URL}/me`, {
       method: 'PATCH',
       headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ displayName, avatarUrl }),
+      body: JSON.stringify(body),
       cache: 'no-store',
     });
 

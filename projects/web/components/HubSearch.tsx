@@ -19,7 +19,7 @@ export function HubSearch({
   placeholderKey: MessageKey;
 }) {
   return (
-    <form action={basePath} className="mt-3 flex max-w-md items-center gap-2">
+    <form action={basePath} className="flex w-full items-center gap-2 sm:w-80">
       <div className="relative flex-1">
         <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint">
           <SearchIcon size={16} />

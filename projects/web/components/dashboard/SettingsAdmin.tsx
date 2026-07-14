@@ -2,16 +2,58 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { useT } from '@/components/LocaleProvider';
 import { removeIntegration, setIntegration } from '@/lib/settings-actions';
-import type { Integration } from '@/lib/settings-types';
+import type { Integration, IntegrationGroup } from '@/lib/settings-types';
+import type { MessageKey } from '@/lib/i18n';
 import { formatDate } from '@/lib/format';
+
+/** The order sections appear in — socials first, since they are the most edited. */
+const GROUP_ORDER: IntegrationGroup[] = [
+  'social',
+  'site',
+  'email',
+  'media',
+  'storage',
+  'search',
+  'payments',
+  'ai',
+  'analytics',
+  'custom',
+];
+
+const GROUP_TITLE: Record<IntegrationGroup, MessageKey> = {
+  social: 'dset.g.social',
+  site: 'dset.g.site',
+  email: 'dset.g.email',
+  media: 'dset.g.media',
+  storage: 'dset.g.storage',
+  search: 'dset.g.search',
+  payments: 'dset.g.payments',
+  ai: 'dset.g.ai',
+  analytics: 'dset.g.analytics',
+  custom: 'dset.g.custom',
+};
+
+const GROUP_DESC: Record<IntegrationGroup, MessageKey> = {
+  social: 'dset.g.socialDesc',
+  site: 'dset.g.siteDesc',
+  email: 'dset.g.emailDesc',
+  media: 'dset.g.mediaDesc',
+  storage: 'dset.g.storageDesc',
+  search: 'dset.g.searchDesc',
+  payments: 'dset.g.paymentsDesc',
+  ai: 'dset.g.aiDesc',
+  analytics: 'dset.g.analyticsDesc',
+  custom: 'dset.g.customDesc',
+};
 
 function StatusPill({ integration }: { integration: Integration }) {
   const t = useT();
   if (!integration.isSet) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-faint">
+      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-faint">
         <span className="h-1.5 w-1.5 rounded-full bg-faint" /> {t('dset.notSet')}
       </span>
     );
@@ -19,7 +61,7 @@ function StatusPill({ integration }: { integration: Integration }) {
   const fromDb = integration.source === 'database';
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide ${
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide ${
         fromDb ? 'border-accent-green/40 text-accent-green' : 'border-primary/40 text-primary'
       }`}
     >
@@ -32,8 +74,11 @@ function StatusPill({ integration }: { integration: Integration }) {
 function IntegrationCard({ integration }: { integration: Integration }) {
   const router = useRouter();
   const t = useT();
+  const ask = useConfirm();
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState('');
+  // A non-secret value (a social URL, a hostname) comes back in the clear, so
+  // the field opens pre-filled and the admin can tweak rather than retype it.
+  const [value, setValue] = useState(integration.value ?? '');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -45,21 +90,29 @@ function IntegrationCard({ integration }: { integration: Integration }) {
         setError(res.error);
         return;
       }
-      setValue('');
+      if (integration.secret) setValue('');
       setEditing(false);
       router.refresh();
     });
   }
 
-  function remove() {
+  async function remove() {
+    const ok = await ask({
+      title: t('dset.remove'),
+      message: `${integration.label} — ${integration.key}`,
+      confirmLabel: t('dset.remove'),
+      danger: true,
+    });
+    if (!ok) return;
     startTransition(async () => {
       await removeIntegration(integration.key);
+      setValue('');
       router.refresh();
     });
   }
 
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-surface p-5">
+    <div className="flex flex-col rounded-xl border border-border bg-surface p-5 transition-colors hover:border-primary/40">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="font-heading font-bold text-text">{integration.label}</h3>
@@ -74,9 +127,10 @@ function IntegrationCard({ integration }: { integration: Integration }) {
         {integration.description}
       </p>
 
-      {integration.isSet && integration.maskedValue && (
-        <p className="mt-3 font-mono text-xs text-text">
-          {integration.maskedValue}
+      {integration.isSet && (
+        <p className="mt-3 break-all font-mono text-xs text-text">
+          {/* Non-secret values are safe to show in full; secrets get the mask. */}
+          {integration.secret ? integration.maskedValue : integration.value}
           {integration.updatedAt && (
             <span className="text-faint">
               {' '}
@@ -86,48 +140,98 @@ function IntegrationCard({ integration }: { integration: Integration }) {
         </p>
       )}
 
-      <div className="mt-4 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setEditing((e) => !e)}
-          className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary"
-        >
-          {integration.source === 'database' ? t('dset.update') : t('dset.setKey')}
-        </button>
-        {integration.source === 'database' && (
-          <button
-            type="button"
-            onClick={remove}
-            disabled={pending}
-            className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-accent-red hover:text-accent-red disabled:opacity-50"
-          >
-            {t('dset.remove')}
-          </button>
-        )}
-      </div>
-
-      {editing && (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+      {editing ? (
+        <div className="mt-4 flex flex-col gap-2">
           <input
-            type="password"
+            type={integration.secret ? 'password' : 'text'}
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder={t('dset.pasteKey')}
+            placeholder={
+              integration.placeholder ??
+              (integration.secret ? t('dset.pasteKey') : t('dset.enterValue'))
+            }
             autoComplete="off"
-            className="min-w-0 flex-1 rounded-lg border border-border bg-surface-2 px-3 py-1.5 font-mono text-sm text-text outline-none focus:border-primary"
+            spellCheck={false}
+            className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 font-mono text-sm text-text outline-none focus:border-primary"
           />
+          {integration.secret && (
+            <p className="font-mono text-[10px] leading-relaxed text-faint">
+              {t('dset.secretHint')}
+            </p>
+          )}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={save}
+              disabled={pending || !value.trim()}
+              className="rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black hover:opacity-90 disabled:opacity-50"
+            >
+              {pending ? t('d.common.saving') : t('d.common.save')}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditing(false);
+                setError(null);
+                setValue(integration.value ?? '');
+              }}
+              className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted transition hover:text-text"
+            >
+              {t('d.common.cancel')}
+            </button>
+          </div>
+          {error && <span className="font-mono text-[11px] text-accent-red">{error}</span>}
+        </div>
+      ) : (
+        <div className="mt-4 flex items-center gap-2">
           <button
             type="button"
-            onClick={save}
-            disabled={pending}
-            className="rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-bold text-black hover:opacity-90 disabled:opacity-50"
+            onClick={() => setEditing(true)}
+            className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-text transition hover:border-primary hover:text-primary"
           >
-            {pending ? t('d.common.saving') : t('d.common.save')}
+            {integration.source === 'database'
+              ? t('dset.update')
+              : integration.secret
+                ? t('dset.setKey')
+                : t('dset.setValue')}
           </button>
-          {error && <span className="w-full font-mono text-[11px] text-accent-red">{error}</span>}
+          {integration.source === 'database' && (
+            <button
+              type="button"
+              onClick={remove}
+              disabled={pending}
+              className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-accent-red hover:text-accent-red disabled:opacity-50"
+            >
+              {t('dset.remove')}
+            </button>
+          )}
         </div>
       )}
     </div>
+  );
+}
+
+function GroupSection({ group, items }: { group: IntegrationGroup; items: Integration[] }) {
+  const t = useT();
+  const configured = items.filter((i) => i.isSet).length;
+
+  return (
+    <section>
+      <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-3">
+        <div>
+          <h2 className="font-heading text-lg font-bold text-text">{t(GROUP_TITLE[group])}</h2>
+          <p className="mt-0.5 font-body text-sm text-muted">{t(GROUP_DESC[group])}</p>
+        </div>
+        <span className="font-mono text-[11px] text-faint">
+          {configured}/{items.length}
+        </span>
+      </div>
+      <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {items.map((i) => (
+          <IntegrationCard key={i.key} integration={i} />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -154,7 +258,7 @@ function AddCustom() {
   }
 
   return (
-    <section className="rounded-xl border border-border bg-surface p-5">
+    <section className="rounded-xl border border-dashed border-border bg-surface p-5">
       <h2 className="font-heading text-lg font-bold text-text">{t('dset.addCustomKey')}</h2>
       <p className="mt-1 font-body text-sm text-muted">{t('dset.addCustomDesc')}</p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -191,8 +295,13 @@ export function SettingsAdmin({ integrations }: { integrations: Integration[] })
   const t = useT();
   const configured = integrations.filter((i) => i.isSet).length;
 
+  const groups = GROUP_ORDER.map((group) => ({
+    group,
+    items: integrations.filter((i) => i.group === group),
+  })).filter((g) => g.items.length > 0);
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10">
       {/* Header */}
       <div>
         <h1 className="font-heading text-3xl font-black tracking-tight text-text">
@@ -205,12 +314,9 @@ export function SettingsAdmin({ integrations }: { integrations: Integration[] })
         </p>
       </div>
 
-      {/* Integration cards */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {integrations.map((i) => (
-          <IntegrationCard key={i.key} integration={i} />
-        ))}
-      </div>
+      {groups.map(({ group, items }) => (
+        <GroupSection key={group} group={group} items={items} />
+      ))}
 
       <AddCustom />
     </div>

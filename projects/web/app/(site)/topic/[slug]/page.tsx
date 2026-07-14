@@ -1,7 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { AdSlot } from '@/components/AdSlot';
+import { ArticleCard } from '@/components/ArticleCard';
 import { FollowButton } from '@/components/FollowButton';
+import { JustIn } from '@/components/JustIn';
 import { LoadMore } from '@/components/LoadMore';
+import { NewsletterBox } from '@/components/NewsletterBox';
+import { SectionHeading } from '@/components/SectionHeading';
 import { fetchArticles, fetchTopic } from '@/lib/api';
 import { getFollowStatus } from '@/lib/follows-actions';
 import { getSession } from '@/lib/session';
@@ -70,11 +75,31 @@ export default async function TopicPage({ params }: PageProps) {
       {articles.length === 0 ? (
         <p className="py-16 text-center font-body text-muted">{t(locale, 'topic.empty')}</p>
       ) : (
-        <LoadMore
-          initialArticles={articles}
-          initialCursor={pagination?.nextCursor ?? null}
-          topic={slug}
-        />
+        // Same editorial front as a section: wide lead, then small cards,
+        // beside a "Just in" rail with the freshness timestamps.
+        <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="min-w-0">
+            <div className="border-b border-border pb-8">
+              <ArticleCard article={articles[0]} horizontal locale={locale} />
+            </div>
+            {articles.length > 1 && (
+              <div className="mt-8">
+                <SectionHeading title={t(locale, 'home.latest')} />
+                <LoadMore
+                  initialArticles={articles.slice(1)}
+                  initialCursor={pagination?.nextCursor ?? null}
+                  topic={slug}
+                  compact
+                />
+              </div>
+            )}
+          </div>
+          <aside className="flex flex-col gap-8">
+            <JustIn articles={articles.slice(0, 7)} locale={locale} />
+            <AdSlot variant="halfpage" sticky desktopOnly />
+            <NewsletterBox />
+          </aside>
+        </div>
       )}
     </div>
   );

@@ -16,4 +16,16 @@ export class UpdateProfileDto {
   @IsString()
   @MaxLength(500)
   avatarUrl?: string;
+
+  /** The byline bio a reader sees on /author/<slug>. Empty string clears it. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(600)
+  bio?: string;
+
+  /** "Senior reporter, Business" — shown under the name on the author page. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  jobTitle?: string;
 }

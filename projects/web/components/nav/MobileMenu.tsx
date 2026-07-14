@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import type { CategoryNode } from '@/lib/api';
 import { type Locale, type MessageKey, t, translateCategory } from '@/lib/i18n';
 import { logout } from '@/lib/auth-actions';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 
 /** Hub pages shown under the taxonomy "Multimedia" section. */
 const MULTIMEDIA_HUBS: { nameKey: MessageKey; href: string }[] = [
@@ -96,7 +97,8 @@ export function MobileMenu({
             aria-label={t(locale, 'nav.menu')}
           >
             <div className="absolute inset-0 bg-black/50" onClick={close} />
-            <div className="absolute right-0 top-0 flex h-full w-[85%] max-w-sm flex-col overflow-y-auto border-l border-border bg-bg p-5">
+            {/* The drawer opens from the left — the same side as its trigger. */}
+            <div className="absolute left-0 top-0 flex h-full w-[85%] max-w-sm flex-col overflow-y-auto border-r border-border bg-bg p-5">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
                   {t(locale, 'nav.menu')}
@@ -122,6 +124,13 @@ export function MobileMenu({
               </form>
 
               <nav aria-label={t(locale, 'nav.sections')} className="mt-5 flex flex-col">
+                <Link
+                  href="/"
+                  onClick={close}
+                  className="border-b border-border py-3 font-heading text-base font-semibold text-text"
+                >
+                  {t(locale, 'nav.home')}
+                </Link>
                 {sections.map((section) => {
                   const subs = subLinks(section);
                   const translatedName = translateCategory(locale, section.slug, section.name);
@@ -174,6 +183,13 @@ export function MobileMenu({
                   );
                 })}
               </nav>
+
+              <div className="mt-5 flex items-center justify-between border-b border-border pb-4 font-mono text-xs">
+                <span className="uppercase tracking-[0.14em] text-faint">
+                  {t(locale, 'footer.language')}
+                </span>
+                <LanguageSwitcher current={locale} />
+              </div>
 
               <div className="mt-6 flex flex-col gap-2">
                 {signedIn ? (

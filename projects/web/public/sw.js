@@ -23,6 +23,48 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+/* Breaking-news alerts (WS: web push). The payload is encrypted to this browser's
+ * own keys, so only it can read the headline. */
+self.addEventListener('push', (event) => {
+  let alert = {};
+  try {
+    alert = event.data ? event.data.json() : {};
+  } catch {
+    // A malformed payload is not worth waking the reader for.
+    return;
+  }
+  if (!alert.title) return;
+
+  event.waitUntil(
+    self.registration.showNotification(alert.title, {
+      body: alert.body || '',
+      // `tag` collapses repeat alerts for the same story into one.
+      tag: alert.tag || 'frame-africa',
+      icon: '/brand/icon.png',
+      badge: '/brand/icon.png',
+      data: { url: alert.url || '/' },
+    }),
+  );
+});
+
+/* Tapping the alert should land on the story — reusing an open tab if there is one. */
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = new URL(
+    (event.notification.data && event.notification.data.url) || '/',
+    self.location.origin,
+  );
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if (client.url === target.href && 'focus' in client) return client.focus();
+      }
+      return self.clients.openWindow(target.href);
+    }),
+  );
+});
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;

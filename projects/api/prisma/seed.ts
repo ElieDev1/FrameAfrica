@@ -993,6 +993,9 @@ async function main(): Promise<void> {
     create: {
       email: 'jane.uwase@frameafrica.rw',
       displayName: 'Jane Uwase',
+      // The public byline handle. Without it a freshly seeded database gives every
+      // author a null slug, and /author/<slug> doesn't exist at all.
+      authorSlug: 'jane-uwase',
       emailVerifiedAt: new Date(),
       passwordHash,
     },
@@ -1016,6 +1019,9 @@ async function main(): Promise<void> {
     create: {
       email: 'eric.mugisha@frameafrica.rw',
       displayName: 'Eric Mugisha',
+      // The public byline handle. Without it a freshly seeded database gives every
+      // author a null slug, and /author/<slug> doesn't exist at all.
+      authorSlug: 'eric-mugisha',
       emailVerifiedAt: new Date(),
       passwordHash,
     },
@@ -1038,6 +1044,9 @@ async function main(): Promise<void> {
     create: {
       email: 'admin@frameafrica.rw',
       displayName: 'Site Admin',
+      // The public byline handle. Without it a freshly seeded database gives every
+      // author a null slug, and /author/<slug> doesn't exist at all.
+      authorSlug: 'site-admin',
       emailVerifiedAt: new Date(),
       passwordHash,
     },
@@ -1055,6 +1064,9 @@ async function main(): Promise<void> {
     create: {
       email: 'newsroom.admin@frameafrica.rw',
       displayName: 'Newsroom Admin',
+      // The public byline handle. Without it a freshly seeded database gives every
+      // author a null slug, and /author/<slug> doesn't exist at all.
+      authorSlug: 'newsroom-admin',
       emailVerifiedAt: new Date(),
       passwordHash,
     },
@@ -1614,6 +1626,9 @@ async function main(): Promise<void> {
     create: {
       email: 'aline.dev@frameafrica.rw',
       displayName: 'Aline U.',
+      // The public byline handle. Without it a freshly seeded database gives every
+      // author a null slug, and /author/<slug> doesn't exist at all.
+      authorSlug: 'aline-u',
       emailVerifiedAt: new Date(),
       passwordHash,
     },
@@ -1648,6 +1663,57 @@ async function main(): Promise<void> {
         parentId: top.id,
         body: 'Agreed — the Western Province lots have been exceptional this season.',
       },
+    });
+  }
+
+  // ── Site settings: the footer's social profiles and contact details ────────
+  // Non-secret, admin-editable from Settings → Social profiles. Seeded so a
+  // fresh environment renders a complete footer instead of an empty rail.
+  const siteSettings: Record<string, string> = {
+    SOCIAL_X_URL: 'https://x.com/frameafrica',
+    SOCIAL_FACEBOOK_URL: 'https://facebook.com/frameafrica',
+    SOCIAL_INSTAGRAM_URL: 'https://instagram.com/frameafrica',
+    SOCIAL_YOUTUBE_URL: 'https://youtube.com/@frameafrica',
+    SOCIAL_LINKEDIN_URL: 'https://linkedin.com/company/frameafrica',
+    SOCIAL_TIKTOK_URL: 'https://tiktok.com/@frameafrica',
+    SOCIAL_WHATSAPP_URL: 'https://wa.me/250788000000',
+    CONTACT_EMAIL: 'hello@frameafrica.rw',
+    CONTACT_PHONE: '+250 788 000 000',
+  };
+  for (const [key, value] of Object.entries(siteSettings)) {
+    await prisma.appSetting.upsert({
+      where: { key },
+      update: {}, // never overwrite what an admin has already set
+      create: { key, value, isSecret: false },
+    });
+  }
+
+  // ── Subscription plans ────────────────────────────────────────────────────
+  // What the paywall sells. Prices are in minor units; RWF has none, so the
+  // figures below are francs.
+  const plans = [
+    {
+      code: 'digital-monthly',
+      name: 'Digital monthly',
+      description: 'Unlimited access to every story, cancel any time.',
+      priceCents: 5_000,
+      interval: 'month' as const,
+      sortOrder: 1,
+    },
+    {
+      code: 'digital-annual',
+      name: 'Digital annual',
+      description: 'Two months free versus paying monthly.',
+      priceCents: 50_000,
+      interval: 'year' as const,
+      sortOrder: 2,
+    },
+  ];
+  for (const plan of plans) {
+    await prisma.plan.upsert({
+      where: { code: plan.code },
+      update: {}, // never overwrite prices an admin has set
+      create: { ...plan, currency: 'RWF' },
     });
   }
 

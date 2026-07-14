@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import {
   BookmarkIcon,
+  CheckIcon,
   ChevronDownIcon,
+  CreditCardIcon,
   GridIcon,
   type IconProps,
   LogOutIcon,
@@ -59,6 +61,7 @@ export function ProfileMenu({ user, locale }: { user: NavUser; locale: Locale })
     { href: '/for-you', labelKey: 'nav.forYou', icon: SparklesIcon },
     { href: '/account', labelKey: 'nav.myAccount', icon: UsersIcon },
     { href: '/account#saved', labelKey: 'nav.savedStories', icon: BookmarkIcon },
+    { href: '/account/billing', labelKey: 'pay.billing', icon: CreditCardIcon },
     { href: '/account/security', labelKey: 'nav.accountSecurity', icon: SettingsIcon },
   ];
 
@@ -146,21 +149,32 @@ export function ProfileMenu({ user, locale }: { user: NavUser; locale: Locale })
 
 function Avatar({ user, lg = false }: { user: NavUser; lg?: boolean }) {
   const size = lg ? 'h-9 w-9 text-sm' : 'h-8 w-8 text-xs';
-  if (user.avatarUrl) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element -- avatar, arbitrary host
-      <img
-        src={user.avatarUrl}
-        alt=""
-        className={`${size} shrink-0 rounded-full object-cover ring-1 ring-border`}
-      />
-    );
-  }
+  // A small brand-coloured member badge in the corner, mirroring the account page.
+  const badge = lg ? 'h-4 w-4' : 'h-3.5 w-3.5';
   return (
-    <span
-      className={`${size} grid shrink-0 place-items-center rounded-full bg-primary/15 font-bold text-primary ring-1 ring-primary/20`}
-    >
-      {initials(user.name)}
+    <span className="relative shrink-0">
+      {user.avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- avatar, arbitrary host
+        <img
+          src={user.avatarUrl}
+          alt=""
+          className={`${size} rounded-full object-cover ring-1 ring-border`}
+        />
+      ) : (
+        <span
+          className={`${size} grid place-items-center rounded-full bg-primary/15 font-bold text-primary ring-1 ring-primary/20`}
+        >
+          {initials(user.name)}
+        </span>
+      )}
+      {user.isSubscriber && (
+        <span
+          aria-hidden
+          className={`${badge} absolute -bottom-0.5 -right-0.5 grid place-items-center rounded-full bg-primary text-black ring-2 ring-surface`}
+        >
+          <CheckIcon size={lg ? 10 : 9} />
+        </span>
+      )}
     </span>
   );
 }

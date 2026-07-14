@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, RoleName, UserStatus } from '@prisma/client';
 import { PasswordService } from '../auth/password.service';
+import { uniqueAuthorSlug } from '../common/author-slug';
 import { MailerService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { generateTemporaryPassword } from './password-generator';
@@ -81,6 +82,7 @@ export class AdminUsersService {
           email: input.email,
           displayName: input.displayName,
           passwordHash,
+          authorSlug: await uniqueAuthorSlug(this.prisma, input.displayName),
           mustChangePassword: true,
           emailVerifiedAt: new Date(), // admin-vouched account
           roles: { create: roleCreate(input.roles) },

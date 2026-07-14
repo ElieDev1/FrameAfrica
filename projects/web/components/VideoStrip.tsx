@@ -28,7 +28,7 @@ export async function VideoStrip() {
       {videos.length === 0 ? (
         <Link
           href="/videos"
-          className="media-fill flex aspect-[16/5] items-center justify-center rounded-xl ring-1 ring-border"
+          className="media-fill flex aspect-[16/5] items-center justify-center ring-1 ring-border"
         >
           <p className="px-6 text-center font-heading text-lg font-bold text-text">
             Video is coming to Frame Africa
@@ -40,7 +40,7 @@ export async function VideoStrip() {
             <article key={video.id} className="w-64 shrink-0">
               <Link
                 href={`/videos/${video.id}`}
-                className="media-fill relative flex aspect-video items-center justify-center overflow-hidden rounded-xl ring-1 ring-border"
+                className="media-fill relative flex aspect-video items-center justify-center overflow-hidden ring-1 ring-border"
               >
                 {video.thumbnailUrl && (
                   // eslint-disable-next-line @next/next/no-img-element -- YouTube thumbnail host

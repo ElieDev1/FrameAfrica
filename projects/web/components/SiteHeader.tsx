@@ -54,6 +54,7 @@ export async function SiteHeader() {
         isStaff: user.roles.some((r) => STAFF_ROLES.includes(r)),
         isEditor: user.roles.some((r) => EDITOR_ROLES.includes(r)),
         isAdmin: user.roles.includes('admin'),
+        isSubscriber: user.isSubscriber ?? false,
       }
     : null;
 

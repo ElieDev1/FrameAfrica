@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { SiteBreadcrumbs } from '@/components/Breadcrumbs';
 import { CookieConsent } from '@/components/CookieConsent';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -15,7 +16,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   return (
     <>
       <SiteHeader />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        <div className="mx-auto max-w-[1440px] px-6 pt-4 empty:hidden">
+          <SiteBreadcrumbs />
+        </div>
+        {children}
+      </main>
       <SiteFooter />
       <CookieConsent initialDecided={consentDecided} />
     </>

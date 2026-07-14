@@ -49,18 +49,31 @@ export default async function AccountPage() {
       {/* ---- Profile header ---- */}
       <section className="flex flex-col gap-5 rounded-2xl border border-border bg-surface p-6 sm:flex-row sm:items-center">
         <div className="flex items-center gap-4">
-          {user.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- user avatar, arbitrary host
-            <img
-              src={user.avatarUrl}
-              alt=""
-              className="h-16 w-16 rounded-full object-cover ring-1 ring-border"
-            />
-          ) : (
-            <span className="grid h-16 w-16 place-items-center rounded-full bg-primary/15 font-heading text-2xl font-black text-primary">
-              {initials(user.displayName)}
-            </span>
-          )}
+          {/* The avatar carries a brand-coloured "verified member" badge in its
+              corner — the way Google/Twitter mark a status on the picture itself. */}
+          <div className="relative shrink-0">
+            {user.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- user avatar, arbitrary host
+              <img
+                src={user.avatarUrl}
+                alt=""
+                className="h-16 w-16 rounded-full object-cover ring-1 ring-border"
+              />
+            ) : (
+              <span className="grid h-16 w-16 place-items-center rounded-full bg-primary/15 font-heading text-2xl font-black text-primary">
+                {initials(user.displayName)}
+              </span>
+            )}
+            {user.isSubscriber && (
+              <span
+                title={t(locale, 'account.member')}
+                aria-label={t(locale, 'account.member')}
+                className="absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full bg-primary text-black ring-2 ring-surface"
+              >
+                <CheckIcon size={13} aria-hidden />
+              </span>
+            )}
+          </div>
           <div className="min-w-0">
             <h1 className="truncate font-heading text-2xl font-black tracking-tight text-text">
               {user.displayName}
@@ -78,6 +91,11 @@ export default async function AccountPage() {
                   </span>
                 );
               })}
+              {user.isSubscriber && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-primary">
+                  <CheckIcon size={11} aria-hidden /> {t(locale, 'account.member')}
+                </span>
+              )}
               {user.twoFactorEnabled && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-accent-green/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-accent-green">
                   <CheckIcon size={11} aria-hidden /> {t(locale, 'account.twoFactorOn')}
@@ -88,7 +106,20 @@ export default async function AccountPage() {
         </div>
 
         <div className="flex flex-wrap gap-2 sm:ml-auto">
-          <EditProfileForm displayName={user.displayName} avatarUrl={user.avatarUrl} />
+          <EditProfileForm
+            displayName={user.displayName}
+            avatarUrl={user.avatarUrl}
+            // The byline fields are only meaningful for someone who writes.
+            byline={
+              isStaff
+                ? {
+                    bio: user.bio ?? '',
+                    jobTitle: user.jobTitle ?? '',
+                    slug: user.authorSlug ?? null,
+                  }
+                : undefined
+            }
+          />
           <Link
             href="/for-you"
             className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-text transition hover:border-primary hover:text-primary"
@@ -157,6 +188,27 @@ export default async function AccountPage() {
         <aside className="space-y-8">
           <Panel title={t(locale, 'account.following')} count={followingCount}>
             <FollowedList sections={follows.sections} topics={follows.topics} />
+          </Panel>
+
+          <Panel title={t(locale, 'account.membership')}>
+            <Link
+              href="/account/billing"
+              className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5 text-sm text-text transition hover:border-primary"
+            >
+              <span>
+                {user.isSubscriber
+                  ? t(locale, 'account.memberActive')
+                  : t(locale, 'account.notMember')}
+                {user.isSubscriber && user.subscribedUntil && (
+                  <span className="mt-0.5 block font-mono text-[11px] text-faint">
+                    {t(locale, 'account.renewsOn')} {formatDate(user.subscribedUntil, locale)}
+                  </span>
+                )}
+              </span>
+              <span className="shrink-0 font-mono text-[11px] text-primary">
+                {user.isSubscriber ? t(locale, 'account.manage') : t(locale, 'pay.seePlans')}
+              </span>
+            </Link>
           </Panel>
 
           <Panel title={t(locale, 'nav.accountSecurity')}>

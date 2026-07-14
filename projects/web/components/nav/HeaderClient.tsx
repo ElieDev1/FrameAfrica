@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import type { CategoryNode } from '@/lib/api';
 import { type Locale, type MessageKey, t, translateCategory } from '@/lib/i18n';
 import { ChevronDownIcon, ChevronRightIcon, SearchIcon } from '../icons';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 import { ThemeToggle } from '../ThemeToggle';
 import { Wordmark } from '../Wordmark';
 import { MobileMenu } from './MobileMenu';
@@ -19,6 +20,8 @@ export interface NavUser {
   isStaff: boolean;
   isEditor: boolean;
   isAdmin: boolean;
+  /** An active subscription — drives the member badge on the avatar. */
+  isSubscriber: boolean;
 }
 
 export interface FeaturedStory {
@@ -88,13 +91,17 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
         condensed ? 'shadow-sm' : ''
       }`}
     >
+      {/* Row 1 — brand + actions. The section nav gets its own row below, the
+          way a newspaper masthead runs: cramming brand + nine sections + the
+          actions cluster into one row needed ~1390px and scrolled the page
+          sideways on any laptop. */}
       <div
-        className={`mx-auto flex max-w-[1440px] items-center gap-3 px-4 transition-[padding] duration-300 sm:px-6 ${
+        className={`mx-auto flex max-w-[1440px] items-center gap-2 px-3 transition-[padding] duration-300 sm:gap-3 sm:px-6 ${
           condensed ? 'py-2' : 'py-3'
         }`}
       >
         {/* Brand */}
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex min-w-0 shrink items-center gap-2">
           <div className="flex items-center lg:hidden">
             <MobileMenu
               sections={allSections}
@@ -106,24 +113,40 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
               locale={locale}
             />
           </div>
-          <Link href="/" aria-label="Frame Africa — home" className="shrink-0">
+          <Link href="/" aria-label="Frame Africa — home" className="min-w-0 shrink">
             <Wordmark />
           </Link>
         </div>
 
-        {/* Section nav (single, centered) — full nav from lg; hamburger below */}
+        {/* Section nav — on the main bar, between brand and actions (desktop). */}
         {sections.length > 0 && (
-          <nav aria-label="Sections" className="mx-auto hidden shrink-0 lg:block">
+          <nav aria-label="Sections" className="hidden min-w-0 flex-1 items-center lg:flex">
             <ul className="flex items-center">
-              {sections.map((section) => {
+              {/* Home leads the nav — a reader always has a way back to the front page. */}
+              <li className="group relative">
+                <Link
+                  href="/"
+                  aria-current={pathname === '/' ? 'page' : undefined}
+                  className={`relative inline-flex items-center px-1.5 py-2 text-[13px] font-semibold transition-colors after:absolute after:inset-x-1.5 after:bottom-0 after:h-0.5 after:origin-left after:rounded-full after:bg-primary after:transition-transform after:duration-200 group-hover:text-text group-hover:after:scale-x-100 ${
+                    pathname === '/' ? 'text-text after:scale-x-100' : 'text-muted after:scale-x-0'
+                  }`}
+                >
+                  {t(locale, 'nav.home')}
+                </Link>
+              </li>
+
+              {sections.map((section, index) => {
                 const active = sectionActive(section);
                 const feat = featured[section.slug];
+                // The last few menus anchor to their right edge, or a wide panel
+                // hanging off the final section would run off-screen.
+                const alignRight = index >= sections.length - 3;
                 return (
                   <li key={section.id} className="group relative">
                     <Link
                       href={`/section/${section.slug}`}
                       aria-current={active ? 'page' : undefined}
-                      className={`relative inline-flex items-center gap-0.5 px-2 py-2.5 text-[13px] font-semibold transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:origin-left after:rounded-full after:bg-primary after:transition-transform after:duration-200 group-hover:text-text group-focus-within:text-text group-hover:after:scale-x-100 group-focus-within:after:scale-x-100 ${
+                      className={`relative inline-flex items-center gap-0.5 px-1.5 py-2 text-[13px] font-semibold transition-colors after:absolute after:inset-x-1.5 after:bottom-0 after:h-0.5 after:origin-left after:rounded-full after:bg-primary after:transition-transform after:duration-200 group-hover:text-text group-focus-within:text-text group-hover:after:scale-x-100 group-focus-within:after:scale-x-100 ${
                         active ? 'text-text after:scale-x-100' : 'text-muted after:scale-x-0'
                       }`}
                     >
@@ -136,13 +159,13 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
                         />
                       )}
                     </Link>
-
                     {hasMenu(section) && (
                       <MegaMenu
                         section={section}
                         featured={feat}
                         activeSlug={pathname}
                         locale={locale}
+                        alignRight={alignRight}
                       />
                     )}
                   </li>
@@ -153,12 +176,18 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
         )}
 
         {/* Actions */}
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <SearchForm locale={locale} />
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+          {/* An international, trilingual site keeps its language choice in the
+              masthead — not buried in the footer. */}
+          <span className="hidden font-mono text-[11px] md:inline-flex">
+            <LanguageSwitcher current={locale} />
+          </span>
+          {/* Search is an icon in the actions cluster now, so the section nav can
+              share the top row rather than sit on a line of its own. */}
           <Link
             href="/search"
             aria-label={t(locale, 'nav.searchAria')}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-primary lg:hidden"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-primary"
           >
             <SearchIcon size={16} />
           </Link>
@@ -173,9 +202,10 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
               >
                 {t(locale, 'nav.signIn')}
               </Link>
+              {/* "Subscribe" now means subscribe — it used to just open signup. */}
               <Link
-                href="/signup"
-                className="whitespace-nowrap rounded-full bg-primary px-3 py-1.5 text-[13px] font-semibold text-black transition-transform hover:-translate-y-px"
+                href="/pricing"
+                className="whitespace-nowrap rounded-full bg-primary px-2.5 py-1.5 text-[13px] font-semibold text-black transition-transform hover:-translate-y-px sm:px-3"
               >
                 {t(locale, 'nav.subscribe')}
               </Link>
@@ -187,40 +217,26 @@ export function HeaderClient({ sections, allSections, featured, user, locale }: 
   );
 }
 
-function SearchForm({ locale }: { locale: Locale }) {
-  return (
-    <form action="/search" className="relative hidden lg:block">
-      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint">
-        <SearchIcon size={15} />
-      </span>
-      <input
-        name="q"
-        type="search"
-        placeholder={t(locale, 'nav.searchPlaceholder')}
-        aria-label={t(locale, 'nav.searchAria')}
-        className="w-36 rounded-full border border-border bg-surface-2 py-1.5 pl-9 pr-4 text-sm text-text outline-none transition-[width,border-color] focus:w-52 focus:border-primary xl:w-44"
-      />
-    </form>
-  );
-}
-
 function MegaMenu({
   section,
   featured,
   activeSlug,
   locale,
+  alignRight = false,
 }: {
   section: CategoryNode;
   featured?: FeaturedStory;
   activeSlug: string;
   locale: Locale;
+  /** Anchor the panel to its right edge — for sections near the end of the bar. */
+  alignRight?: boolean;
 }) {
   const wide = Boolean(featured);
   return (
     <div
-      className={`invisible absolute left-0 top-full z-30 translate-y-1 rounded-2xl border border-border bg-surface/95 p-3 opacity-0 shadow-2xl backdrop-blur-xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 ${
-        wide ? 'w-[36rem]' : 'w-max min-w-[15rem] max-w-[34rem]'
-      }`}
+      className={`invisible absolute top-full z-30 translate-y-1 rounded-2xl border border-border bg-surface/95 p-3 opacity-0 shadow-2xl backdrop-blur-xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 ${
+        alignRight ? 'right-0' : 'left-0'
+      } ${wide ? 'w-[36rem]' : 'w-max min-w-[15rem] max-w-[34rem]'}`}
     >
       <div className="mb-2 flex items-center justify-between gap-8 border-b border-border pb-2">
         <span className="font-heading text-sm font-bold text-text">

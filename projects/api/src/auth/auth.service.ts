@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { NotificationType, Prisma, RoleName, UserStatus } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
+import { uniqueAuthorSlug } from '../common/author-slug';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AccountService } from './account.service';
@@ -29,6 +30,15 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   /** Consecutive failed sign-ins before the account is locked. */
   private static readonly MAX_FAILED_ATTEMPTS = 5;
+  /**
+   * How long a lock lasts before it lifts on its own (minutes). A *temporary*
+   * lock defeats brute-force just as well as a permanent one, but never traps a
+   * legitimate user — critically, the sole admin can't lock themselves out of a
+   * live system with no way back in (documents/05 §3.2). Override with
+   * AUTH_LOCKOUT_MINUTES; an admin can still clear a lock instantly, and ops
+   * have the break-glass CLI (`pnpm --filter api admin:recover`).
+   */
+  private static readonly LOCKOUT_MINUTES = Number(process.env.AUTH_LOCKOUT_MINUTES ?? 15);
 
   constructor(
     private readonly prisma: PrismaService,
@@ -56,6 +66,9 @@ export class AuthService {
           email: input.email,
           displayName: input.displayName,
           passwordHash,
+          // Every account carries a byline handle from day one — a reader who is
+          // later hired should not need a data fix to get an author page.
+          authorSlug: await uniqueAuthorSlug(this.prisma, input.displayName),
           roles: {
             create: [
               {
@@ -105,10 +118,21 @@ export class AuthService {
       input.password,
     );
 
-    // A locked account stays locked until an admin clears it — reject even a
-    // correct password so brute-forcing can't slip through on the 6th try.
-    if (user?.lockedAt) {
+    // While a lock is in force, reject even a correct password so brute-forcing
+    // can't slip through on the 6th try. The lock is *temporary*: once the
+    // cooldown passes it lifts itself (below) so no one — not even the only
+    // admin — is ever permanently trapped.
+    if (user?.lockedAt && this.lockStillActive(user.lockedAt)) {
       throw new UnauthorizedException('ACCOUNT_LOCKED');
+    }
+    // Cooldown elapsed on a previously-locked account: clear the lock and the
+    // counter so this attempt is judged fresh.
+    if (user?.lockedAt && !this.lockStillActive(user.lockedAt)) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { lockedAt: null, failedLoginAttempts: 0 },
+      });
+      user.failedLoginAttempts = 0;
     }
 
     if (!user || !user.passwordHash || !passwordOk) {
@@ -148,9 +172,16 @@ export class AuthService {
     return this.issueSession(user);
   }
 
+  /** True while a lock set at `lockedAt` is still within its cooldown window. */
+  private lockStillActive(lockedAt: Date): boolean {
+    const elapsedMs = Date.now() - lockedAt.getTime();
+    return elapsedMs < AuthService.LOCKOUT_MINUTES * 60_000;
+  }
+
   /**
    * Count a failed sign-in. Once the threshold is reached the account is locked
-   * and only an admin can clear it (documents/05 §3.2 — brute-force lockout).
+   * for a cooldown window (documents/05 §3.2 — brute-force lockout); the lock
+   * lifts automatically after LOCKOUT_MINUTES, or instantly if an admin clears it.
    */
   private async registerFailedLogin(userId: string, current: number): Promise<boolean> {
     const attempts = current + 1;

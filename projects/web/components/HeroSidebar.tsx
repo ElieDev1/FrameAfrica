@@ -1,8 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { LiveBadge } from '@/components/ArticleCard';
 import { ClockIcon } from '@/components/icons';
 import type { ArticleSummary } from '@/lib/api';
-import { formatDate } from '@/lib/format';
+import { newsTime } from '@/lib/format';
 import { type Locale, t, translateCategory } from '@/lib/i18n';
 
 function Kicker({
@@ -26,9 +27,15 @@ function Kicker({
           ? translateCategory(locale, article.category.slug, article.category.name)
           : article.category.name}
       </Link>
-      {article.isBreaking && (
+      {article.isLive && <LiveBadge locale={locale} />}
+      {article.isBreaking && !article.isLive && (
         <span className="rounded bg-accent-red px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wide text-white">
           {locale ? t(locale, 'home.breaking') : 'Breaking'}
+        </span>
+      )}
+      {small && article.publishedAt && (
+        <span className="font-mono text-[10px] normal-case tracking-normal text-faint">
+          {newsTime(article.publishedAt, locale)}
         </span>
       )}
     </span>
@@ -38,7 +45,7 @@ function Kicker({
 function Meta({ article, locale }: { article: ArticleSummary; locale?: Locale }) {
   return (
     <p className="flex flex-wrap items-center gap-x-1.5 font-mono text-[11px] text-muted">
-      {article.publishedAt && <span>{formatDate(article.publishedAt)}</span>}
+      {article.publishedAt && <span>{newsTime(article.publishedAt, locale)}</span>}
       {article.readTimeMin && (
         <span className="inline-flex items-center gap-1">
           · <ClockIcon size={11} /> {article.readTimeMin} {locale ? t(locale, 'common.min') : 'min'}
@@ -49,9 +56,10 @@ function Meta({ article, locale }: { article: ArticleSummary; locale?: Locale })
 }
 
 /**
- * The hero's secondary column: a lead item with a wide image, then compact
- * thumbnail rows. Fills the space beside the front-page lead with real
- * hierarchy instead of a flat list of headlines.
+ * The hero's secondary column: one lead item carries a wide image, and every
+ * story below it is headline-only (no photo) — a single photo anchors the
+ * column and the rest read as a clean list, the way a print front page runs its
+ * "more top stories".
  */
 export function HeroSidebar({ articles, locale }: { articles: ArticleSummary[]; locale?: Locale }) {
   if (articles.length === 0) return null;
@@ -59,16 +67,16 @@ export function HeroSidebar({ articles, locale }: { articles: ArticleSummary[]; 
 
   return (
     <div className="lg:border-l lg:border-border lg:pl-8">
-      <h2 className="flex items-center gap-2 border-b border-border pb-3 font-mono text-xs uppercase tracking-[0.18em] text-muted">
+      <h2 className="flex items-center gap-2 border-b border-border pb-2.5 font-mono text-xs uppercase tracking-[0.18em] text-muted">
         <span className="h-3.5 w-1 rounded-full bg-primary" />
         {locale ? t(locale, 'home.topStories') : 'Top stories'}
       </h2>
 
-      {/* Lead secondary story — image on top */}
-      <article className="group border-b border-border py-4">
+      {/* Lead secondary story — image on top (kept shallow so the column stays compact) */}
+      <article className="group border-b border-border py-3">
         <Link
           href={`/article/${top.slug}`}
-          className="relative block aspect-[16/9] w-full overflow-hidden rounded-xl ring-1 ring-border"
+          className="relative block aspect-[2/1] w-full overflow-hidden ring-1 ring-border"
         >
           {top.featuredImage ? (
             <Image
@@ -82,9 +90,9 @@ export function HeroSidebar({ articles, locale }: { articles: ArticleSummary[]; 
             <span className="media-fill absolute inset-0" aria-hidden />
           )}
         </Link>
-        <div className="mt-3 flex flex-col gap-1.5">
+        <div className="mt-2.5 flex flex-col gap-1">
           <Kicker article={top} locale={locale} />
-          <h3 className="font-heading text-xl font-bold leading-tight tracking-tight text-text">
+          <h3 className="font-heading text-lg font-bold leading-tight tracking-tight text-text">
             <Link
               href={`/article/${top.slug}`}
               className="transition-colors group-hover:text-primary"
@@ -96,37 +104,19 @@ export function HeroSidebar({ articles, locale }: { articles: ArticleSummary[]; 
         </div>
       </article>
 
-      {/* Remaining stories — compact thumbnail rows */}
+      {/* Remaining stories — headline-only, no photo */}
       <div className="divide-y divide-border">
         {rows.map((article) => (
-          <article key={article.id} className="group flex gap-4 py-4">
-            <Link
-              href={`/article/${article.slug}`}
-              className="relative aspect-square w-[4.5rem] shrink-0 overflow-hidden rounded-lg ring-1 ring-border"
-            >
-              {article.featuredImage ? (
-                <Image
-                  src={article.featuredImage.url}
-                  alt={article.featuredImage.alt ?? ''}
-                  fill
-                  sizes="72px"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              ) : (
-                <span className="media-fill absolute inset-0" aria-hidden />
-              )}
-            </Link>
-            <div className="min-w-0 flex-1">
-              <Kicker article={article} small locale={locale} />
-              <h3 className="mt-1 font-heading text-[15px] font-bold leading-snug text-text">
-                <Link
-                  href={`/article/${article.slug}`}
-                  className="line-clamp-3 transition-colors group-hover:text-primary"
-                >
-                  {article.title}
-                </Link>
-              </h3>
-            </div>
+          <article key={article.id} className="group py-3">
+            <Kicker article={article} small locale={locale} />
+            <h3 className="mt-1 font-heading text-[15px] font-bold leading-snug text-text">
+              <Link
+                href={`/article/${article.slug}`}
+                className="line-clamp-3 transition-colors group-hover:text-primary"
+              >
+                {article.title}
+              </Link>
+            </h3>
           </article>
         ))}
       </div>

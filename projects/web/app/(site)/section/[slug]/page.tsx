@@ -1,9 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ChevronRightIcon } from '@/components/icons';
+import { AdSlot } from '@/components/AdSlot';
+import { ArticleCard } from '@/components/ArticleCard';
 import { FollowButton } from '@/components/FollowButton';
+import { JustIn } from '@/components/JustIn';
 import { LoadMore } from '@/components/LoadMore';
 import { MultimediaHubs } from '@/components/MultimediaHubs';
+import { NewsletterBox } from '@/components/NewsletterBox';
+import { SectionHeading } from '@/components/SectionHeading';
 import { fetchArticles, fetchCategory } from '@/lib/api';
 import { getFollowStatus } from '@/lib/follows-actions';
 import { getSession } from '@/lib/session';
@@ -52,25 +58,38 @@ export default async function SectionPage({ params }: PageProps) {
   // "Multimedia" holds no articles — it's a container for the standalone hubs.
   const isMultimedia = category.slug === MULTIMEDIA_SLUG;
 
+  // The newest story leads the section; the rest fill the small-card grid.
+  const lead = articles[0];
+  const restArticles = articles.slice(1);
+
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-8">
       <header className="border-b border-border pb-6">
-        {category.parent ? (
-          <nav aria-label="Breadcrumb" className="font-mono text-xs text-muted">
-            <Link
-              href={`/section/${category.parent.slug}`}
-              className="text-primary hover:underline"
-            >
-              {translateCategory(locale, category.parent.slug, category.parent.name)}
-            </Link>
-            <span aria-hidden> › </span>
-            <span>{categoryName}</span>
-          </nav>
-        ) : (
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
-            {t(locale, 'common.section')}
-          </p>
-        )}
+        {/* Home › [parent section ›] this section. The parent only exists for a
+            sub-section; a top-level section is just Home › Name. */}
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1 font-mono text-xs text-muted"
+        >
+          <Link href="/" className="hover:text-primary">
+            {t(locale, 'nav.home')}
+          </Link>
+          <ChevronRightIcon size={12} className="text-faint" />
+          {category.parent && (
+            <>
+              <Link
+                href={`/section/${category.parent.slug}`}
+                className="text-primary hover:underline"
+              >
+                {translateCategory(locale, category.parent.slug, category.parent.name)}
+              </Link>
+              <ChevronRightIcon size={12} className="text-faint" />
+            </>
+          )}
+          <span aria-current="page" className="text-text">
+            {categoryName}
+          </span>
+        </nav>
         <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-heading text-4xl font-black tracking-tight text-text">
             {categoryName}
@@ -116,21 +135,45 @@ export default async function SectionPage({ params }: PageProps) {
         )}
       </header>
 
+      {/* Standard top-banner position: directly under the section masthead. */}
+      {!isMultimedia && <AdSlot variant="leaderboard" className="mt-6" />}
+
       {isMultimedia && <MultimediaHubs locale={locale} />}
 
-      {articles.length === 0 ? (
-        !isMultimedia && (
-          <p className="py-16 text-center font-body text-muted">{t(locale, 'section.empty')}</p>
-        )
-      ) : (
-        <div className={isMultimedia ? 'mt-12' : undefined}>
-          <LoadMore
-            initialArticles={articles}
-            initialCursor={pagination?.nextCursor ?? null}
-            category={slug}
-          />
-        </div>
-      )}
+      {articles.length === 0
+        ? !isMultimedia && (
+            <p className="py-16 text-center font-body text-muted">{t(locale, 'section.empty')}</p>
+          )
+        : !isMultimedia && (
+            // Editorial layout: a wide lead story, then a dense column of small
+            // cards, beside a "Just in" rail showing how recently each story
+            // landed — a news page, not a grid of uniform product tiles.
+            <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+              <div className="min-w-0">
+                {lead && (
+                  <div className="border-b border-border pb-8">
+                    <ArticleCard article={lead} horizontal locale={locale} />
+                  </div>
+                )}
+                {restArticles.length > 0 && (
+                  <div className="mt-8">
+                    <SectionHeading title={t(locale, 'home.latest')} />
+                    <LoadMore
+                      initialArticles={restArticles}
+                      initialCursor={pagination?.nextCursor ?? null}
+                      category={slug}
+                      compact
+                    />
+                  </div>
+                )}
+              </div>
+              <aside className="flex flex-col gap-8">
+                <JustIn articles={articles.slice(0, 7)} locale={locale} />
+                <AdSlot variant="halfpage" sticky desktopOnly />
+                <NewsletterBox />
+              </aside>
+            </div>
+          )}
     </div>
   );
 }

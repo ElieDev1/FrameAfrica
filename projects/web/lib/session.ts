@@ -18,10 +18,18 @@ export interface SessionUser {
   displayName: string;
   avatarUrl: string | null;
   roles: string[];
+  /** Public byline identity — the author page a story links to. */
+  authorSlug?: string | null;
+  bio?: string | null;
+  jobTitle?: string | null;
   /** True when on a generated password — must set a new one before continuing. */
   mustChangePassword?: boolean;
   /** True when TOTP two-factor is enabled on the account. */
   twoFactorEnabled?: boolean;
+  /** An active, unexpired subscription — the truth the UI shows as "Member". */
+  isSubscriber?: boolean;
+  /** When paid access runs out (ISO), or null. */
+  subscribedUntil?: string | null;
 }
 
 /** The current user (via `/me`), or `null` when signed out / token expired. */

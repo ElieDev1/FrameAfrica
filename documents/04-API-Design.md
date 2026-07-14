@@ -95,6 +95,15 @@
 | GET | `/notices` | Public notices / tenders / obituaries |
 | GET | `/videos` · `/galleries` · `/podcasts` · `/interactives` | Multimedia hubs — accept `?limit=&page=`, answer `meta.pagination.hasMore` |
 | GET | `/videos/{id}` · `/galleries/{slug}` · `/podcasts/{slug}` · `/interactives/{slug}` | One item, for its own page |
+| GET | `/authors` | Everyone who has published (name, job title, bio, story count) |
+| GET | `/authors/{slug}` | One author's public page |
+
+**Author pages.** Every user carries an `author_slug`, but only a *published* writer is
+reachable: `/authors/{slug}` for a slug that has never published is a **404**, not an empty
+profile — a reader's account has a slug too, and asking must not confirm that it exists.
+The slug is assigned once and does not follow a later rename, so a URL that has been shared
+or indexed keeps working. An author's stories are not duplicated in the profile response;
+they come from `GET /articles?author={slug}`, which already paginates.
 
 ### CMS (journalist / editor) — role-gated
 | Method | Path | Description | Role |
@@ -144,17 +153,25 @@ queue serve every content type.
 
 | Method | Path | Description | Auth |
 |---|---|---|---|
-| GET | `/plans` | List subscription plans | Public |
-| POST | `/subscriptions` | Start subscription (returns payment intent) | User |
-| POST | `/payments/webhook/momo` | MTN MoMo callback | Provider (signed) |
-| POST | `/payments/webhook/airtel` | Airtel callback | Provider (signed) |
-| POST | `/payments/webhook/card` | Card gateway callback | Provider (signed) |
-| GET | `/me/subscription` | Current subscription status | User |
-| GET | `/me/invoices` | Invoice history | User |
+| GET | `/billing/plans` | List subscription plans | Public |
+| GET | `/billing/me/subscription` | Current subscription (plan, status, period end) | User |
+| GET | `/billing/me/payments` | Payment history | User |
+| POST | `/billing/me/checkout` | Start a subscription — a Stripe checkout URL, or a mobile-money prompt on the reader's handset | User |
+| POST | `/billing/me/cancel` | Cancel at period end (paid days are not taken back) | User |
+| POST | `/billing/webhooks/stripe` | Stripe callback (HMAC-verified) | Provider (signed) |
+| POST | `/billing/webhooks/{momo\|airtel}` | Mobile-money callback | Provider |
+| POST | `/admin/billing/grant` | Comped / corporate / cash subscription | admin |
+| POST | `/admin/billing/expire-lapsed` | Sweep subscriptions past their period end | admin |
 | GET | `/ads/serve?slot=` | Get ad for placement | Public |
 | POST | `/ads/{id}/click` | Track click | Public |
 
-Paywall check happens server-side on `/articles/{slug}`: premium content returns `402 PAYMENT_REQUIRED` with a preview payload when the reader is over the free meter and unsubscribed.
+**Settlement is the only path that grants access**, and it is idempotent: a UNIQUE index on
+`payment.provider_ref` is the database-level replay guard, so a webhook delivered twice cannot
+buy a second period. A renewal extends from the current period end rather than from "now", so a
+reader who pays early never loses days they have already bought. Entitlement lives in one field —
+`user.subscribed_until` — which is the field the paywall already reads.
+
+Paywall check happens server-side on `/articles/{slug}`: premium content returns `402 PAYMENT_REQUIRED` with a preview payload when the reader is over the free meter and unsubscribed. The reader is then offered `/pricing` — a wall with no door is just a broken page.
 
 ## 8. Admin Endpoints
 
@@ -164,20 +181,65 @@ Paywall check happens server-side on `/articles/{slug}`: premium content returns
 | PATCH | `/admin/users/{id}/roles` | Assign roles | admin |
 | GET | `/admin/analytics/overview` | Dashboard metrics | admin/editor |
 | GET | `/admin/audit-logs` | Query audit trail | admin |
-| PATCH | `/admin/settings` | System settings / feature flags | admin |
+| GET | `/admin/settings/integrations` | List every integration key, grouped, with its set-state | admin |
+| PUT | `/admin/settings/integrations/{key}` | Set an integration value | admin |
+| DELETE | `/admin/settings/integrations/{key}` | Clear a stored value (falls back to env) | admin |
 | POST | `/admin/backups` | Trigger backup | admin |
+
+### 8.1 Integration settings
+
+Every key in the catalogue maps 1:1 to an env var; a value stored in the DB **overrides** `process.env`. Keys are grouped (`social`, `site`, `email`, `storage`, `search`, `payments`, `ai`, `analytics`, `media`) and each is flagged `secret`:
+
+- **`secret: true`** (API keys, passwords) — **write-only**. The list endpoint returns `maskedValue` (`••••1234`) and `value: null`. The raw value is only ever resolved server-side by the service that consumes it.
+- **`secret: false`** (social URLs, hostnames, contact details) — returned in the clear so the dashboard can pre-fill the field for editing.
+
+**Public read.** The footer needs the social links, which are public by definition:
+
+| Method | Path | Description | Role |
+|---|---|---|---|
+| GET | `/site/settings` | Configured social profiles + contact details | Public |
+
+This route reads a **fixed allow-list** of non-secret keys (`SOCIAL_*`, `CONTACT_EMAIL`, `CONTACT_PHONE`) — it cannot return anything else, whatever is stored. Unset keys are omitted (the footer then hides that icon), and a social value is rejected on write and dropped on read unless it is a plain `http(s)` URL, so no `javascript:`/`data:` URI can reach an `href`.
 
 ## 9. AI Endpoints (advisory)
 
-| Method | Path | Description |
-|---|---|---|
-| POST | `/ai/summarize` | Draft summary for an article |
-| POST | `/ai/headlines` | Suggest headlines |
-| POST | `/ai/tags` | Suggest tags/category |
-| POST | `/ai/translate` | Translate draft |
-| POST | `/ai/moderate` | Score comment for spam/abuse |
+| Method | Path | Description | Status |
+|---|---|---|---|
+| GET | `/ai/status` | Is a key configured? (the editor hides its buttons when not) | ✅ |
+| POST | `/ai/summarize` | Standfirst + key points, in the article's own language | ✅ |
+| POST | `/ai/headlines` | Five ranked headline options + a standfirst | ✅ |
+| POST | `/ai/tags` | Section + topic tags, drawn from the taxonomy that exists | ✅ |
+| POST | `/ai/translate` | Translate a draft (en / rw / fr / sw) | ✅ |
+| POST | `/ai/moderate` | Score a comment for spam/abuse | planned |
 
-All AI endpoints are **staff-only**, rate-limited, and return suggestions the human may accept or reject; nothing auto-publishes.
+All AI endpoints are **staff-only**, rate-limited (20/min — each call costs money at the provider), and return suggestions the human may accept or reject; **nothing auto-publishes**.
+
+The provider key (`ANTHROPIC_API_KEY`, optionally `ANTHROPIC_MODEL`) is resolved **per call from Settings**, so an admin can add, rotate, or pull it from the dashboard without a redeploy. With no key configured the endpoints answer `503` with a message saying where to fix it, rather than half-working.
+
+`/ai/tags` is grounded in reality: the model is given the site's real section and topic names, and a section it invents is **dropped** rather than guessed at — a suggestion the newsroom cannot file under is worse than no suggestion.
+
+## 9a. Push Endpoints (breaking-news alerts)
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| GET | `/push/key` | The VAPID public key a browser needs to subscribe (`null` = not set up) | Public |
+| GET | `/push/status?endpoint=` | Is this browser already subscribed? | Public |
+| POST | `/push/subscribe` | Remember this browser | Public (tied to the account when a token is present) |
+| POST | `/push/unsubscribe` | Forget this browser | Public |
+| GET | `/admin/push` | Configured? How many browsers can we reach? | admin |
+| POST | `/admin/push/keys?force=` | Generate the VAPID pair (`force` rotates — see below) | admin |
+
+A subscription belongs to a **browser**, not an account: no sign-in is required (`user_id` is
+nullable), and the push service's `endpoint` is the identity — so re-subscribing the same browser
+updates its row instead of fanning out duplicate alerts. Unsubscribing always works, even if push
+has since been switched off.
+
+Publishing an article with `is_breaking` broadcasts its headline to every subscription. A browser
+that answers `404`/`410` has revoked permission or cleared its data and is **pruned**; a transient
+failure is left alone and retried on the next alert. **The alert never blocks the publish** — if the
+push service is down, the story is still out and the failure is logged. Rotating the VAPID pair
+changes the identity we push under and orphans every existing subscription, so it takes an explicit
+`force=true` and drops the stale rows rather than failing on every send.
 
 ## 10. Rate Limiting
 

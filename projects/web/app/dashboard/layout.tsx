@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { DashboardBreadcrumbs } from '@/components/Breadcrumbs';
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 import { DashboardTopbar } from '@/components/dashboard/DashboardTopbar';
 import { requireStaff } from '@/lib/cms';
@@ -31,7 +32,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <DashboardTopbar name={user.displayName} role={role} roles={user.roles} />
         {/* Fluid width: when the sidebar collapses, the content reclaims the
             space instead of staying pinned to a centered column. */}
-        <main className="w-full flex-1 px-4 py-8 sm:px-6 lg:px-8 2xl:px-10">{children}</main>
+        <main className="w-full flex-1 px-4 py-8 sm:px-6 lg:px-8 2xl:px-10">
+          <DashboardBreadcrumbs />
+          {children}
+        </main>
       </div>
     </div>
   );

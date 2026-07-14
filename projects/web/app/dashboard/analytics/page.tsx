@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { DashTabs } from '@/components/dashboard/DashTabs';
 import { BarList, TrendArea } from '@/components/dashboard/OverviewCharts';
 import { CommentIcon, EyeIcon, HeartIcon, type IconProps, ShareIcon } from '@/components/icons';
 import { fetchAnalytics, requireStaff } from '@/lib/cms';
+import { insightsTabs } from '@/lib/dash-tabs';
 import { type Locale, t } from '@/lib/i18n';
 import { getLocale } from '@/lib/i18n-server';
 
@@ -114,7 +116,7 @@ function InteractionsTable({
 }
 
 export default async function AnalyticsPage() {
-  await requireStaff();
+  const user = await requireStaff();
   const [a, locale] = await Promise.all([fetchAnalytics(), getLocale()]);
 
   const totals = a.totals ?? { views: 0, likes: 0, comments: 0, shares: 0 };
@@ -142,6 +144,8 @@ export default async function AnalyticsPage() {
           {a.totalToday.toLocaleString()} {t(locale, 'dana.viewsToday')}
         </p>
       </div>
+
+      <DashTabs tabs={insightsTabs(user.roles)} />
 
       {/* Site-wide interaction totals */}
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
