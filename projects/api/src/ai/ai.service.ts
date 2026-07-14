@@ -244,7 +244,7 @@ export class AiService {
       });
     } catch (error) {
       this.logger.error('Anthropic request failed', error as Error);
-      throw new ServiceUnavailableException('The AI assistant is unavailable right now.');
+      throw this.describeFailure(error);
     }
 
     if (message.stop_reason === 'refusal') {
@@ -262,6 +262,39 @@ export class AiService {
       this.logger.error(`Anthropic returned unparseable JSON: ${text.slice(0, 200)}`);
       throw new ServiceUnavailableException('The AI assistant returned an unusable answer.');
     }
+  }
+
+  /**
+   * Turn an Anthropic failure into something the editor can act on. A generic
+   * "unavailable" is useless when the real problem is a key the admin can fix in
+   * one step — an out-of-credit account, a revoked key, or a permission gap all
+   * look identical otherwise, and none of them is a "try again later".
+   */
+  private describeFailure(error: unknown): ServiceUnavailableException {
+    if (error instanceof Anthropic.APIError) {
+      const detail =
+        typeof (error.error as { error?: { message?: string } })?.error?.message === 'string'
+          ? (error.error as { error: { message: string } }).error.message
+          : '';
+
+      // 400 with a billing message, or 402 — the account behind the key is out of credit.
+      if (error.status === 402 || /credit balance|too low|billing/i.test(detail)) {
+        return new ServiceUnavailableException(
+          'The AI provider account is out of credit. Top it up in the Anthropic console, then try again.',
+        );
+      }
+      if (error.status === 401 || error.status === 403) {
+        return new ServiceUnavailableException(
+          'The Anthropic API key was rejected. Check the key in Settings → Integrations.',
+        );
+      }
+      if (error.status === 429) {
+        return new ServiceUnavailableException(
+          'The AI assistant is rate-limited right now. Try again in a moment.',
+        );
+      }
+    }
+    return new ServiceUnavailableException('The AI assistant is unavailable right now.');
   }
 
   /** Built per call: the key can change in Settings between one request and the next. */

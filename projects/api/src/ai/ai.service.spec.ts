@@ -19,13 +19,31 @@ function sentPrompt(): string {
   return create.mock.calls[0][0].messages[0].content;
 }
 
-jest.mock('@anthropic-ai/sdk', () => ({
-  __esModule: true,
-  default: jest.fn().mockImplementation((opts: { apiKey?: string }) => {
+jest.mock('@anthropic-ai/sdk', () => {
+  // Defined inside the factory: jest.mock is hoisted above module-level code, so a
+  // class declared outside isn't initialised yet when this runs.
+  class MockAPIError extends Error {
+    constructor(
+      readonly status: number,
+      readonly error: unknown,
+    ) {
+      super('api error');
+    }
+  }
+  const ctor = jest.fn().mockImplementation((opts: { apiKey?: string }) => {
     constructed.push(opts);
     return { messages: { create } };
-  }),
-}));
+  }) as jest.Mock & { APIError: typeof MockAPIError };
+  // The service does `error instanceof Anthropic.APIError` — the mock must carry it.
+  ctor.APIError = MockAPIError;
+  return { __esModule: true, default: ctor };
+});
+
+// The mock's APIError class, for tests that simulate a provider error.
+const mockedSdk = jest.requireMock<{
+  default: { APIError: new (status: number, error: unknown) => Error };
+}>('@anthropic-ai/sdk');
+const MockAPIError = mockedSdk.default.APIError;
 
 /** An Anthropic reply carrying a JSON payload, the way structured output arrives. */
 function reply(payload: unknown, stopReason = 'end_turn') {
@@ -163,6 +181,25 @@ describe('AiService', () => {
     create.mockRejectedValue(new Error('529 overloaded'));
 
     await expect(service.summarize(STORY)).rejects.toBeInstanceOf(ServiceUnavailableException);
+  });
+
+  it('tells the newsroom when the provider account is out of credit', async () => {
+    const { service } = build();
+    create.mockRejectedValue(
+      new MockAPIError(400, {
+        error: { message: 'Your credit balance is too low to access the Anthropic API.' },
+      }),
+    );
+
+    // Actionable, not a vague "unavailable" — this is a top-up, not a retry.
+    await expect(service.summarize(STORY)).rejects.toThrow(/out of credit/i);
+  });
+
+  it('tells the admin when the key itself is rejected', async () => {
+    const { service } = build();
+    create.mockRejectedValue(new MockAPIError(401, { error: { message: 'invalid x-api-key' } }));
+
+    await expect(service.summarize(STORY)).rejects.toThrow(/key was rejected|Settings/i);
   });
 
   it('does not hand the editor an unparseable answer', async () => {
