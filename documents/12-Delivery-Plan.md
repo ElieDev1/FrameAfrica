@@ -90,7 +90,7 @@ until merged and note their PR.
 - [x] 2FA (TOTP) mandatory for staff (`FR-AUTH-6`) — native RFC 6238; `/account/security` enrol (QR + key), login code step, dashboard enforces enrolment for staff (WS12).
 - [x] **Admin user management** — create/list users, assign/revoke roles, suspend/reactivate, reset passwords; generated first password + forced first-login reset (no email code), later resets emailed (WS8).
 - [ ] Object-level authZ, applied per resource as write features land (`05` §4)
-- [ ] Bookmarks, reading history, followed categories (`FR-READ-5`, `-6`) — _bookmarks live; history/follows pending_
+- [x] Bookmarks, reading history, followed categories/topics (`FR-READ-5`, `-6`) — saved stories, a reading-history feed, follows, and the personalised **For you** feed
 - [ ] Data export + account erasure (`FR-AUTH-8`; `05` §9)
 
 ### Slice 5 — CMS & editorial workflow  `FR-PROD-*`, `FR-EDIT-*` 🚧
@@ -99,12 +99,12 @@ until merged and note their PR.
 - [x] **Sub-editor copy desk** (WS14) — submitted drafts land on `copy_edit`; sub-editors polish then pass to editors (`ready`) or return to the writer (`/dashboard/copydesk`). Pipeline: draft → copy-edit → review → published.
 - [x] Publish now / **schedule / embargo** + **archive** (`FR-EDIT-2`, `-3`, WS15) — schedule at a future time (holds `embargoed`; an in-process `SchedulerService` publishes when due); archive removes a published story from the public site.
 - [x] **Admin full CRUD** (WS13) — create+publish/edit-any/publish/unpublish/archive/soft-delete→trash→restore for any article, plus taxonomy (sections/topics) CRUD (`/dashboard/articles`, `/dashboard/taxonomy`).
-- [ ] Corrections & retractions with a public, dated log (`FR-EDIT-5`)
-- [ ] Feature as breaking news (`FR-EDIT-4`)
+- [x] Corrections & retractions with a public, dated log (`FR-EDIT-5`) — dated notes on the article + `/corrections`
+- [x] Feature as breaking news (`FR-EDIT-4`) — the breaking flag drives the ticker, the card badge, and (new) a **web-push alert** to every subscribed browser on publish
 - [x] CMS editor UI: `/cms` draft list + `/cms/new` + `/cms/[id]` editor (create/edit/submit), staff-gated (`06` §4.5) — _rich-text editor still a plain textarea for now_
 
 ### Slice 6 — Media  `FR-PROD-2` 🚧
-- [ ] Signed S3 upload + responsive image variants (WebP/AVIF) (`02` §5)
+- [x] **S3 upload** (`02` §5) — `StorageService` picks S3 whenever a bucket + credentials are set in Settings (also R2/MinIO via `S3_ENDPOINT`, and a CDN base URL), and falls back to local disk otherwise, so uploads survive a deploy. _Responsive variants (WebP/AVIF) still to come._
 - [x] Featured image on articles — `featured_image_url` on `article`, served by the read API and rendered with `next/image` across cards + article hero (falls back to the branded placeholder when absent). Staff attach one via the **CMS editor** (URL + alt + credit fields). _Galleries + upload still to come._
 - [x] Credit / alt-text metadata — `featured_image_alt` + `featured_image_credit`, authored in the CMS and rendered as image `alt` and a photo credit (`06` §6). _Licensing field with the DAM._
 
@@ -115,15 +115,10 @@ until merged and note their PR.
 - [x] Moderation queue, hide/remove, **delete**, **user ban** (`FR-COMM-3`, `-4`) — `/dashboard/moderation` for moderators/editors/admins: keep/hide/remove, delete a comment, and **ban/unban a user from commenting** (WS7, WS13, WS16). _AI spam pre-screen still to come._
 
 ### Slice 8 — Monetization  `FR-SUB-*`, `FR-AD-*`
-- [ ] Metered paywall (N free/period) → `402` preview when over meter (`FR-SUB-1`; `04` §7)
-  - *Partial, landed early as a Slice 1 fix (#8):* `GET /v1/articles/:slug` already
-    returns the `402` + one-paragraph-preview shape for `isPremium` articles (every
-    caller is currently treated as unsubscribed — there's no auth yet). Still
-    missing: per-reader metering (N free articles/period), and this only covers
-    the always-premium case, not "over the free meter."
-- [ ] Plans, subscriptions, invoices (`FR-SUB-2`)
-- [ ] MoMo & Airtel payments with signed, idempotent webhooks (`FR-SUB-3`; `05` §8)
-- [ ] Basic ads + public notices / tenders / obituaries (`FR-AD-1`, `-3`)
+- [x] Metered paywall (N free/period) → `402` preview when over meter (`FR-SUB-1`; `04` §7) — premium stories *and* the free meter, with entitlement read from one field (`user.subscribedUntil`)
+- [x] Plans, subscriptions, payments (`FR-SUB-2`) — `plan` / `subscription` / `payment` tables, `/pricing`, `/account/billing`, and an admin grant for comped/corporate/cash
+- [x] MoMo & Airtel payments with signed, idempotent webhooks (`FR-SUB-3`; `05` §8) — plus Stripe for cards; settlement is the only path that grants access, is idempotent (a `providerRef` unique index is the DB-level replay guard), and a renewal extends from the period end rather than losing paid days
+- [x] Basic ads + public notices / tenders / obituaries (`FR-AD-1`, `-3`) — house ad slots (leaderboard / billboard / half-page / native), each labelled
 
 ### Slice 9 — Launch baseline
 - [x] Global exception filter → standard `{ error: { code, ... } }` envelope (`04` §2) — pulled early so the whole API shares one error contract; the `402` premium preview stays success-shaped
@@ -131,27 +126,27 @@ until merged and note their PR.
 - [~] Admin overview + monitoring (`FR-ADM-3`) — `/dashboard/monitor` with user/article/comment stats + recent-activity feeds, and **edit-any-article** for admins regardless of author/status (WS10). _Event-level analytics ingestion still pending._
 - [x] Admin integrations & API keys — `/dashboard/settings` to store integration keys (YouTube, AI, payments, custom) in an `app_setting` table, surfaced masked and read server-side (WS9).
 - [ ] Backups + restore drill; pre-launch security checklist (`05` §16)
-- [ ] i18n EN/RW at launch (`FR-READ-7`)
+- [x] i18n EN/RW/FR (`FR-READ-7`) — every reader- and dashboard-facing string is translated (English, Kinyarwanda, French), with a flag switcher in the masthead
 
 ---
 
 ## Phase 2 — Growth (v1.5) ⏳
 
-- [ ] PWA + offline reading; low-bandwidth data-saver mode (`FR-READ-8`, `-9`)
-- [ ] Newsletters (digests) with delivery/open/click analytics (`FR-NEWS-*`)
-- [ ] Push notifications (web + mobile) + breaking-news alerts (`FR-NOTIF-*`)
-- [ ] Live blog / real-time tickers for elections & sports (`FR-LIVE-*`)
-- [ ] Author profiles, related-articles engine, reading history
-- [ ] Expanded analytics (funnels, churn, scroll depth) + A/B headline testing
+- [x] PWA + offline reading (`FR-READ-8`, `-9`) — installable, a service worker that caches visited stories, and an offline page. _Data-saver mode still to come._
+- [x] Newsletters (digests) with signup + admin list (`FR-NEWS-*`). _Open/click analytics still to come._
+- [x] **Web push + breaking-news alerts** (`FR-NOTIF-*`) — VAPID keys generated from Settings, an opt-in in the footer, and a broadcast to every subscribed browser when a breaking story is published. Native mobile push ships with the apps (Phase 3).
+- [x] Live blog / real-time tickers (`FR-LIVE-*`) — a LIVE flag + an update feed on the story.
+- [x] **Author profiles** (`/author/<slug>`, linked from every byline), related-articles engine, reading history
+- [~] Expanded analytics — page views, a monitor and a report. _Funnels, churn, scroll depth and A/B headline testing still to come._
 
 ---
 
 ## Phase 3 — Intelligence & Scale (v2.0) ⏳
 
-- [ ] AI assistance: summaries, headline/tag suggestions, translation, TTS, recommendations (`FR-AI-*`)
+- [~] AI assistance (`FR-AI-*`) — **summaries, headline suggestions, tag/section suggestions, and translation** are live in the story editor, running on Claude with the key an admin sets in Settings; every result is advisory and nothing auto-publishes. _TTS and recommendations still to come._
 - [ ] AI comment moderation + misinformation flagging (human-in-the-loop)
 - [ ] Native Android & iOS apps
-- [ ] Full multilingual (French, optional Kiswahili) with `hreflang`
+- [~] Full multilingual — **French is live** alongside English and Kinyarwanda (Kiswahili is an article language). _`hreflang` still to come._
 - [ ] E-paper / PDF edition; open syndication API
 - [ ] Hardening toward 99.99% uptime, higher concurrency, advanced observability
 
@@ -177,11 +172,24 @@ until merged and note their PR.
 > role — journalist, sub-editor, editor, moderator, admin — is now functionally
 > complete (Ads Manager is the only office role still empty; it ships with ads).
 >
-> **Next up:** the (secondary) **reader experience** — follow section/topic/author
-> + "For you", reading history, author pages, reading aids (progress/font/TTS).
-> Then the remaining **critical infra** slices: **Slice 6** media on S3, **Slice 4**
-> data export + erasure, **Slice 3** OpenSearch. **Slice 8 monetization** (paywall
-> + MoMo/Airtel + ads, with the Ads Manager role) is deferred until the core is solid.
+> **Since then — the money, the media, and the machine (July 2026):**
+> **Slice 8 monetization is done** — plans, subscriptions and payments (MoMo,
+> Airtel, Stripe) with signed, idempotent webhooks; the paywall now has a route
+> through it (`/pricing`), and entitlement is one field. **Slice 6 media** now
+> writes to **S3** (or R2/MinIO) when a bucket is configured, so an upload
+> survives a deploy. **Web push** delivers breaking-news alerts to a subscribed
+> browser even with the site closed. **Author pages** give every byline somewhere
+> to lead. And the **AI assist** in the story editor drafts summaries, headlines,
+> tags and translations on Claude — advisory only; a human always decides.
+> The **E2E suite** now walks the whole newsroom: draft → copy desk → editor →
+> reader.
+>
+> **Next up:** **Slice 3** OpenSearch (relevance + typo tolerance — today's search
+> is a Postgres `LIKE`), **Slice 4** data export + account erasure (`FR-AUTH-8`,
+> a legal requirement), responsive image variants (WebP/AVIF), and **Slice 9's**
+> launch baseline — backups + a restore drill, and the pre-launch security
+> checklist. The **Ads Manager** office role is the last one still empty; it ships
+> with the ad server.
 
 ---
 
