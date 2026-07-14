@@ -677,6 +677,24 @@ const dict = {
     rw: 'Ifoto yawe igaragara ku bitekerezo no kuri konti yawe. Shyiramo aderesi y’ifoto, cg uyihorere ukoreshe inyuguti z’izina ryawe.',
     fr: 'Votre photo apparaît sur les commentaires et votre compte. Collez l’URL d’une image, ou laissez vide pour utiliser vos initiales.',
   },
+  'account.byline': { en: 'Byline', rw: 'Umukono w’umwanditsi', fr: 'Signature' },
+  'account.jobTitle': { en: 'Job title', rw: 'Umwanya', fr: 'Fonction' },
+  'account.jobTitlePlaceholder': {
+    en: 'Senior reporter, Business',
+    rw: 'Umunyamakuru mukuru, Ubucuruzi',
+    fr: 'Grand reporter, Économie',
+  },
+  'account.bio': { en: 'Short bio', rw: 'Amakuru magufi', fr: 'Courte bio' },
+  'account.bioPlaceholder': {
+    en: 'A line or two about what you cover — shown on your author page.',
+    rw: 'Interuro imwe cg ebyiri ku byo ukurikirana — bigaragara ku rupapuro rwawe.',
+    fr: 'Une ligne ou deux sur ce que vous couvrez — affichée sur votre page auteur.',
+  },
+  'account.viewAuthorPage': {
+    en: 'View your author page',
+    rw: 'Reba urupapuro rwawe',
+    fr: 'Voir votre page auteur',
+  },
   'account.security': { en: 'Security', rw: 'Umutekano', fr: 'Sécurité' },
   'account.twoFactorOn': { en: 'On', rw: 'Bikora', fr: 'Activé' },
   'account.twoFactorAuth': {
@@ -1143,6 +1161,7 @@ const dict = {
   'dash.allArticles': { en: 'All articles', rw: 'Inkuru zose', fr: 'Tous les articles' },
   'dash.taxonomy': { en: 'Taxonomy', rw: 'Ibyiciro', fr: 'Taxonomie' },
   'dash.houseAds': { en: 'House ads', rw: 'Kwamamaza', fr: 'Publicités maison' },
+  'dash.billing': { en: 'Billing', rw: 'Kwishyura', fr: 'Facturation' },
   'dash.users': { en: 'Users & roles', rw: 'Abakoresha n’inshingano', fr: 'Utilisateurs et rôles' },
   'dash.monitor': { en: 'Monitor', rw: 'Ugukurikirana', fr: 'Supervision' },
   'dash.auditLog': { en: 'Audit log', rw: 'Ibyakozwe', fr: 'Journal d’audit' },

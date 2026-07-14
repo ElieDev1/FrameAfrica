@@ -18,6 +18,10 @@ export interface SessionUser {
   displayName: string;
   avatarUrl: string | null;
   roles: string[];
+  /** Public byline identity — the author page a story links to. */
+  authorSlug?: string | null;
+  bio?: string | null;
+  jobTitle?: string | null;
   /** True when on a generated password — must set a new one before continuing. */
   mustChangePassword?: boolean;
   /** True when TOTP two-factor is enabled on the account. */

@@ -88,7 +88,20 @@ export default async function AccountPage() {
         </div>
 
         <div className="flex flex-wrap gap-2 sm:ml-auto">
-          <EditProfileForm displayName={user.displayName} avatarUrl={user.avatarUrl} />
+          <EditProfileForm
+            displayName={user.displayName}
+            avatarUrl={user.avatarUrl}
+            // The byline fields are only meaningful for someone who writes.
+            byline={
+              isStaff
+                ? {
+                    bio: user.bio ?? '',
+                    jobTitle: user.jobTitle ?? '',
+                    slug: user.authorSlug ?? null,
+                  }
+                : undefined
+            }
+          />
           <Link
             href="/for-you"
             className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-text transition hover:border-primary hover:text-primary"

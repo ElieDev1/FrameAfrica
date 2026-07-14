@@ -14,6 +14,7 @@ import {
   GridIcon,
   type IconProps,
   ImageIcon,
+  CreditCardIcon,
   MegaphoneIcon,
   PlayIcon,
   SettingsIcon,
@@ -138,6 +139,11 @@ function groupsFor(roles: string[]): NavGroup[] {
   push('dash.sec.admin', [
     has('admin') && { href: '/dashboard/taxonomy', labelKey: 'dash.taxonomy', Icon: TagIcon },
     has('admin') && { href: '/dashboard/ads', labelKey: 'dash.houseAds', Icon: MegaphoneIcon },
+    has('admin') && {
+      href: '/dashboard/billing',
+      labelKey: 'dash.billing',
+      Icon: CreditCardIcon,
+    },
     has('admin') && { href: '/dashboard/users', labelKey: 'dash.users', Icon: UsersIcon },
     has('admin') && {
       href: '/dashboard/audit',
