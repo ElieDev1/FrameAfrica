@@ -72,6 +72,8 @@ export interface AdminSubscriptionView {
   currentPeriodEnd: string;
   cancelAtPeriodEnd: boolean;
   isActive: boolean;
+  /** Paid but unconfirmed — the admin can activate it. */
+  needsActivation: boolean;
 }
 
 /** What a checkout returns: either a redirect (card) or a pending push (mobile money). */

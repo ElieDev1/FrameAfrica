@@ -93,15 +93,31 @@ export async function fetchSubscribers(): Promise<AdminSubscription[]> {
 
 /** End a subscription immediately (refund, chargeback, abuse). */
 export async function revokeSubscription(id: string): Promise<{ ok: boolean; error?: string }> {
+  return adminSubscriptionAction(id, 'revoke', 'Could not revoke the subscription.');
+}
+
+/** Activate a paid-but-unconfirmed subscription — grants access. */
+export async function activateSubscription(id: string): Promise<{ ok: boolean; error?: string }> {
+  return adminSubscriptionAction(id, 'activate', 'Could not activate the subscription.');
+}
+
+async function adminSubscriptionAction(
+  id: string,
+  action: 'revoke' | 'activate',
+  fallback: string,
+): Promise<{ ok: boolean; error?: string }> {
   const token = await getAccessToken();
   if (!token) return { ok: false, error: 'Sign in again.' };
   try {
-    const res = await fetch(`${API_URL}/admin/billing/subscriptions/${id}/revoke`, {
+    const res = await fetch(`${API_URL}/admin/billing/subscriptions/${id}/${action}`, {
       method: 'POST',
       headers: { authorization: `Bearer ${token}` },
       cache: 'no-store',
     });
-    if (!res.ok) return { ok: false, error: 'Could not revoke the subscription.' };
+    if (!res.ok) {
+      const body = (await res.json().catch(() => null)) as { message?: string } | null;
+      return { ok: false, error: body?.message ?? fallback };
+    }
     revalidatePath('/dashboard/billing');
     return { ok: true };
   } catch {

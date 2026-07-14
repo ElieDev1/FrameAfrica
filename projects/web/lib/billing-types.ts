@@ -66,6 +66,8 @@ export interface AdminSubscription {
   currentPeriodEnd: string;
   cancelAtPeriodEnd: boolean;
   isActive: boolean;
+  /** Paid but unconfirmed — the admin can activate it. */
+  needsActivation: boolean;
 }
 
 /** The public, non-sensitive confirmation shown on the verify page. */

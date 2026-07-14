@@ -450,12 +450,17 @@ export class BillingService {
   async listSubscriptions(): Promise<AdminSubscriptionView[]> {
     const now = new Date();
     const rows = await this.prisma.subscription.findMany({
-      where: { status: { not: SubscriptionStatus.incomplete } },
-      orderBy: { currentPeriodEnd: 'desc' },
-      take: 500,
+      orderBy: { createdAt: 'desc' },
+      take: 1000,
       include: {
         user: { select: { id: true, displayName: true, email: true } },
         plan: { select: { name: true } },
+        // Is a payment sitting unconfirmed? That's what "needs activation" means.
+        payments: {
+          where: { status: PaymentStatus.pending },
+          select: { id: true },
+          take: 1,
+        },
       },
     });
     return rows.map((s) => ({
@@ -467,7 +472,37 @@ export class BillingService {
       currentPeriodEnd: s.currentPeriodEnd.toISOString(),
       cancelAtPeriodEnd: s.cancelAtPeriodEnd,
       isActive: s.status === SubscriptionStatus.active && s.currentPeriodEnd > now,
+      // A paid (or claimed-paid) subscription the gateway hasn't confirmed yet —
+      // the admin activates it once they've verified the money landed.
+      needsActivation: s.status === SubscriptionStatus.incomplete && s.payments.length > 0,
     }));
+  }
+
+  /**
+   * Admin: activate a subscription whose payment the gateway never confirmed —
+   * a mobile-money payment taken while webhooks weren't wired, or a bank transfer
+   * checked by hand. It settles the pending payment, which grants access the same
+   * way a webhook would. The admin is vouching that the money actually landed.
+   */
+  async activate(subscriptionId: string): Promise<{ activated: boolean }> {
+    const sub = await this.prisma.subscription.findUnique({
+      where: { id: subscriptionId },
+      include: {
+        payments: {
+          where: { status: PaymentStatus.pending },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+    });
+    if (!sub) throw new NotFoundException('Subscription not found');
+
+    const pending = sub.payments[0];
+    if (!pending) {
+      throw new BadRequestException('No pending payment to activate on this subscription.');
+    }
+    await this.settlePayment(pending.id, 'succeeded');
+    return { activated: true };
   }
 
   /**

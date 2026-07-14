@@ -34,11 +34,13 @@ export function GrantSubscription({ plans }: { plans: Plan[] }) {
     <section className="rounded-xl border border-border bg-surface p-5">
       <h2 className="flex items-center gap-2 font-heading text-lg font-bold text-text">
         <CreditCardIcon size={16} className="text-primary" />
-        Grant a subscription
+        Add a subscriber
       </h2>
       <p className="mt-0.5 max-w-xl font-body text-sm text-muted">
-        Give a reader access without a payment — for corporate deals, cash paid offline, or a comp.
-        It behaves exactly like a paid subscription.
+        Give a reader access without taking a payment here — a corporate deal, cash paid offline, or
+        a comp. It behaves exactly like a paid subscription. (If they already paid and are waiting
+        on the gateway, use <span className="font-semibold text-text">Activate</span> above
+        instead.)
       </p>
 
       {plans.length === 0 ? (

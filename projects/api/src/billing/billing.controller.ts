@@ -187,6 +187,12 @@ export class BillingAdminController {
     return apiResponse(await this.billing.listSubscriptions());
   }
 
+  @Post('subscriptions/:id/activate')
+  @HttpCode(200)
+  async activate(@Param('id') id: string) {
+    return apiResponse(await this.billing.activate(id));
+  }
+
   @Post('subscriptions/:id/revoke')
   @HttpCode(200)
   async revoke(@Param('id') id: string) {

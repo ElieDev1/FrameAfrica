@@ -287,7 +287,7 @@ describe('BillingService', () => {
   });
 
   describe('listSubscriptions (admin)', () => {
-    it('lists subscribers with user + plan, excluding never-settled ones', async () => {
+    it('lists subscribers, flagging paid-but-unconfirmed ones for activation', async () => {
       const { service, prisma } = build();
       prisma.subscription.findMany.mockResolvedValue([
         {
@@ -298,20 +298,54 @@ describe('BillingService', () => {
           cancelAtPeriodEnd: false,
           user: { id: 'u1', displayName: 'Jane Uwase', email: 'jane@frameafrica.rw' },
           plan: { name: 'Digital monthly' },
+          payments: [],
+        },
+        {
+          id: 'sub-2',
+          status: 'incomplete',
+          provider: 'momo',
+          currentPeriodEnd: new Date('2026-07-14T00:00:00Z'),
+          cancelAtPeriodEnd: false,
+          user: { id: 'u2', displayName: 'Eric', email: 'eric@frameafrica.rw' },
+          plan: { name: 'Digital monthly' },
+          payments: [{ id: 'pay-2' }], // a pending payment sitting unconfirmed
         },
       ]);
 
       const list = await service.listSubscriptions();
 
-      expect(list[0]).toMatchObject({
+      expect(list[0]).toMatchObject({ isActive: true, needsActivation: false });
+      expect(list[1]).toMatchObject({ isActive: false, needsActivation: true });
+    });
+  });
+
+  describe('activate (admin)', () => {
+    it('settles the pending payment, which grants access', async () => {
+      const { service, prisma } = build();
+      prisma.subscription.findUnique.mockResolvedValue({
         id: 'sub-1',
-        user: { name: 'Jane Uwase', email: 'jane@frameafrica.rw' },
-        planName: 'Digital monthly',
-        isActive: true,
+        payments: [{ id: 'pay-1' }],
       });
-      const findManyCalls = prisma.subscription.findMany.mock.calls as unknown[][];
-      const findManyArg = findManyCalls[0]?.[0] as { where: { status: unknown } };
-      expect(findManyArg.where.status).toEqual({ not: 'incomplete' }); // never-settled left out
+      // settlePayment reloads the payment by id.
+      prisma.payment.findUnique.mockResolvedValue(pendingPayment({ id: 'pay-1' }));
+
+      const res = await service.activate('sub-1');
+
+      expect(res).toEqual({ activated: true });
+      expect(prisma.$transaction).toHaveBeenCalled(); // the grant path ran
+    });
+
+    it('refuses when there is nothing pending to activate', async () => {
+      const { service, prisma } = build();
+      prisma.subscription.findUnique.mockResolvedValue({ id: 'sub-1', payments: [] });
+
+      await expect(service.activate('sub-1')).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('404s an unknown subscription', async () => {
+      const { service, prisma } = build();
+      prisma.subscription.findUnique.mockResolvedValue(null);
+      await expect(service.activate('nope')).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 
